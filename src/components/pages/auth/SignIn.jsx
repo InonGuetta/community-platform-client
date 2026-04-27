@@ -174,10 +174,11 @@ const SignIn = () => {
             <Divider sx={{ flexGrow: 1, borderColor: '#d3d3d3' }} />
           </Box>
 
-          <Button 
-            variant="outlined" 
-            fullWidth 
+          <Button
+            variant="outlined"
+            fullWidth
             startIcon={<GoogleIcon />}
+            onClick={() => { window.location.href = "http://localhost:3001/api/auth/google"; }}
             sx={{
               py: 1,
               borderRadius: "24px",

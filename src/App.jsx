@@ -6,6 +6,7 @@ import Navbar from "./components/layout/navbar/Navbar";
 import ProtectedRoute from "./components/pages/auth/ProtectedRoute";
 import SignIn from "./components/pages/auth/SignIn";
 import SignUp from "./components/pages/auth/SignUp";
+import GoogleCallback from "./components/pages/auth/GoogleCallback";
 import ArchivePage from "./components/pages/archive/ArchivePage";
 import MediaViewPage from "./components/pages/mediaView/MediaViewPage";
 import SessionsPage from "./components/pages/sessions/SessionsPage";
@@ -16,7 +17,7 @@ import DonatePage from "./components/pages/donate/DonatePage";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
 import { selectUser } from "./store/selectors/authSelectors";
 
-const AUTH_PATHS = ["/sign-in", "/sign-up"];
+const AUTH_PATHS = ["/sign-in", "/sign-up", "/auth/google/callback"];
 
 const theme = createTheme({
   palette: { mode: "light", primary: { main: "#1a73e8" } },
@@ -42,6 +43,7 @@ const App = () => {
       <Routes>
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
         <Route path="/" element={<Navigate to="/archive" replace />} />
         <Route path="/archive" element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
         <Route path="/media/:id" element={<ProtectedRoute><MediaViewPage /></ProtectedRoute>} />

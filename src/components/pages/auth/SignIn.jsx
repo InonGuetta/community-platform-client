@@ -31,9 +31,10 @@ const EyeCrossedIcon = () => (
   </svg>
 );
 
-const CheckIcon = () => (
+const EyeIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#7a7a7a' }}>
-    <polyline points="20 6 9 17 4 12"></polyline>
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+    <circle cx="12" cy="12" r="3"></circle>
   </svg>
 );
 
@@ -44,6 +45,20 @@ const SignIn = () => {
   const error = useSelector(selectAuthError);
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+
+  const floatingLabelSx = {
+    "& .MuiInputLabel-root": {
+      color: "#8a8a8a",
+      transform: "translate(0, 0.35rem) scale(1)",
+      transformOrigin: "top left",
+      transition: "transform 220ms ease, color 220ms ease",
+      fontSize: "1rem",
+    },
+    "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiInputLabel-shrink": {
+      color: "#1e63ff",
+      transform: "translate(0, -0.8rem) scale(0.78)",
+    },
+  };
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -100,14 +115,15 @@ const SignIn = () => {
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
             <TextField 
-              placeholder="Email" 
+              label="Email"
               name="email" 
               type="email" 
               variant="standard"
               value={form.email} 
               onChange={handleChange} 
-              required 
+              required={!form.email}
               fullWidth
+              sx={floatingLabelSx}
               InputProps={{
                 disableUnderline: true,
                 sx: { 
@@ -118,27 +134,28 @@ const SignIn = () => {
             />
             
             <TextField 
-              placeholder="Password" 
+              label="Password"
               name="password" 
               type={showPassword ? "text" : "password"} 
               variant="standard"
               value={form.password} 
               onChange={handleChange} 
-              required 
+              required={!form.password}
               fullWidth 
+              sx={floatingLabelSx}
               InputProps={{
                 disableUnderline: true,
                 sx: { 
                     borderBottom: '1px solid #c2c2c2', pb: 0.5, color: '#333',
                     fontSize: '1rem', '&::before, &::after': { display: 'none' }
                 },
-                endAdornment: (
+                endAdornment: form.password ? (
                   <InputAdornment position="end">
                     <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ p: 0.5 }}>
-                      {form.password ? <CheckIcon /> : <EyeCrossedIcon />}
+                      {showPassword ? <EyeIcon /> : <EyeCrossedIcon />}
                     </IconButton>
                   </InputAdornment>
-                )
+                ) : null
               }}
             />
 

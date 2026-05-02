@@ -28,9 +28,9 @@ const usersSlice = createSlice({
       })
 
       .addCase(deleteUser.fulfilled, (state, action) => {
-        const idx = state.items.findIndex((u) => u.id === action.payload.id);
-        if (idx !== -1) state.items[idx] = { ...state.items[idx], is_active: false };
-      });
+        state.items = state.items.filter((u) => u.id !== action.payload.id);
+      })
+      .addCase(deleteUser.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

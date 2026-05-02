@@ -35,7 +35,8 @@ const mediaSlice = createSlice({
       .addCase(deleteMedia.fulfilled, (state, action) => {
         state.items = state.items.filter((i) => i.id !== action.payload.id);
         if (state.selectedItem?.id === action.payload.id) state.selectedItem = null;
-      });
+      })
+      .addCase(deleteMedia.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

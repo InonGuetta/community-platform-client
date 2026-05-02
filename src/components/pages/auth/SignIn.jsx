@@ -195,7 +195,7 @@ const SignIn = () => {
             variant="outlined"
             fullWidth
             startIcon={<GoogleIcon />}
-            onClick={() => { window.location.href = "http://localhost:3001/api/auth/google"; }}
+            onClick={() => { window.location.href = "/api/auth/google"; }}
             sx={{
               py: 1,
               borderRadius: "24px",

@@ -22,6 +22,19 @@ const UploadMedia = ({ open }) => {
 
   const handleFieldChange = (key, val) => setFields((prev) => ({ ...prev, [key]: val }));
 
+  const detectMediaType = (file) => {
+    if (file.type.startsWith("video/")) return "video";
+    if (file.type.startsWith("audio/")) return "audio";
+    return "text";
+  };
+
+  const handleFileChange = (e) => {
+    const selected = e.target.files[0];
+    if (!selected) return;
+    setFile(selected);
+    setFields((prev) => ({ ...prev, mediaType: detectMediaType(selected) }));
+  };
+
   const handleSubmit = async () => {
     if (!file || !fields.title || !fields.mediaType) return;
     setUploading(true);
@@ -58,8 +71,8 @@ const UploadMedia = ({ open }) => {
               id="media-file-input"
               type="file"
               hidden
-              accept="video/*,audio/*"
-              onChange={(e) => setFile(e.target.files[0])}
+              accept="video/*,audio/*,.pdf,.txt,.doc,.docx"
+              onChange={handleFileChange}
             />
           </Box>
           <ContentFieldsUpload values={fields} onChange={handleFieldChange} />

@@ -4,17 +4,23 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import DeleteIcon from "@mui/icons-material/Delete";
 import VideoFileIcon from "@mui/icons-material/VideoFile";
 import AudioFileIcon from "@mui/icons-material/AudioFile";
 import ArticleIcon from "@mui/icons-material/Article";
+import { roles } from "../../../../utilities/constant";
 
 const TYPE_ICON = { video: <VideoFileIcon />, audio: <AudioFileIcon />, text: <ArticleIcon /> };
 const TYPE_COLOR = { video: "primary", audio: "secondary", text: "success" };
 
-const MediaCard = ({ item, onView }) => (
+const canDelete = (user, item) =>
+  user?.role === roles.admin || (user?.role === roles.lecturer && item.uploader_id === user.id);
+
+const MediaCard = ({ item, onView, user, onDelete }) => (
   <Card sx={{ height: "100%", display: "flex", flexDirection: "column", transition: "transform 0.2s", "&:hover": { transform: "translateY(-4px)", boxShadow: 4 } }}>
     {item.thumbnail_url ? (
       <CardMedia component="img" height={160} image={item.thumbnail_url} alt={item.title} />
@@ -26,7 +32,14 @@ const MediaCard = ({ item, onView }) => (
     <CardContent sx={{ flexGrow: 1, pb: 0 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 0.5 }}>
         <Typography variant="subtitle2" fontWeight={600} noWrap sx={{ flex: 1 }}>{item.title}</Typography>
-        <Chip label={item.media_type} color={TYPE_COLOR[item.media_type]} size="small" sx={{ ml: 1 }} />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 1 }}>
+          <Chip label={item.media_type} color={TYPE_COLOR[item.media_type]} size="small" />
+          {canDelete(user, item) && (
+            <IconButton size="small" color="error" onClick={() => onDelete(item.id)}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
+        </Box>
       </Box>
       {item.description && (
         <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>

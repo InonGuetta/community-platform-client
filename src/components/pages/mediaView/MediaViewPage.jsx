@@ -8,6 +8,7 @@ import Divider from "@mui/material/Divider";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import MediaPlayer from "../../features/MediaPlayer/MediaPlayer";
+import TextViewer from "./componentsMediaView/TextViewer";
 import AISummaryPanel from "./componentsMediaView/AISummaryPanel";
 import ChaptersPanel from "./componentsMediaView/ChaptersPanel";
 import NotesPanel from "./componentsMediaView/NotesPanel";
@@ -49,13 +50,17 @@ const MediaViewPage = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          <MediaPlayer
-            url={media.s3_key}
-            bookmarks={bookmarks}
-            duration={media.duration_seconds}
-            onProgress={(sec) => { setCurrentTime(sec); handleSaveProgress(sec); }}
-            segments={segments}
-          />
+          {media.media_type === "text" ? (
+            <TextViewer mediaId={media.id} />
+          ) : (
+            <MediaPlayer
+              url={media.s3_key}
+              bookmarks={bookmarks}
+              duration={media.duration_seconds}
+              onProgress={(sec) => { setCurrentTime(sec); handleSaveProgress(sec); }}
+              segments={segments}
+            />
+          )}
         </Grid>
 
         <Grid item xs={12} md={4}>

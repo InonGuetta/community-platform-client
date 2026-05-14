@@ -24,6 +24,8 @@ const MediaCard = ({ item, onView, user, onDelete }) => (
   <Card sx={{ height: "100%", display: "flex", flexDirection: "column", transition: "transform 0.2s", "&:hover": { transform: "translateY(-4px)", boxShadow: 4 } }}>
     {item.thumbnail_url ? (
       <CardMedia component="img" height={160} image={item.thumbnail_url} alt={item.title} />
+    ) : item.media_type === "text" ? (
+      <CardMedia component="img" height={160} image="/images/book_image.png" alt={item.title} sx={{ objectFit: "contain", transform: "scale(0.90)", transformOrigin: "center center" }} />
     ) : (
       <Box sx={{ height: 160, bgcolor: "grey.100", display: "flex", alignItems: "center", justifyContent: "center", color: "grey.400" }}>
         {TYPE_ICON[item.media_type]}

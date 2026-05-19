@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import Navbar from "./components/layout/navbar/Navbar";
 import ProtectedRoute from "./components/pages/auth/ProtectedRoute";
@@ -15,7 +15,6 @@ import UsersPage from "./components/pages/users/UsersPage";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import DonatePage from "./components/pages/donate/DonatePage";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
-import { selectUser } from "./store/selectors/authSelectors";
 
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/auth/google/callback"];
 
@@ -29,12 +28,12 @@ const theme = createTheme({
 const App = () => {
   const dispatch = useDispatch();
   const { pathname } = useLocation();
-  const user = useSelector(selectUser);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token && !user) dispatch(fetchMe());
-  }, [dispatch, user]);
+    // The httpOnly cookie isn't readable from JS, so we always ask the server who we are
+    // on first mount. fetchMe.rejected flips `initialized` true so unauth pages still render.
+    dispatch(fetchMe());
+  }, [dispatch]);
 
   return (
     <ThemeProvider theme={theme}>

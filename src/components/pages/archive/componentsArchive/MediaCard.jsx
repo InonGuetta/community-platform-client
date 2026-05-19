@@ -1,13 +1,10 @@
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
-import CardActions from "@mui/material/CardActions";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VideoFileIcon from "@mui/icons-material/VideoFile";
 import AudioFileIcon from "@mui/icons-material/AudioFile";
@@ -21,7 +18,7 @@ const canDelete = (user, item) =>
   user?.role === roles.admin || (user?.role === roles.lecturer && item.uploader_id === user.id);
 
 const MediaCard = ({ item, onView, user, onDelete }) => (
-  <Card sx={{ height: "100%", display: "flex", flexDirection: "column", transition: "transform 0.2s", "&:hover": { transform: "translateY(-4px)", boxShadow: 4 } }}>
+  <Card onClick={() => onView(item.id)} sx={{ height: "100%", display: "flex", flexDirection: "column", cursor: "pointer", transition: "transform 0.2s", "&:hover": { transform: "translateY(-4px)", boxShadow: 4 } }}>
     {item.thumbnail_url ? (
       <CardMedia component="img" height={160} image={item.thumbnail_url} alt={item.title} />
     ) : item.media_type === "text" ? (
@@ -37,7 +34,7 @@ const MediaCard = ({ item, onView, user, onDelete }) => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 1 }}>
           <Chip label={item.media_type} color={TYPE_COLOR[item.media_type]} size="small" />
           {canDelete(user, item) && (
-            <IconButton size="small" color="error" onClick={() => onDelete(item.id)}>
+            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}>
               <DeleteIcon fontSize="small" />
             </IconButton>
           )}
@@ -49,11 +46,6 @@ const MediaCard = ({ item, onView, user, onDelete }) => (
         </Typography>
       )}
     </CardContent>
-    <CardActions>
-      <Button startIcon={<PlayArrowIcon />} size="small" variant="contained" onClick={() => onView(item.id)} fullWidth>
-        Watch
-      </Button>
-    </CardActions>
   </Card>
 );
 

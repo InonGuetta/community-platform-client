@@ -11,16 +11,16 @@ const GoogleCallback = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const token = searchParams.get("token");
     const error = searchParams.get("error");
-
-    if (error || !token) {
+    if (error) {
       navigate("/sign-in?error=google_failed");
       return;
     }
-
-    localStorage.setItem("token", token);
-    dispatch(fetchMe()).then(() => navigate("/archive"));
+    // Cookie has been set server-side via the redirect; hydrate the user.
+    dispatch(fetchMe()).then((result) => {
+      if (result.meta.requestStatus === "fulfilled") navigate("/archive");
+      else navigate("/sign-in?error=google_failed");
+    });
   }, []);
 
   return (

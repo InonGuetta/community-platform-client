@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
@@ -10,7 +10,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import { register } from "../../../store/slicesAndThunks/authSlices/authPost";
-import { selectAuthStatus, selectAuthError } from "../../../store/selectors/authSelectors";
+import { clearError } from "../../../store/slicesAndThunks/authSlices/authSlice";
+import { selectLoginStatus, selectAuthError } from "../../../store/selectors/authSelectors";
 import { statuses } from "../../../utilities/constant";
 import AuthLayout from "./AuthLayout";
 import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
@@ -18,10 +19,12 @@ import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, subm
 const SignUp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const status = useSelector(selectAuthStatus);
+  const loginStatus = useSelector(selectLoginStatus);
   const error = useSelector(selectAuthError);
   const [form, setForm] = useState({ email: "", password: "", displayName: "" });
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => { dispatch(clearError()); }, [dispatch]);
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -30,6 +33,8 @@ const SignUp = () => {
     const result = await dispatch(register(form));
     if (result.meta.requestStatus === "fulfilled") navigate("/archive");
   };
+
+  const isSubmitting = loginStatus === statuses.loading;
 
   return (
     <AuthLayout title="Sign Up">
@@ -42,7 +47,7 @@ const SignUp = () => {
           variant="standard"
           value={form.displayName}
           onChange={handleChange}
-          required={!form.displayName}
+          required
           fullWidth
           sx={floatingLabelSx}
           InputProps={inputBaseSx}
@@ -55,7 +60,7 @@ const SignUp = () => {
           variant="standard"
           value={form.email}
           onChange={handleChange}
-          required={!form.email}
+          required
           fullWidth
           sx={floatingLabelSx}
           InputProps={inputBaseSx}
@@ -68,7 +73,7 @@ const SignUp = () => {
           variant="standard"
           value={form.password}
           onChange={handleChange}
-          required={!form.password}
+          required
           fullWidth
           sx={floatingLabelSx}
           InputProps={{
@@ -83,8 +88,8 @@ const SignUp = () => {
           }}
         />
 
-        <Button type="submit" variant="contained" fullWidth disabled={status === statuses.loading} sx={submitButtonSx}>
-          {status === statuses.loading ? "..." : "SIGN UP"}
+        <Button type="submit" variant="contained" fullWidth disabled={isSubmitting} sx={submitButtonSx}>
+          {isSubmitting ? "..." : "SIGN UP"}
         </Button>
       </Box>
 
@@ -110,4 +115,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-

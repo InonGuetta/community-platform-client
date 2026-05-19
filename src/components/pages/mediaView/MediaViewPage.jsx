@@ -43,6 +43,9 @@ const MediaViewPage = () => {
 
   const chapters  = transcript?.ai_chapters || [];
   const segments  = chunksToSegments(transcript?.chunks);
+  const canEditTranscript =
+    media.media_type !== "text" &&
+    (user?.role === roles.lecturer || user?.role === roles.admin);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -69,7 +72,7 @@ const MediaViewPage = () => {
               <Tab label="Summary" />
               <Tab label="Chapters" />
               <Tab label="Notes" />
-              {(user?.role === roles.lecturer || user?.role === roles.admin) && (
+              {canEditTranscript && (
                 <Tab label="Transcript" />
               )}
             </Tabs>
@@ -83,7 +86,7 @@ const MediaViewPage = () => {
                 onCreateBookmark={handleCreateBookmark}
               />
             )}
-            {tab === 3 && (user?.role === roles.lecturer || user?.role === roles.admin) && (
+            {tab === 3 && canEditTranscript && (
               <TranscriptEditor transcript={transcript} mediaId={media.id} />
             )}
           </Paper>

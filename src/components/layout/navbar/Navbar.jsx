@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
-import { logout } from "../../../store/slicesAndThunks/authSlices/authSlice";
+import { logout } from "../../../store/slicesAndThunks/authSlices/authPost";
 import { selectUser, selectUserRole } from "../../../store/selectors/authSelectors";
 import { roles } from "../../../utilities/constant";
 
@@ -42,8 +42,8 @@ const Navbar = () => {
 
   const links = getLinksByRole(role);
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    await dispatch(logout());
     navigate("/sign-in");
   };
 

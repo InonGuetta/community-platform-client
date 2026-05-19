@@ -5,6 +5,7 @@ import { fetchOneMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGe
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
 import { fetchBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksGet";
 import { createBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPost";
+import { clearSelectedItem } from "../../../store/slicesAndThunks/mediaSlice/mediaSlice";
 import { selectSelectedMedia } from "../../../store/selectors/mediaSelectors";
 import { selectTranscriptByMediaId } from "../../../store/selectors/transcriptSelectors";
 import { selectBookmarksByMediaId } from "../../../store/selectors/bookmarksSelectors";
@@ -19,12 +20,22 @@ const useMediaViewPageController = () => {
   const bookmarks = useSelector(selectBookmarksByMediaId(id));
 
   useEffect(() => {
+    dispatch(clearSelectedItem());
     if (id) {
       dispatch(fetchOneMedia(id));
-      dispatch(fetchTranscript(id)).catch(() => {});
       dispatch(fetchBookmarks(id));
     }
   }, [dispatch, id]);
+
+  useEffect(() => {
+    if (
+      media?.id &&
+      String(media.id) === String(id) &&
+      media.media_type !== "text"
+    ) {
+      dispatch(fetchTranscript(id)).catch(() => {});
+    }
+  }, [dispatch, id, media?.id, media?.media_type]);
 
   const handleSaveProgress = async (positionSeconds) => {
     try {

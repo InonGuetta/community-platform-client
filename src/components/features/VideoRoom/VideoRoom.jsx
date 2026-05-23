@@ -39,7 +39,7 @@ const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
 
     pc.onicecandidate = (e) => {
       if (e.candidate) {
-        socketRef.current?.emit("ice-candidate", { roomToken, candidate: e.candidate, to: targetId });
+        socketRef.current?.emit("ice-candidate", { to: targetId, candidate: e.candidate });
       }
     };
 
@@ -58,11 +58,11 @@ const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
       setConnected(true);
     });
 
-    socket.on("user-joined", async ({ userId: remoteId }) => {
+    socket.on("user-joined", async ({ socketId: remoteId }) => {
       const pc = createPeer(remoteId);
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      socket.emit("offer", { roomToken, offer, to: remoteId });
+      socket.emit("offer", { to: remoteId, offer });
     });
 
     socket.on("offer", async ({ offer, from }) => {
@@ -70,7 +70,7 @@ const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
       await pc.setRemoteDescription(offer);
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
-      socket.emit("answer", { roomToken, answer, to: from });
+      socket.emit("answer", { to: from, answer });
     });
 
     socket.on("answer", async ({ answer, from }) => {
@@ -81,7 +81,7 @@ const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
       await peersRef.current[from]?.addIceCandidate(candidate);
     });
 
-    socket.on("user-left", ({ userId: leftId }) => removeStream(leftId));
+    socket.on("user-left", ({ socketId: leftId }) => removeStream(leftId));
     socket.on("session-ended", () => onEnd?.());
 
     return () => {

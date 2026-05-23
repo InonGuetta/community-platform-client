@@ -13,6 +13,12 @@ import { roles } from "../../../../utilities/constant";
 
 const TYPE_ICON = { video: <VideoFileIcon />, audio: <AudioFileIcon />, text: <ArticleIcon /> };
 const TYPE_COLOR = { video: "primary", audio: "secondary", text: "success" };
+const TYPE_IMAGE = { video: "/images/video_image.png", audio: "/images/audio_image.png", text: "/images/book_image.png" };
+const TYPE_IMAGE_STYLE = {
+  video: { height: 160, scale: 1.20 },
+  audio: { height: 160, scale: 0.90 },
+  text:  { height: 160, scale: 0.80 },
+};
 
 const canDelete = (user, item) =>
   user?.role === roles.admin || (user?.role === roles.lecturer && item.uploader_id === user.id);
@@ -21,12 +27,8 @@ const MediaCard = ({ item, onView, user, onDelete }) => (
   <Card onClick={() => onView(item.id)} sx={{ height: "100%", display: "flex", flexDirection: "column", cursor: "pointer", transition: "transform 0.2s", "&:hover": { transform: "translateY(-4px)", boxShadow: 4 } }}>
     {item.thumbnail_url ? (
       <CardMedia component="img" height={160} image={item.thumbnail_url} alt={item.title} />
-    ) : item.media_type === "text" ? (
-      <CardMedia component="img" height={160} image="/images/book_image.png" alt={item.title} sx={{ objectFit: "contain", transform: "scale(0.90)", transformOrigin: "center center" }} />
     ) : (
-      <Box sx={{ height: 160, bgcolor: "grey.100", display: "flex", alignItems: "center", justifyContent: "center", color: "grey.400" }}>
-        {TYPE_ICON[item.media_type]}
-      </Box>
+      <CardMedia component="img" height={TYPE_IMAGE_STYLE[item.media_type].height} image={TYPE_IMAGE[item.media_type]} alt={item.title} sx={{ objectFit: "contain", transform: `scale(${TYPE_IMAGE_STYLE[item.media_type].scale})`, transformOrigin: "center center" }} />
     )}
     <CardContent sx={{ flexGrow: 1, pb: 0 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 0.5 }}>

@@ -57,7 +57,7 @@ const MediaViewPage = () => {
             <TextViewer mediaId={media.id} />
           ) : (
             <MediaPlayer
-              url={media.s3_key}
+              url={`/api/media/${media.id}/stream`}
               bookmarks={bookmarks}
               duration={media.duration_seconds}
               onProgress={(sec) => { setCurrentTime(sec); handleSaveProgress(sec); }}

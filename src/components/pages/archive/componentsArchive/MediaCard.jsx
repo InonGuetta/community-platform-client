@@ -19,7 +19,6 @@ const TYPE_IMAGE_STYLE = {
   audio: { height: 160, scale: 0.90 },
   text:  { height: 160, scale: 0.80 },
 };
-
 const canDelete = (user, item) =>
   user?.role === roles.admin || (user?.role === roles.lecturer && item.uploader_id === user.id);
 
@@ -31,17 +30,26 @@ const MediaCard = ({ item, onView, user, onDelete }) => (
       <CardMedia component="img" height={TYPE_IMAGE_STYLE[item.media_type].height} image={TYPE_IMAGE[item.media_type]} alt={item.title} sx={{ objectFit: "contain", transform: `scale(${TYPE_IMAGE_STYLE[item.media_type].scale})`, transformOrigin: "center center" }} />
     )}
     <CardContent sx={{ flexGrow: 1, pb: 0 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 0.5 }}>
-        <Typography variant="subtitle2" fontWeight={600} noWrap sx={{ flex: 1 }}>{item.title}</Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 1 }}>
-          <Chip label={item.media_type} color={TYPE_COLOR[item.media_type]} size="small" />
-          {canDelete(user, item) && (
-            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          )}
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, mb: 0.5 }}>
+        <Chip label={item.media_type} color={TYPE_COLOR[item.media_type]} size="small" />
+        <Box
+          component="a"
+          href={`/api/media/${item.id}/download`}
+          download
+          aria-label="Download"
+          title="הורדה"
+          onClick={(e) => e.stopPropagation()}
+          sx={{ display: "inline-flex", lineHeight: 0 }}
+        >
+          <Box component="img" src="/images/download_image.png" alt="download" sx={{ width: 46, height: 46, cursor: "pointer" }} />
         </Box>
+        {canDelete(user, item) && (
+          <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        )}
       </Box>
+      <Typography variant="subtitle2" fontWeight={600} noWrap sx={{ textAlign: "center", mb: 0.5 }}>{item.title}</Typography>
       {item.description && (
         <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {item.description}

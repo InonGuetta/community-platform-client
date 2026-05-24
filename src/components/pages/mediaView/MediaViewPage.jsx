@@ -7,6 +7,7 @@ import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
+import IconButton from "@mui/material/IconButton";
 import MediaPlayer from "../../features/MediaPlayer/MediaPlayer";
 import TextViewer from "./componentsMediaView/TextViewer";
 import AISummaryPanel from "./componentsMediaView/AISummaryPanel";
@@ -49,7 +50,19 @@ const MediaViewPage = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" fontWeight={700} mb={2}>{media.title}</Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+        <Typography variant="h5" fontWeight={700}>{media.title}</Typography>
+        <IconButton
+          component="a"
+          href={`/api/media/${media.id}/download`}
+          download
+          aria-label="Download"
+          title="הורדה"
+          sx={{ p: 0.75, "&:hover": { bgcolor: "action.hover" } }}
+        >
+          <Box component="img" src="/images/download_image.png" alt="Download" sx={{ width: 26, height: 26 }} />
+        </IconButton>
+      </Box>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>

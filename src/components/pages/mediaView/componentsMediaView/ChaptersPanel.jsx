@@ -15,7 +15,7 @@ const ChaptersPanel = ({ chapters = [], onSeek }) => {
 
   return (
     <Box>
-      <Typography variant="subtitle1" fontWeight={600} mb={1}>Chapters</Typography>
+      <Typography variant="subtitle1" fontWeight={600} mb={1}>פרקים</Typography>
       <List disablePadding dense>
         {chapters.map((chapter, i) => (
           <ListItemButton key={i} onClick={() => onSeek?.(chapter.start_time)} sx={{ borderRadius: 1, mb: 0.5 }}>

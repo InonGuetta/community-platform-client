@@ -10,13 +10,13 @@ const AISummaryPanel = ({ transcript }) => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="subtitle1" fontWeight={600}>AI Summary</Typography>
+      <Typography variant="subtitle1" fontWeight={600}>סיכום AI</Typography>
       <Typography variant="body2" color="text.secondary">{transcript.ai_summary}</Typography>
 
       {keyPoints.length > 0 && (
         <>
           <Divider />
-          <Typography variant="subtitle2" fontWeight={600}>Key Points</Typography>
+          <Typography variant="subtitle2" fontWeight={600}>נקודות מפתח</Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
             {keyPoints.map((point, i) => (
               <Chip key={i} label={point} size="small" variant="outlined" color="primary" />

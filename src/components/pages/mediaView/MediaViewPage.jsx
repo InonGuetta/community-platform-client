@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -19,20 +19,32 @@ import { useSelector } from "react-redux";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { roles } from "../../../utilities/constant";
 
-// ממיר chunks לפורמט שה-MediaPlayer מצפה לו לכתוביות
-const chunksToSegments = (chunks = []) =>
-  chunks.map((c) => ({
-    start: c.start_time,
-    end: c.end_time,
-    text: c.content,
-  }));
-
 const MediaViewPage = () => {
   const { media, transcript, bookmarks, handleSaveProgress, handleCreateBookmark } =
     useMediaViewPageController();
   const [tab, setTab] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const user = useSelector(selectUser);
+  const playerRef = useRef(null);
+  const lastSavedAtRef = useRef(0);
+
+  // Used by Chapters and Notes to jump the player to a specific timestamp
+  // from a sibling component.
+  const seekPlayer = useCallback((seconds) => {
+    playerRef.current?.seekTo(seconds);
+  }, []);
+
+  // MediaPlayer now reports progress every ~1s. We update currentTime each
+  // tick (cheap React state update) but throttle DB persistence to once
+  // every 10s so the watch_progress endpoint isn't hammered.
+  const handlePlayerProgress = useCallback((sec) => {
+    setCurrentTime(sec);
+    const now = Date.now();
+    if (now - lastSavedAtRef.current >= 10000) {
+      lastSavedAtRef.current = now;
+      handleSaveProgress(sec);
+    }
+  }, [handleSaveProgress]);
 
   if (!media) {
     return (
@@ -42,8 +54,7 @@ const MediaViewPage = () => {
     );
   }
 
-  const chapters  = transcript?.ai_chapters || [];
-  const segments  = chunksToSegments(transcript?.chunks);
+  const chapters = transcript?.ai_chapters || [];
   // Transcript tab is visible to everyone on audio/video; editing/triggering
   // is gated inside TranscriptEditor itself based on role.
   const showTranscriptTab = media.media_type !== "text";
@@ -72,11 +83,11 @@ const MediaViewPage = () => {
             <TextViewer mediaId={media.id} />
           ) : (
             <MediaPlayer
+              ref={playerRef}
               url={`/api/media/${media.id}/stream`}
               bookmarks={bookmarks}
               duration={media.duration_seconds}
-              onProgress={(sec) => { setCurrentTime(sec); handleSaveProgress(sec); }}
-              segments={segments}
+              onProgress={handlePlayerProgress}
             />
           )}
         </Grid>
@@ -84,21 +95,22 @@ const MediaViewPage = () => {
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 2, height: "100%" }}>
             <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth" sx={{ mb: 2 }}>
-              <Tab label="Summary" />
-              <Tab label="Chapters" />
-              <Tab label="Notes" />
+              <Tab label="סיכום" />
+              <Tab label="פרקים" />
+              <Tab label="הערות אישיות" />
               {showTranscriptTab && (
-                <Tab label="Transcript" />
+                <Tab label="תמלול" />
               )}
             </Tabs>
 
             {tab === 0 && <AISummaryPanel transcript={transcript} />}
-            {tab === 1 && <ChaptersPanel chapters={chapters} />}
+            {tab === 1 && <ChaptersPanel chapters={chapters} onSeek={seekPlayer} />}
             {tab === 2 && (
               <NotesPanel
                 bookmarks={bookmarks}
                 currentTime={currentTime}
                 onCreateBookmark={handleCreateBookmark}
+                onSeek={seekPlayer}
               />
             )}
             {tab === 3 && showTranscriptTab && (

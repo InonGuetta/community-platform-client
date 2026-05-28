@@ -36,6 +36,7 @@ const useMediaViewPageController = () => {
       String(media.id) === String(id) &&
       media.media_type !== "text"
     ) {
+      console.log(`[FE:ctrl] media loaded id=${id} type=${media.media_type} → initial fetchTranscript`);
       dispatch(fetchTranscript(id)).catch(() => {});
     }
   }, [dispatch, id, media?.id, media?.media_type]);
@@ -44,11 +45,19 @@ const useMediaViewPageController = () => {
   // status='pending' or 'processing'. Poll every 4s until it lands on
   // 'done' / 'error', then stop. Cleared on unmount or id change.
   useEffect(() => {
-    if (!id || !transcript || !IN_FLIGHT_STATUSES.has(transcript.status)) return;
+    if (!id || !transcript || !IN_FLIGHT_STATUSES.has(transcript.status)) {
+      if (transcript) console.log(`[FE:ctrl] polling skipped (status=${transcript.status})`);
+      return;
+    }
+    console.log(`[FE:ctrl] polling started id=${id} status=${transcript.status} every ${TRANSCRIPT_POLL_MS}ms`);
     const interval = setInterval(() => {
+      console.log(`[FE:ctrl] polling tick id=${id}`);
       dispatch(fetchTranscript(id)).catch(() => {});
     }, TRANSCRIPT_POLL_MS);
-    return () => clearInterval(interval);
+    return () => {
+      console.log(`[FE:ctrl] polling stopped id=${id}`);
+      clearInterval(interval);
+    };
   }, [dispatch, id, transcript?.status]);
 
   const handleSaveProgress = async (positionSeconds) => {

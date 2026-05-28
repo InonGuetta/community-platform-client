@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState, useCallback } from "react";
 import ReactPlayer from "react-player";
 import Box from "@mui/material/Box";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -7,29 +7,24 @@ import BookmarkTimeline from "./BookmarkTimeline";
 
 const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
 
-const MediaPlayer = ({ url, bookmarks = [], duration, onProgress, segments = [] }) => {
+// forwardRef so MediaViewPage can call player.seekTo(sec) from the Chapters
+// tab. Without this the chapters list has no way to drive the player.
+const MediaPlayer = forwardRef(({ url, bookmarks = [], duration, onProgress }, ref) => {
   const playerRef = useRef(null);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [subtitle, setSubtitle] = useState("");
-  const progressTimerRef = useRef(null);
 
+  // Fire on every ReactPlayer tick (~1s) so consumers see fresh playback time.
+  // Throttling for any DB persistence is now the caller's responsibility —
+  // here we only want the UI to feel real-time.
   const handleProgress = useCallback(({ playedSeconds }) => {
-    if (segments.length) {
-      const seg = segments.find((s) => playedSeconds >= s.start && playedSeconds <= s.end);
-      setSubtitle(seg?.text || "");
-    }
+    onProgress?.(Math.floor(playedSeconds));
+  }, [onProgress]);
 
-    if (!progressTimerRef.current) {
-      progressTimerRef.current = setTimeout(() => {
-        onProgress?.(Math.floor(playedSeconds));
-        progressTimerRef.current = null;
-      }, 10000);
-    }
-  }, [segments, onProgress]);
+  const seekTo = useCallback((seconds) => {
+    playerRef.current?.seekTo(seconds, "seconds");
+  }, []);
 
-  useEffect(() => () => clearTimeout(progressTimerRef.current), []);
-
-  const seekTo = (seconds) => playerRef.current?.seekTo(seconds, "seconds");
+  useImperativeHandle(ref, () => ({ seekTo }), [seekTo]);
 
   return (
     <Box sx={{ position: "relative", width: "100%", bgcolor: "black", borderRadius: 2, overflow: "hidden" }}>
@@ -43,16 +38,6 @@ const MediaPlayer = ({ url, bookmarks = [], duration, onProgress, segments = [] 
         onProgress={handleProgress}
         style={{ aspectRatio: "16/9" }}
       />
-
-      {subtitle && (
-        <Box sx={{
-          position: "absolute", bottom: 60, left: "50%", transform: "translateX(-50%)",
-          bgcolor: "rgba(0,0,0,0.75)", color: "white", px: 2, py: 0.5, borderRadius: 1,
-          maxWidth: "80%", textAlign: "center", fontSize: 14,
-        }}>
-          {subtitle}
-        </Box>
-      )}
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1, bgcolor: "grey.900" }}>
         <ButtonGroup size="small" variant="outlined">
@@ -71,6 +56,8 @@ const MediaPlayer = ({ url, bookmarks = [], duration, onProgress, segments = [] 
       <BookmarkTimeline bookmarks={bookmarks} duration={duration} onSeek={seekTo} />
     </Box>
   );
-};
+});
+
+MediaPlayer.displayName = "MediaPlayer";
 
 export default MediaPlayer;

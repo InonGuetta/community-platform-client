@@ -11,6 +11,9 @@ import { selectTranscriptByMediaId } from "../../../store/selectors/transcriptSe
 import { selectBookmarksByMediaId } from "../../../store/selectors/bookmarksSelectors";
 import axiosInstance from "../../../utilities/axiosInstance";
 
+const TRANSCRIPT_POLL_MS = 4000;
+const IN_FLIGHT_STATUSES = new Set(["pending", "processing"]);
+
 const useMediaViewPageController = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -36,6 +39,17 @@ const useMediaViewPageController = () => {
       dispatch(fetchTranscript(id)).catch(() => {});
     }
   }, [dispatch, id, media?.id, media?.media_type]);
+
+  // While Whisper/LLM workers are processing, the transcript row sits in
+  // status='pending' or 'processing'. Poll every 4s until it lands on
+  // 'done' / 'error', then stop. Cleared on unmount or id change.
+  useEffect(() => {
+    if (!id || !transcript || !IN_FLIGHT_STATUSES.has(transcript.status)) return;
+    const interval = setInterval(() => {
+      dispatch(fetchTranscript(id)).catch(() => {});
+    }, TRANSCRIPT_POLL_MS);
+    return () => clearInterval(interval);
+  }, [dispatch, id, transcript?.status]);
 
   const handleSaveProgress = async (positionSeconds) => {
     try {

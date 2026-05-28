@@ -44,9 +44,11 @@ const MediaViewPage = () => {
 
   const chapters  = transcript?.ai_chapters || [];
   const segments  = chunksToSegments(transcript?.chunks);
+  // Transcript tab is visible to everyone on audio/video; editing/triggering
+  // is gated inside TranscriptEditor itself based on role.
+  const showTranscriptTab = media.media_type !== "text";
   const canEditTranscript =
-    media.media_type !== "text" &&
-    (user?.role === roles.lecturer || user?.role === roles.admin);
+    user?.role === roles.lecturer || user?.role === roles.admin;
 
   return (
     <Box sx={{ p: 3 }}>
@@ -85,7 +87,7 @@ const MediaViewPage = () => {
               <Tab label="Summary" />
               <Tab label="Chapters" />
               <Tab label="Notes" />
-              {canEditTranscript && (
+              {showTranscriptTab && (
                 <Tab label="Transcript" />
               )}
             </Tabs>
@@ -99,8 +101,12 @@ const MediaViewPage = () => {
                 onCreateBookmark={handleCreateBookmark}
               />
             )}
-            {tab === 3 && canEditTranscript && (
-              <TranscriptEditor transcript={transcript} mediaId={media.id} />
+            {tab === 3 && showTranscriptTab && (
+              <TranscriptEditor
+                transcript={transcript}
+                mediaId={media.id}
+                canEdit={canEditTranscript}
+              />
             )}
           </Paper>
         </Grid>

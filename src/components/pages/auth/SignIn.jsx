@@ -52,6 +52,7 @@ const SignIn = () => {
           fullWidth
           sx={floatingLabelSx}
           InputProps={inputBaseSx}
+          InputLabelProps={{ required: !form.email }}
         />
 
         <TextField
@@ -64,6 +65,7 @@ const SignIn = () => {
           required
           fullWidth
           sx={floatingLabelSx}
+          InputLabelProps={{ required: !form.password }}
           InputProps={{
             ...inputBaseSx,
             endAdornment: form.password ? (

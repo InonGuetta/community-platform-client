@@ -15,8 +15,9 @@ import ChaptersPanel from "./componentsMediaView/ChaptersPanel";
 import NotesPanel from "./componentsMediaView/NotesPanel";
 import TranscriptEditor from "../../features/TranscriptEditor/TranscriptEditor";
 import useMediaViewPageController from "./useMediaViewPageController";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { selectUser } from "../../../store/selectors/authSelectors";
+import { generateKeyPointHeadings } from "../../../store/slicesAndThunks/transcriptSlice/transcriptPut";
 import { roles } from "../../../utilities/constant";
 
 const MediaViewPage = () => {
@@ -24,9 +25,18 @@ const MediaViewPage = () => {
     useMediaViewPageController();
   const [tab, setTab] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [generatingHeadings, setGeneratingHeadings] = useState(false);
   const user = useSelector(selectUser);
+  const dispatch = useDispatch();
   const playerRef = useRef(null);
   const lastSavedAtRef = useRef(0);
+
+  const handleGenerateHeadings = useCallback(async () => {
+    if (!media?.id) return;
+    setGeneratingHeadings(true);
+    await dispatch(generateKeyPointHeadings(media.id));
+    setGeneratingHeadings(false);
+  }, [dispatch, media?.id]);
 
   // Used by Chapters and Notes to jump the player to a specific timestamp
   // from a sibling component.
@@ -54,7 +64,11 @@ const MediaViewPage = () => {
     );
   }
 
-  const chapters = transcript?.ai_chapters || [];
+  const keyPointHeadings = transcript?.ai_key_point_headings || [];
+  // The feature is built on the existing key points, so it's only available
+  // once the LLM pipeline has produced them.
+  const canGenerateHeadings =
+    Array.isArray(transcript?.ai_key_points) && transcript.ai_key_points.length > 0;
   // Transcript tab is visible to everyone on audio/video; editing/triggering
   // is gated inside TranscriptEditor itself based on role.
   const showTranscriptTab = media.media_type !== "text";
@@ -104,7 +118,16 @@ const MediaViewPage = () => {
             </Tabs>
 
             {tab === 0 && <AISummaryPanel transcript={transcript} />}
-            {tab === 1 && <ChaptersPanel chapters={chapters} onSeek={seekPlayer} />}
+            {tab === 1 && (
+              <ChaptersPanel
+                keyPointHeadings={keyPointHeadings}
+                onSeek={seekPlayer}
+                canEdit={canEditTranscript}
+                canGenerate={canGenerateHeadings}
+                generating={generatingHeadings}
+                onGenerate={handleGenerateHeadings}
+              />
+            )}
             {tab === 2 && (
               <NotesPanel
                 bookmarks={bookmarks}

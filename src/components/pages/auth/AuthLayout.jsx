@@ -72,7 +72,7 @@ const AuthLayout = ({ title, children }) => (
         boxShadow: "inset 0 -5px 10px rgba(0,0,0,0.03)",
         zIndex: 1,
       }} />
-
+  
       <CardContent sx={{ p: 4, pt: 6, position: "relative", zIndex: 2 }}>
         <Typography variant="h4" fontWeight={400} mb={4} textAlign="center" color="#424242">
           {title}

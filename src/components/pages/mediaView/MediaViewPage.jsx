@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -30,6 +30,21 @@ const MediaViewPage = () => {
   const dispatch = useDispatch();
   const playerRef = useRef(null);
   const lastSavedAtRef = useRef(0);
+
+  // Cap the side panel to the media block's height so a long list (e.g. many
+  // chapters) scrolls inside the panel instead of stretching it past the player.
+  const mediaBoxRef = useRef(null);
+  const [mediaHeight, setMediaHeight] = useState(null);
+
+  useEffect(() => {
+    const el = mediaBoxRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) setMediaHeight(e.contentRect.height);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [media?.id, media?.media_type]);
 
   const handleGenerateHeadings = useCallback(async () => {
     if (!media?.id) return;
@@ -65,10 +80,12 @@ const MediaViewPage = () => {
   }
 
   const keyPointHeadings = transcript?.ai_key_point_headings || [];
-  // The feature is built on the existing key points, so it's only available
-  // once the LLM pipeline has produced them.
+  // Available as soon as there's a transcript: if key points are missing (e.g.
+  // the auto AI step failed on a long lecture), the server generates them from
+  // the existing chunks on demand — so a transcript is all we need here.
   const canGenerateHeadings =
-    Array.isArray(transcript?.ai_key_points) && transcript.ai_key_points.length > 0;
+    (transcript?.chunks?.length ?? 0) > 0 ||
+    (Array.isArray(transcript?.ai_key_points) && transcript.ai_key_points.length > 0);
   // Transcript tab is visible to everyone on audio/video; editing/triggering
   // is gated inside TranscriptEditor itself based on role.
   const showTranscriptTab = media.media_type !== "text";
@@ -93,22 +110,34 @@ const MediaViewPage = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          {media.media_type === "text" ? (
-            <TextViewer mediaId={media.id} />
-          ) : (
-            <MediaPlayer
-              ref={playerRef}
-              url={`/api/media/${media.id}/stream`}
-              bookmarks={bookmarks}
-              duration={media.duration_seconds}
-              onProgress={handlePlayerProgress}
-            />
-          )}
+          <Box ref={mediaBoxRef}>
+            {media.media_type === "text" ? (
+              <TextViewer mediaId={media.id} />
+            ) : (
+              <MediaPlayer
+                ref={playerRef}
+                url={`/api/media/${media.id}/stream`}
+                bookmarks={bookmarks}
+                duration={media.duration_seconds}
+                onProgress={handlePlayerProgress}
+              />
+            )}
+          </Box>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 2, height: "100%" }}>
-            <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth" sx={{ mb: 2 }}>
+          <Paper
+            sx={{
+              p: 2,
+              display: "flex",
+              flexDirection: "column",
+              // On desktop, match the media block's height so the panel never
+              // grows past the player; content scrolls inside. On mobile (stacked)
+              // let it size naturally.
+              height: { xs: "auto", md: mediaHeight ? `${mediaHeight}px` : "100%" },
+            }}
+          >
+            <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth" sx={{ mb: 2, flexShrink: 0 }}>
               <Tab label="סיכום" />
               <Tab label="פרקים" />
               <Tab label="הערות אישיות" />
@@ -117,32 +146,34 @@ const MediaViewPage = () => {
               )}
             </Tabs>
 
-            {tab === 0 && <AISummaryPanel transcript={transcript} />}
-            {tab === 1 && (
-              <ChaptersPanel
-                keyPointHeadings={keyPointHeadings}
-                onSeek={seekPlayer}
-                canEdit={canEditTranscript}
-                canGenerate={canGenerateHeadings}
-                generating={generatingHeadings}
-                onGenerate={handleGenerateHeadings}
-              />
-            )}
-            {tab === 2 && (
-              <NotesPanel
-                bookmarks={bookmarks}
-                currentTime={currentTime}
-                onCreateBookmark={handleCreateBookmark}
-                onSeek={seekPlayer}
-              />
-            )}
-            {tab === 3 && showTranscriptTab && (
-              <TranscriptEditor
-                transcript={transcript}
-                mediaId={media.id}
-                canEdit={canEditTranscript}
-              />
-            )}
+            <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+              {tab === 0 && <AISummaryPanel transcript={transcript} />}
+              {tab === 1 && (
+                <ChaptersPanel
+                  keyPointHeadings={keyPointHeadings}
+                  onSeek={seekPlayer}
+                  canEdit={canEditTranscript}
+                  canGenerate={canGenerateHeadings}
+                  generating={generatingHeadings}
+                  onGenerate={handleGenerateHeadings}
+                />
+              )}
+              {tab === 2 && (
+                <NotesPanel
+                  bookmarks={bookmarks}
+                  currentTime={currentTime}
+                  onCreateBookmark={handleCreateBookmark}
+                  onSeek={seekPlayer}
+                />
+              )}
+              {tab === 3 && showTranscriptTab && (
+                <TranscriptEditor
+                  transcript={transcript}
+                  mediaId={media.id}
+                  canEdit={canEditTranscript}
+                />
+              )}
+            </Box>
           </Paper>
         </Grid>
       </Grid>

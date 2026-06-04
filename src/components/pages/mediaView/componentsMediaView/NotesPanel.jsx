@@ -11,8 +11,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { useDispatch } from "react-redux";
 import { deleteBookmark } from "../../../../store/slicesAndThunks/bookmarksSlice/bookmarksDelete";
-
-const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+import { formatTime } from "../../../../utilities/formatTime";
 
 // "Active" bookmark = the latest one whose timestamp is <= current playback.
 // That's the one the user is "inside" right now.

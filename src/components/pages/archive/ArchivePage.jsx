@@ -23,21 +23,48 @@ const ArchivePage = () => {
   const deleteTarget = filteredMedia.find((i) => i.id === deleteTargetId);
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h5" fontWeight={700}>Media Archive</Typography>
-        {(user?.role === roles.lecturer || user?.role === roles.admin) && (
-          <Button variant="contained" startIcon={<UploadIcon />} onClick={handleOpenUpload}>
-            Upload Media
-          </Button>
-        )}
-      </Box>
+    <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
+      {/* Left side image */}
+      <Box
+        component="img"
+        src="/images/central_image.png"
+        alt=""
+        sx={{
+          flexShrink: 0,
+          width: { xs: 0, md: "24%" },
+          display: { xs: "none", md: "block" },
+          objectFit: "cover",
+          position: "sticky",
+          top: 64,
+          alignSelf: "flex-start",
+          height: "calc(100vh - 64px)",
+          borderRight: "1px solid rgba(0,0,0,0.06)",
+        }}
+      />
 
-      <Box sx={{ mb: 3 }}>
-        <FilterBar typeFilter={typeFilter} onFilter={handleFilter} onSearch={handleSearch} />
-      </Box>
+      {/* Main content */}
+      <Box sx={{ flexGrow: 1, p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+          <Typography variant="h4" fontWeight={800} color="primary">Media Archive</Typography>
+          {(user?.role === roles.lecturer || user?.role === roles.admin) && (
+            <Button variant="contained" startIcon={<UploadIcon />} onClick={handleOpenUpload}
+              sx={{
+                background: "linear-gradient(135deg, #29b6d8 0%, #1597bb 100%)",
+                "&:hover": { background: "linear-gradient(135deg, #1ea7ca 0%, #128aab 100%)" },
+                borderRadius: 2, fontWeight: 700, px: 3, boxShadow: "0 3px 10px rgba(21,151,187,0.35)",
+              }}
+            >
+              Upload Media
+            </Button>
+          )}
+        </Box>
 
-      <MediaGrid items={filteredMedia} status={status} onView={handleOpenMedia} user={user} onDelete={handleDeleteRequest} />
+        <Box sx={{ mb: 3 }}>
+          <FilterBar typeFilter={typeFilter} onFilter={handleFilter} onSearch={handleSearch} />
+        </Box>
+
+        <MediaGrid items={filteredMedia} status={status} onView={handleOpenMedia} user={user} onDelete={handleDeleteRequest} />
+      </Box>
 
       <UploadMedia open={isUploadOpen} />
 

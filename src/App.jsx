@@ -19,7 +19,12 @@ import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/auth/google/callback"];
 
 const theme = createTheme({
-  palette: { mode: "light", primary: { main: "#1a73e8" } },
+  palette: {
+    mode: "light",
+    primary: { main: "#1a4a66" },   // navy — logo, headings, nav links
+    secondary: { main: "#17a2c4" },  // teal — upload button, accents
+    background: { default: "#f3f5f7" },
+  },
   components: {
     MuiButton: { defaultProps: { disableElevation: true } },
   },

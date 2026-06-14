@@ -19,7 +19,7 @@ const MediaGrid = ({ items, status, onView, user, onDelete }) => {
   return (
     <Grid container spacing={3}>
       {items.map((item) => (
-        <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+        <Grid item xs={12} sm={6} md={4} key={item.id}>
           <MediaCard item={item} onView={onView} user={user} onDelete={onDelete} />
         </Grid>
       ))}

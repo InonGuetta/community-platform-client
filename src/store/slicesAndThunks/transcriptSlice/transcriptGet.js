@@ -13,9 +13,11 @@ export const fetchTranscript = createAsyncThunk("transcript/fetch", async (media
   }
 });
 
-export const searchTranscripts = createAsyncThunk("transcript/search", async (query, { rejectWithValue }) => {
+// mode: "hybrid" (default) | "semantic" | "keyword". The "smart deep search"
+// box passes "hybrid" — meaning + keyword fused on the server.
+export const searchTranscripts = createAsyncThunk("transcript/search", async ({ q, mode = "hybrid" }, { rejectWithValue }) => {
   try {
-    const { data } = await axiosInstance.get("/transcripts/search", { params: { q: query } });
+    const { data } = await axiosInstance.get("/transcripts/search", { params: { q, mode } });
     return data;
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || "Search failed");

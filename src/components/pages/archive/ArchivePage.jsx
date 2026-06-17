@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import UploadIcon from "@mui/icons-material/Upload";
 import FilterBar from "./componentsArchive/FilterBar";
 import MediaGrid from "./componentsArchive/MediaGrid";
 import UploadMedia from "../../features/UploadMedia/UploadMedia";
+import SmartSearch from "../../features/SmartSearch/SmartSearch";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useArchivePageController from "./useArchivePageController";
 import { selectUser } from "../../../store/selectors/authSelectors";
@@ -14,11 +18,12 @@ import { roles } from "../../../utilities/constant";
 const ArchivePage = () => {
   const {
     filteredMedia, status, typeFilter,
-    handleFilter, handleSearch, handleOpenMedia, handleOpenUpload,
+    handleFilter, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
   } = useArchivePageController();
   const { isUploadOpen } = useSelector((state) => state.ui);
   const user = useSelector(selectUser);
+  const [tab, setTab] = useState(0);
 
   const deleteTarget = filteredMedia.find((i) => i.id === deleteTargetId);
 
@@ -59,11 +64,21 @@ const ArchivePage = () => {
           )}
         </Box>
 
-        <Box sx={{ mb: 3 }}>
-          <FilterBar typeFilter={typeFilter} onFilter={handleFilter} onSearch={handleSearch} />
-        </Box>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
+          <Tab label="ארכיון" />
+          <Tab label="Smart Deep Search" />
+        </Tabs>
 
-        <MediaGrid items={filteredMedia} status={status} onView={handleOpenMedia} user={user} onDelete={handleDeleteRequest} />
+        {tab === 0 && (
+          <>
+            <Box sx={{ mb: 3 }}>
+              <FilterBar typeFilter={typeFilter} onFilter={handleFilter} onSearch={handleSearch} />
+            </Box>
+            <MediaGrid items={filteredMedia} status={status} onView={handleOpenMedia} user={user} onDelete={handleDeleteRequest} />
+          </>
+        )}
+
+        {tab === 1 && <SmartSearch onOpenResult={handleOpenResult} />}
       </Box>
 
       <UploadMedia open={isUploadOpen} />

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { fetchOneMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
@@ -22,13 +22,36 @@ const useMediaViewPageController = () => {
   const transcript = useSelector(selectTranscriptByMediaId(id));
   const bookmarks = useSelector(selectBookmarksByMediaId(id));
 
+  // Resume Playback: the saved position (seconds) from a previous viewing.
+  // The player seeks here once it's ready. 0 = start from the beginning.
+  const [resumePosition, setResumePosition] = useState(0);
+
   useEffect(() => {
     dispatch(clearSelectedItem());
+    setResumePosition(0);
     if (id) {
       dispatch(fetchOneMedia(id));
       dispatch(fetchBookmarks(id));
     }
   }, [dispatch, id]);
+
+  // Fetch where this user left off so the player can resume there. Failures
+  // (no progress yet, network) are silent — we just start from the beginning.
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await axiosInstance.get(`/media/${id}/progress`);
+        if (!cancelled && data?.last_position_seconds > 0) {
+          setResumePosition(data.last_position_seconds);
+        }
+      } catch {}
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   useEffect(() => {
     if (
@@ -66,7 +89,7 @@ const useMediaViewPageController = () => {
   const handleCreateBookmark = (timestampSeconds, note) =>
     dispatch(createBookmark({ mediaId: Number(id), timestampSeconds, note }));
 
-  return { media, transcript, bookmarks, handleSaveProgress, handleCreateBookmark };
+  return { media, transcript, bookmarks, resumePosition, handleSaveProgress, handleCreateBookmark };
 };
 
 export default useMediaViewPageController;

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
+import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
 import Navbar from "./components/layout/navbar/Navbar";
 import ProtectedRoute from "./components/pages/auth/ProtectedRoute";
 import SignIn from "./components/pages/auth/SignIn";
@@ -30,9 +30,32 @@ const theme = createTheme({
   },
 });
 
+// Mac-style page transition: each time the route changes, the new page slides
+// in gradually from the side with a fade. Keying off the pathname remounts this
+// wrapper so the CSS animation replays on every navigation.
+const PageTransition = ({ pathname, children }) => (
+  <Box
+    key={pathname}
+    sx={{
+      // Flowing but snappy: shorter duration, blur clears early so content is
+      // crisp for most of the motion, and a soft decelerating settle at the end.
+      animation: "pageSlide 0.55s cubic-bezier(0.22, 1, 0.36, 1) both",
+      willChange: "opacity, transform, filter",
+      "@keyframes pageSlide": {
+        "0%": { opacity: 0, transform: "translateX(24px) scale(0.99)", filter: "blur(4px)" },
+        "45%": { opacity: 1, filter: "blur(0px)" },
+        "100%": { opacity: 1, transform: "translateX(0) scale(1)", filter: "blur(0px)" },
+      },
+    }}
+  >
+    {children}
+  </Box>
+);
+
 const App = () => {
   const dispatch = useDispatch();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
 
   useEffect(() => {
     // The httpOnly cookie isn't readable from JS, so we always ask the server who we are
@@ -44,20 +67,22 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       {!AUTH_PATHS.includes(pathname) && <Navbar />}
-      <Routes>
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/auth/google/callback" element={<GoogleCallback />} />
-        <Route path="/" element={<Navigate to="/archive" replace />} />
-        <Route path="/archive" element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
-        <Route path="/media/:id" element={<ProtectedRoute><MediaViewPage /></ProtectedRoute>} />
-        <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
-        <Route path="/sessions/:roomToken" element={<ProtectedRoute><SessionRoom /></ProtectedRoute>} />
-        <Route path="/users" element={<ProtectedRoute allowedRoles={["admin"]}><UsersPage /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/archive" replace />} />
-      </Routes>
+      <PageTransition pathname={pathname}>
+        <Routes location={location}>
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/auth/google/callback" element={<GoogleCallback />} />
+          <Route path="/" element={<Navigate to="/archive" replace />} />
+          <Route path="/archive" element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
+          <Route path="/media/:id" element={<ProtectedRoute><MediaViewPage /></ProtectedRoute>} />
+          <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
+          <Route path="/sessions/:roomToken" element={<ProtectedRoute><SessionRoom /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute allowedRoles={["admin"]}><UsersPage /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/archive" replace />} />
+        </Routes>
+      </PageTransition>
     </ThemeProvider>
   );
 };

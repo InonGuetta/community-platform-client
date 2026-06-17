@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef, useState, useCallback } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState, useCallback, useEffect } from "react";
 import ReactPlayer from "react-player";
 import Box from "@mui/material/Box";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -9,9 +9,31 @@ const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
 
 // forwardRef so MediaViewPage can call player.seekTo(sec) from the Chapters
 // tab. Without this the chapters list has no way to drive the player.
-const MediaPlayer = forwardRef(({ url, bookmarks = [], duration, onProgress }, ref) => {
+const MediaPlayer = forwardRef(({ url, bookmarks = [], duration, onProgress, seekOnReady = 0 }, ref) => {
   const playerRef = useRef(null);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [isReady, setIsReady] = useState(false);
+
+  // Auto-seek (smart-search deep link ?t= or Resume Playback) must happen exactly
+  // once, and only after the media is ready — seekTo before load is a no-op.
+  // seekOnReady can also arrive late (the resume position is fetched async), so
+  // we react to both "became ready" and "value arrived" via an effect. The ref
+  // guards against re-seeking on later renders, which would fight a user who
+  // manually rewinds. It resets per source so a new media item resumes again.
+  const hasAutoSeekedRef = useRef(false);
+  useEffect(() => {
+    hasAutoSeekedRef.current = false;
+    setIsReady(false);
+  }, [url]);
+
+  useEffect(() => {
+    if (isReady && seekOnReady > 0 && !hasAutoSeekedRef.current) {
+      hasAutoSeekedRef.current = true;
+      playerRef.current?.seekTo(seekOnReady, "seconds");
+    }
+  }, [isReady, seekOnReady]);
+
+  const handleReady = useCallback(() => setIsReady(true), []);
 
   // Fire on every ReactPlayer tick (~1s) so consumers see fresh playback time.
   // Throttling for any DB persistence is now the caller's responsibility —
@@ -36,6 +58,7 @@ const MediaPlayer = forwardRef(({ url, bookmarks = [], duration, onProgress }, r
         controls
         playbackRate={playbackRate}
         onProgress={handleProgress}
+        onReady={handleReady}
         style={{ aspectRatio: "16/9" }}
       />
 

@@ -23,6 +23,9 @@ const useArchivePageController = () => {
   const handleFilter = (type) => setTypeFilter(type);
   const handleSearch = (query) => setSearchQuery(query);
   const handleOpenMedia = (id) => navigate(`/media/${id}`);
+  // Smart-search result → open the media and jump the player to the segment.
+  // The ?t= seconds are read by MediaViewPage and seeked once the player is ready.
+  const handleOpenResult = (mediaId, startTime) => navigate(`/media/${mediaId}?t=${startTime}`);
   const handleOpenUpload = () => dispatch(openUpload());
 
   const handleDeleteRequest = (id) => setDeleteTargetId(id);
@@ -42,7 +45,7 @@ const useArchivePageController = () => {
 
   return {
     filteredMedia, status, typeFilter,
-    handleFilter, handleSearch, handleOpenMedia, handleOpenUpload,
+    handleFilter, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
   };
 };

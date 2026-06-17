@@ -17,16 +17,17 @@ const TYPE_IMAGE_SCALE = { video: 0.65, audio: 0.55, text: 0.50 };
 const canDelete = (user, item) =>
   user?.role === roles.admin || (user?.role === roles.lecturer && item.uploader_id === user.id);
 
-// L-shaped corner bracket drawn as SVG so the arm tips get true rounded caps.
+// L-shaped corner bracket drawn as SVG with a crisp right-angle elbow that
+// follows the card's SHARP (square) top-right & bottom-left corners.
 // It sits just OUTSIDE the card (offset -5) and behind it (zIndex 1), wrapping
 // the corner from outside — so when the card scales up on hover it covers the
-// bracket completely.
+// bracket completely. Arm tips keep rounded caps; the elbow is mitered (sharp).
 const CornerBracket = ({ accent, placement }) => {
   const isTR = placement === "tr";
-  // Concentric with the card's 20px rounded corner; long arms, 6px thick.
+  // Two straight arms meeting at a square 90° elbow over the card corner.
   const d = isTR
-    ? "M 8 3 L 60 3 A 17 17 0 0 1 77 20 L 77 72"
-    : "M 3 8 L 3 60 A 17 17 0 0 0 20 77 L 72 77";
+    ? "M 8 3 L 77 3 L 77 72"
+    : "M 3 8 L 3 77 L 72 77";
   return (
     <Box
       component="svg"
@@ -36,7 +37,7 @@ const CornerBracket = ({ accent, placement }) => {
         ...(isTR ? { top: -5, right: -5 } : { bottom: -5, left: -5 }),
       }}
     >
-      <path d={d} fill="none" stroke={accent} strokeWidth={6} strokeLinecap="round" strokeLinejoin="round" />
+      <path d={d} fill="none" stroke={accent} strokeWidth={3} strokeLinecap="round" strokeLinejoin="miter" />
     </Box>
   );
 };
@@ -76,14 +77,17 @@ const MediaCard = ({ item, onView, user, onDelete }) => {
     sx={{
       position: "relative", zIndex: 2, overflow: "hidden",
       height: "100%", display: "flex", flexDirection: "column", cursor: "pointer",
-      borderRadius: 5, boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+      // Sharp (square) top-right & bottom-left corners; rounded top-left & bottom-right.
+      borderTopLeftRadius: "20px", borderTopRightRadius: 0,
+      borderBottomRightRadius: "20px", borderBottomLeftRadius: 0,
+      boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
       transformOrigin: "center",
       transition: "transform 0.35s ease, box-shadow 0.35s ease",
-      "&:hover": { transform: "scale(1.06)", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" },
+      "&:hover": { transform: "scale(1.03)", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" },
     }}
   >
     {/* Image / icon area */}
-    <Box sx={{ position: "relative", bgcolor: "#ffffff", height: 180, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", borderTopLeftRadius: "20px", borderTopRightRadius: "20px" }}>
+    <Box sx={{ position: "relative", bgcolor: "#ffffff", height: 180, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", borderTopLeftRadius: "20px", borderTopRightRadius: 0 }}>
       {item.thumbnail_url ? (
         <Box component="img" src={item.thumbnail_url} alt={item.title} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : (

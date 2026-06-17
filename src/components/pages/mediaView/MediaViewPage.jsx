@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -21,7 +22,7 @@ import { generateKeyPointHeadings } from "../../../store/slicesAndThunks/transcr
 import { roles } from "../../../utilities/constant";
 
 const MediaViewPage = () => {
-  const { media, transcript, bookmarks, handleSaveProgress, handleCreateBookmark } =
+  const { media, transcript, bookmarks, resumePosition, handleSaveProgress, handleCreateBookmark } =
     useMediaViewPageController();
   const [tab, setTab] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -30,6 +31,13 @@ const MediaViewPage = () => {
   const dispatch = useDispatch();
   const playerRef = useRef(null);
   const lastSavedAtRef = useRef(0);
+
+  // Smart-search deep link: /media/:id?t=SECONDS → start the player at that point.
+  // An explicit deep link wins over Resume Playback; otherwise fall back to the
+  // saved watch position so the player picks up where the user left off.
+  const [searchParams] = useSearchParams();
+  const deepLinkSeek = Number(searchParams.get("t")) || 0;
+  const seekOnReady = deepLinkSeek || resumePosition;
 
   // Cap the side panel to the media block's height so a long list (e.g. many
   // chapters) scrolls inside the panel instead of stretching it past the player.
@@ -120,6 +128,7 @@ const MediaViewPage = () => {
                 bookmarks={bookmarks}
                 duration={media.duration_seconds}
                 onProgress={handlePlayerProgress}
+                seekOnReady={seekOnReady}
               />
             )}
           </Box>

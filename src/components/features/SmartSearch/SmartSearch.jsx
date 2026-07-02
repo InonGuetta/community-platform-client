@@ -48,6 +48,10 @@ const SmartSearch = ({ onOpenResult }) => {
   const [searched, setSearched] = useState(false);
 
   const runSearch = async () => {
+    // Guard against overlapping searches: a search runs an embedding + a GPT-4o
+    // rerank (a few seconds). Without this, a second Enter mid-search could let
+    // the older (slower) request resolve last and overwrite the newer results.
+    if (loading) return;
     const q = value.trim();
     if (!q) {
       dispatch(clearSearchResults());
@@ -123,8 +127,9 @@ const SmartSearch = ({ onOpenResult }) => {
                   {r.media_title}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
-                  {/* TEMP (calibration): raw cosine similarity so we can set the
-                      colour thresholds to the real value range, then remove. */}
+                  {/* TEMP (calibration): the rerank relevance score, shown so we
+                      can verify the colour thresholds against real values. Decide
+                      whether to keep as a "match %" feature or remove. */}
                   {Number.isFinite(Number(r.similarity)) && (
                     <Typography variant="caption" color="text.secondary">
                       {Math.round(Number(r.similarity) * 100)}%

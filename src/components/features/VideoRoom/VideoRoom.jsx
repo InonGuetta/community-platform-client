@@ -13,6 +13,10 @@ const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
   const peersRef = useRef({});
   const [streams, setStreams] = useState([]);
   const [connected, setConnected] = useState(false);
+  // The server can now refuse a join (room ended, room full) or an end-session
+  // (not the host). Without surfacing it the user would just sit on an empty
+  // grid with no idea why. Wave 6 rewrites this effect and will absorb it.
+  const [roomError, setRoomError] = useState(null);
 
   const addStream = useCallback((id, stream, label) => {
     setStreams((prev) => {
@@ -84,6 +88,9 @@ const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
     socket.on("user-left", ({ socketId: leftId }) => removeStream(leftId));
     socket.on("session-ended", () => onEnd?.());
 
+    socket.on("join-error", ({ message }) => setRoomError(message || "לא ניתן להצטרף למפגש"));
+    socket.on("session-error", ({ message }) => setRoomError(message || "הפעולה נכשלה"));
+
     return () => {
       localStreamRef.current?.getTracks().forEach((t) => t.stop());
       Object.values(peersRef.current).forEach((pc) => pc.close());
@@ -109,6 +116,14 @@ const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
           )}
         </Box>
       </Box>
+      {roomError && (
+        <Box sx={{ p: 2, textAlign: "center" }}>
+          <Typography color="error.main" fontWeight={600}>{roomError}</Typography>
+          <Button size="small" variant="outlined" onClick={onEnd} sx={{ mt: 1 }}>
+            חזרה למפגשים
+          </Button>
+        </Box>
+      )}
       <Box sx={{ flex: 1, p: 1 }}>
         <ParticipantGrid streams={streams} />
       </Box>

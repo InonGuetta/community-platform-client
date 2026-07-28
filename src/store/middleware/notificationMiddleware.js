@@ -59,6 +59,9 @@ const ERROR_MESSAGES = {
 // text, so the map can drift without ever breaking — it only ever adds detail.
 const SERVER_MESSAGE_HE = {
   "Email already in use": "האימייל כבר בשימוש",
+  "Cannot remove the last active admin — promote another admin first":
+    "לא ניתן להסיר את המנהל הפעיל האחרון — יש למנות מנהל אחר קודם",
+  "Forbidden": "אין לך הרשאה לפעולה זו",
   "Media not found": "המדיה לא נמצאה",
   "Session not found": "המפגש לא נמצא",
   "Session not found or not authorized": "המפגש לא נמצא או שאין לך הרשאה",

@@ -22,7 +22,7 @@ const IN_FLIGHT = new Set(["pending", "processing"]);
 const chunksToText = (chunks = []) =>
   chunks.map((c) => c.content).join("\n\n");
 
-const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
+const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled = false, onRetryPolling }) => {
   const dispatch = useDispatch();
   const initialText =
     transcript?.edited_text ||
@@ -121,7 +121,26 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
         </Box>
       </Box>
 
-      {isProcessing && !hasContent && (
+      {/* The page stopped polling while the row still says it is processing —
+          which usually means the worker died mid-job and nothing will ever
+          update that row. Say so and offer to look again, rather than leaving a
+          spinner that would never resolve. */}
+      {isProcessing && pollingStalled && (
+        <Alert
+          severity="warning"
+          action={
+            onRetryPolling && (
+              <Button color="inherit" size="small" onClick={onRetryPolling}>
+                בדוק שוב
+              </Button>
+            )
+          }
+        >
+          הפסקנו לבדוק אחרי המתנה ארוכה. ייתכן שהתמלול נתקע.
+        </Alert>
+      )}
+
+      {isProcessing && !pollingStalled && !hasContent && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.5, color: "text.secondary" }}>
           <CircularProgress size={18} />
           <Typography variant="body2">

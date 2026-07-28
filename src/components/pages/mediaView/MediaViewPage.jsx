@@ -22,8 +22,11 @@ import { generateKeyPointHeadings } from "../../../store/slicesAndThunks/transcr
 import { roles } from "../../../utilities/constant";
 
 const MediaViewPage = () => {
-  const { media, transcript, bookmarks, resumePosition, handleSaveProgress, handleCreateBookmark } =
-    useMediaViewPageController();
+  const {
+    media, transcript, bookmarks, resumePosition,
+    handleSaveProgress, handleCreateBookmark,
+    pollingStalled, retryPolling,
+  } = useMediaViewPageController();
   const [tab, setTab] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [generatingHeadings, setGeneratingHeadings] = useState(false);
@@ -180,6 +183,8 @@ const MediaViewPage = () => {
                   transcript={transcript}
                   mediaId={media.id}
                   canEdit={canEditTranscript}
+                  pollingStalled={pollingStalled}
+                  onRetryPolling={retryPolling}
                 />
               )}
             </Box>

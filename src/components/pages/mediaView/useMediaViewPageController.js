@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { fetchOneMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
@@ -10,8 +10,8 @@ import { selectSelectedMedia } from "../../../store/selectors/mediaSelectors";
 import { selectTranscriptByMediaId } from "../../../store/selectors/transcriptSelectors";
 import { selectBookmarksByMediaId } from "../../../store/selectors/bookmarksSelectors";
 import axiosInstance from "../../../utilities/axiosInstance";
+import { nextPollDelay, hasExceededPollWindow } from "../../../utilities/pollingSchedule";
 
-const TRANSCRIPT_POLL_MS = 4000;
 const IN_FLIGHT_STATUSES = new Set(["pending", "processing"]);
 
 const useMediaViewPageController = () => {
@@ -19,8 +19,18 @@ const useMediaViewPageController = () => {
   const { id } = useParams();
 
   const media = useSelector(selectSelectedMedia);
-  const transcript = useSelector(selectTranscriptByMediaId(id));
-  const bookmarks = useSelector(selectBookmarksByMediaId(id));
+
+  // These are selector FACTORIES: calling them inline built a fresh
+  // createSelector on every render, so its memoisation never applied. For the
+  // bookmarks one that mattered — it ends in .filter(), which returns a new
+  // array each call, so useSelector saw a new reference after every action
+  // dispatched anywhere in the app and re-rendered this page and its whole
+  // subtree. Memoising per id keeps one instance alive, which then returns a
+  // stable reference while the underlying list is unchanged.
+  const selectTranscript = useMemo(() => selectTranscriptByMediaId(id), [id]);
+  const selectBookmarks = useMemo(() => selectBookmarksByMediaId(id), [id]);
+  const transcript = useSelector(selectTranscript);
+  const bookmarks = useSelector(selectBookmarks);
 
   // Resume Playback: the saved position (seconds) from a previous viewing.
   // The player seeks here once it's ready. 0 = start from the beginning.
@@ -63,16 +73,67 @@ const useMediaViewPageController = () => {
     }
   }, [dispatch, id, media?.id, media?.media_type]);
 
-  // While Whisper/LLM workers are processing, the transcript row sits in
-  // status='pending' or 'processing'. Poll every 4s until it lands on
-  // 'done' / 'error', then stop. Cleared on unmount or id change.
+  // True once polling has given up — see pollingSchedule.js for why that can
+  // happen while the row still says 'processing'.
+  const [pollingStalled, setPollingStalled] = useState(false);
+  // Bumping this restarts the poll after the user asks to check again.
+  const [pollAttemptEpoch, setPollAttemptEpoch] = useState(0);
+
+  const retryPolling = useCallback(() => setPollAttemptEpoch((n) => n + 1), []);
+
+  useEffect(() => {
+    setPollingStalled(false);
+  }, [id]);
+
+  // While the workers are running, the transcript row sits in 'pending' or
+  // 'processing'. Poll until it reaches 'done' / 'error', with the gap growing
+  // so a long job is not hammered, and a hard ceiling so a wedged worker cannot
+  // keep this running forever.
+  //
+  // A self-scheduling timeout rather than setInterval: the delay changes between
+  // ticks, and this way a slow response can never overlap the next request.
   useEffect(() => {
     if (!id || !transcript || !IN_FLIGHT_STATUSES.has(transcript.status)) return;
-    const interval = setInterval(() => {
-      dispatch(fetchTranscript(id)).catch(() => {});
-    }, TRANSCRIPT_POLL_MS);
-    return () => clearInterval(interval);
-  }, [dispatch, id, transcript?.status]);
+
+    let timer = null;
+    let attempt = 0;
+    let cancelled = false;
+    const startedAt = Date.now();
+
+    const schedule = () => {
+      if (cancelled) return;
+      if (hasExceededPollWindow(startedAt)) {
+        setPollingStalled(true);
+        return;
+      }
+      // Nothing is watching a hidden tab, and browsers throttle these anyway.
+      // Leaving `timer` null lets the visibility listener pick it back up.
+      if (document.hidden) return;
+      timer = setTimeout(tick, nextPollDelay(attempt++));
+    };
+
+    const tick = async () => {
+      timer = null;
+      if (cancelled) return;
+      await dispatch(fetchTranscript(id));
+      schedule();
+    };
+
+    // Coming back to the tab should show the current state immediately rather
+    // than after another backed-off wait.
+    const handleVisibilityChange = () => {
+      if (cancelled || document.hidden || timer !== null) return;
+      tick();
+    };
+
+    schedule();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [dispatch, id, transcript?.status, pollAttemptEpoch]);
 
   const handleSaveProgress = async (positionSeconds) => {
     try {
@@ -83,7 +144,11 @@ const useMediaViewPageController = () => {
   const handleCreateBookmark = (timestampSeconds, note) =>
     dispatch(createBookmark({ mediaId: Number(id), timestampSeconds, note }));
 
-  return { media, transcript, bookmarks, resumePosition, handleSaveProgress, handleCreateBookmark };
+  return {
+    media, transcript, bookmarks, resumePosition,
+    handleSaveProgress, handleCreateBookmark,
+    pollingStalled, retryPolling,
+  };
 };
 
 export default useMediaViewPageController;

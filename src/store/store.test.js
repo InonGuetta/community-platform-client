@@ -33,6 +33,46 @@ describe("an expired session", () => {
   });
 });
 
+// Only auth was being cleared on sign-out, so the next person to sign in on the
+// same tab saw the previous user's notes and bookmarks until each page's own
+// fetch replaced them.
+describe("signing out empties every slice", () => {
+  const loadUserData = () => {
+    store.dispatch({ type: "bookmarks/fetch/fulfilled", payload: [{ id: 1, media_id: 7, timestamp_seconds: 10 }] });
+    store.dispatch({ type: "notes/fetch/fulfilled", payload: [{ id: 1, title: "פרטי" }] });
+    store.dispatch({ type: "media/fetchAll/fulfilled", payload: [{ id: 1, title: "שיעור" }] });
+    store.dispatch({ type: "transcript/fetch/fulfilled", payload: { media_id: 7, status: "done" } });
+    store.dispatch({ type: "users/fetchAll/fulfilled", payload: [{ id: 1, email: "a@b.c" }] });
+  };
+
+  test.each(["auth/logout/fulfilled", "auth/logout/rejected", "auth/sessionExpired"])(
+    "%s leaves nothing behind",
+    (type) => {
+      signIn();
+      loadUserData();
+      expect(store.getState().notes.items).toHaveLength(1);
+
+      store.dispatch({ type });
+
+      const state = store.getState();
+      expect(state.auth.user).toBe(null);
+      expect(state.notes.items).toEqual([]);
+      expect(state.bookmarks.items).toEqual([]);
+      expect(state.media.items).toEqual([]);
+      expect(state.transcript.byMediaId).toEqual({});
+      expect(state.users.items).toEqual([]);
+    }
+  );
+
+  test("ordinary actions do not reset anything", () => {
+    signIn();
+    loadUserData();
+    store.dispatch({ type: "ui/openUpload" });
+    expect(store.getState().notes.items).toHaveLength(1);
+    expect(store.getState().auth.user).not.toBe(null);
+  });
+});
+
 // RETURNING * has no chunks, and the chapter list and the editor's fallback
 // text are built from them. Assigning the response over the stored entry
 // discarded them on every save.
@@ -110,6 +150,17 @@ describe("selector reference stability", () => {
 
     expect(select(store.getState())).not.toBe(before);
     expect(select(store.getState())).toHaveLength(2);
+  });
+
+  // The list arrives sorted but createBookmark appends, so one added at an
+  // earlier point than the last left the array out of order. NotesPanel walks
+  // it assuming ascending time and stops at the first entry past the playhead.
+  test("a bookmark added out of order is still returned sorted", () => {
+    store.dispatch({ type: "bookmarks/create/fulfilled", payload: { id: 9, media_id: 7, timestamp_seconds: 5 } });
+
+    const times = selectBookmarksByMediaId(7)(store.getState()).map((b) => b.timestamp_seconds);
+    expect(times).toEqual([...times].sort((a, b) => a - b));
+    expect(times[0]).toBe(5);
   });
 
   test("each id sees only its own rows", () => {

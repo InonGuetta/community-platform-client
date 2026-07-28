@@ -76,7 +76,18 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
       setConnected(true);
       socket.emit("join-room", { roomToken });
     });
-    socket.on("disconnect", () => setConnected(false));
+    socket.on("disconnect", () => {
+      setConnected(false);
+      // Tear the mesh down, because rejoining cannot reuse it. Reconnecting
+      // gives us a NEW socket id, so every remaining member treats us as a
+      // newcomer and opens a fresh connection — but their own ids are unchanged,
+      // so when their offer arrives ensurePeer() would hand back the dead
+      // connection from before the drop and the media would never come back.
+      // Clearing here lets the rejoin rebuild the mesh, and takes the frozen
+      // tiles with it. The local preview stays: that stream is still live.
+      mesh.closeAll();
+      setStreams((prev) => prev.filter((s) => s.id === "local"));
+    });
 
     socket.on("user-joined", ({ socketId }) => mesh.offerTo(socketId).catch(guard("offer")));
     socket.on("offer", ({ from, offer }) => mesh.acceptOffer(from, offer).catch(guard("answer")));

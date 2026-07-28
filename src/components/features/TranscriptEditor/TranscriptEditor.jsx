@@ -10,14 +10,15 @@ import Alert from "@mui/material/Alert";
 import { updateTranscript, triggerTranscriptPipeline, fixHebrewTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptPut";
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
 
-const STATUS_COLOR = { pending: "default", processing: "warning", done: "success", error: "error" };
+const STATUS_COLOR = { pending: "default", processing: "warning", analyzing: "info", done: "success", error: "error" };
 const STATUS_LABEL_HE = {
   pending: "בהמתנה",
   processing: "מתמלל",
+  analyzing: "מסכם",
   done: "מוכן",
   error: "שגיאה",
 };
-const IN_FLIGHT = new Set(["pending", "processing"]);
+const IN_FLIGHT = new Set(["pending", "processing", "analyzing"]);
 
 const chunksToText = (chunks = []) =>
   chunks.map((c) => c.content).join("\n\n");
@@ -138,6 +139,17 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
         >
           הפסקנו לבדוק אחרי המתנה ארוכה. ייתכן שהתמלול נתקע.
         </Alert>
+      )}
+
+      {/* The transcript is readable at this point — only the AI summary is
+          still being produced — so say that rather than showing nothing. */}
+      {status === "analyzing" && !pollingStalled && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.5, color: "text.secondary" }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">
+            התמלול מוכן. מפיק סיכום ונקודות מפתח...
+          </Typography>
+        </Box>
       )}
 
       {isProcessing && !pollingStalled && !hasContent && (

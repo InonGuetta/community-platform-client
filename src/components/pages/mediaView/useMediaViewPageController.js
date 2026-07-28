@@ -12,7 +12,10 @@ import { selectBookmarksByMediaId } from "../../../store/selectors/bookmarksSele
 import axiosInstance from "../../../utilities/axiosInstance";
 import { nextPollDelay, hasExceededPollWindow } from "../../../utilities/pollingSchedule";
 
-const IN_FLIGHT_STATUSES = new Set(["pending", "processing"]);
+// 'analyzing' is included so polling continues through the AI step. Without it
+// the page stopped watching the moment transcription finished, and the summary
+// — written afterwards by the LLM worker — never appeared without a reload.
+const IN_FLIGHT_STATUSES = new Set(["pending", "processing", "analyzing"]);
 
 const useMediaViewPageController = () => {
   const dispatch = useDispatch();

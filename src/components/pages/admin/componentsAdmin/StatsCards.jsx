@@ -50,13 +50,13 @@ const StatsCards = ({ stats }) => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={4}>
-        <StatCard icon={<PeopleIcon />} label="Active Users" value={stats.users?.active ?? 0} color="primary" to="/users" />
+        <StatCard icon={<PeopleIcon />} label="משתמשים פעילים" value={stats.users?.active ?? 0} color="primary" to="/users" />
       </Grid>
       <Grid item xs={12} sm={4}>
-        <StatCard icon={<VideoLibraryIcon />} label="Total Media" value={stats.media?.total ?? 0} color="secondary" to="/archive" />
+        <StatCard icon={<VideoLibraryIcon />} label="סה״כ מדיה" value={stats.media?.total ?? 0} color="secondary" to="/archive" />
       </Grid>
       <Grid item xs={12} sm={4}>
-        <StatCard icon={<VolunteerActivismIcon />} label="Total Donations" value={donationILS} color="success" to="/donate" />
+        <StatCard icon={<VolunteerActivismIcon />} label="סה״כ תרומות" value={donationILS} color="success" to="/donate" />
       </Grid>
     </Grid>
   );

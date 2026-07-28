@@ -43,8 +43,12 @@ const useArchivePageController = () => {
     return matchesType && matchesSearch;
   });
 
+  // Whether the empty grid is due to an active filter/search (vs a truly empty
+  // archive) — lets the empty state choose between "no results" and the upload CTA.
+  const hasActiveFilter = Boolean(typeFilter || searchQuery);
+
   return {
-    filteredMedia, status, typeFilter,
+    filteredMedia, status, typeFilter, hasActiveFilter,
     handleFilter, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
   };

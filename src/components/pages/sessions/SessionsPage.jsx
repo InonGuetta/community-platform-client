@@ -19,7 +19,7 @@ import DialogActions from "../../features/Dialogs/DialogActions";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import useSessionsPageController from "./useSessionsPageController";
 import { selectUser } from "../../../store/selectors/authSelectors";
-import { roles, sessionTypes } from "../../../utilities/constant";
+import { roles, sessionTypes, sessionTypeLabels } from "../../../utilities/constant";
 
 const SessionsPage = () => {
   const { rooms, createDialogOpen, setCreateDialogOpen, handleJoinRoom, handleCreateSession } = useSessionsPageController();
@@ -31,31 +31,35 @@ const SessionsPage = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h5" fontWeight={700}>Live Sessions</Typography>
+        <Typography variant="h5" fontWeight={700}>מפגשים חיים</Typography>
         {canCreate && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateDialogOpen(true)}>
-            New Session
+            מפגש חדש
           </Button>
         )}
       </Box>
 
       {rooms.length === 0 ? (
-        <NoDataDialog message="No active sessions right now" />
+        <NoDataDialog
+          message="אין מפגשים פעילים כרגע"
+          actionLabel={canCreate ? "מפגש חדש" : undefined}
+          onAction={() => setCreateDialogOpen(true)}
+        />
       ) : (
         <Grid container spacing={2}>
           {rooms.map((room) => (
             <Grid item xs={12} sm={6} md={4} key={room.id}>
               <Card>
                 <CardContent>
-                  <Typography variant="subtitle1" fontWeight={600}>{room.title || "Untitled Session"}</Typography>
+                  <Typography variant="subtitle1" fontWeight={600}>{room.title || "מפגש ללא כותרת"}</Typography>
                   <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-                    <Chip label={room.session_type} size="small" color="primary" />
-                    <Chip label={`Host: ${room.host_name}`} size="small" variant="outlined" />
+                    <Chip label={sessionTypeLabels[room.session_type] || room.session_type} size="small" color="primary" />
+                    <Chip label={`מארח: ${room.host_name}`} size="small" variant="outlined" />
                   </Box>
                 </CardContent>
                 <CardActions>
                   <Button startIcon={<MeetingRoomIcon />} variant="contained" size="small" onClick={() => handleJoinRoom(room.room_token)} fullWidth>
-                    Join
+                    הצטרפות
                   </Button>
                 </CardActions>
               </Card>
@@ -65,19 +69,19 @@ const SessionsPage = () => {
       )}
 
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle onClose={() => setCreateDialogOpen(false)}>Create Session</DialogTitle>
+        <DialogTitle onClose={() => setCreateDialogOpen(false)}>יצירת מפגש</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <TextField label="Title" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} fullWidth />
-            <TextField label="Type" value={form.sessionType} onChange={(e) => setForm((p) => ({ ...p, sessionType: e.target.value }))} select fullWidth>
-              {Object.values(sessionTypes).map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+            <TextField label="כותרת" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} fullWidth />
+            <TextField label="סוג" value={form.sessionType} onChange={(e) => setForm((p) => ({ ...p, sessionType: e.target.value }))} select fullWidth>
+              {Object.values(sessionTypes).map((t) => <MenuItem key={t} value={t}>{sessionTypeLabels[t] || t}</MenuItem>)}
             </TextField>
-            <TextField label="Max Participants" type="number" value={form.maxParticipants} onChange={(e) => setForm((p) => ({ ...p, maxParticipants: Number(e.target.value) }))} fullWidth />
+            <TextField label="מספר משתתפים מרבי" type="number" value={form.maxParticipants} onChange={(e) => setForm((p) => ({ ...p, maxParticipants: Number(e.target.value) }))} fullWidth />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)} variant="outlined">Cancel</Button>
-          <Button onClick={() => handleCreateSession(form)} variant="contained">Create</Button>
+          <Button onClick={() => setCreateDialogOpen(false)} variant="outlined">ביטול</Button>
+          <Button onClick={() => handleCreateSession(form)} variant="contained">יצירה</Button>
         </DialogActions>
       </Dialog>
     </Box>

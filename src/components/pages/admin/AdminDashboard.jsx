@@ -41,7 +41,7 @@ const AdminDashboard = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" fontWeight={700} mb={3}>Admin Dashboard</Typography>
+      <Typography variant="h5" fontWeight={700} mb={3}>לוח בקרה ניהולי</Typography>
 
       <Box sx={{ mb: 3 }}>
         <StatsCards stats={stats} />

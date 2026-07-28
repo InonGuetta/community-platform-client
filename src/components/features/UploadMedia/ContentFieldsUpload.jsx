@@ -1,19 +1,19 @@
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
-import { mediaTypes } from "../../../utilities/constant";
+import { mediaTypes, mediaTypeLabels } from "../../../utilities/constant";
 
 const ContentFieldsUpload = ({ values, onChange }) => (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
     <TextField
-      label="Title"
+      label="כותרת"
       value={values.title}
       onChange={(e) => onChange("title", e.target.value)}
       required
       fullWidth
     />
     <TextField
-      label="Description"
+      label="תיאור"
       value={values.description}
       onChange={(e) => onChange("description", e.target.value)}
       multiline
@@ -21,7 +21,7 @@ const ContentFieldsUpload = ({ values, onChange }) => (
       fullWidth
     />
     <TextField
-      label="Media Type"
+      label="סוג מדיה"
       value={values.mediaType}
       onChange={(e) => onChange("mediaType", e.target.value)}
       select
@@ -29,7 +29,7 @@ const ContentFieldsUpload = ({ values, onChange }) => (
       required
     >
       {Object.values(mediaTypes).map((type) => (
-        <MenuItem key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</MenuItem>
+        <MenuItem key={type} value={type}>{mediaTypeLabels[type] || type}</MenuItem>
       ))}
     </TextField>
   </Box>

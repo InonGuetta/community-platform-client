@@ -53,7 +53,7 @@ const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
 
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
       localStreamRef.current = stream;
-      addStream("local", stream, "You");
+      addStream("local", stream, "אני");
       socket.emit("join-room", { roomToken, userId, role });
       setConnected(true);
     });
@@ -99,13 +99,13 @@ const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: "grey.950" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 1, bgcolor: "grey.900" }}>
-        <Typography variant="body2" color="grey.400">Room: {roomToken}</Typography>
+        <Typography variant="body2" color="grey.400">חדר: {roomToken}</Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
-          {connected && <Typography variant="body2" color="success.main">{streams.length} participant(s)</Typography>}
+          {connected && <Typography variant="body2" color="success.main">{streams.length} משתתפים</Typography>}
           {role === "lecturer" || role === "admin" ? (
-            <Button size="small" variant="contained" color="error" onClick={handleEnd}>End Session</Button>
+            <Button size="small" variant="contained" color="error" onClick={handleEnd}>סיום מפגש</Button>
           ) : (
-            <Button size="small" variant="outlined" color="warning" onClick={onEnd}>Leave</Button>
+            <Button size="small" variant="outlined" color="warning" onClick={onEnd}>עזיבה</Button>
           )}
         </Box>
       </Box>

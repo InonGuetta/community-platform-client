@@ -29,9 +29,9 @@ const DonateForm = () => {
         currency: "ILS",
         type,
       });
-      setMessage({ type: "success", text: `Payment intent created (client_secret: ${data.clientSecret?.slice(0, 20)}...)` });
+      setMessage({ type: "success", text: `כוונת תשלום נוצרה (client_secret: ${data.clientSecret?.slice(0, 20)}...)` });
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.message || "Payment failed" });
+      setMessage({ type: "error", text: err.response?.data?.message || "התשלום נכשל" });
     }
     setLoading(false);
   };
@@ -39,15 +39,15 @@ const DonateForm = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box>
-        <Typography variant="subtitle2" mb={1}>Donation Type</Typography>
+        <Typography variant="subtitle2" mb={1}>סוג תרומה</Typography>
         <ToggleButtonGroup value={type} exclusive onChange={(_, v) => v && setType(v)} size="small">
-          <ToggleButton value="one_time">One Time</ToggleButton>
-          <ToggleButton value="monthly">Monthly</ToggleButton>
+          <ToggleButton value="one_time">חד פעמי</ToggleButton>
+          <ToggleButton value="monthly">חודשי</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
       <Box>
-        <Typography variant="subtitle2" mb={1}>Amount (₪)</Typography>
+        <Typography variant="subtitle2" mb={1}>סכום (₪)</Typography>
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
           {PRESET_AMOUNTS.map((a) => (
             <Button
@@ -61,7 +61,7 @@ const DonateForm = () => {
           ))}
         </Box>
         <TextField
-          label="Custom amount"
+          label="סכום מותאם"
           type="number"
           value={customAmount}
           onChange={(e) => { setCustomAmount(e.target.value); setAmount(0); }}
@@ -74,11 +74,11 @@ const DonateForm = () => {
       {message && <Alert severity={message.type}>{message.text}</Alert>}
 
       <Button variant="contained" size="large" onClick={handleSubmit} disabled={loading || !finalAmount}>
-        {loading ? "Processing..." : `Donate ₪${finalAmount}`}
+        {loading ? "מעבד..." : `תרומה ₪${finalAmount}`}
       </Button>
 
       <Typography variant="caption" color="text.secondary">
-        Secure payment powered by Stripe. We never store your card details.
+        תשלום מאובטח באמצעות Stripe. איננו שומרים את פרטי הכרטיס שלך.
       </Typography>
     </Box>
   );

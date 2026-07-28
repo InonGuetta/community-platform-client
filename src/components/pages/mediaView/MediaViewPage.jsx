@@ -108,7 +108,7 @@ const MediaViewPage = () => {
           component="a"
           href={`/api/media/${media.id}/download`}
           download
-          aria-label="Download"
+          aria-label="הורדה"
           title="הורדה"
           sx={{ p: 0.75, "&:hover": { bgcolor: "action.hover" } }}
         >

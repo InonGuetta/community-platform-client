@@ -6,11 +6,13 @@ import TableCell from "@mui/material/TableCell";
 import Paper from "@mui/material/Paper";
 import UsersTableContent from "./UsersTableContent";
 
-const HEADERS = ["ID", "Name", "Email", "Role", "Status", "Actions"];
+const HEADERS = ["ID / מזהה", "שם", "אימייל", "תפקיד", "סטטוס", "פעולות"];
 
-const UsersTable = ({ users, onEdit, onDelete }) => (
+const UsersTable = ({ users, onEdit, onDelete, onToggleActive, canToggleActive = false, currentUserId, loading = false }) => (
   <TableContainer component={Paper} sx={{ boxShadow: 1 }}>
-    <Table size="small">
+    {/* minWidth keeps the columns readable and lets TableContainer scroll the
+        table horizontally on narrow screens instead of squashing the cells. */}
+    <Table size="small" sx={{ minWidth: 640 }}>
       <TableHead>
         <TableRow sx={{ bgcolor: "grey.100" }}>
           {HEADERS.map((h) => (
@@ -18,7 +20,15 @@ const UsersTable = ({ users, onEdit, onDelete }) => (
           ))}
         </TableRow>
       </TableHead>
-      <UsersTableContent users={users} onEdit={onEdit} onDelete={onDelete} />
+      <UsersTableContent
+        users={users}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onToggleActive={onToggleActive}
+        canToggleActive={canToggleActive}
+        currentUserId={currentUserId}
+        loading={loading}
+      />
     </Table>
   </TableContainer>
 );

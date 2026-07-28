@@ -52,7 +52,7 @@ const UploadMedia = ({ open }) => {
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle onClose={handleClose}>Upload Media</DialogTitle>
+      <DialogTitle onClose={handleClose}>העלאת מדיה</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Box
@@ -65,7 +65,7 @@ const UploadMedia = ({ open }) => {
           >
             <CloudUploadIcon sx={{ fontSize: 40, color: "grey.500", mb: 1 }} />
             <Typography color="text.secondary">
-              {file ? file.name : "Click to select a file"}
+              {file ? file.name : "לחץ לבחירת קובץ"}
             </Typography>
             <input
               id="media-file-input"
@@ -79,9 +79,9 @@ const UploadMedia = ({ open }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} variant="outlined">Cancel</Button>
+        <Button onClick={handleClose} variant="outlined">ביטול</Button>
         <Button onClick={handleSubmit} variant="contained" disabled={uploading || !file}>
-          {uploading ? "Uploading..." : "Upload"}
+          {uploading ? "מעלה..." : "העלאה"}
         </Button>
       </DialogActions>
     </Dialog>

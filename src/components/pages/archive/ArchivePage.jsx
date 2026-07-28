@@ -17,7 +17,7 @@ import { roles } from "../../../utilities/constant";
 
 const ArchivePage = () => {
   const {
-    filteredMedia, status, typeFilter,
+    filteredMedia, status, typeFilter, hasActiveFilter,
     handleFilter, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
   } = useArchivePageController();
@@ -29,7 +29,50 @@ const ArchivePage = () => {
 
   return (
     <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
-      {/* Left side image */}
+      {/* Main content */}
+      <Box sx={{ flexGrow: 1, p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+          <Typography variant="h4" fontWeight={800} color="primary">ארכיון מדיה</Typography>
+          {(user?.role === roles.lecturer || user?.role === roles.admin) && (
+            <Button variant="contained" startIcon={<UploadIcon />} onClick={handleOpenUpload}
+              sx={{
+                background: "linear-gradient(135deg, #29b6d8 0%, #1597bb 100%)",
+                "&:hover": { background: "linear-gradient(135deg, #1ea7ca 0%, #128aab 100%)" },
+                borderRadius: 2, fontWeight: 700, px: 3, boxShadow: "0 3px 10px rgba(21,151,187,0.35)",
+              }}
+            >
+              העלאת מדיה
+            </Button>
+          )}
+        </Box>
+
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
+          <Tab label="ארכיון" />
+          <Tab label="חיפוש עומק חכם" />
+        </Tabs>
+
+        {tab === 0 && (
+          <>
+            <Box sx={{ mb: 3 }}>
+              <FilterBar typeFilter={typeFilter} onFilter={handleFilter} onSearch={handleSearch} />
+            </Box>
+            <MediaGrid
+              items={filteredMedia}
+              status={status}
+              onView={handleOpenMedia}
+              user={user}
+              onDelete={handleDeleteRequest}
+              emptyActionLabel={(user?.role === roles.lecturer || user?.role === roles.admin) ? "העלאת מדיה" : undefined}
+              onEmptyAction={handleOpenUpload}
+              filtered={hasActiveFilter}
+            />
+          </>
+        )}
+
+        {tab === 1 && <SmartSearch onOpenResult={handleOpenResult} />}
+      </Box>
+
+      {/* Left side image (rendered last so it sits on the left under RTL) */}
       <Box
         component="img"
         src="/images/central_image.png"
@@ -43,43 +86,10 @@ const ArchivePage = () => {
           top: 64,
           alignSelf: "flex-start",
           height: "calc(100vh - 64px)",
-          borderRight: "1px solid rgba(0,0,0,0.06)",
+          borderLeft: "1px solid rgba(0,0,0,0.06)",
+          opacity: 0.5,
         }}
       />
-
-      {/* Main content */}
-      <Box sx={{ flexGrow: 1, p: 3 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-          <Typography variant="h4" fontWeight={800} color="primary">Media Archive</Typography>
-          {(user?.role === roles.lecturer || user?.role === roles.admin) && (
-            <Button variant="contained" startIcon={<UploadIcon />} onClick={handleOpenUpload}
-              sx={{
-                background: "linear-gradient(135deg, #29b6d8 0%, #1597bb 100%)",
-                "&:hover": { background: "linear-gradient(135deg, #1ea7ca 0%, #128aab 100%)" },
-                borderRadius: 2, fontWeight: 700, px: 3, boxShadow: "0 3px 10px rgba(21,151,187,0.35)",
-              }}
-            >
-              Upload Media
-            </Button>
-          )}
-        </Box>
-
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
-          <Tab label="ארכיון" />
-          <Tab label="Smart Deep Search" />
-        </Tabs>
-
-        {tab === 0 && (
-          <>
-            <Box sx={{ mb: 3 }}>
-              <FilterBar typeFilter={typeFilter} onFilter={handleFilter} onSearch={handleSearch} />
-            </Box>
-            <MediaGrid items={filteredMedia} status={status} onView={handleOpenMedia} user={user} onDelete={handleDeleteRequest} />
-          </>
-        )}
-
-        {tab === 1 && <SmartSearch onOpenResult={handleOpenResult} />}
-      </Box>
 
       <UploadMedia open={isUploadOpen} />
 

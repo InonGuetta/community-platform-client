@@ -1,129 +1,48 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { io } from "socket.io-client";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
 import ParticipantGrid from "./ParticipantGrid";
+import { useVideoRoom } from "./useVideoRoom";
 
-const ICE_SERVERS = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+// Presentation only — every piece of signalling now lives in useVideoRoom, and
+// the peer bookkeeping under it in peerMesh, where it can be tested without a
+// browser or a camera.
+const VideoRoom = ({ roomToken, role, onEnd }) => {
+  const { streams, connected, mediaError, roomError, endSession, leave } = useVideoRoom({ roomToken, onEnd });
 
-const VideoRoom = ({ roomToken, userId, role, onEnd }) => {
-  const socketRef = useRef(null);
-  const localStreamRef = useRef(null);
-  const peersRef = useRef({});
-  const [streams, setStreams] = useState([]);
-  const [connected, setConnected] = useState(false);
-  // The server can now refuse a join (room ended, room full) or an end-session
-  // (not the host). Without surfacing it the user would just sit on an empty
-  // grid with no idea why. Wave 6 rewrites this effect and will absorb it.
-  const [roomError, setRoomError] = useState(null);
-
-  const addStream = useCallback((id, stream, label) => {
-    setStreams((prev) => {
-      const exists = prev.find((s) => s.id === id);
-      if (exists) return prev;
-      return [...prev, { id, stream, label }];
-    });
-  }, []);
-
-  const removeStream = useCallback((id) => {
-    setStreams((prev) => prev.filter((s) => s.id !== id));
-    if (peersRef.current[id]) {
-      peersRef.current[id].close();
-      delete peersRef.current[id];
-    }
-  }, []);
-
-  const createPeer = useCallback((targetId) => {
-    const pc = new RTCPeerConnection(ICE_SERVERS);
-
-    localStreamRef.current?.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current));
-
-    pc.ontrack = (e) => addStream(targetId, e.streams[0], targetId);
-
-    pc.onicecandidate = (e) => {
-      if (e.candidate) {
-        socketRef.current?.emit("ice-candidate", { to: targetId, candidate: e.candidate });
-      }
-    };
-
-    peersRef.current[targetId] = pc;
-    return pc;
-  }, [roomToken, addStream]);
-
-  useEffect(() => {
-    const socket = io("/", { path: "/socket.io" });
-    socketRef.current = socket;
-
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
-      localStreamRef.current = stream;
-      addStream("local", stream, "אני");
-      socket.emit("join-room", { roomToken, userId, role });
-      setConnected(true);
-    });
-
-    socket.on("user-joined", async ({ socketId: remoteId }) => {
-      const pc = createPeer(remoteId);
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      socket.emit("offer", { to: remoteId, offer });
-    });
-
-    socket.on("offer", async ({ offer, from }) => {
-      const pc = createPeer(from);
-      await pc.setRemoteDescription(offer);
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      socket.emit("answer", { to: from, answer });
-    });
-
-    socket.on("answer", async ({ answer, from }) => {
-      await peersRef.current[from]?.setRemoteDescription(answer);
-    });
-
-    socket.on("ice-candidate", async ({ candidate, from }) => {
-      await peersRef.current[from]?.addIceCandidate(candidate);
-    });
-
-    socket.on("user-left", ({ socketId: leftId }) => removeStream(leftId));
-    socket.on("session-ended", () => onEnd?.());
-
-    socket.on("join-error", ({ message }) => setRoomError(message || "לא ניתן להצטרף למפגש"));
-    socket.on("session-error", ({ message }) => setRoomError(message || "הפעולה נכשלה"));
-
-    return () => {
-      localStreamRef.current?.getTracks().forEach((t) => t.stop());
-      Object.values(peersRef.current).forEach((pc) => pc.close());
-      socket.disconnect();
-    };
-  }, [roomToken, userId, role, createPeer, addStream, removeStream, onEnd]);
-
-  const handleEnd = () => {
-    socketRef.current?.emit("end-session", { roomToken });
-    onEnd?.();
-  };
+  const canEndSession = role === "lecturer" || role === "admin";
+  // Always counts the local participant, who has no tile when their camera was
+  // refused — the old count read "0 משתתפים" to someone who was plainly in the room.
+  const participantCount = streams.filter((s) => s.id !== "local").length + 1;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: "grey.950" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 1, bgcolor: "grey.900" }}>
         <Typography variant="body2" color="grey.400">חדר: {roomToken}</Typography>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          {connected && <Typography variant="body2" color="success.main">{streams.length} משתתפים</Typography>}
-          {role === "lecturer" || role === "admin" ? (
-            <Button size="small" variant="contained" color="error" onClick={handleEnd}>סיום מפגש</Button>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          {connected && <Typography variant="body2" color="success.main">{participantCount} משתתפים</Typography>}
+          {canEndSession ? (
+            <Button size="small" variant="contained" color="error" onClick={endSession}>סיום מפגש</Button>
           ) : (
-            <Button size="small" variant="outlined" color="warning" onClick={onEnd}>עזיבה</Button>
+            <Button size="small" variant="outlined" color="warning" onClick={leave}>עזיבה</Button>
           )}
         </Box>
       </Box>
+
       {roomError && (
         <Box sx={{ p: 2, textAlign: "center" }}>
           <Typography color="error.main" fontWeight={600}>{roomError}</Typography>
-          <Button size="small" variant="outlined" onClick={onEnd} sx={{ mt: 1 }}>
+          <Button size="small" variant="outlined" onClick={leave} sx={{ mt: 1 }}>
             חזרה למפגשים
           </Button>
         </Box>
       )}
+
+      {mediaError && (
+        <Alert severity="warning" sx={{ m: 1 }}>{mediaError}</Alert>
+      )}
+
       <Box sx={{ flex: 1, p: 1 }}>
         <ParticipantGrid streams={streams} />
       </Box>

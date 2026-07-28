@@ -59,6 +59,10 @@ const ERROR_MESSAGES = {
 // text, so the map can drift without ever breaking — it only ever adds detail.
 const SERVER_MESSAGE_HE = {
   "Email already in use": "האימייל כבר בשימוש",
+  // A 401 mid-session: the toast would otherwise blame whatever request
+  // happened to be in flight ("טעינת המדיה נכשלה") instead of the real cause.
+  "Unauthorized": "פג תוקף החיבור, יש להתחבר מחדש",
+  "Invalid token": "פג תוקף החיבור, יש להתחבר מחדש",
   "Cannot remove the last active admin — promote another admin first":
     "לא ניתן להסיר את המנהל הפעיל האחרון — יש למנות מנהל אחר קודם",
   "Forbidden": "אין לך הרשאה לפעולה זו",

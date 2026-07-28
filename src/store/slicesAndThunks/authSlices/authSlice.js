@@ -24,6 +24,21 @@ const authSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+    // The cookie expired or was rejected mid-session. Deliberately a plain
+    // reducer and not the logout thunk: that thunk POSTs to /auth/logout, which
+    // would itself answer 401 and trigger this again.
+    //
+    // activeFetchMeRequestId is cleared for the same reason login/logout clear
+    // it — otherwise a fetchMe that was already in flight could land afterwards
+    // and put the user back.
+    sessionExpired(state) {
+      state.user = null;
+      state.status = statuses.idle;
+      state.loginStatus = statuses.idle;
+      state.error = null;
+      state.initialized = true;
+      state.activeFetchMeRequestId = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -101,5 +116,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { authInitialized, clearError } = authSlice.actions;
+export const { authInitialized, clearError, sessionExpired } = authSlice.actions;
 export default authSlice.reducer;

@@ -9,6 +9,8 @@ import usersReducer from "./slicesAndThunks/usersSlice/usersSlice";
 import uiReducer from "./slicesAndThunks/uiSlice";
 import notificationReducer from "./slicesAndThunks/notificationSlice";
 import { notificationMiddleware } from "./middleware/notificationMiddleware";
+import { setUnauthorizedHandler } from "../utilities/axiosInstance";
+import { sessionExpired } from "./slicesAndThunks/authSlices/authSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,3 +28,8 @@ export const store = configureStore({
   // turns mutation outcomes into toasts.
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(notificationMiddleware),
 });
+
+// Wire the API layer's 401 handling here, where the store already exists. This
+// direction is the whole point: axiosInstance must not import the store, or the
+// existing store -> slices -> axiosInstance chain becomes a cycle.
+setUnauthorizedHandler(() => store.dispatch(sessionExpired()));

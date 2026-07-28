@@ -4,6 +4,11 @@ const uiSlice = createSlice({
   name: "ui",
   initialState: {
     isUploadOpen: false,
+    // 0-100 while an upload is in flight. Lives here rather than in mediaSlice
+    // because the upload thunk has to dispatch it: mediaSlice already imports
+    // that thunk, so putting the action there would create an import cycle and
+    // leave the thunk undefined when createSlice builds its reducers.
+    uploadProgress: 0,
     isEditMediaOpen: false,
     isDeleteOpen: false,
     itemToDelete: null,
@@ -14,8 +19,9 @@ const uiSlice = createSlice({
     activeSessionRoom: null,
   },
   reducers: {
-    openUpload(state) { state.isUploadOpen = true; },
-    closeUpload(state) { state.isUploadOpen = false; },
+    openUpload(state) { state.isUploadOpen = true; state.uploadProgress = 0; },
+    closeUpload(state) { state.isUploadOpen = false; state.uploadProgress = 0; },
+    setUploadProgress(state, action) { state.uploadProgress = action.payload; },
 
     openEditMedia(state) { state.isEditMediaOpen = true; },
     closeEditMedia(state) { state.isEditMediaOpen = false; },
@@ -52,7 +58,7 @@ const uiSlice = createSlice({
 });
 
 export const {
-  openUpload, closeUpload,
+  openUpload, closeUpload, setUploadProgress,
   openEditMedia, closeEditMedia,
   openDeleteDialog, closeDeleteDialog,
   openTranscriptEditor, closeTranscriptEditor,

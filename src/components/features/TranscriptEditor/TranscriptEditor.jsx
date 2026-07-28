@@ -47,7 +47,6 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
   const hasContent = (transcript?.chunks?.length ?? 0) > 0 || !!transcript?.edited_text;
 
   const handleSave = async () => {
-    console.log(`[FE:editor] handleSave click mediaId=${mediaId} textLen=${editedText.length}`);
     setSaving(true);
     setSaveFeedback(null);
     const result = await dispatch(updateTranscript({ mediaId, editedText }));
@@ -62,7 +61,6 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
   };
 
   const handleTrigger = async () => {
-    console.log(`[FE:editor] handleTrigger (Run Pipeline) click mediaId=${mediaId}`);
     setTriggering(true);
     const result = await dispatch(triggerTranscriptPipeline(mediaId));
     setTriggering(false);
@@ -70,13 +68,11 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
     // away, which is what flips the polling loop on. Without this we'd have
     // to wait for a manual refresh or a stale transcript with no status.
     if (result.meta.requestStatus === "fulfilled") {
-      console.log(`[FE:editor] trigger ok → immediate fetchTranscript to start polling`);
       dispatch(fetchTranscript(mediaId));
     }
   };
 
   const handleFixHebrew = async () => {
-    console.log(`[FE:editor] handleFixHebrew click mediaId=${mediaId}`);
     setFixing(true);
     const result = await dispatch(fixHebrewTranscript(mediaId));
     if (result.meta.requestStatus === "fulfilled" && result.payload?.edited_text != null) {

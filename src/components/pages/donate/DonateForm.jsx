@@ -24,12 +24,15 @@ const DonateForm = () => {
     setLoading(true);
     setMessage(null);
     try {
-      const { data } = await axiosInstance.post("/donations/create-intent", {
+      // The returned clientSecret is a payment credential — it is meant to be
+      // handed to Stripe.js, never rendered. Confirming the charge still needs
+      // a Stripe Elements form; until that exists this only records the intent.
+      await axiosInstance.post("/donations/create-intent", {
         amountCents: finalAmount * 100,
         currency: "ILS",
         type,
       });
-      setMessage({ type: "success", text: `כוונת תשלום נוצרה (client_secret: ${data.clientSecret?.slice(0, 20)}...)` });
+      setMessage({ type: "success", text: "כוונת התשלום נוצרה בהצלחה." });
     } catch (err) {
       setMessage({ type: "error", text: err.response?.data?.message || "התשלום נכשל" });
     }

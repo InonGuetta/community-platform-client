@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
 import Chip from "@mui/material/Chip";
-import Grid from "@mui/material/Grid";
 
 const QueueRow = ({ name, stats }) => (
   <Box sx={{ mb: 2 }}>

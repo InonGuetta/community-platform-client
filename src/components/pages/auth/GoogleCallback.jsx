@@ -21,6 +21,10 @@ const GoogleCallback = () => {
       if (result.meta.requestStatus === "fulfilled") navigate("/archive");
       else navigate("/sign-in?error=google_failed");
     });
+    // Runs exactly once, on arrival back from Google. Adding the dependencies
+    // the rule asks for would let a second fetchMe fire — and this component
+    // navigates away as its whole purpose, so re-running it is never wanted.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

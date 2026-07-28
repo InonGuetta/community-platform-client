@@ -136,6 +136,12 @@ const useMediaViewPageController = () => {
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
+    // Depends on transcript?.status, deliberately NOT on transcript. Every poll
+    // returns a new object, so depending on the whole thing would tear this
+    // effect down and rebuild it on every response — resetting the backoff and
+    // the ceiling clock each time, and defeating the point of both. Only a
+    // change of status should restart it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id, transcript?.status, pollAttemptEpoch]);
 
   const handleSaveProgress = async (positionSeconds) => {

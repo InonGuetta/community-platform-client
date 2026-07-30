@@ -3,6 +3,20 @@ import { fetchTranscript, searchTranscripts } from "./transcriptGet";
 import { updateTranscript, fixHebrewTranscript, generateKeyPointHeadings } from "./transcriptPut";
 import { statuses } from "../../../utilities/constant";
 
+// Every one of these endpoints returns the transcript row via RETURNING *,
+// which does NOT include the chunks — those are fetched separately and are what
+// the chapter list and the editor's fallback text are built from. So the
+// response has to be merged over what is already stored, never assigned over
+// it. Two of the three reducers did this and the third did not, which is
+// exactly the drift this helper exists to prevent.
+//
+// Merging is safe for deliberate clears: a key present in the payload wins even
+// when its value is null. Only keys the response omits survive.
+const mergeTranscript = (state, payload) => {
+  const previous = state.byMediaId[payload.media_id] || {};
+  state.byMediaId[payload.media_id] = { ...previous, ...payload };
+};
+
 const transcriptSlice = createSlice({
   name: "transcript",
   initialState: { byMediaId: {}, searchResults: [], status: statuses.idle, error: null },
@@ -13,7 +27,6 @@ const transcriptSlice = createSlice({
     builder
       .addCase(fetchTranscript.pending, (state) => { state.status = statuses.loading; })
       .addCase(fetchTranscript.fulfilled, (state, action) => {
-        console.log(`[FE:slice] fetchTranscript.fulfilled → store mediaId=${action.payload.media_id} status=${action.payload.status}`);
         state.status = statuses.succeeded;
         state.byMediaId[action.payload.media_id] = action.payload;
       })
@@ -21,31 +34,22 @@ const transcriptSlice = createSlice({
 
       .addCase(searchTranscripts.fulfilled, (state, action) => { state.searchResults = action.payload; })
 
+      // Was an assignment, which dropped the chunks on every save.
       .addCase(updateTranscript.fulfilled, (state, action) => {
-        console.log(`[FE:slice] updateTranscript.fulfilled → store mediaId=${action.payload.media_id}`);
-        state.byMediaId[action.payload.media_id] = action.payload;
+        mergeTranscript(state, action.payload);
       })
       .addCase(updateTranscript.rejected, (state, action) => {
-        console.log(`[FE:slice] updateTranscript.rejected → ${action.payload}`);
         state.error = action.payload;
       })
 
       .addCase(fixHebrewTranscript.fulfilled, (state, action) => {
-        console.log(`[FE:slice] fixHebrewTranscript.fulfilled → store mediaId=${action.payload.media_id}`);
-        const prev = state.byMediaId[action.payload.media_id] || {};
-        // Keep existing chunks (for navigation); only the edited_text changed.
-        state.byMediaId[action.payload.media_id] = { ...prev, ...action.payload };
+        mergeTranscript(state, action.payload);
       })
 
       .addCase(generateKeyPointHeadings.fulfilled, (state, action) => {
-        console.log(`[FE:slice] generateKeyPointHeadings.fulfilled → store mediaId=${action.payload.media_id}`);
-        const prev = state.byMediaId[action.payload.media_id] || {};
-        // RETURNING * gives the transcript row without chunks; merge so the
-        // existing chunks (used for navigation) survive.
-        state.byMediaId[action.payload.media_id] = { ...prev, ...action.payload };
+        mergeTranscript(state, action.payload);
       })
       .addCase(generateKeyPointHeadings.rejected, (state, action) => {
-        console.log(`[FE:slice] generateKeyPointHeadings.rejected → ${action.payload}`);
         state.error = action.payload;
       });
   },

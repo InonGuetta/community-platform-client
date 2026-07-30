@@ -4,7 +4,10 @@ export const floatingLabelSx = {
     color: "#3a3a3a",
     fontWeight: 700,
     transform: "translate(0, 0.35rem) scale(1)",
-    transformOrigin: "top left",
+    // RTL: the field's inline-start is the right edge, so the label must shrink
+    // toward the top-right (not the LTR default top-left) to stay anchored to
+    // where the Hebrew text begins.
+    transformOrigin: "top right",
     transition: "transform 220ms ease, color 220ms ease",
     fontSize: "1rem",
   },

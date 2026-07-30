@@ -12,16 +12,16 @@ const HealthRow = ({ label, ok }) => (
     <ListItemIcon sx={{ minWidth: 36 }}>
       {ok ? <CheckCircleIcon color="success" /> : <ErrorIcon color="error" />}
     </ListItemIcon>
-    <ListItemText primary={label} secondary={ok ? "Healthy" : "Unavailable"} />
+    <ListItemText primary={label} secondary={ok ? "תקין" : "לא זמין"} />
   </ListItem>
 );
 
 const SystemHealth = ({ health }) => (
   <Box>
-    <Typography variant="h6" fontWeight={700} mb={1}>System Health</Typography>
+    <Typography variant="h6" fontWeight={700} mb={1}>תקינות המערכת</Typography>
     <List dense>
-      <HealthRow label="Database (PostgreSQL)" ok={health?.db} />
-      <HealthRow label="Cache (Redis)" ok={health?.redis} />
+      <HealthRow label="מסד נתונים (PostgreSQL)" ok={health?.db} />
+      <HealthRow label="מטמון (Redis)" ok={health?.redis} />
     </List>
   </Box>
 );

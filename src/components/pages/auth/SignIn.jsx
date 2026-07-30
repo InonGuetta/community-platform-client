@@ -37,12 +37,12 @@ const SignIn = () => {
   const isSubmitting = loginStatus === statuses.loading;
 
   return (
-    <AuthLayout title="Sign In">
+    <AuthLayout title="התחברות">
       {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
         <TextField
-          label="Email"
+          label="אימייל"
           name="email"
           type="email"
           variant="standard"
@@ -56,7 +56,7 @@ const SignIn = () => {
         />
 
         <TextField
-          label="Password"
+          label="סיסמה"
           name="password"
           type={showPassword ? "text" : "password"}
           variant="standard"
@@ -70,7 +70,7 @@ const SignIn = () => {
             ...inputBaseSx,
             endAdornment: form.password ? (
               <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ p: 0.5 }}>
+                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"} sx={{ p: 0.5 }}>
                   {showPassword ? <EyeIcon /> : <EyeCrossedIcon />}
                 </IconButton>
               </InputAdornment>
@@ -79,13 +79,13 @@ const SignIn = () => {
         />
 
         <Button type="submit" variant="contained" fullWidth disabled={isSubmitting} sx={submitButtonSx}>
-          {isSubmitting ? "..." : "SIGN IN"}
+          {isSubmitting ? "..." : "התחברות"}
         </Button>
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", my: 3 }}>
         <Divider sx={dividerSx} />
-        <Typography sx={{ mx: 2, color: "#9e9e9e", fontSize: "0.8rem" }}>Or</Typography>
+        <Typography sx={{ mx: 2, color: "#6e6e6e", fontSize: "0.8rem" }}>או</Typography>
         <Divider sx={dividerSx} />
       </Box>
 
@@ -93,12 +93,12 @@ const SignIn = () => {
         onClick={() => { window.location.href = "/api/auth/google"; }}
         sx={googleButtonSx}
       >
-        Sign in with Google
+        התחברות עם Google
       </Button>
 
       <Typography textAlign="center" mt={4} variant="body2" color="#757575">
-        Don't have an account?{" "}
-        <Link to="/sign-up" style={{ color: "#424242", fontWeight: 500, textDecoration: "none" }}>Sign Up</Link>
+        אין לך חשבון?{" "}
+        <Link to="/sign-up" style={{ color: "#424242", fontWeight: 500, textDecoration: "none" }}>הרשמה</Link>
       </Typography>
     </AuthLayout>
   );

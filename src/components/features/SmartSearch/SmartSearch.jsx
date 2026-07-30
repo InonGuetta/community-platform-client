@@ -74,7 +74,7 @@ const SmartSearch = ({ onOpenResult }) => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="smart deep search"
+        placeholder="חיפוש עומק חכם"
         fullWidth
         InputProps={{
           startAdornment: (
@@ -84,7 +84,7 @@ const SmartSearch = ({ onOpenResult }) => {
           ),
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton onClick={runSearch} edge="end" aria-label="search" disabled={loading}>
+              <IconButton onClick={runSearch} edge="end" aria-label="חיפוש" disabled={loading}>
                 {loading ? <CircularProgress size={20} /> : <SearchIcon />}
               </IconButton>
             </InputAdornment>

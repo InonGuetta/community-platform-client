@@ -37,12 +37,12 @@ const SignUp = () => {
   const isSubmitting = loginStatus === statuses.loading;
 
   return (
-    <AuthLayout title="Sign Up">
+    <AuthLayout title="הרשמה">
       {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
         <TextField
-          label="Display Name"
+          label="שם תצוגה"
           name="displayName"
           variant="standard"
           value={form.displayName}
@@ -55,7 +55,7 @@ const SignUp = () => {
         />
 
         <TextField
-          label="Email"
+          label="אימייל"
           name="email"
           type="email"
           variant="standard"
@@ -69,7 +69,7 @@ const SignUp = () => {
         />
 
         <TextField
-          label="Password"
+          label="סיסמה"
           name="password"
           type={showPassword ? "text" : "password"}
           variant="standard"
@@ -83,7 +83,7 @@ const SignUp = () => {
             ...inputBaseSx,
             endAdornment: form.password ? (
               <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ p: 0.5 }}>
+                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"} sx={{ p: 0.5 }}>
                   {showPassword ? <EyeIcon /> : <EyeCrossedIcon />}
                 </IconButton>
               </InputAdornment>
@@ -92,13 +92,13 @@ const SignUp = () => {
         />
 
         <Button type="submit" variant="contained" fullWidth disabled={isSubmitting} sx={submitButtonSx}>
-          {isSubmitting ? "..." : "SIGN UP"}
+          {isSubmitting ? "..." : "הרשמה"}
         </Button>
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", my: 3 }}>
         <Divider sx={dividerSx} />
-        <Typography sx={{ mx: 2, color: "#9e9e9e", fontSize: "0.8rem" }}>Or</Typography>
+        <Typography sx={{ mx: 2, color: "#6e6e6e", fontSize: "0.8rem" }}>או</Typography>
         <Divider sx={dividerSx} />
       </Box>
 
@@ -106,12 +106,12 @@ const SignUp = () => {
         onClick={() => { window.location.href = "/api/auth/google"; }}
         sx={googleButtonSx}
       >
-        Sign up with Google
+        הרשמה עם Google
       </Button>
 
       <Typography textAlign="center" mt={4} variant="body2" color="#757575">
-        Already have an account?{" "}
-        <Link to="/sign-in" style={{ color: "#424242", fontWeight: 500, textDecoration: "none" }}>Sign In</Link>
+        כבר יש לך חשבון?{" "}
+        <Link to="/sign-in" style={{ color: "#424242", fontWeight: 500, textDecoration: "none" }}>התחברות</Link>
       </Typography>
     </AuthLayout>
   );

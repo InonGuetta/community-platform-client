@@ -2,8 +2,17 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
+import { ThemeProvider } from "@mui/material/styles";
+import { buildTheme } from "../../../theme/theme";
+
+// Auth is a branded, always-light landing built on hardcoded light styling.
+// Forcing the light theme here keeps it consistent even when the user has dark
+// mode enabled elsewhere (e.g. MUI's own Alert/inputs won't render dark on the
+// light glass card). Built once at module scope so it's a stable reference.
+const lightTheme = buildTheme("light");
 
 const AuthLayout = ({ title, children }) => (
+  <ThemeProvider theme={lightTheme}>
   <Box sx={{
     minHeight: "100vh",
     display: "flex",
@@ -37,7 +46,7 @@ const AuthLayout = ({ title, children }) => (
       bottom: "-12.5%",
       backgroundImage: 'url("/images/entry_image.png")',
       backgroundSize: "cover",
-      backgroundPosition: "center",
+      backgroundPosition: "left center",
       backgroundRepeat: "no-repeat",
       transform: "scale(0.8)",
       transformOrigin: "center center",
@@ -81,10 +90,11 @@ const AuthLayout = ({ title, children }) => (
       </CardContent>
     </Card>
 
-    <Typography variant="caption" sx={{ mt: 3, color: "#a0a0a0", zIndex: 2 }}>
-      Required fields are implicit
+    <Typography variant="caption" sx={{ mt: 3, color: "#6e6e6e", zIndex: 2 }}>
+      כל השדות הם שדות חובה
     </Typography>
   </Box>
+  </ThemeProvider>
 );
 
 export default AuthLayout;

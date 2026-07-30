@@ -5,12 +5,16 @@ import { createUser } from "../../../store/slicesAndThunks/usersSlice/usersSlice
 import { updateUser } from "../../../store/slicesAndThunks/usersSlice/usersSlicePut";
 import { deleteUser } from "../../../store/slicesAndThunks/usersSlice/usersSliceDelete";
 import { selectAllUsers, selectUsersStatus } from "../../../store/selectors/usersSelectors";
+import { selectUser } from "../../../store/selectors/authSelectors";
 import { openDeleteDialog, closeDeleteDialog } from "../../../store/slicesAndThunks/uiSlice";
+import { roles } from "../../../utilities/constant";
 
 const useUsersPageController = () => {
   const dispatch = useDispatch();
   const users = useSelector(selectAllUsers);
   const status = useSelector(selectUsersStatus);
+  const currentUser = useSelector(selectUser);
+  const isAdmin = currentUser?.role === roles.admin;
   const { isDeleteOpen, itemToDelete } = useSelector((state) => state.ui);
 
   const [search, setSearch] = useState("");
@@ -36,6 +40,11 @@ const useUsersPageController = () => {
     setEditUser(null);
   };
 
+  // Admin-only: flip a user's active status in place. updateUser returns the
+  // row with the new is_active, so the table row updates (chip + opacity) live.
+  const handleToggleActive = (user) =>
+    dispatch(updateUser({ id: user.id, isActive: !user.is_active }));
+
   const handleDeleteClick = (user) => dispatch(openDeleteDialog({ item: user, type: "user" }));
 
   const handleDeleteConfirm = async () => {
@@ -45,10 +54,11 @@ const useUsersPageController = () => {
 
   return {
     filteredUsers, status, search, setSearch,
+    isAdmin, currentUserId: currentUser?.id,
     isCreateOpen, setIsCreateOpen,
     editUser, setEditUser,
     isDeleteOpen, itemToDelete,
-    handleCreateUser, handleUpdateUser,
+    handleCreateUser, handleUpdateUser, handleToggleActive,
     handleDeleteClick, handleDeleteConfirm,
     closeDeleteDialog: () => dispatch(closeDeleteDialog()),
   };

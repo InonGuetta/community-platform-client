@@ -10,19 +10,20 @@ import Alert from "@mui/material/Alert";
 import { updateTranscript, triggerTranscriptPipeline, fixHebrewTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptPut";
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
 
-const STATUS_COLOR = { pending: "default", processing: "warning", done: "success", error: "error" };
+const STATUS_COLOR = { pending: "default", processing: "warning", analyzing: "info", done: "success", error: "error" };
 const STATUS_LABEL_HE = {
   pending: "בהמתנה",
   processing: "מתמלל",
+  analyzing: "מסכם",
   done: "מוכן",
   error: "שגיאה",
 };
-const IN_FLIGHT = new Set(["pending", "processing"]);
+const IN_FLIGHT = new Set(["pending", "processing", "analyzing"]);
 
 const chunksToText = (chunks = []) =>
   chunks.map((c) => c.content).join("\n\n");
 
-const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
+const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled = false, onRetryPolling }) => {
   const dispatch = useDispatch();
   const initialText =
     transcript?.edited_text ||
@@ -47,7 +48,6 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
   const hasContent = (transcript?.chunks?.length ?? 0) > 0 || !!transcript?.edited_text;
 
   const handleSave = async () => {
-    console.log(`[FE:editor] handleSave click mediaId=${mediaId} textLen=${editedText.length}`);
     setSaving(true);
     setSaveFeedback(null);
     const result = await dispatch(updateTranscript({ mediaId, editedText }));
@@ -62,7 +62,6 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
   };
 
   const handleTrigger = async () => {
-    console.log(`[FE:editor] handleTrigger (Run Pipeline) click mediaId=${mediaId}`);
     setTriggering(true);
     const result = await dispatch(triggerTranscriptPipeline(mediaId));
     setTriggering(false);
@@ -70,13 +69,11 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
     // away, which is what flips the polling loop on. Without this we'd have
     // to wait for a manual refresh or a stale transcript with no status.
     if (result.meta.requestStatus === "fulfilled") {
-      console.log(`[FE:editor] trigger ok → immediate fetchTranscript to start polling`);
       dispatch(fetchTranscript(mediaId));
     }
   };
 
   const handleFixHebrew = async () => {
-    console.log(`[FE:editor] handleFixHebrew click mediaId=${mediaId}`);
     setFixing(true);
     const result = await dispatch(fixHebrewTranscript(mediaId));
     if (result.meta.requestStatus === "fulfilled" && result.payload?.edited_text != null) {
@@ -125,7 +122,37 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
         </Box>
       </Box>
 
-      {isProcessing && !hasContent && (
+      {/* The page stopped polling while the row still says it is processing —
+          which usually means the worker died mid-job and nothing will ever
+          update that row. Say so and offer to look again, rather than leaving a
+          spinner that would never resolve. */}
+      {isProcessing && pollingStalled && (
+        <Alert
+          severity="warning"
+          action={
+            onRetryPolling && (
+              <Button color="inherit" size="small" onClick={onRetryPolling}>
+                בדוק שוב
+              </Button>
+            )
+          }
+        >
+          הפסקנו לבדוק אחרי המתנה ארוכה. ייתכן שהתמלול נתקע.
+        </Alert>
+      )}
+
+      {/* The transcript is readable at this point — only the AI summary is
+          still being produced — so say that rather than showing nothing. */}
+      {status === "analyzing" && !pollingStalled && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.5, color: "text.secondary" }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">
+            התמלול מוכן. מפיק סיכום ונקודות מפתח...
+          </Typography>
+        </Box>
+      )}
+
+      {isProcessing && !pollingStalled && !hasContent && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.5, color: "text.secondary" }}>
           <CircularProgress size={18} />
           <Typography variant="body2">

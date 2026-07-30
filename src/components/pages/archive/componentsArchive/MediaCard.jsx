@@ -7,10 +7,9 @@ import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { roles } from "../../../../utilities/constant";
+import { roles, mediaTypeLabels, mediaTypeAccents } from "../../../../utilities/constant";
 
 const TYPE_COLOR = { video: "warning", audio: "info", text: "success" };
-const TYPE_ACCENT = { video: "#ef6c00", audio: "#1976d2", text: "#2e7d32" };
 const TYPE_IMAGE = { video: "/images/video_image.png", audio: "/images/audio_image.png", text: "/images/book_image.png" };
 const TYPE_IMAGE_SCALE = { video: 0.65, audio: 0.55, text: 0.50 };
 
@@ -44,7 +43,7 @@ const CornerBracket = ({ accent, placement }) => {
 
 const MediaCard = ({ item, onView, user, onDelete }) => {
   const isVideo = item.media_type === "video";
-  const accent = TYPE_ACCENT[item.media_type];
+  const accent = mediaTypeAccents[item.media_type];
   const videoRef = useRef(null);
   const [previewing, setPreviewing] = useState(false);
 
@@ -87,7 +86,7 @@ const MediaCard = ({ item, onView, user, onDelete }) => {
     }}
   >
     {/* Image / icon area */}
-    <Box sx={{ position: "relative", bgcolor: "#ffffff", height: 180, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", borderTopLeftRadius: "20px", borderTopRightRadius: 0 }}>
+    <Box sx={(theme) => ({ position: "relative", bgcolor: theme.palette.mode === "dark" ? "#161d22" : "#ffffff", height: 180, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", borderTopLeftRadius: "20px", borderTopRightRadius: 0 })}>
       {item.thumbnail_url ? (
         <Box component="img" src={item.thumbnail_url} alt={item.title} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : (
@@ -117,10 +116,10 @@ const MediaCard = ({ item, onView, user, onDelete }) => {
 
       {/* Type badge — top left */}
       <Chip
-        label={item.media_type}
+        label={mediaTypeLabels[item.media_type] || item.media_type}
         color={TYPE_COLOR[item.media_type]}
         size="small"
-        sx={{ position: "absolute", top: 8, left: 8, fontWeight: 600, textTransform: "capitalize" }}
+        sx={{ position: "absolute", top: 8, left: 8, fontWeight: 600 }}
         onClick={(e) => e.stopPropagation()}
       />
 
@@ -130,7 +129,7 @@ const MediaCard = ({ item, onView, user, onDelete }) => {
           component="a"
           href={`/api/media/${item.id}/download`}
           download
-          aria-label="Download"
+          aria-label="הורדה"
           size="small"
           sx={{ bgcolor: "rgba(255,255,255,0.85)", "&:hover": { bgcolor: "white" }, p: 0.5 }}
         >
@@ -140,6 +139,7 @@ const MediaCard = ({ item, onView, user, onDelete }) => {
           <IconButton
             size="small"
             color="error"
+            aria-label="מחיקה"
             onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
             sx={{ bgcolor: "rgba(255,255,255,0.85)", "&:hover": { bgcolor: "white" }, p: 0.5 }}
           >

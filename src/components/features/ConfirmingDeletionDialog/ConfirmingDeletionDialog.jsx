@@ -5,17 +5,26 @@ import DialogTitle from "../Dialogs/DialogTitle";
 import DialogContent from "../Dialogs/DialogContent";
 import DialogActions from "../Dialogs/DialogActions";
 
-const ConfirmingDeletionDialog = ({ open, onClose, onConfirm, itemName, type = "item" }) => (
+// Display-only Hebrew label for the `type` prop; callers still pass the raw
+// "media"/"user"/"item" values, so no calling code changes.
+const TYPE_LABEL = { media: "את פריט המדיה", user: "את המשתמש", item: "את הפריט" };
+
+// `message` overrides the default sentence for callers that need their own
+// wording; everything else about the dialog stays identical, so the confirm
+// step looks the same wherever it appears.
+const ConfirmingDeletionDialog = ({ open, onClose, onConfirm, itemName, type = "item", message }) => (
   <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle onClose={onClose}>Confirm Deletion</DialogTitle>
+    <DialogTitle onClose={onClose}>אישור מחיקה</DialogTitle>
     <DialogContent>
       <Typography>
-        Are you sure you want to delete {type} <strong>{itemName}</strong>? This action cannot be undone.
+        {message || (
+          <>האם למחוק {TYPE_LABEL[type] || "את הפריט"} <strong>{itemName}</strong>? לא ניתן לבטל פעולה זו.</>
+        )}
       </Typography>
     </DialogContent>
     <DialogActions>
-      <Button onClick={onClose} variant="outlined">Cancel</Button>
-      <Button onClick={onConfirm} variant="contained" color="error">Delete</Button>
+      <Button onClick={onClose} variant="outlined">ביטול</Button>
+      <Button onClick={onConfirm} variant="contained" color="error">מחיקה</Button>
     </DialogActions>
   </Dialog>
 );

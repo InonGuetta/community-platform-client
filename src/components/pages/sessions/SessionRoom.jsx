@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
@@ -9,13 +10,16 @@ const SessionRoom = () => {
   const navigate = useNavigate();
   const user = useSelector(selectUser);
 
-  const handleEnd = () => navigate("/sessions");
+  // useVideoRoom holds this in a ref so it no longer drives the room's
+  // lifecycle, but keeping it stable is correct regardless.
+  const handleEnd = useCallback(() => navigate("/sessions"), [navigate]);
 
   return (
     <Box sx={{ height: "calc(100vh - 64px)", display: "flex", flexDirection: "column" }}>
+      {/* userId is no longer passed: the server takes the identity from the
+          signed token rather than from anything the client claims. */}
       <VideoRoom
         roomToken={roomToken}
-        userId={user?.id}
         role={user?.role}
         onEnd={handleEnd}
       />

@@ -7,10 +7,9 @@ import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { roles, mediaTypeLabels } from "../../../../utilities/constant";
+import { roles, mediaTypeLabels, mediaTypeAccents } from "../../../../utilities/constant";
 
 const TYPE_COLOR = { video: "warning", audio: "info", text: "success" };
-const TYPE_ACCENT = { video: "#ef6c00", audio: "#1976d2", text: "#2e7d32" };
 const TYPE_IMAGE = { video: "/images/video_image.png", audio: "/images/audio_image.png", text: "/images/book_image.png" };
 const TYPE_IMAGE_SCALE = { video: 0.65, audio: 0.55, text: 0.50 };
 
@@ -44,7 +43,7 @@ const CornerBracket = ({ accent, placement }) => {
 
 const MediaCard = ({ item, onView, user, onDelete }) => {
   const isVideo = item.media_type === "video";
-  const accent = TYPE_ACCENT[item.media_type];
+  const accent = mediaTypeAccents[item.media_type];
   const videoRef = useRef(null);
   const [previewing, setPreviewing] = useState(false);
 

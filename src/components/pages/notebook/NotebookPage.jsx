@@ -11,6 +11,7 @@ import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
 import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
@@ -18,11 +19,15 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import { fetchNotes } from "../../../store/slicesAndThunks/notesSlice/notesGet";
 import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost";
 import { updateNote } from "../../../store/slicesAndThunks/notesSlice/notesPut";
 import { deleteNote } from "../../../store/slicesAndThunks/notesSlice/notesDelete";
-import { statuses } from "../../../utilities/constant";
+import { fetchBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksGet";
+import { clearBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksSlice";
+import { statuses, mediaTypeLabels, mediaTypeAccents } from "../../../utilities/constant";
 import { formatTime } from "../../../utilities/formatTime";
 
 const formatDate = (value) =>
@@ -31,13 +36,20 @@ const formatDate = (value) =>
 const NotebookPage = () => {
   const dispatch = useDispatch();
   const { items, status } = useSelector((state) => state.notes);
+  const { items: bookmarks, status: bookmarksStatus } = useSelector((state) => state.bookmarks);
 
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
   const [draft, setDraft] = useState({ title: "", body: "" });
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchNotes());
+    // The bookmarks slice is shared with the media page, which loads only one
+    // lecture's worth. Clear first so that subset is not briefly rendered here
+    // as if it were the user's whole collection.
+    dispatch(clearBookmarks());
+    dispatch(fetchBookmarks());
   }, [dispatch]);
 
   const selected = useMemo(() => items.find((n) => n.id === selectedId) || null, [items, selectedId]);
@@ -61,6 +73,29 @@ const NotebookPage = () => {
     );
   }, [items, search]);
 
+  // Every bookmark the user has left anywhere on the platform, grouped under
+  // the lecture it belongs to. The API already returns them ordered by lecture
+  // title and then by timestamp, so a single pass preserves that order.
+  const bookmarkGroups = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const groups = [];
+    const byMedia = new Map();
+
+    for (const bm of bookmarks) {
+      const mediaTitle = bm.media_title || "שיעור";
+      if (q && !`${bm.note || ""} ${mediaTitle}`.toLowerCase().includes(q)) continue;
+
+      let group = byMedia.get(bm.media_id);
+      if (!group) {
+        group = { mediaId: bm.media_id, mediaTitle, mediaType: bm.media_type, items: [] };
+        byMedia.set(bm.media_id, group);
+        groups.push(group);
+      }
+      group.items.push(bm);
+    }
+    return groups;
+  }, [bookmarks, search]);
+
   const isDirty =
     selected && (draft.title !== (selected.title || "") || draft.body !== (selected.body || ""));
 
@@ -74,7 +109,10 @@ const NotebookPage = () => {
     dispatch(updateNote({ id: selected.id, title: draft.title, body: draft.body }));
   };
 
-  const handleDelete = () => {
+  // Deleting is irreversible and the note is the user's own writing, so it goes
+  // through a confirmation step rather than firing straight off the icon.
+  const handleDeleteConfirm = () => {
+    setConfirmDeleteOpen(false);
     if (!selected) return;
     dispatch(deleteNote(selected.id));
     setSelectedId(null);
@@ -108,6 +146,7 @@ const NotebookPage = () => {
             InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>) }}
           />
 
+          <Box sx={{ flexGrow: 1, minHeight: 100, overflowY: "auto" }}>
           {status === statuses.loading && items.length === 0 ? (
             <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}><CircularProgress size={28} /></Box>
           ) : filtered.length === 0 ? (
@@ -147,6 +186,81 @@ const NotebookPage = () => {
               })}
             </List>
           )}
+          </Box>
+
+          {/* Every bookmark the user has left across the platform, so the
+              notebook is one place for both kinds of personal marking. */}
+          <Divider />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, maxHeight: "45%", minHeight: 120 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <BookmarkIcon fontSize="small" color="primary" />
+              <Typography variant="subtitle2" fontWeight={700}>הסימניות שלי</Typography>
+              {bookmarks.length > 0 && (
+                <Chip size="small" label={bookmarks.length} sx={{ height: 18, fontSize: "0.65rem" }} />
+              )}
+            </Box>
+
+            {bookmarksStatus === statuses.loading && bookmarks.length === 0 ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}><CircularProgress size={22} /></Box>
+            ) : bookmarkGroups.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 3 }}>
+                {bookmarks.length === 0
+                  ? "עדיין אין סימניות. סמן נקודות בשיעורים והן יופיעו כאן."
+                  : "לא נמצאו סימניות תואמות."}
+              </Typography>
+            ) : (
+              <Box sx={{ overflowY: "auto" }}>
+                {bookmarkGroups.map((group) => (
+                  <Box key={group.mediaId} sx={{ mb: 1.5 }}>
+                    {/* "וידאו | כותרת השיעור", on the same accent the archive
+                        card uses for that type, so a bookmark is recognisable
+                        as video / audio / text at a glance. */}
+                    <Box
+                      sx={{
+                        display: "flex", alignItems: "center", gap: 0.75,
+                        px: 1, py: 0.5, mb: 0.5, borderRadius: 1.5,
+                        bgcolor: mediaTypeAccents[group.mediaType] || "grey.600",
+                        color: "#fff",
+                      }}
+                      title={group.mediaTitle}
+                    >
+                      <Typography variant="caption" fontWeight={800} sx={{ flexShrink: 0 }}>
+                        {mediaTypeLabels[group.mediaType] || "שיעור"}
+                      </Typography>
+                      <Box sx={{ width: "1px", alignSelf: "stretch", bgcolor: "rgba(255,255,255,0.55)", flexShrink: 0 }} />
+                      <Typography variant="caption" fontWeight={700} noWrap sx={{ minWidth: 0 }}>
+                        {group.mediaTitle}
+                      </Typography>
+                    </Box>
+                    <List dense disablePadding>
+                      {group.items.map((bm) => (
+                        <ListItemButton
+                          key={bm.id}
+                          component={RouterLink}
+                          to={`/media/${group.mediaId}?t=${bm.timestamp_seconds}`}
+                          sx={{
+                            display: "flex", alignItems: "center", gap: 1,
+                            borderRadius: 2, mb: 0.5, bgcolor: "grey.50",
+                            "&:hover": { bgcolor: "grey.100" },
+                          }}
+                        >
+                          <PlayCircleOutlineIcon fontSize="small" sx={{ color: "primary.main", flexShrink: 0 }} />
+                          <Typography variant="body2" noWrap sx={{ flexGrow: 1, minWidth: 0 }}>
+                            {bm.note?.trim() || "(ללא כותרת)"}
+                          </Typography>
+                          <Chip
+                            size="small"
+                            label={formatTime(bm.timestamp_seconds)}
+                            sx={{ height: 18, fontSize: "0.65rem", flexShrink: 0 }}
+                          />
+                        </ListItemButton>
+                      ))}
+                    </List>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
         </Paper>
 
         {/* Editor column */}
@@ -189,7 +303,7 @@ const NotebookPage = () => {
                   {`עודכן לאחרונה: ${formatDate(selected.updated_at)}`}
                 </Typography>
                 <Box sx={{ display: "flex", gap: 1 }}>
-                  <IconButton color="error" onClick={handleDelete} aria-label="מחיקת הערה">
+                  <IconButton color="error" onClick={() => setConfirmDeleteOpen(true)} aria-label="מחיקת הערה">
                     <DeleteIcon />
                   </IconButton>
                   <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSave} disabled={!isDirty}
@@ -207,6 +321,13 @@ const NotebookPage = () => {
           )}
         </Paper>
       </Box>
+
+      <ConfirmingDeletionDialog
+        open={confirmDeleteOpen}
+        onClose={() => setConfirmDeleteOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        message={`האם אתה בטוח שאתה מעוניין למחוק את המחברת "${selected?.title?.trim() || "ללא כותרת"}"?`}
+      />
     </Box>
   );
 };

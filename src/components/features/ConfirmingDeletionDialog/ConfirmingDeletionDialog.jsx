@@ -9,12 +9,17 @@ import DialogActions from "../Dialogs/DialogActions";
 // "media"/"user"/"item" values, so no calling code changes.
 const TYPE_LABEL = { media: "את פריט המדיה", user: "את המשתמש", item: "את הפריט" };
 
-const ConfirmingDeletionDialog = ({ open, onClose, onConfirm, itemName, type = "item" }) => (
+// `message` overrides the default sentence for callers that need their own
+// wording; everything else about the dialog stays identical, so the confirm
+// step looks the same wherever it appears.
+const ConfirmingDeletionDialog = ({ open, onClose, onConfirm, itemName, type = "item", message }) => (
   <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
     <DialogTitle onClose={onClose}>אישור מחיקה</DialogTitle>
     <DialogContent>
       <Typography>
-        האם למחוק {TYPE_LABEL[type] || "את הפריט"} <strong>{itemName}</strong>? לא ניתן לבטל פעולה זו.
+        {message || (
+          <>האם למחוק {TYPE_LABEL[type] || "את הפריט"} <strong>{itemName}</strong>? לא ניתן לבטל פעולה זו.</>
+        )}
       </Typography>
     </DialogContent>
     <DialogActions>

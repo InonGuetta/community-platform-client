@@ -15,9 +15,11 @@ import MediaViewPage from "./components/pages/mediaView/MediaViewPage";
 import SessionsPage from "./components/pages/sessions/SessionsPage";
 import SessionRoom from "./components/pages/sessions/SessionRoom";
 import UsersPage from "./components/pages/users/UsersPage";
+import CoursesPage from "./components/pages/courses/CoursesPage";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import DonatePage from "./components/pages/donate/DonatePage";
 import NotebookPage from "./components/pages/notebook/NotebookPage";
+import LikesPage from "./components/pages/likes/LikesPage";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
 
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/auth/google/callback"];
@@ -91,9 +93,13 @@ const App = () => {
           <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
           <Route path="/sessions/:roomToken" element={<ProtectedRoute><SessionRoom /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute allowedRoles={["admin"]}><UsersPage /></ProtectedRoute>} />
+          {/* Lecturers manage their own courses here, so this is not admin-only —
+              the page itself hides the controls for courses they do not teach. */}
+          <Route path="/courses" element={<ProtectedRoute allowedRoles={["lecturer", "admin"]}><CoursesPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
           <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
           <Route path="/notebook" element={<ProtectedRoute><NotebookPage /></ProtectedRoute>} />
+          <Route path="/likes" element={<ProtectedRoute><LikesPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/archive" replace />} />
         </Routes>
         </PageTransition>

@@ -25,6 +25,7 @@ import { ColorModeContext } from "../../../theme/colorMode";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import { roles, roleLabels } from "../../../utilities/constant";
 
 // Every entry here must map to a real route in App.jsx. A link to a path with
@@ -37,20 +38,41 @@ import { roles, roleLabels } from "../../../utilities/constant";
 // because the drawer promotes it to its own section at the top.
 const studentLinks = [
   { label: "המחברת שלי", to: "/notebook" },
+  { label: "התוכן שאהבתי", to: "/likes" },
   { label: "ארכיון", to: "/archive" },
   { label: "מפגשים", to: "/sessions" },
   { label: "תרומה", to: "/donate" },
 ];
 
-const adminLinks = [
+// Lecturers get the courses entry — they run their own courses — but nothing
+// else: uploading is the "העלאת מדיה" button on the archive page itself, so it
+// needs no separate nav entry.
+const lecturerLinks = [
   ...studentLinks,
+  { label: "קורסים", to: "/courses" },
+];
+
+const adminLinks = [
+  ...lecturerLinks,
   { label: "משתמשים", to: "/users" },
   { label: "ניהול", to: "/admin" },
 ];
 
-// Lecturers navigate exactly like students: uploading is the "העלאת מדיה"
-// button on the archive page itself, so it needs no separate nav entry.
-const getLinksByRole = (role) => (role === roles.admin ? adminLinks : studentLinks);
+// The drawer lifts these out of the flat list into a section of their own at the
+// top. PERSONAL_PATHS is derived rather than written twice: an entry promoted
+// here must also be filtered out below, and the two drifting apart is what would
+// make a link appear in the drawer twice.
+const PERSONAL_ENTRIES = [
+  { label: "המחברת שלי", to: "/notebook", Icon: MenuBookIcon },
+  { label: "התוכן שאהבתי", to: "/likes", Icon: FavoriteIcon },
+];
+const PERSONAL_PATHS = new Set(PERSONAL_ENTRIES.map((e) => e.to));
+
+const getLinksByRole = (role) => {
+  if (role === roles.admin) return adminLinks;
+  if (role === roles.lecturer) return lecturerLinks;
+  return studentLinks;
+};
 
 const avatarInitial = (user) => user?.display_name?.[0]?.toUpperCase() || "U";
 
@@ -258,27 +280,27 @@ const Navbar = () => {
 
           <Divider />
 
-          {/* Personal notebook — prominent entry */}
+          {/* The user's own material — their notes and the lectures they liked.
+              Promoted above the divider because both are personal collections
+              rather than places to browse. */}
           <List>
-            <ListItem disablePadding>
-              {/* Navigation does NOT close the drawer — it stays open until the
-                  user explicitly closes it with the X button (or Esc). */}
-              <ListItemButton
-                component={Link}
-                to="/notebook"
-                selected={pathname === "/notebook"}
-              >
-                <MenuBookIcon fontSize="small" sx={{ color: "primary.main", ml: 1 }} />
-                <ListItemText primary="המחברת שלי" primaryTypographyProps={{ fontWeight: 800, color: "primary.main" }} />
-              </ListItemButton>
-            </ListItem>
+            {PERSONAL_ENTRIES.map(({ label, to, Icon }) => (
+              <ListItem key={to} disablePadding>
+                {/* Navigation does NOT close the drawer — it stays open until the
+                    user explicitly closes it with the X button (or Esc). */}
+                <ListItemButton component={Link} to={to} selected={pathname === to}>
+                  <Icon fontSize="small" sx={{ color: "primary.main", ml: 1 }} />
+                  <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 800, color: "primary.main" }} />
+                </ListItemButton>
+              </ListItem>
+            ))}
           </List>
 
           <Divider />
 
           {/* Navigation links */}
           <List>
-            {links.filter((link) => link.to !== "/notebook").map((link) => (
+            {links.filter((link) => !PERSONAL_PATHS.has(link.to)).map((link) => (
               <ListItem key={link.label} disablePadding>
                 <ListItemButton
                   component={Link}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
@@ -12,13 +12,24 @@ import DialogActions from "../Dialogs/DialogActions";
 import ContentFieldsUpload from "./ContentFieldsUpload";
 import { uploadMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaPost";
 import { closeUpload } from "../../../store/slicesAndThunks/uiSlice";
+import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
+import { selectActiveCourses } from "../../../store/selectors/coursesSelectors";
+
+const EMPTY_FIELDS = { title: "", description: "", mediaType: "video", courseId: "" };
 
 const UploadMedia = ({ open }) => {
   const dispatch = useDispatch();
   const progress = useSelector((state) => state.ui.uploadProgress);
+  const courses = useSelector(selectActiveCourses);
   const [file, setFile] = useState(null);
-  const [fields, setFields] = useState({ title: "", description: "", mediaType: "video" });
+  const [fields, setFields] = useState(EMPTY_FIELDS);
   const [uploading, setUploading] = useState(false);
+
+  // Only when the dialog opens: the archive page itself has no use for the
+  // course list, and fetching on mount would pay for it on every visit.
+  useEffect(() => {
+    if (open) dispatch(fetchAllCourses());
+  }, [open, dispatch]);
 
   const handleClose = () => dispatch(closeUpload());
 
@@ -52,6 +63,9 @@ const UploadMedia = ({ open }) => {
     formData.append("title", fields.title);
     formData.append("description", fields.description);
     formData.append("mediaType", fields.mediaType);
+    // Omitted entirely when no course is chosen: FormData stringifies, so an
+    // empty selection would arrive as the string "" and fail optionalId.
+    if (fields.courseId) formData.append("courseId", fields.courseId);
     const result = await dispatch(uploadMedia(formData));
     setUploading(false);
 
@@ -60,7 +74,7 @@ const UploadMedia = ({ open }) => {
     if (result.meta.requestStatus !== "fulfilled") return;
 
     setFile(null);
-    setFields({ title: "", description: "", mediaType: "video" });
+    setFields(EMPTY_FIELDS);
     handleClose();
   };
 
@@ -89,7 +103,7 @@ const UploadMedia = ({ open }) => {
               onChange={handleFileChange}
             />
           </Box>
-          <ContentFieldsUpload values={fields} onChange={handleFieldChange} />
+          <ContentFieldsUpload values={fields} onChange={handleFieldChange} courses={courses} />
 
           {uploading && (
             <Box>

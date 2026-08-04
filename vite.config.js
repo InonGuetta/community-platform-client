@@ -32,6 +32,11 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.{js,jsx}"],
     environment: "node",
+    // Mirrors LOG_LEVEL=error in the server's test/setup.js, and for the same
+    // reason: several of these tests drive failure paths on purpose (every
+    // retry, every 401), and at the dev default of "debug" the real assertion
+    // output is buried under the tracing they produce.
+    env: { VITE_LOG_LEVEL: "error" },
   },
   server: {
     port: 5173,

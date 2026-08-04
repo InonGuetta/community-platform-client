@@ -7,7 +7,7 @@ import DialogActions from "../Dialogs/DialogActions";
 
 // Display-only Hebrew label for the `type` prop; callers still pass the raw
 // "media"/"user"/"item" values, so no calling code changes.
-const TYPE_LABEL = { media: "את פריט המדיה", user: "את המשתמש", item: "את הפריט" };
+const TYPE_LABEL = { media: "את פריט המדיה", user: "את המשתמש", course: "את הקורס", item: "את הפריט" };
 
 // `message` overrides the default sentence for callers that need their own
 // wording; everything else about the dialog stays identical, so the confirm

@@ -1,10 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../../../utilities/axiosInstance";
+import { sessionsApi } from "../../../api/sessionsApi";
 
 export const fetchActiveSessions = createAsyncThunk("sessions/fetchActive", async (_, { rejectWithValue }) => {
   try {
-    const { data } = await axiosInstance.get("/sessions/active");
-    return data;
+    return await sessionsApi.listActive();
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || "Failed to fetch sessions");
   }
@@ -12,8 +11,7 @@ export const fetchActiveSessions = createAsyncThunk("sessions/fetchActive", asyn
 
 export const fetchSessionById = createAsyncThunk("sessions/fetchById", async (id, { rejectWithValue }) => {
   try {
-    const { data } = await axiosInstance.get(`/sessions/${id}`);
-    return data;
+    return await sessionsApi.getOne(id);
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || "Failed to fetch session");
   }

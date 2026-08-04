@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { createPeerMesh } from "./peerMesh";
 import { describeMediaError, mediaDevicesUnavailable } from "./mediaErrors";
+import { SOCKET_EVENTS, SOCKET_LIFECYCLE } from "../../../utilities/socketEvents";
+import { logger } from "../../../utilities/logger";
 
 const DEFAULT_ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
 
@@ -16,7 +18,7 @@ const ICE_SERVERS = (() => {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) && parsed.length ? parsed : DEFAULT_ICE_SERVERS;
   } catch {
-    console.warn("[VideoRoom] VITE_ICE_SERVERS is not valid JSON — using the default STUN server");
+    logger.warn("[VideoRoom] VITE_ICE_SERVERS is not valid JSON — using the default STUN server");
     return DEFAULT_ICE_SERVERS;
   }
 })();
@@ -54,7 +56,14 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
 
     const mesh = createPeerMesh({
       createConnection: () => new RTCPeerConnection({ iceServers: ICE_SERVERS }),
-      emit: (event, payload) => socket.emit(event, payload),
+      emit: (event, payload) => {
+        // Names and peer ids only, never the SDP or the candidate itself: they
+        // are kilobytes each, they arrive in bursts, and they describe the
+        // user's network. What matters when a room fails to connect is the
+        // ORDER of the handshake, which the names alone show.
+        logger.debug(`[socket] → ${event}`, payload?.to ?? "");
+        socket.emit(event, payload);
+      },
       onStream: (peerId, stream) => upsertStream(peerId, stream, peerId),
       onPeerLost: (peerId) => {
         dropStream(peerId);
@@ -65,18 +74,37 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
 
     // Signalling failures are reported rather than thrown: an unhandled
     // rejection here would leave the room half-built with nothing on screen.
-    const guard = (label) => (err) => console.error(`[VideoRoom] ${label} failed:`, err);
+    const guard = (label) => (err) => logger.error(`[VideoRoom] ${label} failed:`, err);
+
+    // Every inbound event is traced before its handler runs, so the console
+    // shows the handshake as a sequence. Mirrors the server's own socket
+    // tracing, which uses the same ← / → notation.
+    const on = (event, handler) =>
+      socket.on(event, (payload) => {
+        logger.debug(`[socket] ← ${event}`, payload?.from ?? payload?.socketId ?? "");
+        handler(payload);
+      });
 
     // Joining on every "connect" covers the first connection and every
     // automatic reconnect alike. It used to be emitted once, inside the camera
     // callback, so a brief network drop left the user silently outside the room
     // while their screen still looked perfectly normal.
-    socket.on("connect", () => {
+    socket.on(SOCKET_LIFECYCLE.CONNECT, () => {
+      logger.info(`[socket] connected as ${socket.id}`);
       setRoomError(null);
       setConnected(true);
-      socket.emit("join-room", { roomToken });
+      socket.emit(SOCKET_EVENTS.JOIN_ROOM, { roomToken });
     });
-    socket.on("disconnect", () => {
+
+    // A handshake refused by the server (no cookie, expired token) fires this
+    // and nothing else — without it the room simply stayed blank with no
+    // indication anywhere of why.
+    socket.on(SOCKET_LIFECYCLE.CONNECT_ERROR, (err) =>
+      logger.error(`[socket] connection refused: ${err.message}`)
+    );
+
+    socket.on(SOCKET_LIFECYCLE.DISCONNECT, (reason) => {
+      logger.info(`[socket] disconnected (${reason})`);
       setConnected(false);
       // Tear the mesh down, because rejoining cannot reuse it. Reconnecting
       // gives us a NEW socket id, so every remaining member treats us as a
@@ -89,19 +117,25 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
       setStreams((prev) => prev.filter((s) => s.id === "local"));
     });
 
-    socket.on("user-joined", ({ socketId }) => mesh.offerTo(socketId).catch(guard("offer")));
-    socket.on("offer", ({ from, offer }) => mesh.acceptOffer(from, offer).catch(guard("answer")));
-    socket.on("answer", ({ from, answer }) => mesh.acceptAnswer(from, answer).catch(guard("accept answer")));
-    socket.on("ice-candidate", ({ from, candidate }) => mesh.addCandidate(from, candidate).catch(guard("candidate")));
+    on(SOCKET_EVENTS.USER_JOINED, ({ socketId }) => mesh.offerTo(socketId).catch(guard("offer")));
+    on(SOCKET_EVENTS.OFFER, ({ from, offer }) => mesh.acceptOffer(from, offer).catch(guard("answer")));
+    on(SOCKET_EVENTS.ANSWER, ({ from, answer }) => mesh.acceptAnswer(from, answer).catch(guard("accept answer")));
+    on(SOCKET_EVENTS.ICE_CANDIDATE, ({ from, candidate }) => mesh.addCandidate(from, candidate).catch(guard("candidate")));
 
-    socket.on("user-left", ({ socketId }) => {
+    on(SOCKET_EVENTS.USER_LEFT, ({ socketId }) => {
       dropStream(socketId);
       mesh.removePeer(socketId);
     });
 
-    socket.on("session-ended", () => onEndRef.current?.());
-    socket.on("join-error", ({ message }) => setRoomError(message || "לא ניתן להצטרף למפגש"));
-    socket.on("session-error", ({ message }) => setRoomError(message || "הפעולה נכשלה"));
+    on(SOCKET_EVENTS.SESSION_ENDED, () => onEndRef.current?.());
+    on(SOCKET_EVENTS.JOIN_ERROR, ({ message }) => {
+      logger.warn(`[VideoRoom] join refused: ${message}`);
+      setRoomError(message || "לא ניתן להצטרף למפגש");
+    });
+    on(SOCKET_EVENTS.SESSION_ERROR, ({ message }) => {
+      logger.warn(`[VideoRoom] session error: ${message}`);
+      setRoomError(message || "הפעולה נכשלה");
+    });
 
     // Media first, then connect: an offer must not arrive before we know
     // whether there are local tracks to attach to the connection.
@@ -146,7 +180,8 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
   // Leaving immediately would have navigated a non-host away even though the
   // server refused their request and the session carried on without them.
   const endSession = useCallback(() => {
-    socketRef.current?.emit("end-session", { roomToken });
+    logger.debug(`[socket] → ${SOCKET_EVENTS.END_SESSION}`);
+    socketRef.current?.emit(SOCKET_EVENTS.END_SESSION, { roomToken });
   }, [roomToken]);
 
   const leave = useCallback(() => onEndRef.current?.(), []);

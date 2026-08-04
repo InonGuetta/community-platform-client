@@ -1,11 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../../../utilities/axiosInstance";
+import { bookmarksApi } from "../../../api/bookmarksApi";
 
 export const fetchBookmarks = createAsyncThunk("bookmarks/fetch", async (mediaId, { rejectWithValue }) => {
   try {
-    const params = mediaId ? { mediaId } : {};
-    const { data } = await axiosInstance.get("/bookmarks", { params });
-    return data;
+    return await bookmarksApi.list(mediaId);
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || "Failed to fetch bookmarks");
   }

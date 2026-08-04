@@ -5,16 +5,24 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { roles, mediaTypeLabels, mediaTypeAccents } from "../../../../utilities/constant";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { mediaApi } from "../../../../api/mediaApi";
+import DownloadMenu from "../../mediaView/componentsMediaView/DownloadMenu";
+import { mediaTypeLabels, mediaTypeAccents } from "../../../../utilities/constant";
+import { canManageMedia } from "../../../../utilities/permissions";
 
 const TYPE_COLOR = { video: "warning", audio: "info", text: "success" };
 const TYPE_IMAGE = { video: "/images/video_image.png", audio: "/images/audio_image.png", text: "/images/book_image.png" };
 const TYPE_IMAGE_SCALE = { video: 0.65, audio: 0.55, text: 0.50 };
 
-const canDelete = (user, item) =>
-  user?.role === roles.admin || (user?.role === roles.lecturer && item.uploader_id === user.id);
+// This card's ownership rule was the original — and, until the server caught up,
+// the only — place it lived. It now defers to the shared helper so the card and
+// the API cannot drift.
+const canDelete = canManageMedia;
 
 // L-shaped corner bracket drawn as SVG with a crisp right-angle elbow that
 // follows the card's SHARP (square) top-right & bottom-left corners.
@@ -41,11 +49,27 @@ const CornerBracket = ({ accent, placement }) => {
   );
 };
 
-const MediaCard = ({ item, onView, user, onDelete }) => {
+const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
   const isVideo = item.media_type === "video";
   const accent = mediaTypeAccents[item.media_type];
   const videoRef = useRef(null);
   const [previewing, setPreviewing] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [downloadAnchor, setDownloadAnchor] = useState(null);
+
+  const canManage = canManageMedia(user, item);
+  const isPublished = Boolean(item.is_published);
+
+  // The one control that decides whether students see this item at all. Uploads
+  // are created unpublished (is_published defaults to FALSE and createMedia
+  // never sets it), and until this existed nothing in the app could turn it on —
+  // so every item stayed a draft and the student archive was permanently empty.
+  const handleTogglePublish = async (e) => {
+    e.stopPropagation();
+    setPublishing(true);
+    await onTogglePublish(item);
+    setPublishing(false);
+  };
 
   // Hover-to-preview: play the video (muted) inside the small card on mouse
   // enter, pause + reset on leave. Only for video items.
@@ -100,7 +124,7 @@ const MediaCard = ({ item, onView, user, onDelete }) => {
         <Box
           component="video"
           ref={videoRef}
-          src={`/api/media/${item.id}/stream`}
+          src={mediaApi.streamUrl(item.id)}
           muted
           loop
           playsInline
@@ -123,18 +147,47 @@ const MediaCard = ({ item, onView, user, onDelete }) => {
         onClick={(e) => e.stopPropagation()}
       />
 
+      {/* Draft badge. Only managers ever see an unpublished item in the first
+          place, so this never appears for a student — it tells the owner why
+          their upload isn't in anyone else's archive yet. */}
+      {canManage && !isPublished && (
+        <Chip
+          label="טיוטה"
+          size="small"
+          sx={{ position: "absolute", top: 42, left: 8, fontWeight: 700, bgcolor: "rgba(0,0,0,0.65)", color: "#fff" }}
+          onClick={(e) => e.stopPropagation()}
+        />
+      )}
+
       {/* Action icons — top right */}
       <Box sx={{ position: "absolute", top: 6, right: 6, display: "flex", gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
         <IconButton
-          component="a"
-          href={`/api/media/${item.id}/download`}
-          download
+          onClick={(e) => setDownloadAnchor(e.currentTarget)}
           aria-label="הורדה"
+          aria-haspopup="menu"
           size="small"
           sx={{ bgcolor: "rgba(255,255,255,0.85)", "&:hover": { bgcolor: "white" }, p: 0.5 }}
         >
           <FileDownloadIcon fontSize="small" />
         </IconButton>
+        {canManage && (
+          <Tooltip title={isPublished ? "מוצג לתלמידים — לחץ כדי להסתיר" : "טיוטה — לחץ כדי לפרסם לתלמידים"}>
+            {/* span: a disabled IconButton fires no events, so the Tooltip needs
+                a wrapper that still does. */}
+            <span>
+              <IconButton
+                size="small"
+                color={isPublished ? "success" : "default"}
+                aria-label={isPublished ? "הסתרה מתלמידים" : "פרסום לתלמידים"}
+                onClick={handleTogglePublish}
+                disabled={publishing}
+                sx={{ bgcolor: "rgba(255,255,255,0.85)", "&:hover": { bgcolor: "white" }, p: 0.5 }}
+              >
+                {isPublished ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
         {canDelete(user, item) && (
           <IconButton
             size="small"
@@ -157,8 +210,35 @@ const MediaCard = ({ item, onView, user, onDelete }) => {
           {item.description}
         </Typography>
       )}
+      {/* Attribution. course_title is absent for the general library, which is
+          most of the archive today — so the row only appears once there is
+          something to say. */}
+      {(item.course_title || item.lecturer_name) && (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+          {item.course_title && (
+            <Chip label={item.course_title} size="small" color="primary" variant="outlined" />
+          )}
+          {item.lecturer_name && (
+            <Chip label={item.lecturer_name} size="small" variant="outlined" />
+          )}
+        </Box>
+      )}
     </CardContent>
   </Card>
+
+  {/* Rendered outside the Card because MUI puts a Menu in a portal at the end of
+      <body>: it is not inside the card's DOM, so the card's own onClick (which
+      opens the lecture) never sees these clicks. `hasTranscript` rather than a
+      transcript — the archive list carries the flag, and the text is fetched
+      only if the user actually picks the PDF. */}
+  <DownloadMenu
+    anchorEl={downloadAnchor}
+    open={Boolean(downloadAnchor)}
+    onClose={() => setDownloadAnchor(null)}
+    media={item}
+    hasTranscript={item.has_transcript}
+    direction="down"
+  />
   </Box>
   );
 };

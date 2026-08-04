@@ -19,14 +19,15 @@ import DialogActions from "../../features/Dialogs/DialogActions";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import useSessionsPageController from "./useSessionsPageController";
 import { selectUser } from "../../../store/selectors/authSelectors";
-import { roles, sessionTypes, sessionTypeLabels } from "../../../utilities/constant";
+import { sessionTypes, sessionTypeLabels } from "../../../utilities/constant";
+import { isPrivileged } from "../../../utilities/permissions";
 
 const SessionsPage = () => {
   const { rooms, createDialogOpen, setCreateDialogOpen, handleJoinRoom, handleCreateSession } = useSessionsPageController();
   const user = useSelector(selectUser);
   const [form, setForm] = useState({ title: "", sessionType: "group", maxParticipants: 10 });
 
-  const canCreate = user?.role === roles.lecturer || user?.role === roles.admin;
+  const canCreate = isPrivileged(user);
 
   return (
     <Box sx={{ p: 3 }}>

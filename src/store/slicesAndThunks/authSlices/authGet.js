@@ -1,10 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../../../utilities/axiosInstance";
+import { authApi } from "../../../api/authApi";
 
 export const fetchMe = createAsyncThunk("auth/fetchMe", async (_, { rejectWithValue }) => {
   try {
-    const { data } = await axiosInstance.get("/auth/me");
-    return data;
+    return await authApi.me();
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || "Failed to fetch user");
   }

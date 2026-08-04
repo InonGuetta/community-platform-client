@@ -6,7 +6,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import axiosInstance from "../../../utilities/axiosInstance";
+import { donationsApi } from "../../../api/donationsApi";
 
 const PRESET_AMOUNTS = [50, 100, 250, 500];
 
@@ -27,7 +27,7 @@ const DonateForm = () => {
       // The returned clientSecret is a payment credential — it is meant to be
       // handed to Stripe.js, never rendered. Confirming the charge still needs
       // a Stripe Elements form; until that exists this only records the intent.
-      await axiosInstance.post("/donations/create-intent", {
+      await donationsApi.createIntent({
         amountCents: finalAmount * 100,
         currency: "ILS",
         type,

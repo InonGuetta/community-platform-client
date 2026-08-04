@@ -65,11 +65,63 @@ test("no module in src/ imports itself in a cycle", () => {
   expect(cycles.map((c) => c.map(rel).join(" -> "))).toEqual([]);
 });
 
-test("axiosInstance stays a leaf of the import graph", () => {
+// Everything reachable from a file, not just what it imports directly. A cycle
+// back into the store is created just as effectively by a dependency two hops
+// away as by a direct import.
+const closure = (graph, entry) => {
+  const seen = new Set();
+  const walk = (node) => {
+    for (const dep of graph.get(node) ?? []) {
+      if (seen.has(dep)) continue;
+      seen.add(dep);
+      walk(dep);
+    }
+  };
+  walk(entry);
+  return [...seen];
+};
+
+test("axiosInstance never reaches the store, at any depth", () => {
   const graph = buildGraph();
-  const deps = graph.get(path.join(SRC, "utilities/axiosInstance.js")) ?? [];
-  // It must not reach back into the store; the store hands it a callback.
-  expect(deps.map(rel)).toEqual([]);
+  const reachable = closure(graph, path.join(SRC, "utilities/axiosInstance.js")).map(rel);
+
+  // The invariant this file exists to protect: the store hands axiosInstance
+  // its 401 handler through setUnauthorizedHandler precisely so that the
+  // dependency runs one way. Asserting on the whole closure rather than on the
+  // direct imports is what makes that hold when axiosInstance picks up a
+  // helper — as it has for the logger — and that helper later grows an import
+  // of its own.
+  expect(reachable.filter((f) => f.startsWith("store/"))).toEqual([]);
+});
+
+// The api/ layer is only worth having if it cannot be bypassed. Nothing stops
+// someone reaching for axiosInstance directly in a new thunk — it is one import
+// away and it works — and the URLs would drift back out of api/ one call at a
+// time, which is the state this replaced.
+test("only src/api/ talks to axiosInstance", () => {
+  const graph = buildGraph();
+  const target = path.join(SRC, "utilities/axiosInstance.js");
+
+  const importers = [...graph.entries()]
+    .filter(([, deps]) => deps.includes(target))
+    .map(([file]) => rel(file));
+
+  // store.js is the documented exception: it injects the 401 handler with
+  // setUnauthorizedHandler, which is what keeps axiosInstance from importing the
+  // store and closing a cycle (see the two tests above).
+  const allowed = (f) => f.startsWith("api/") || f === "store/store.js";
+  expect(importers.filter((f) => !allowed(f))).toEqual([]);
+
+  // Guards against the rule passing because the graph came back empty.
+  expect(importers.some((f) => f.startsWith("api/"))).toBe(true);
+});
+
+test("the logger stays dependency-free, so importing it cannot create a cycle", () => {
+  // It is imported from both sides of the app, axiosInstance included. A module
+  // that everything depends on must depend on nothing, or it becomes the link
+  // that closes a cycle between two parts that are otherwise unrelated.
+  const deps = (buildGraph().get(path.join(SRC, "utilities/logger.js")) ?? []).map(rel);
+  expect(deps).toEqual([]);
 });
 
 test("the store is the side that wires the two together", () => {

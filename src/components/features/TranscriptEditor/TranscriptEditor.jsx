@@ -9,6 +9,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import { updateTranscript, triggerTranscriptPipeline, fixHebrewTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptPut";
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
+import { transcriptToText } from "../../../utilities/transcriptText";
 
 const STATUS_COLOR = { pending: "default", processing: "warning", analyzing: "info", done: "success", error: "error" };
 const STATUS_LABEL_HE = {
@@ -20,15 +21,9 @@ const STATUS_LABEL_HE = {
 };
 const IN_FLIGHT = new Set(["pending", "processing", "analyzing"]);
 
-const chunksToText = (chunks = []) =>
-  chunks.map((c) => c.content).join("\n\n");
-
 const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled = false, onRetryPolling }) => {
   const dispatch = useDispatch();
-  const initialText =
-    transcript?.edited_text ||
-    chunksToText(transcript?.chunks) ||
-    "";
+  const initialText = transcriptToText(transcript);
   const [editedText, setEditedText] = useState(initialText);
   const [saving, setSaving] = useState(false);
   const [triggering, setTriggering] = useState(false);

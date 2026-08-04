@@ -135,13 +135,19 @@ const SmartSearch = ({ onOpenResult }) => {
                       {Math.round(Number(r.similarity) * 100)}%
                     </Typography>
                   )}
-                  <Chip
-                    icon={<PlayArrowIcon />}
-                    label={formatTime(r.start_time)}
-                    size="small"
-                    color="secondary"
-                    variant="outlined"
-                  />
+                  {/* A hit inside a book has no timestamp — start_time is null,
+                      since a document has no timeline. Showing "00:00" next to a
+                      play icon would promise a seek that cannot happen, so the
+                      chip is simply absent for those results. */}
+                  {Number.isFinite(Number(r.start_time)) && r.start_time !== null && (
+                    <Chip
+                      icon={<PlayArrowIcon />}
+                      label={formatTime(r.start_time)}
+                      size="small"
+                      color="secondary"
+                      variant="outlined"
+                    />
+                  )}
                 </Box>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{

@@ -3,8 +3,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchAllMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
 import { deleteMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaDelete";
+import { updateMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaPut";
 import { selectAllMedia, selectMediaStatus } from "../../../store/selectors/mediaSelectors";
 import { openUpload } from "../../../store/slicesAndThunks/uiSlice";
+import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 
 const useArchivePageController = () => {
   const dispatch = useDispatch();
@@ -25,7 +27,14 @@ const useArchivePageController = () => {
   const handleOpenMedia = (id) => navigate(`/media/${id}`);
   // Smart-search result → open the media and jump the player to the segment.
   // The ?t= seconds are read by MediaViewPage and seeked once the player is ready.
-  const handleOpenResult = (mediaId, startTime) => navigate(`/media/${mediaId}?t=${startTime}`);
+  // A hit inside a book has no timestamp (start_time is null), so it opens the
+  // document with no ?t= at all rather than a "?t=null" that means nothing.
+  const handleOpenResult = (mediaId, startTime) =>
+    navigate(
+      Number.isFinite(Number(startTime)) && startTime !== null
+        ? `/media/${mediaId}?t=${startTime}`
+        : `/media/${mediaId}`
+    );
   const handleOpenUpload = () => dispatch(openUpload());
 
   const handleDeleteRequest = (id) => setDeleteTargetId(id);
@@ -33,6 +42,22 @@ const useArchivePageController = () => {
   const handleDeleteConfirm = async () => {
     await dispatch(deleteMedia(deleteTargetId));
     setDeleteTargetId(null);
+  };
+
+  // Publishing is what makes an item visible to students, so it is worth
+  // confirming out loud in both directions rather than leaving the user to infer
+  // it from an icon that changed colour.
+  const handleTogglePublish = async (item) => {
+    const next = !item.is_published;
+    const result = await dispatch(updateMedia({ id: item.id, isPublished: next }));
+    const ok = result.meta.requestStatus === "fulfilled";
+    dispatch(
+      notify(
+        ok
+          ? { message: next ? "הפריט פורסם ומוצג לתלמידים" : "הפריט הוסתר מהתלמידים", severity: "success" }
+          : { message: result.payload || "עדכון הפרסום נכשל", severity: "error" }
+      )
+    );
   };
 
   const filteredMedia = allMedia.filter((item) => {
@@ -51,6 +76,7 @@ const useArchivePageController = () => {
     filteredMedia, status, typeFilter, hasActiveFilter,
     handleFilter, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
+    handleTogglePublish,
   };
 };
 

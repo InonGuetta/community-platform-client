@@ -10,6 +10,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import { login } from "../../../store/slicesAndThunks/authSlices/authPost";
+import { authApi } from "../../../api/authApi";
 import { clearError } from "../../../store/slicesAndThunks/authSlices/authSlice";
 import { selectLoginStatus, selectAuthError } from "../../../store/selectors/authSelectors";
 import { statuses } from "../../../utilities/constant";
@@ -90,7 +91,7 @@ const SignIn = () => {
       </Box>
 
       <Button variant="outlined" fullWidth startIcon={<GoogleIcon />}
-        onClick={() => { window.location.href = "/api/auth/google"; }}
+        onClick={() => { window.location.href = authApi.googleLoginUrl; }}
         sx={googleButtonSx}
       >
         התחברות עם Google

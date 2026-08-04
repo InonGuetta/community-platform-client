@@ -9,7 +9,7 @@ import { clearSelectedItem } from "../../../store/slicesAndThunks/mediaSlice/med
 import { selectSelectedMedia } from "../../../store/selectors/mediaSelectors";
 import { selectTranscriptByMediaId } from "../../../store/selectors/transcriptSelectors";
 import { selectBookmarksByMediaId } from "../../../store/selectors/bookmarksSelectors";
-import axiosInstance from "../../../utilities/axiosInstance";
+import { mediaApi } from "../../../api/mediaApi";
 import { nextPollDelay, hasExceededPollWindow } from "../../../utilities/pollingSchedule";
 
 // 'analyzing' is included so polling continues through the AI step. Without it
@@ -55,7 +55,7 @@ const useMediaViewPageController = () => {
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await axiosInstance.get(`/media/${id}/progress`);
+        const data = await mediaApi.getProgress(id);
         if (!cancelled && data?.last_position_seconds > 0) {
           setResumePosition(data.last_position_seconds);
         }
@@ -66,15 +66,14 @@ const useMediaViewPageController = () => {
     };
   }, [id]);
 
+  // Text media is included now that books get summarised too. A document with
+  // no summary yet simply has no transcripts row, so this 404s and the thunk
+  // rejects — which is the correct "nothing here yet" and is already handled.
   useEffect(() => {
-    if (
-      media?.id &&
-      String(media.id) === String(id) &&
-      media.media_type !== "text"
-    ) {
+    if (media?.id && String(media.id) === String(id)) {
       dispatch(fetchTranscript(id)).catch(() => {});
     }
-  }, [dispatch, id, media?.id, media?.media_type]);
+  }, [dispatch, id, media?.id]);
 
   // True once polling has given up — see pollingSchedule.js for why that can
   // happen while the row still says 'processing'.
@@ -146,7 +145,7 @@ const useMediaViewPageController = () => {
 
   const handleSaveProgress = async (positionSeconds) => {
     try {
-      await axiosInstance.post(`/media/${id}/progress`, { positionSeconds });
+      await mediaApi.saveProgress(id, positionSeconds);
     } catch {}
   };
 

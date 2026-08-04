@@ -1,9 +1,58 @@
 import axios from "axios";
+import { logger } from "./logger";
 
 const axiosInstance = axios.create({
   baseURL: "/api",
   withCredentials: true,
 });
+
+// ── Tracing every call to the API ───────────────────────────────────────────
+//
+// The point of this pair of interceptors is the SERVER's request id. Each
+// response carries it in X-Request-Id, and the server stamps the same id on
+// every log line that request produced — the SQL it ran, the errors it raised.
+// Printing it next to the browser-side outcome is what makes it possible to
+// take a failure a user is looking at and find the matching server log, instead
+// of correlating by timestamp and hoping.
+//
+// The URL is logged; bodies are not. A request body here is a password, a
+// transcript, or a note — exactly what must not be written to a console someone
+// else may be looking over the shoulder of.
+const describe = (config = {}) =>
+  `${(config.method || "get").toUpperCase()} ${config.url}`;
+
+const elapsed = (config) =>
+  config?.__startedAt ? ` ${(performance.now() - config.__startedAt).toFixed(0)}ms` : "";
+
+axiosInstance.interceptors.request.use((config) => {
+  config.__startedAt = performance.now();
+  logger.debug(`[api] → ${describe(config)}`);
+  return config;
+});
+
+axiosInstance.interceptors.response.use(
+  (response) => {
+    const requestId = response.headers?.["x-request-id"];
+    logger.debug(
+      `[api] ← ${describe(response.config)} ${response.status}${elapsed(response.config)}` +
+      (requestId ? ` [${requestId}]` : "")
+    );
+    return response;
+  },
+  (error) => {
+    // Registered before the retry interceptor below, so this fires for the
+    // FIRST failure of a request that will go on to be retried — which is the
+    // one worth seeing. The retry itself re-enters as a fresh request and gets
+    // its own line.
+    const requestId = error?.response?.headers?.["x-request-id"];
+    const status = error?.response?.status ?? "no response";
+    logger.warn(
+      `[api] ✕ ${describe(error?.config)} ${status}${elapsed(error?.config)}` +
+      (requestId ? ` [${requestId}]` : "")
+    );
+    return Promise.reject(error);
+  }
+);
 
 // What to do when the server says we are no longer authenticated. Injected
 // rather than imported: store.js already reaches this module through its
@@ -42,6 +91,14 @@ const isAuthRequest = (url = "") => url.startsWith("/auth/");
 //     have been processed and only lost its reply. Hence the method guard below.
 const RETRIABLE_STATUSES = new Set([502, 503, 504]);
 
+// The Vite dev proxy stamps this code on the 503 it invents when nothing is
+// listening on :3001, which is proof the request never reached Express. So is
+// no response at all — there was no gateway to answer in the first place.
+// Anything else in RETRIABLE_STATUSES *might* be the API's own answer, so it is
+// treated as processed.
+const neverReachedServer = (error) =>
+  !error.response || error.response.data?.code === "API_UNAVAILABLE";
+
 // Idempotent by HTTP semantics, plus the two POSTs that are safe to repeat by
 // inspection: login only reads and sets a cookie, logout only clears one.
 // Register is deliberately absent — a replay after a lost response would answer
@@ -53,19 +110,29 @@ const isReplayable = (config = {}) =>
   IDEMPOTENT_METHODS.has((config.method || "get").toLowerCase()) ||
   REPLAYABLE_POSTS.has(config.url);
 
-// Four attempts over ~4s. Sized against the two things being waited on: a
-// `node --watch` restart takes about 2-3s to listen again, and a cold database
-// connection resolves in about the same. Not longer, because /auth/login sits
-// behind a 10-per-minute rate limiter — at four attempts per click a user can
-// still click twice before tripping it, which a longer schedule would not allow.
-export const RETRY_DELAYS_MS = [400, 1200, 2400];
+// Six attempts over ~11s. The previous ~4s was measured against a warm
+// `node --watch` restart and was too tight for the case that actually bites: the
+// first boot of the day, where loading the server's module graph (the AWS /
+// OpenAI / Stripe / Bull clients) takes ~2.5s warm and several seconds more off
+// a cold disk cache. A first login would spend every attempt and still fail —
+// the retry fired and gave up, which is the worst of both.
+export const RETRY_DELAYS_MS = [400, 900, 1800, 3200, 5000];
+
+// The schedule above is only free to be this long because a request the API
+// never received costs nothing. /auth/login sits behind a 10-per-minute limiter
+// and express-rate-limit counts failures too, but a request answered by the
+// proxy never reaches that middleware. When the API *is* up and answering 5xx
+// itself — a database it cannot reach — the attempts do count, so those stop
+// after the first two delays and leave a user room to click again.
+const PROCESSED_RETRY_LIMIT = 2;
 
 export const shouldRetry = (error, attempt) => {
   if (attempt >= RETRY_DELAYS_MS.length) return false;
   if (axios.isCancel(error)) return false;
   if (!error?.config) return false; // nothing to replay
   if (!isReplayable(error.config)) return false;
-  return !error.response || RETRIABLE_STATUSES.has(error.response.status);
+  if (error.response && !RETRIABLE_STATUSES.has(error.response.status)) return false;
+  return neverReachedServer(error) || attempt < PROCESSED_RETRY_LIMIT;
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

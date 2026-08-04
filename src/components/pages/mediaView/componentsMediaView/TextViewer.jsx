@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import axiosInstance from "../../../../utilities/axiosInstance";
+import { mediaApi } from "../../../../api/mediaApi";
 
 const TextViewer = ({ mediaId }) => {
   const [blobUrl, setBlobUrl] = useState(null);
@@ -16,11 +16,11 @@ const TextViewer = ({ mediaId }) => {
     let cancelled = false;
     setError(false);
     setBlobUrl(null);
-    axiosInstance
-      .get(`/media/${mediaId}/stream`, { responseType: "blob" })
-      .then(({ data }) => {
+    mediaApi
+      .fetchBlob(mediaId)
+      .then((blob) => {
         if (cancelled) return;
-        url = URL.createObjectURL(data);
+        url = URL.createObjectURL(blob);
         setBlobUrl(url);
       })
       // Previously there was no catch, so a failed load left the spinner

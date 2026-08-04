@@ -8,7 +8,7 @@ import Alert from "@mui/material/Alert";
 import StatsCards from "./componentsAdmin/StatsCards";
 import QueueStatus from "./componentsAdmin/QueueStatus";
 import SystemHealth from "./componentsAdmin/SystemHealth";
-import axiosInstance from "../../../utilities/axiosInstance";
+import { adminApi } from "../../../api/adminApi";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -20,14 +20,13 @@ const AdminDashboard = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [s, q, h] = await Promise.all([
-          axiosInstance.get("/admin/stats"),
-          axiosInstance.get("/admin/queue-status"),
-          axiosInstance.get("/admin/system-health"),
-        ]);
-        setStats(s.data);
-        setQueueStatus(q.data);
-        setHealth(h.data);
+        // Renamed on the way out so they do not shadow the state variables of
+        // the same name declared above.
+        const { stats: nextStats, queueStatus: nextQueue, health: nextHealth } =
+          await adminApi.overview();
+        setStats(nextStats);
+        setQueueStatus(nextQueue);
+        setHealth(nextHealth);
         setError(null);
       } catch (err) {
         // This used to be swallowed entirely, which was worse than it sounds:

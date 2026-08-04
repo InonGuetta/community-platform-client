@@ -1,10 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../../../utilities/axiosInstance";
+import { mediaApi } from "../../../api/mediaApi";
 
 export const updateMedia = createAsyncThunk("media/update", async ({ id, ...payload }, { rejectWithValue }) => {
   try {
-    const { data } = await axiosInstance.put(`/media/update/${id}`, payload);
-    return data;
+    return await mediaApi.update(id, payload);
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || "Update failed");
   }

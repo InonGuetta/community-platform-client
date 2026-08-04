@@ -62,6 +62,14 @@ export default [
       // human decides. Every deliberate omission below carries a reason.
       "react-hooks/exhaustive-deps": "warn",
 
+      // Matches the server. A bare console.* call ships to production and runs
+      // in every visitor's browser, because there is nothing to switch it off
+      // with — the level in utilities/logger.js is resolved at build time, so a
+      // logger.debug is stripped from the bundle entirely while a console.log
+      // is not. This rule is what keeps a line added during debugging from
+      // becoming permanent. The exemptions are listed below.
+      "no-console": "error",
+
       // Matches the server: a best-effort operation whose failure is genuinely
       // uninteresting — fetching a saved playback position, say — is written as
       // an empty catch on purpose.
@@ -80,5 +88,17 @@ export default [
     // than in a browser.
     files: ["src/**/*.test.{js,jsx}"],
     languageOptions: { globals: { ...globals.node } },
+  },
+  {
+    // logger.js is where console.* is the implementation. ErrorBoundary is the
+    // deliberate exception documented in its own componentDidCatch: it is the
+    // last line of defence, it must report even if the logger module is part of
+    // what failed to load, and it is where a real error-reporting service would
+    // be wired in.
+    files: [
+      "src/utilities/logger.js",
+      "src/components/features/ErrorBoundary/ErrorBoundary.jsx",
+    ],
+    rules: { "no-console": "off" },
   },
 ];

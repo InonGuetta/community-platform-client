@@ -80,6 +80,12 @@ describe("shouldRetry", () => {
     ...(status ? { response: { status } } : {}),
   });
 
+  // What the Vite proxy answers with when nothing is listening on :3001.
+  const unreachable = (config = { method: "get", url: "/media/1" }) => ({
+    config,
+    response: { status: 503, data: { message: "API server unavailable", code: "API_UNAVAILABLE" } },
+  });
+
   test.each([502, 503, 504])("a %i from a gateway is retried", (status) => {
     expect(shouldRetry(err(status), 0)).toBe(true);
   });
@@ -94,8 +100,26 @@ describe("shouldRetry", () => {
   });
 
   test("stops once the schedule is spent", () => {
-    expect(shouldRetry(err(503), RETRY_DELAYS_MS.length - 1)).toBe(true);
-    expect(shouldRetry(err(503), RETRY_DELAYS_MS.length)).toBe(false);
+    expect(shouldRetry(unreachable(), RETRY_DELAYS_MS.length - 1)).toBe(true);
+    expect(shouldRetry(unreachable(), RETRY_DELAYS_MS.length)).toBe(false);
+  });
+
+  // A 5xx the API answered itself still counts against /auth/login's
+  // 10-per-minute limiter, so it gets the short end of the schedule; one the
+  // API never saw costs nothing and gets all of it.
+  describe("only failures the server never saw use the whole schedule", () => {
+    test("a proxy 503 keeps retrying to the end", () => {
+      expect(shouldRetry(unreachable(), 2)).toBe(true);
+    });
+
+    test("no response at all keeps retrying to the end", () => {
+      expect(shouldRetry(err(null), 2)).toBe(true);
+    });
+
+    test("a 5xx that may be the API's own answer stops early", () => {
+      expect(shouldRetry(err(503), 1)).toBe(true);
+      expect(shouldRetry(err(503), 2)).toBe(false);
+    });
   });
 
   test("a cancelled request is not retried", () => {
@@ -146,7 +170,7 @@ describe("a login through a server that is still booting", () => {
     if (attempts < successfulAttempt) {
       return Promise.reject(Object.assign(new Error("Request failed with status code 503"), {
         config,
-        response: { status: 503, statusText: "Service Unavailable", headers: {}, config, data: { message: "API server unavailable" } },
+        response: { status: 503, statusText: "Service Unavailable", headers: {}, config, data: { message: "API server unavailable", code: "API_UNAVAILABLE" } },
       }));
     }
     return Promise.resolve({ status: 200, statusText: "OK", headers: {}, config, data: { user: { id: 1 } } });

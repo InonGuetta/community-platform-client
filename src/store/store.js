@@ -5,10 +5,13 @@ import sessionsReducer from "./slicesAndThunks/sessionsSlice/sessionsSlice";
 import transcriptReducer from "./slicesAndThunks/transcriptSlice/transcriptSlice";
 import bookmarksReducer from "./slicesAndThunks/bookmarksSlice/bookmarksSlice";
 import notesReducer from "./slicesAndThunks/notesSlice/notesSlice";
+import likesReducer from "./slicesAndThunks/likesSlice/likesSlice";
 import usersReducer from "./slicesAndThunks/usersSlice/usersSlice";
+import coursesReducer from "./slicesAndThunks/coursesSlice/coursesSlice";
 import uiReducer from "./slicesAndThunks/uiSlice";
 import notificationReducer from "./slicesAndThunks/notificationSlice";
 import { notificationMiddleware } from "./middleware/notificationMiddleware";
+import { loggerMiddleware } from "./middleware/loggerMiddleware";
 import { setUnauthorizedHandler } from "../utilities/axiosInstance";
 import { sessionExpired } from "./slicesAndThunks/authSlices/authSlice";
 
@@ -19,7 +22,9 @@ const appReducer = combineReducers({
   transcript: transcriptReducer,
   bookmarks: bookmarksReducer,
   notes: notesReducer,
+  likes: likesReducer,
   users: usersReducer,
+  courses: coursesReducer,
   ui: uiReducer,
   notification: notificationReducer,
 });
@@ -45,9 +50,13 @@ const rootReducer = (state, action) => appReducer(RESET_ON.has(action.type) ? un
 
 export const store = configureStore({
   reducer: rootReducer,
-  // Keep the default middleware (thunk + dev checks) and append ours, which
-  // turns mutation outcomes into toasts.
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(notificationMiddleware),
+  // Keep the default middleware (thunk + dev checks) and append ours. The
+  // logger goes first so an action is traced as it arrives — before the
+  // notification middleware turns the outcome into a toast and dispatches an
+  // action of its own, which would otherwise be logged in the middle of the one
+  // that caused it.
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(loggerMiddleware, notificationMiddleware),
 });
 
 // Wire the API layer's 401 handling here, where the store already exists. This

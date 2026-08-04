@@ -13,16 +13,18 @@ import SmartSearch from "../../features/SmartSearch/SmartSearch";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useArchivePageController from "./useArchivePageController";
 import { selectUser } from "../../../store/selectors/authSelectors";
-import { roles } from "../../../utilities/constant";
+import { isPrivileged } from "../../../utilities/permissions";
 
 const ArchivePage = () => {
   const {
     filteredMedia, status, typeFilter, hasActiveFilter,
     handleFilter, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
+    handleTogglePublish,
   } = useArchivePageController();
   const { isUploadOpen } = useSelector((state) => state.ui);
   const user = useSelector(selectUser);
+  const canUpload = isPrivileged(user);
   const [tab, setTab] = useState(0);
 
   const deleteTarget = filteredMedia.find((i) => i.id === deleteTargetId);
@@ -33,7 +35,7 @@ const ArchivePage = () => {
       <Box sx={{ flexGrow: 1, p: 3 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Typography variant="h4" fontWeight={800} color="primary">ארכיון מדיה</Typography>
-          {(user?.role === roles.lecturer || user?.role === roles.admin) && (
+          {canUpload && (
             <Button variant="contained" startIcon={<UploadIcon />} onClick={handleOpenUpload}
               sx={{
                 background: "linear-gradient(135deg, #29b6d8 0%, #1597bb 100%)",
@@ -62,7 +64,8 @@ const ArchivePage = () => {
               onView={handleOpenMedia}
               user={user}
               onDelete={handleDeleteRequest}
-              emptyActionLabel={(user?.role === roles.lecturer || user?.role === roles.admin) ? "העלאת מדיה" : undefined}
+              onTogglePublish={handleTogglePublish}
+              emptyActionLabel={canUpload ? "העלאת מדיה" : undefined}
               onEmptyAction={handleOpenUpload}
               filtered={hasActiveFilter}
             />

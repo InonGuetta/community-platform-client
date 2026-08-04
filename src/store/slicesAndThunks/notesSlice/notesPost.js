@@ -1,10 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../../../utilities/axiosInstance";
+import { notesApi } from "../../../api/notesApi";
 
 export const createNote = createAsyncThunk("notes/create", async (payload, { rejectWithValue }) => {
   try {
-    const { data } = await axiosInstance.post("/notes", payload);
-    return data;
+    return await notesApi.create(payload);
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || "Failed to create note");
   }

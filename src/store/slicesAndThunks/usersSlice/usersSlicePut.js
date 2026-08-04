@@ -1,10 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../../../utilities/axiosInstance";
+import { usersApi } from "../../../api/usersApi";
 
 export const updateUser = createAsyncThunk("users/update", async ({ id, ...payload }, { rejectWithValue }) => {
   try {
-    const { data } = await axiosInstance.put(`/users/update-user/${id}`, payload);
-    return data;
+    return await usersApi.update(id, payload);
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || "Failed to update user");
   }

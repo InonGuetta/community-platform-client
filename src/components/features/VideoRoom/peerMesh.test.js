@@ -35,15 +35,21 @@ const build = ({ withCamera = true } = {}) => {
   const emitted = [];
   const received = [];
   const lost = [];
+  const logged = [];
   const mesh = createPeerMesh({
     createConnection: () => new FakePeerConnection(),
     emit: (event, payload) => emitted.push({ event, payload }),
     onStream: (id, stream) => received.push({ id, stream }),
     onPeerLost: (id) => lost.push(id),
+    log: (message) => logged.push(message),
   });
   if (withCamera) mesh.setLocalStream({ getTracks: () => [{ kind: "video" }, { kind: "audio" }] });
-  return { mesh, emitted, received, lost, pcs: FakePeerConnection.instances };
+  return { mesh, emitted, received, lost, logged, pcs: FakePeerConnection.instances };
 };
+
+// Did any line mention both the peer and the thing that happened to it?
+const logMentions = (logged, ...fragments) =>
+  logged.some((line) => fragments.every((f) => line.includes(f)));
 
 describe("handshake", () => {
   test("offering attaches local media and sends the offer", async () => {
@@ -179,6 +185,79 @@ describe("connection state", () => {
     pcs[0].connectionState = "failed";
     pcs[0].onconnectionstatechange();
     expect(lost).toEqual(["p9"]);
+  });
+});
+
+// A track can arrive carrying no stream. ParticipantGrid skips a tile whose
+// stream is falsy, so passing that through produced a permanently black square
+// with nothing logged anywhere — indistinguishable from a peer whose camera is
+// simply off, which is the wrong diagnosis to be led to.
+describe("a remote track with no stream", () => {
+  test("does not reach onStream", async () => {
+    const { mesh, received, logged, pcs } = build();
+    await mesh.offerTo("pX");
+    pcs[0].ontrack({ streams: [], track: { kind: "video" } });
+
+    expect(received).toEqual([]);
+    expect(logMentions(logged, "pX", "no stream")).toBe(true);
+  });
+
+  test("a track WITH a stream still does", async () => {
+    const { mesh, received, pcs } = build();
+    await mesh.offerTo("pY");
+    const stream = { id: "remote" };
+    pcs[0].ontrack({ streams: [stream], track: { kind: "video" } });
+
+    expect(received).toEqual([{ id: "pY", stream }]);
+  });
+});
+
+// The mesh used to be entirely silent, so a call that connected at the socket
+// level and still showed a black tile left nothing to read. These assert the
+// four things anyone diagnosing that actually asks for. Failures are the point:
+// a rejected candidate used to be swallowed by a bare `catch {}`, which made
+// "every candidate is failing" look exactly like "everything is fine".
+describe("tracing", () => {
+  test("the handshake and the connection state are traced per peer", async () => {
+    const { mesh, logged, pcs } = build();
+    await mesh.offerTo("p1");
+    expect(logMentions(logged, "p1", "new connection")).toBe(true);
+    expect(logMentions(logged, "p1", "offering")).toBe(true);
+
+    await mesh.acceptAnswer("p1", { type: "answer", sdp: "a" });
+    expect(logMentions(logged, "p1", "answer")).toBe(true);
+
+    pcs[0].connectionState = "disconnected";
+    pcs[0].onconnectionstatechange();
+    // Not acted on — transient while ICE re-checks — but a "disconnected" that
+    // never settles back is the signature of a call about to go quiet, and it
+    // was the one state the handler deliberately ignored in silence.
+    expect(logMentions(logged, "p1", "disconnected")).toBe(true);
+  });
+
+  test("buffered candidates are reported as a count, not one line each", async () => {
+    const { mesh, logged } = build();
+    for (let i = 0; i < 5; i++) await mesh.addCandidate("p2", { candidate: `c${i}` });
+    // Bursts of dozens per peer: a line each would bury everything else.
+    expect(logged.filter((l) => l.includes("candidate")).length).toBe(0);
+
+    await mesh.acceptOffer("p2", { type: "offer", sdp: "o" });
+    expect(logMentions(logged, "p2", "replayed 5")).toBe(true);
+  });
+
+  test("a rejected candidate is reported instead of swallowed", async () => {
+    const { mesh, logged, pcs } = build();
+    await mesh.acceptOffer("p3", { type: "offer", sdp: "o" });
+    pcs[0].addIceCandidate = async () => { throw new Error("malformed candidate"); };
+
+    await mesh.addCandidate("p3", { candidate: "bad" });
+    expect(logMentions(logged, "p3", "malformed candidate")).toBe(true);
+  });
+
+  test("an answer for a peer that already left says so", async () => {
+    const { mesh, logged } = build();
+    await mesh.acceptAnswer("ghost", { type: "answer" });
+    expect(logMentions(logged, "ghost", "untracked")).toBe(true);
   });
 });
 

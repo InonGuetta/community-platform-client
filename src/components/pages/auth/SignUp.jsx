@@ -13,9 +13,13 @@ import { register } from "../../../store/slicesAndThunks/authSlices/authPost";
 import { authApi } from "../../../api/authApi";
 import { clearError } from "../../../store/slicesAndThunks/authSlices/authSlice";
 import { selectLoginStatus, selectAuthError } from "../../../store/selectors/authSelectors";
+import { hebrewForError } from "../../../utilities/apiError";
 import { statuses } from "../../../utilities/constant";
 import AuthLayout from "./AuthLayout";
 import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
+
+// See SignIn: never fall back to the server's English message.
+const FALLBACK = "ההרשמה נכשלה. נסה שוב.";
 
 const SignUp = () => {
   const dispatch = useDispatch();
@@ -39,7 +43,7 @@ const SignUp = () => {
 
   return (
     <AuthLayout title="הרשמה">
-      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{hebrewForError(error, FALLBACK)}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
         <TextField

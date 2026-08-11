@@ -27,11 +27,17 @@ const answerUnavailable = (proxy) => {
 export default defineConfig({
   plugins: [react()],
   // Vitest resolves the app's extensionless imports the same way the dev server
-  // does, which plain node cannot. The default "node" environment is enough —
-  // none of these tests render components, they exercise the logic underneath.
+  // does, which plain node cannot.
+  //
+  // "node" stays the DEFAULT environment, because most of these tests exercise
+  // logic and jsdom costs a second of startup for a DOM they never touch. The
+  // files that render components opt in individually with a
+  // `// @vitest-environment jsdom` docblock on their first line — so the cost
+  // lands only where it buys something.
   test: {
     include: ["src/**/*.test.{js,jsx}"],
     environment: "node",
+    setupFiles: ["./vitest.setup.js"],
     // Mirrors LOG_LEVEL=error in the server's test/setup.js, and for the same
     // reason: several of these tests drive failure paths on purpose (every
     // retry, every 401), and at the dev default of "debug" the real assertion

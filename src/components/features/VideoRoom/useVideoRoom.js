@@ -69,6 +69,11 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
         dropStream(peerId);
         meshRef.current?.removePeer(peerId);
       },
+      // Interleaved with the [socket] lines above and below, so the console
+      // reads as one story: the message that crossed the wire, then what the
+      // mesh did about it. Same debug level, so it is stripped from the
+      // production bundle at build time along with everything else here.
+      log: (message) => logger.debug(`[mesh] ${message}`),
     });
     meshRef.current = mesh;
 

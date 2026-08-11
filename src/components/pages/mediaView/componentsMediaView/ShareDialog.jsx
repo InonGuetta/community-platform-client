@@ -16,11 +16,15 @@ import DialogContent from "../../../features/Dialogs/DialogContent";
 import { notify } from "../../../../store/slicesAndThunks/notificationSlice";
 import { formatTime } from "../../../../utilities/formatTime";
 
-// Built from the live location rather than a hard-coded path so the link keeps
-// working behind any deploy prefix, and drops an existing ?t= (the page may
-// itself have been opened from a timestamped share) before appending our own.
-const buildShareUrl = (seconds) => {
-  const base = `${window.location.origin}${window.location.pathname}`;
+// The origin comes from the live location so the link keeps working wherever the
+// app is served, and an existing ?t= is dropped (the page may itself have been
+// opened from a timestamped share) before appending our own.
+//
+// `path` is for callers that are not standing on the page they are sharing — the
+// notebook floats a lecture over /notebook, and without this the shared link
+// would point at the notebook instead. It defaults to the current path.
+const buildShareUrl = (seconds, path) => {
+  const base = `${window.location.origin}${path || window.location.pathname}`;
   return seconds > 0 ? `${base}?t=${Math.floor(seconds)}` : base;
 };
 
@@ -31,7 +35,7 @@ const buildShareUrl = (seconds) => {
 const rowSx = { borderRadius: 1, textAlign: "start" };
 
 // `canShareTime` is false for documents: a book has no playhead to point at.
-const ShareDialog = ({ open, onClose, title, currentTime = 0, canShareTime = false }) => {
+const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime = false }) => {
   const dispatch = useDispatch();
   const [withTime, setWithTime] = useState(false);
 
@@ -40,7 +44,7 @@ const ShareDialog = ({ open, onClose, title, currentTime = 0, canShareTime = fal
   useEffect(() => { if (!open) setWithTime(false); }, [open]);
 
   const offerTime = canShareTime && currentTime >= 1;
-  const url = buildShareUrl(offerTime && withTime ? currentTime : 0);
+  const url = buildShareUrl(offerTime && withTime ? currentTime : 0, path);
   const text = `${title}\n${url}`;
 
   // Opened without an opener reference: a share target has no reason to keep a

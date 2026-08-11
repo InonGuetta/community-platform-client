@@ -1,11 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { mediaApi } from "../../../api/mediaApi";
+import { rejectionOf } from "../../../utilities/apiError";
 
 export const fetchAllMedia = createAsyncThunk("media/fetchAll", async (filters = {}, { rejectWithValue }) => {
   try {
     return await mediaApi.getAll(filters);
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || "Failed to fetch media");
+    return rejectWithValue(rejectionOf(err, "Failed to fetch media"));
   }
 });
 
@@ -13,6 +14,6 @@ export const fetchOneMedia = createAsyncThunk("media/fetchOne", async (id, { rej
   try {
     return await mediaApi.getOne(id);
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || "Failed to fetch media item");
+    return rejectWithValue(rejectionOf(err, "Failed to fetch media item"));
   }
 });

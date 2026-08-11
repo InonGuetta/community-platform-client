@@ -14,7 +14,7 @@ const bookmarksSlice = createSlice({
     builder
       .addCase(fetchBookmarks.pending, (state) => { state.status = statuses.loading; })
       .addCase(fetchBookmarks.fulfilled, (state, action) => { state.status = statuses.succeeded; state.items = action.payload; })
-      .addCase(fetchBookmarks.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload; })
+      .addCase(fetchBookmarks.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
       .addCase(createBookmark.fulfilled, (state, action) => { state.items.push(action.payload); })
 

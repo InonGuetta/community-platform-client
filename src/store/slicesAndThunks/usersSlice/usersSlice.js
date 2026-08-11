@@ -16,7 +16,7 @@ const usersSlice = createSlice({
     builder
       .addCase(fetchAllUsers.pending, (state) => { state.status = statuses.loading; })
       .addCase(fetchAllUsers.fulfilled, (state, action) => { state.status = statuses.succeeded; state.items = action.payload; })
-      .addCase(fetchAllUsers.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload; })
+      .addCase(fetchAllUsers.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
       .addCase(fetchUserById.fulfilled, (state, action) => { state.selectedUser = action.payload; })
 
@@ -30,7 +30,7 @@ const usersSlice = createSlice({
       .addCase(deleteUser.fulfilled, (state, action) => {
         state.items = state.items.filter((u) => u.id !== action.payload.id);
       })
-      .addCase(deleteUser.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(deleteUser.rejected, (state, action) => { state.error = action.payload?.message; });
   },
 });
 

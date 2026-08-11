@@ -10,19 +10,40 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import MovieRoundedIcon from "@mui/icons-material/MovieRounded";
+import VolumeUpRoundedIcon from "@mui/icons-material/VolumeUpRounded";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
+import { alpha, lighten } from "@mui/material/styles";
 import { mediaApi } from "../../../../api/mediaApi";
-import DownloadMenu from "../../mediaView/componentsMediaView/DownloadMenu";
+import DownloadMenu from "../../../features/DownloadMenu/DownloadMenu";
 import { mediaTypeLabels, mediaTypeAccents } from "../../../../utilities/constant";
 import { canManageMedia } from "../../../../utilities/permissions";
 
 const TYPE_COLOR = { video: "warning", audio: "info", text: "success" };
-const TYPE_IMAGE = { video: "/images/video_image.png", audio: "/images/audio_image.png", text: "/images/book_image.png" };
-const TYPE_IMAGE_SCALE = { video: 0.65, audio: 0.55, text: 0.50 };
+
+// Vector icons rather than the PNGs this used to render: those bitmaps carried a
+// baked-in white background, so in dark mode every card without a thumbnail was
+// a bright white square. An icon inherits `color`, so it can follow the theme.
+const TYPE_ICON = { video: MovieRoundedIcon, audio: VolumeUpRoundedIcon, text: MenuBookRoundedIcon };
 
 // This card's ownership rule was the original — and, until the server caught up,
 // the only — place it lived. It now defers to the shared helper so the card and
 // the API cannot drift.
 const canDelete = canManageMedia;
+
+// The floating action buttons sit over the thumbnail, so they need their own
+// surface to stay legible. A solid white pill is right on a light page but a
+// glaring dot on a dark one; in dark mode a translucent light overlay reads as
+// a raised control without punching a hole in the card.
+const actionButtonSx = (theme) => {
+  const dark = theme.palette.mode === "dark";
+  return {
+    p: 0.5,
+    backdropFilter: "blur(4px)",
+    bgcolor: dark ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.85)",
+    "&:hover": { bgcolor: dark ? "rgba(255,255,255,0.26)" : "#ffffff" },
+  };
+};
 
 // L-shaped corner bracket drawn as SVG with a crisp right-angle elbow that
 // follows the card's SHARP (square) top-right & bottom-left corners.
@@ -51,7 +72,11 @@ const CornerBracket = ({ accent, placement }) => {
 
 const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
   const isVideo = item.media_type === "video";
-  const accent = mediaTypeAccents[item.media_type];
+  // Both fall back for a media_type the client doesn't know yet: the icon so an
+  // unrecognised item still renders, and the accent because alpha()/lighten()
+  // throw on undefined where the bracket's stroke simply ignored it.
+  const accent = mediaTypeAccents[item.media_type] || mediaTypeAccents.text;
+  const PlaceholderIcon = TYPE_ICON[item.media_type] || MenuBookRoundedIcon;
   const videoRef = useRef(null);
   const [previewing, setPreviewing] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -97,16 +122,27 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
     onClick={() => onView(item.id)}
     onMouseEnter={handleMouseEnter}
     onMouseLeave={handleMouseLeave}
-    sx={{
-      position: "relative", zIndex: 2, overflow: "hidden",
-      height: "100%", display: "flex", flexDirection: "column", cursor: "pointer",
-      // Sharp (square) top-right & bottom-left corners; rounded top-left & bottom-right.
-      borderTopLeftRadius: "20px", borderTopRightRadius: 0,
-      borderBottomRightRadius: "20px", borderBottomLeftRadius: 0,
-      boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
-      transformOrigin: "center",
-      transition: "transform 0.35s ease, box-shadow 0.35s ease",
-      "&:hover": { transform: "scale(1.03)", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" },
+    sx={(theme) => {
+      const dark = theme.palette.mode === "dark";
+      return {
+        position: "relative", zIndex: 2, overflow: "hidden",
+        height: "100%", display: "flex", flexDirection: "column", cursor: "pointer",
+        // Sharp (square) top-right & bottom-left corners; rounded top-left & bottom-right.
+        borderTopLeftRadius: "20px", borderTopRightRadius: 0,
+        borderBottomRightRadius: "20px", borderBottomLeftRadius: 0,
+        // MUI tints an elevated Paper in dark mode, which made the text half of
+        // the card visibly lighter than the media half above it. Dropping the
+        // overlay puts both halves on the same surface; a hairline border keeps
+        // the card's edge readable against the page without it.
+        ...(dark && { backgroundImage: "none", border: "1px solid rgba(255,255,255,0.08)" }),
+        boxShadow: dark ? "0 2px 10px rgba(0,0,0,0.5)" : "0 2px 10px rgba(0,0,0,0.06)",
+        transformOrigin: "center",
+        transition: "transform 0.35s ease, box-shadow 0.35s ease",
+        "&:hover": {
+          transform: "scale(1.03)",
+          boxShadow: dark ? "0 6px 20px rgba(0,0,0,0.65)" : "0 6px 20px rgba(0,0,0,0.12)",
+        },
+      };
     }}
   >
     {/* Image / icon area */}
@@ -114,9 +150,25 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
       {item.thumbnail_url ? (
         <Box component="img" src={item.thumbnail_url} alt={item.title} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : (
-        <Box component="img" src={TYPE_IMAGE[item.media_type]} alt={item.title}
-          sx={{ height: `${TYPE_IMAGE_SCALE[item.media_type] * 180}px`, objectFit: "contain", opacity: 0.85 }}
-        />
+        // No thumbnail: a tinted panel carrying the type's icon in the same accent
+        // as the corner brackets and chip. The accent is tuned per mode — the raw
+        // hex is picked for white, and reads as muddy against a dark surface.
+        <Box
+          sx={(theme) => ({
+            position: "absolute", inset: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            bgcolor: alpha(accent, theme.palette.mode === "dark" ? 0.14 : 0.08),
+          })}
+        >
+          <PlaceholderIcon
+            aria-hidden
+            sx={(theme) => ({
+              fontSize: 86,
+              color: theme.palette.mode === "dark" ? lighten(accent, 0.4) : accent,
+              opacity: theme.palette.mode === "dark" ? 0.9 : 0.75,
+            })}
+          />
+        </Box>
       )}
 
       {/* Hover preview — video plays muted on top of the icon */}
@@ -166,7 +218,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
           aria-label="הורדה"
           aria-haspopup="menu"
           size="small"
-          sx={{ bgcolor: "rgba(255,255,255,0.85)", "&:hover": { bgcolor: "white" }, p: 0.5 }}
+          sx={actionButtonSx}
         >
           <FileDownloadIcon fontSize="small" />
         </IconButton>
@@ -181,7 +233,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
                 aria-label={isPublished ? "הסתרה מתלמידים" : "פרסום לתלמידים"}
                 onClick={handleTogglePublish}
                 disabled={publishing}
-                sx={{ bgcolor: "rgba(255,255,255,0.85)", "&:hover": { bgcolor: "white" }, p: 0.5 }}
+                sx={actionButtonSx}
               >
                 {isPublished ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
               </IconButton>
@@ -194,7 +246,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
             color="error"
             aria-label="מחיקה"
             onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
-            sx={{ bgcolor: "rgba(255,255,255,0.85)", "&:hover": { bgcolor: "white" }, p: 0.5 }}
+            sx={actionButtonSx}
           >
             <DeleteIcon fontSize="small" />
           </IconButton>
@@ -204,7 +256,17 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
 
     {/* Text content */}
     <CardContent sx={{ flexGrow: 1, textAlign: "right", pt: 1.5, pb: "16px !important", px: 2 }}>
-      <Typography variant="subtitle1" fontWeight={800} color="primary" noWrap sx={{ mb: 0.5 }}>{item.title}</Typography>
+      {/* primary.main is the navy that reads as a heading on white; on the dark
+          card surface the same tone sinks into the background, so dark mode uses
+          the lighter step of the brand colour rather than dropping to plain text. */}
+      <Typography
+        variant="subtitle1"
+        fontWeight={800}
+        noWrap
+        sx={(theme) => ({ mb: 0.5, color: theme.palette.mode === "dark" ? "primary.light" : "primary.main" })}
+      >
+        {item.title}
+      </Typography>
       {item.description && (
         <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.4 }}>
           {item.description}

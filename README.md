@@ -1,5 +1,13 @@
 # community-platform-client
 
+The browser half of a two-repository system. `../ARCHITECTURE.md` maps how the
+two fit together; `../CONTRIBUTING.md` is the file-by-file recipes.
+
+**Read its "four pairs that must be edited together" section before your first
+change.** Two of those pairs straddle the repository boundary, so no test in
+this repository can catch them going out of step — and nothing fails when they
+do.
+
 ```bash
 npm run dev     # dev server on :5173, proxying /api to the backend
 npm run build
@@ -8,10 +16,31 @@ npm test
 
 ## Tests
 
-Vitest, in the default `node` environment — none of these render components,
-they exercise the logic underneath. Run with `npm test`.
+Vitest. Run with `npm test`.
+
+Two kinds, and the distinction matters when adding one:
+
+| | Environment | Opt in with |
+|---|---|---|
+| Logic — the majority | `node` (the default) | nothing |
+| Rendering a component | `jsdom` | `// @vitest-environment jsdom` on line 1 |
+
+`node` stays the default deliberately: jsdom costs about a second of startup,
+and most of these tests never touch a DOM. A rendering test declares its own
+environment so that cost lands only where it buys something. `vitest.setup.js`
+registers the jest-dom matchers and unmounts between tests.
 
 They concentrate on the things that fail quietly:
+
+- **MediaViewPage** — which tabs a media type offers, and which of the AI/edit
+  affordances a given viewer is shown. Both are decided by flags and both are
+  silent when wrong: a document that offers "תמלול" opens an editor for a
+  transcript that does not exist. The page takes everything it renders from
+  `useMediaViewPageController`, so the test mocks that one module and needs no
+  store, router or network.
+- **Navbar** — the per-role link sets, which are built by extending one another
+  (student ⊂ lecturer ⊂ admin). Adding an entry to the wrong array shows
+  students a link they will get a 403 from, and nothing fails.
 
 - **peerMesh** — the WebRTC signalling. There is no browser, camera or second
   peer here, so the mesh takes its connection factory and transport as

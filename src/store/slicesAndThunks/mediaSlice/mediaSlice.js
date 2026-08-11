@@ -16,15 +16,15 @@ const mediaSlice = createSlice({
     builder
       .addCase(fetchAllMedia.pending, (state) => { state.status = statuses.loading; })
       .addCase(fetchAllMedia.fulfilled, (state, action) => { state.status = statuses.succeeded; state.items = action.payload; })
-      .addCase(fetchAllMedia.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload; })
+      .addCase(fetchAllMedia.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
       .addCase(fetchOneMedia.pending, (state) => { state.status = statuses.loading; })
       .addCase(fetchOneMedia.fulfilled, (state, action) => { state.status = statuses.succeeded; state.selectedItem = action.payload; })
-      .addCase(fetchOneMedia.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload; })
+      .addCase(fetchOneMedia.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
       .addCase(uploadMedia.pending, (state) => { state.status = statuses.loading; })
       .addCase(uploadMedia.fulfilled, (state, action) => { state.status = statuses.succeeded; state.items.unshift(action.payload); })
-      .addCase(uploadMedia.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload; })
+      .addCase(uploadMedia.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
       .addCase(updateMedia.fulfilled, (state, action) => {
         const idx = state.items.findIndex((i) => i.id === action.payload.id);
@@ -36,7 +36,7 @@ const mediaSlice = createSlice({
         state.items = state.items.filter((i) => i.id !== action.payload.id);
         if (state.selectedItem?.id === action.payload.id) state.selectedItem = null;
       })
-      .addCase(deleteMedia.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(deleteMedia.rejected, (state, action) => { state.error = action.payload?.message; });
   },
 });
 

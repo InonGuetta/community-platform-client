@@ -24,7 +24,7 @@ const coursesSlice = createSlice({
     builder
       .addCase(fetchAllCourses.pending, (state) => { state.status = statuses.loading; })
       .addCase(fetchAllCourses.fulfilled, (state, action) => { state.status = statuses.succeeded; state.items = action.payload; })
-      .addCase(fetchAllCourses.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload; })
+      .addCase(fetchAllCourses.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
       .addCase(fetchMyCourses.fulfilled, (state, action) => { state.myCourses = action.payload; })
 
@@ -33,19 +33,19 @@ const coursesSlice = createSlice({
       })
 
       .addCase(createCourse.fulfilled, (state, action) => { state.items.unshift(action.payload); })
-      .addCase(createCourse.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(createCourse.rejected, (state, action) => { state.error = action.payload?.message; })
 
       .addCase(updateCourse.fulfilled, (state, action) => {
         const idx = state.items.findIndex((c) => c.id === action.payload.id);
         if (idx !== -1) state.items[idx] = action.payload;
       })
-      .addCase(updateCourse.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(updateCourse.rejected, (state, action) => { state.error = action.payload?.message; })
 
       .addCase(deleteCourse.fulfilled, (state, action) => {
         state.items = state.items.filter((c) => c.id !== action.payload.id);
         delete state.studentsByCourse[action.payload.id];
       })
-      .addCase(deleteCourse.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(deleteCourse.rejected, (state, action) => { state.error = action.payload?.message; })
 
       // Both enrollment changes also move student_count, which the card shows —
       // so the course row is patched alongside the roster rather than waiting
@@ -56,7 +56,7 @@ const coursesSlice = createSlice({
         const course = state.items.find((c) => c.id === Number(courseId));
         if (course) course.student_count = students.length;
       })
-      .addCase(enrollStudent.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(enrollStudent.rejected, (state, action) => { state.error = action.payload?.message; })
 
       .addCase(unenrollStudent.fulfilled, (state, action) => {
         const { courseId, studentId } = action.payload;
@@ -67,7 +67,7 @@ const coursesSlice = createSlice({
           if (course) course.student_count = state.studentsByCourse[courseId].length;
         }
       })
-      .addCase(unenrollStudent.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(unenrollStudent.rejected, (state, action) => { state.error = action.payload?.message; });
   },
 });
 

@@ -49,6 +49,27 @@ describe("failures that are not the server's answer", () => {
     expect(err.response.data.message).toBeTruthy();
   });
 
+  // The failures invented HERE still have to carry a code, because the Hebrew
+  // the user sees is keyed on it. This is the case that was actually broken:
+  // the unreachable-server text was reworded, the translation was keyed on the
+  // old prose, and the specific Hebrew silently stopped applying. The wording
+  // below is deliberately not asserted — that it is free to change is the point.
+  test.each([
+    ["no response at all", { config: { url: "/media/get-all" }, message: "Network Error" }, "NETWORK_UNREACHABLE"],
+    ["a non-JSON 5xx body", { config: { url: "/x" }, response: { status: 503, data: "<html>down</html>" } }, "SERVER_UNAVAILABLE"],
+    ["a non-JSON 4xx body", { config: { url: "/x" }, response: { status: 400, data: "nope" } }, "BAD_RESPONSE"],
+  ])("%s is stamped with %s", async (_label, input, code) => {
+    const err = await rejected(input).catch((e) => e);
+    expect(err.response.data.code).toBe(code);
+  });
+
+  // A body the API did send keeps its own code — the normaliser only fills in
+  // for responses that never carried one.
+  test("a real API error keeps the server's code", async () => {
+    const err = await send(404, "/media/9", { message: "Media not found", code: "MEDIA_NOT_FOUND" });
+    expect(err.response.data.code).toBe("MEDIA_NOT_FOUND");
+  });
+
   // A retried request is normalised by the inner pass; the outer one must not
   // treat the same 401 as a second expiry.
   test("an already-normalised error is left alone", async () => {

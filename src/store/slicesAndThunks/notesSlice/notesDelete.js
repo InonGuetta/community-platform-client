@@ -1,11 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { notesApi } from "../../../api/notesApi";
+import { rejectionOf } from "../../../utilities/apiError";
 
 export const deleteNote = createAsyncThunk("notes/delete", async (id, { rejectWithValue }) => {
   try {
     await notesApi.remove(id);
     return { id };
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || "Failed to delete note");
+    return rejectWithValue(rejectionOf(err, "Failed to delete note"));
   }
 });

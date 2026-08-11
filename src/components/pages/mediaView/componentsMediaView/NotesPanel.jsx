@@ -12,6 +12,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { useDispatch } from "react-redux";
 import { deleteBookmark } from "../../../../store/slicesAndThunks/bookmarksSlice/bookmarksDelete";
 import { formatTime } from "../../../../utilities/formatTime";
+import { listRowSx } from "../../../../utilities/constant";
 
 // "Active" bookmark = the latest one whose timestamp is <= current playback.
 // That's the one the user is "inside" right now.
@@ -62,12 +63,15 @@ const NotesPanel = ({ bookmarks = [], currentTime = 0, onCreateBookmark, onSeek 
               key={bm.id}
               onClick={() => onSeek?.(bm.timestamp_seconds)}
               sx={{
-                bgcolor: isActive ? "primary.light" : "grey.50",
-                color: isActive ? "primary.contrastText" : "inherit",
                 borderRadius: 1,
                 mb: 0.5,
                 pr: 6,
-                "&:hover": { bgcolor: isActive ? "primary.main" : "grey.100" },
+                ...listRowSx,
+                ...(isActive && {
+                  bgcolor: "primary.light",
+                  color: "primary.contrastText",
+                  "&:hover": { bgcolor: "primary.main" },
+                }),
               }}
             >
               <ListItemText

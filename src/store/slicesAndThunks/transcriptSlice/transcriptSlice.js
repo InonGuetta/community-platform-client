@@ -30,7 +30,7 @@ const transcriptSlice = createSlice({
         state.status = statuses.succeeded;
         state.byMediaId[action.payload.media_id] = action.payload;
       })
-      .addCase(fetchTranscript.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload; })
+      .addCase(fetchTranscript.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
       .addCase(searchTranscripts.fulfilled, (state, action) => { state.searchResults = action.payload; })
 
@@ -39,7 +39,7 @@ const transcriptSlice = createSlice({
         mergeTranscript(state, action.payload);
       })
       .addCase(updateTranscript.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload?.message;
       })
 
       .addCase(fixHebrewTranscript.fulfilled, (state, action) => {
@@ -50,7 +50,7 @@ const transcriptSlice = createSlice({
         mergeTranscript(state, action.payload);
       })
       .addCase(generateKeyPointHeadings.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload?.message;
       });
   },
 });

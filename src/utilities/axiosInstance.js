@@ -1,5 +1,6 @@
 import axios from "axios";
 import { logger } from "./logger";
+import { ERROR_CODES } from "./apiError";
 
 const axiosInstance = axios.create({
   baseURL: "/api",
@@ -97,7 +98,7 @@ const RETRIABLE_STATUSES = new Set([502, 503, 504]);
 // Anything else in RETRIABLE_STATUSES *might* be the API's own answer, so it is
 // treated as processed.
 const neverReachedServer = (error) =>
-  !error.response || error.response.data?.code === "API_UNAVAILABLE";
+  !error.response || error.response.data?.code === ERROR_CODES.API_UNAVAILABLE;
 
 // Idempotent by HTTP semantics, plus the two POSTs that are safe to repeat by
 // inspection: login only reads and sets a cookie, logout only clears one.
@@ -162,9 +163,14 @@ const normalizeError = (error) => {
   if (error?.__normalized) return Promise.reject(error);
   if (error && typeof error === "object") error.__normalized = true;
 
+  // The `code` is the half that matters downstream: the Hebrew the user sees is
+  // chosen by it, so the wording here is free to change without breaking the
+  // translation. That was not true before — this exact string was reworded once
+  // and its Hebrew entry, which matched on the prose, silently stopped applying.
   if (!error.response) {
     error.response = {
       data: {
+        code: ERROR_CODES.NETWORK_UNREACHABLE,
         message:
           "Cannot reach the server. It may still be starting up — wait a moment and try again.",
       },
@@ -185,12 +191,16 @@ const normalizeError = (error) => {
   }
 
   if (typeof data !== "object" || data === null) {
-    error.response.data = {
-      message:
-        status >= 500
-          ? "The server is temporarily unavailable. Please try again in a moment."
-          : "Unexpected server response. Please try again.",
-    };
+    error.response.data =
+      status >= 500
+        ? {
+            code: ERROR_CODES.SERVER_UNAVAILABLE,
+            message: "The server is temporarily unavailable. Please try again in a moment.",
+          }
+        : {
+            code: ERROR_CODES.BAD_RESPONSE,
+            message: "Unexpected server response. Please try again.",
+          };
   }
 
   return Promise.reject(error);

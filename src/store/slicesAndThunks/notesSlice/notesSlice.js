@@ -15,7 +15,7 @@ const notesSlice = createSlice({
     builder
       .addCase(fetchNotes.pending, (state) => { state.status = statuses.loading; })
       .addCase(fetchNotes.fulfilled, (state, action) => { state.status = statuses.succeeded; state.items = action.payload; })
-      .addCase(fetchNotes.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload; })
+      .addCase(fetchNotes.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
       // New notes go to the top — the list is ordered newest-first.
       .addCase(createNote.fulfilled, (state, action) => { state.items.unshift(action.payload); })

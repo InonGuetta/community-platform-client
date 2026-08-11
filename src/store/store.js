@@ -6,6 +6,7 @@ import transcriptReducer from "./slicesAndThunks/transcriptSlice/transcriptSlice
 import bookmarksReducer from "./slicesAndThunks/bookmarksSlice/bookmarksSlice";
 import notesReducer from "./slicesAndThunks/notesSlice/notesSlice";
 import likesReducer from "./slicesAndThunks/likesSlice/likesSlice";
+import savesReducer from "./slicesAndThunks/savesSlice/savesSlice";
 import usersReducer from "./slicesAndThunks/usersSlice/usersSlice";
 import coursesReducer from "./slicesAndThunks/coursesSlice/coursesSlice";
 import uiReducer from "./slicesAndThunks/uiSlice";
@@ -23,6 +24,7 @@ const appReducer = combineReducers({
   bookmarks: bookmarksReducer,
   notes: notesReducer,
   likes: likesReducer,
+  saves: savesReducer,
   users: usersReducer,
   courses: coursesReducer,
   ui: uiReducer,

@@ -1,12 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { likesApi } from "../../../api/likesApi";
+import { rejectionOf } from "../../../utilities/apiError";
 
 // The likes page's own data: full media rows to render as cards.
 export const fetchLikedMedia = createAsyncThunk("likes/fetchMedia", async (_, { rejectWithValue }) => {
   try {
     return await likesApi.list();
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || "Failed to fetch liked media");
+    return rejectWithValue(rejectionOf(err, "Failed to fetch liked media"));
   }
 });
 
@@ -16,6 +17,6 @@ export const fetchLikedIds = createAsyncThunk("likes/fetchIds", async (_, { reje
   try {
     return await likesApi.listIds();
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || "Failed to fetch likes");
+    return rejectWithValue(rejectionOf(err, "Failed to fetch likes"));
   }
 });

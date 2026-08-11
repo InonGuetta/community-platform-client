@@ -19,7 +19,9 @@ import CoursesPage from "./components/pages/courses/CoursesPage";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import DonatePage from "./components/pages/donate/DonatePage";
 import NotebookPage from "./components/pages/notebook/NotebookPage";
-import LikesPage from "./components/pages/likes/LikesPage";
+import CollectionPage from "./components/pages/personal/CollectionPage";
+import PlaylistPage from "./components/pages/personal/PlaylistPage";
+import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE } from "./components/pages/personal/personalShelves";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
 
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/auth/google/callback"];
@@ -98,8 +100,21 @@ const App = () => {
           <Route path="/courses" element={<ProtectedRoute allowedRoles={["lecturer", "admin"]}><CoursesPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
           <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
-          <Route path="/notebook" element={<ProtectedRoute><NotebookPage /></ProtectedRoute>} />
-          <Route path="/likes" element={<ProtectedRoute><LikesPage /></ProtectedRoute>} />
+          {/* The personal shelves take their paths from personalShelves.js, the
+              same file the navigation builds its links from — so a path can no
+              longer be changed on one side only, which used to leave the link
+              falling through to the "*" catch-all with no error anywhere. */}
+          <Route path={NOTEBOOK_SHELF.path} element={<ProtectedRoute><NotebookPage /></ProtectedRoute>} />
+          {COLLECTION_SHELVES.map((shelf) => (
+            <Route
+              key={shelf.path}
+              path={shelf.path}
+              element={<ProtectedRoute><CollectionPage shelf={shelf} /></ProtectedRoute>}
+            />
+          ))}
+          {/* One saved list, opened from the cards on the saved shelf. Its path
+              is built from that shelf's own, in personalShelves.js. */}
+          <Route path={SAVED_LIST_ROUTE} element={<ProtectedRoute><PlaylistPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/archive" replace />} />
         </Routes>
         </PageTransition>

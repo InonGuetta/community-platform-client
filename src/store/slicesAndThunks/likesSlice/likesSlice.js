@@ -27,7 +27,7 @@ const likesSlice = createSlice({
       })
       .addCase(fetchLikedMedia.rejected, (state, action) => {
         state.status = statuses.failed;
-        state.error = action.payload;
+        state.error = action.payload?.message;
       })
 
       .addCase(fetchLikedIds.fulfilled, (state, action) => { state.ids = action.payload; })

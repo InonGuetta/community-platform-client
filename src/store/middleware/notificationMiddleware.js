@@ -1,4 +1,5 @@
 import { notify } from "../slicesAndThunks/notificationSlice";
+import { hebrewForError } from "../../utilities/apiError";
 
 // Central place that turns Redux mutation outcomes into user-facing toasts, so
 // individual components/thunks don't each have to wire feedback. Keyed by the
@@ -26,6 +27,12 @@ const SUCCESS_MESSAGES = {
   "transcript/trigger": "התמלול הופעל",
   "transcript/fixHebrew": "העברית תוקנה",
   "transcript/keyPointHeadings": "כותרות המשנה נוצרו",
+  // The save toggle itself stays silent — the button lights up, which is the
+  // feedback. Making and discarding a LIST is not visible outside the menu it
+  // happens in, so those two do get a toast.
+  "saves/createPlaylist": "הרשימה נוצרה",
+  "saves/renamePlaylist": "שם הרשימה עודכן",
+  "saves/deletePlaylist": "הרשימה נמחקה",
 };
 
 // Error toasts: surfaces failures that were previously silent. Uses curated
@@ -48,41 +55,26 @@ const ERROR_MESSAGES = {
   "transcript/fixHebrew": "תיקון העברית נכשל",
   "transcript/keyPointHeadings": "יצירת כותרות המשנה נכשלה",
   "transcript/search": "החיפוש נכשל",
+  // Unlike the success side, every save failure is worth saying out loud: the
+  // reducers roll the optimistic change back, so without a toast the button
+  // simply un-presses itself and the user is left guessing.
+  "saves/add": "השמירה נכשלה",
+  "saves/remove": "ביטול השמירה נכשל",
+  "saves/fetchPlaylists": "טעינת הרשימות נכשלה",
+  "saves/createPlaylist": "יצירת הרשימה נכשלה",
+  "saves/renamePlaylist": "שינוי שם הרשימה נכשל",
+  "saves/deletePlaylist": "מחיקת הרשימה נכשלה",
+  "saves/addItem": "ההוספה לרשימה נכשלה",
+  "saves/removeItem": "ההסרה מהרשימה נכשלה",
 };
 
-// Hebrew translations of the specific reasons the server (or the axios
-// interceptor) can return, so a failed action tells the user WHAT went wrong —
-// e.g. a duplicate email — instead of only a generic "…נכשל". The rejectWithValue
-// payload carries these exact English strings (from the server's AppError
-// messages / the interceptor). Anything not listed here (dynamic messages, a
-// thunk's own fallback) degrades gracefully to the per-action ERROR_MESSAGES
-// text, so the map can drift without ever breaking — it only ever adds detail.
-const SERVER_MESSAGE_HE = {
-  "Email already in use": "האימייל כבר בשימוש",
-  // A 401 mid-session: the toast would otherwise blame whatever request
-  // happened to be in flight ("טעינת המדיה נכשלה") instead of the real cause.
-  "Unauthorized": "פג תוקף החיבור, יש להתחבר מחדש",
-  "Invalid token": "פג תוקף החיבור, יש להתחבר מחדש",
-  "Cannot remove the last active admin — promote another admin first":
-    "לא ניתן להסיר את המנהל הפעיל האחרון — יש למנות מנהל אחר קודם",
-  "Forbidden": "אין לך הרשאה לפעולה זו",
-  "Media not found": "המדיה לא נמצאה",
-  "Session not found": "המפגש לא נמצא",
-  "Session not found or not authorized": "המפגש לא נמצא או שאין לך הרשאה",
-  "Bookmark not found": "הסימנייה לא נמצאה",
-  "Transcript not found": "התמלול לא נמצא",
-  "No transcript text to correct": "אין טקסט תמלול לתיקון",
-  "No transcript content yet — run transcription first": "אין עדיין תוכן תמלול — הפעל תמלול קודם",
-  "AI analysis produced no key points": "ניתוח ה-AI לא הפיק נקודות מפתח",
-  "Transcription is not available for text media": "תמלול אינו זמין למדיה טקסטואלית",
-  "Database temporarily unavailable, please retry": "מסד הנתונים אינו זמין כרגע, נסה שוב",
-  "Internal server error": "שגיאת שרת פנימית",
-  "Cannot reach the server. Make sure it is running, then try again.":
-    "לא ניתן להגיע לשרת. ודא שהוא פועל ונסה שוב.",
-  "The server is temporarily unavailable. Please try again in a moment.":
-    "השרת אינו זמין כרגע. נסה שוב בעוד רגע.",
-  "Unexpected server response. Please try again.": "תגובת שרת בלתי צפויה. נסה שוב.",
-};
+// The Hebrew for a specific reason — a duplicate email, an expired session —
+// lives in utilities/apiError.js next to the codes it is keyed on, because the
+// toasts here are no longer its only consumer: the sign-in and sign-up forms
+// render their errors inline and use the same lookup.
+//
+// Anything it has nothing specific to say about degrades to the per-action text
+// below, so the map only ever ADDS detail — an unknown code is never worse.
 
 const baseType = (type) => type.replace(/\/(pending|fulfilled|rejected)$/, "");
 
@@ -101,11 +93,14 @@ export const notificationMiddleware = (store) => (next) => (action) => {
       const fallback = ERROR_MESSAGES[baseType(type)];
       // Only curated actions surface an error toast (benign rejections stay quiet).
       if (fallback) {
-        const payload = typeof action.payload === "string" ? action.payload : "";
-        // Prefer the Hebrew translation of the specific reason so the user knows
-        // what to fix; otherwise fall back to the per-action message.
-        const message = SERVER_MESSAGE_HE[payload] || fallback;
-        store.dispatch(notify({ message, severity: "error" }));
+        // Prefer the Hebrew for the specific reason so the user knows what to
+        // fix; otherwise the per-action message, which already names the action
+        // that failed. The code is absent whenever the rejection came from a
+        // thunk's own fallback rather than from the API.
+        store.dispatch(notify({
+          message: hebrewForError(action.payload, fallback),
+          severity: "error",
+        }));
       }
     }
   }

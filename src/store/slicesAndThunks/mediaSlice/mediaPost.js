@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { mediaApi } from "../../../api/mediaApi";
 import { setUploadProgress } from "../uiSlice";
+import { rejectionOf } from "../../../utilities/apiError";
 
 // Progress is reported by dispatching, not by taking a callback in the thunk
 // argument: the argument ends up in the action's meta, and a function there
@@ -13,6 +14,6 @@ export const uploadMedia = createAsyncThunk("media/upload", async (formData, { d
       dispatch(setUploadProgress(Math.round((event.loaded / event.total) * 100)));
     });
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || "Upload failed");
+    return rejectWithValue(rejectionOf(err, "Upload failed"));
   }
 });

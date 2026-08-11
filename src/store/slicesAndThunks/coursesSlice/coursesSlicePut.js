@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { coursesApi } from "../../../api/coursesApi";
+import { rejectionOf } from "../../../utilities/apiError";
 
 export const updateCourse = createAsyncThunk(
   "courses/update",
@@ -7,7 +8,7 @@ export const updateCourse = createAsyncThunk(
     try {
       return await coursesApi.update(id, payload);
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to update course");
+      return rejectWithValue(rejectionOf(err, "Failed to update course"));
     }
   }
 );

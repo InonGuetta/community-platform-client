@@ -7,6 +7,11 @@ const initialState = {
   user: null,
   status: statuses.idle,
   loginStatus: statuses.idle,
+  // The WHOLE rejection — { message, code } — not just the message, unlike every
+  // other slice. Auth is the only one whose error is rendered to the user
+  // (inline, by SignIn/SignUp, rather than as a toast), and the Hebrew for it is
+  // keyed on the code. Storing only the message is what left "Invalid
+  // credentials" on screen in a right-to-left Hebrew application.
   error: null,
   initialized: false,
   // Tracks the in-flight fetchMe request id; cleared whenever a login/register/logout

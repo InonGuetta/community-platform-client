@@ -21,6 +21,7 @@ of them had two problems:
    PUT    /media/update/:id       DELETE /media/delete/:id
    GET    /notes                  POST /notes
    PUT    /notes/:id              DELETE /notes/:id
+   PUT    /notes/order
    ```
 
    Media spells the verb into the path; notes and bookmarks are REST. Spread

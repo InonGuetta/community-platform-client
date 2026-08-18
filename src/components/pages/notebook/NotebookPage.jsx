@@ -27,21 +27,28 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import CallSplitIcon from "@mui/icons-material/CallSplit";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import SourcePreviewDialog from "./componentsNotebook/SourcePreviewDialog";
 import NoteToolbar from "./componentsNotebook/NoteToolbar";
 import NoteCard from "./componentsNotebook/NoteCard";
+import ExportSplitDialog from "./componentsNotebook/ExportSplitDialog";
+import ExportSourcesDialog from "./componentsNotebook/ExportSourcesDialog";
+import { useDragReorder, dropIndicatorSx } from "./componentsNotebook/useDragReorder";
 import { fetchNotes } from "../../../store/slicesAndThunks/notesSlice/notesGet";
 import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost";
-import { updateNote } from "../../../store/slicesAndThunks/notesSlice/notesPut";
+import { updateNote, reorderNotes } from "../../../store/slicesAndThunks/notesSlice/notesPut";
 import { deleteNote } from "../../../store/slicesAndThunks/notesSlice/notesDelete";
 import { fetchBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksGet";
 import { clearBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksSlice";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { statuses, mediaTypeLabels, mediaTypeAccents, listRowSx } from "../../../utilities/constant";
 import { formatTime } from "../../../utilities/formatTime";
+import { isSaveShortcut } from "../../../utilities/keyboard";
 import { noteBodyToHtml, noteHtmlToPlainText, sanitizeNoteHtml } from "../../../utilities/noteHtml";
-import { downloadNotesPdf, downloadNotesWord } from "../../../utilities/notesExport";
+import { BOOKMARK_DRAG_MIME, bookmarkDragPayload } from "../../../utilities/noteSource";
+import { downloadNotesPdf, downloadNotesWord, downloadNotebooks } from "../../../utilities/notesExport";
+import { SOURCE_STYLES } from "../../../utilities/noteFootnotes";
 
 // Identity of a source entry, for keeping the trail free of duplicates.
 const sourceKey = (entry) => `${entry.mediaId}:${entry.timestampSeconds ?? ""}`;
@@ -82,6 +89,13 @@ const NotebookPage = () => {
   const [deleteTargets, setDeleteTargets] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [exportAnchor, setExportAnchor] = useState(null);
+  const [splitOpen, setSplitOpen] = useState(false);
+
+  // The export waiting on its last question, and the answer that was given last
+  // time — which is only the row the question opens on, never an answer given
+  // on the user's behalf. See ExportSourcesDialog.
+  const [pendingExport, setPendingExport] = useState(null);
+  const [sourceStyle, setSourceStyle] = useState(SOURCE_STYLES.footnotes);
 
   // The editors' imperative handles and the cards' DOM nodes, by note id. Refs
   // rather than state: nothing on screen depends on them, and re-rendering the
@@ -241,7 +255,7 @@ const NotebookPage = () => {
   // The draft is dropped only on success: a failed save must leave the user's
   // typing exactly where it is, which is the whole reason the store's copy is
   // not treated as the truth until it agrees.
-  const handleSave = async (note) => {
+  const handleSave = async (note, { announce = false } = {}) => {
     const draft = draftFor(note.id);
     const res = await dispatch(updateNote({
       id: note.id,
@@ -252,26 +266,119 @@ const NotebookPage = () => {
       setDrafts((prev) => Object.fromEntries(
         Object.entries(prev).filter(([id]) => Number(id) !== note.id)
       ));
+      // A click on the save button is its own receipt — the button greys out
+      // under the cursor that pressed it. A keyboard save has no button and no
+      // cursor near one, so that path says so out loud instead.
+      if (announce) dispatch(notify({ message: "ההערה נשמרה", severity: "success" }));
     }
   };
+
+  // Ctrl+S / Cmd+S saves the card the caret is in, and only that one.
+  //
+  // Deliberately not "save everything unsaved": the notebook has every note
+  // open at once, so a save-all would write notes the user may have edited an
+  // hour ago and left open on purpose. The shortcut means what it means in an
+  // editor — save the thing I am writing — and the card's own button is right
+  // there for anything else.
+  //
+  // Held in a ref rather than listed as dependencies. The handler reads the
+  // drafts, which change on every keystroke; an effect keyed on those would
+  // detach and re-attach a window listener as fast as the user can type.
+  const saveActiveNote = useRef(() => {});
+  useEffect(() => {
+    saveActiveNote.current = () => {
+      const note = items.find((n) => n.id === activeNoteId);
+      // Both of these used to be silent. Since the shortcut swallows the
+      // keystroke either way, a user pressing it and getting NOTHING — no save,
+      // no browser dialog, no message — has no way to tell the difference
+      // between "it saved" and "this application ignores Ctrl+S".
+      if (!note) {
+        dispatch(notify({ message: "לא נבחרה הערה. לחץ בתוך הערה ואז שמור.", severity: "info" }));
+        return;
+      }
+      if (!isDirty(note.id)) {
+        dispatch(notify({ message: "אין שינויים לשמירה", severity: "info" }));
+        return;
+      }
+      handleSave(note, { announce: true });
+    };
+  });
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      // Which key this is — and on which keyboard — is a question with a
+      // surprising answer, so it lives in utilities/keyboard.js with the
+      // Hebrew-layout bug that prompted it written out in full.
+      if (!isSaveShortcut(event)) return;
+
+      // Prevented even when there is nothing to save, and BEFORE deciding
+      // whether to act. The browser's "save page as" dialog is never what
+      // Ctrl+S meant on a page you are writing on, and an editor that only
+      // sometimes swallows the shortcut is worse than one that never does.
+      event.preventDefault();
+
+      // A keystroke inside a dialog belongs to the dialog. Without this, Ctrl+S
+      // while naming an export file saves a note behind the modal — an edit the
+      // user cannot see happening.
+      if (event.target?.closest?.('[role="dialog"]')) return;
+
+      saveActiveNote.current();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [dispatch]);
 
   // Deleting is irreversible and the notes are the user's own writing, so both
   // the single-note button and the bulk action go through the same confirmation
   // — the only difference is how many notes are named in it.
-  const handleDeleteConfirm = () => {
+  //
+  // The local state is cleared for the notes that were actually deleted, which is
+  // why this waits. It used to fire the deletes and clear immediately, so a
+  // request that failed left the note on screen with its draft and its tick
+  // already discarded — the one state the user cannot recover from, since the
+  // draft held whatever they had typed and not yet saved.
+  //
+  // Failures need no handling here: every thunk rejects through rejectionOf and
+  // the notification middleware turns that into a toast, so a note that survives
+  // says so on its own. What matters is that it survives INTACT.
+  const handleDeleteConfirm = async () => {
     const targets = deleteTargets ?? [];
     setDeleteTargets(null);
-    const ids = new Set(targets.map((note) => note.id));
 
-    for (const id of ids) dispatch(deleteNote(id));
+    const outcomes = await Promise.all(
+      targets.map(async (note) => ({
+        id: note.id,
+        deleted: (await dispatch(deleteNote(note.id))).meta.requestStatus === "fulfilled",
+      }))
+    );
+    const gone = new Set(outcomes.filter((o) => o.deleted).map((o) => o.id));
+    if (gone.size === 0) return;
 
     // Everything the page still holds ABOUT those notes goes with them: a
     // lingering draft would be re-applied to whatever note reused the id, and a
     // lingering tick would keep a deleted note in the selection count.
-    setDrafts((prev) => Object.fromEntries(Object.entries(prev).filter(([id]) => !ids.has(Number(id)))));
-    setSelectedIds((prev) => new Set([...prev].filter((id) => !ids.has(id))));
-    if (activeNoteId && ids.has(activeNoteId)) setActiveNoteId(null);
+    setDrafts((prev) => Object.fromEntries(Object.entries(prev).filter(([id]) => !gone.has(Number(id)))));
+    setSelectedIds((prev) => new Set([...prev].filter((id) => !gone.has(id))));
+    if (activeNoteId && gone.has(activeNoteId)) setActiveNoteId(null);
   };
+
+  // Dragging notes into a new order, in the index down the side — which is now
+  // the only place it happens. The cards had a grip of their own until it was
+  // removed as visual noise; see useDragReorder.
+  //
+  // Turned off while a search is running. A filtered
+  // list is not the notebook: dropping note 9 "above note 2" when notes 3 to 8
+  // are hidden gives no answer to where the hidden ones go, and any answer the
+  // code picked would move notes the user cannot see.
+  const reorderHint = search.trim()
+    ? "נקה את החיפוש כדי לשנות את סדר ההערות"
+    : (items.length < 2 ? "צריך לפחות שתי הערות כדי לשנות סדר" : "");
+
+  const drag = useDragReorder({
+    ids: items.map((note) => note.id),
+    onReorder: (ids) => dispatch(reorderNotes(ids)),
+    disabled: Boolean(reorderHint),
+  });
 
   const toggleSelected = (id) => setSelectedIds((prev) => {
     const next = new Set(prev);
@@ -307,15 +414,48 @@ const NotebookPage = () => {
   );
   const notesToExport = selectedNotes.length > 0 ? selectedNotes : filtered;
 
+  // An export the user has asked for, held while the one remaining question is
+  // put to them. `{ format }` is the whole notebook to one file; a `books` list
+  // is the split export, already divided and ordered by its dialog.
+  //
+  // Nothing is written until a source style comes back, which is what makes the
+  // question a step rather than a setting: cancelling it exports nothing.
+  const askSources = (request) => {
+    setExportAnchor(null);
+    setPendingExport(request);
+  };
+
+  // Every export ends here, single file or many.
+  //
   // Both formats pull their machinery in on demand — jsPDF, the bidi tables and
   // the Hebrew font for one — so this is async and can fail. A failure is
   // reported rather than swallowed: from the user's side a silent no-op is
   // indistinguishable from a click that missed.
-  const handleExport = async (write) => {
-    setExportAnchor(null);
+  //
+  // The count is reported for a split export because those files land in a
+  // downloads folder rather than on screen: three notebooks that produced two
+  // files is worth knowing at the moment it happens, not when the third is
+  // looked for later.
+  const runExport = async (sources) => {
+    const { format, books } = pendingExport ?? {};
+    if (!format) return;
+
+    // Remembered as the default the next dialog opens on: most people export
+    // the same way every time.
+    setSourceStyle(sources);
     setExporting(true);
     try {
-      await write(notesToExport);
+      const write = format === "pdf" ? downloadNotesPdf : downloadNotesWord;
+
+      if (books) {
+        const written = await downloadNotebooks(books, (bookNotes, options) =>
+          write(bookNotes, { ...options, sources }));
+        setSplitOpen(false);
+        dispatch(notify({ message: `נוצרו ${written} קבצים`, severity: "success" }));
+      } else {
+        await write(notesToExport, { sources });
+      }
+      setPendingExport(null);
     } catch {
       dispatch(notify({ message: "הייצוא נכשל. נסה שוב.", severity: "error" }));
     } finally {
@@ -386,14 +526,30 @@ const NotebookPage = () => {
           <Typography variant="caption" color="text.secondary" sx={{ px: 2, py: 0.5, display: "block" }}>
             {selectedCount > 0 ? `${selectedCount} הערות שנבחרו` : `כל ההערות המוצגות (${notesToExport.length})`}
           </Typography>
-          <MenuItem onClick={() => handleExport(downloadNotesPdf)} sx={{ textAlign: "start" }}>
+
+          {/* Three rows and nothing else. What happens to the SOURCES is asked
+              after one of them is pressed — see ExportSourcesDialog — because
+              it is a decision with three real answers rather than a setting to
+              read past on the way to the button everybody came for. */}
+          <MenuItem onClick={() => askSources({ format: "pdf" })} sx={{ textAlign: "start" }}>
             <ListItemIcon><PictureAsPdfOutlinedIcon fontSize="small" /></ListItemIcon>
             <ListItemText primary="ייצוא ל-PDF" secondary="טקסט בלבד, ללא עיצוב ותמונות" />
           </MenuItem>
-          <MenuItem onClick={() => handleExport(downloadNotesWord)} sx={{ textAlign: "start" }}>
+          <MenuItem onClick={() => askSources({ format: "word" })} sx={{ textAlign: "start" }}>
             <ListItemIcon><DescriptionOutlinedIcon fontSize="small" /></ListItemIcon>
             <ListItemText primary="ייצוא ל-Word" secondary="עם העיצוב והתמונות" />
           </MenuItem>
+
+          {/* Offered only when there is something to divide. An array rather
+              than a fragment: MUI walks a Menu's children to drive keyboard
+              navigation, and a fragment hides them from it. */}
+          {notesToExport.length >= 2 && [
+            <Divider key="split-divider" />,
+            <MenuItem key="split" onClick={() => { setExportAnchor(null); setSplitOpen(true); }} sx={{ textAlign: "start" }}>
+              <ListItemIcon><CallSplitIcon fontSize="small" /></ListItemIcon>
+              <ListItemText primary="פיצול למספר מחברות…" secondary="לבחור כמה קבצים, ומה נכנס לכל אחד" />
+            </MenuItem>,
+          ]}
         </Menu>
 
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreate}
@@ -473,15 +629,28 @@ const NotebookPage = () => {
                   <ListItemButton
                     key={n.id}
                     onClick={() => goToNote(n.id)}
+                    // A row IS the note, so the whole row is the grip — there is
+                    // no separate handle to press and none to look at. The
+                    // cursor is the only affordance, which is the trade the
+                    // notebook's owner chose over a visible one.
+                    {...drag.itemProps(n.id)}
+                    // And the same reordering from the keyboard: focus a row,
+                    // press the arrow keys. Rows are focusable already, so this
+                    // costs nothing on screen — see useDragReorder.keyProps.
+                    {...drag.keyProps(n.id)}
                     sx={{
                       alignItems: "flex-start", gap: 1,
                       borderRadius: 2, mb: 1,
+                      cursor: reorderHint ? "pointer" : "grab",
+                      "&:active": { cursor: reorderHint ? "pointer" : "grabbing" },
                       ...listRowSx,
                       ...(isActive && {
                         bgcolor: "primary.light",
                         color: "primary.contrastText",
                         "&:hover": { bgcolor: "primary.main" },
                       }),
+                      opacity: drag.isDragging(n.id) ? 0.4 : 1,
+                      ...dropIndicatorSx(drag.markerFor(n.id)),
                     }}
                   >
                     {/* Ticking a note is not opening it, so the box swallows the
@@ -528,10 +697,20 @@ const NotebookPage = () => {
           <Divider />
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1, maxHeight: "45%", minHeight: 120 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <BookmarkIcon fontSize="small" color="primary" />
-              <Typography variant="subtitle2" fontWeight={700}>הסימניות שלי</Typography>
+              <BookmarkIcon fontSize="small" color="primary" sx={{ flexShrink: 0 }} />
+              <Typography variant="subtitle2" fontWeight={700} sx={{ flexShrink: 0 }}>הסימניות שלי</Typography>
               {bookmarks.length > 0 && (
-                <Chip size="small" label={bookmarks.length} sx={{ height: 18, fontSize: "0.65rem" }} />
+                <Chip size="small" label={bookmarks.length} sx={{ height: 18, fontSize: "0.65rem", flexShrink: 0 }} />
+              )}
+              {/* The one thing about this list that is not visible from looking
+                  at it. Shown next to the count rather than as a tooltip on the
+                  rows, because a feature nobody hovers over is a feature nobody
+                  finds — and it is the ONLY thing here allowed to be squeezed
+                  out, because the heading and the count are what the panel is. */}
+              {bookmarks.length > 0 && (
+                <Typography variant="caption" color="text.secondary" noWrap sx={{ ml: "auto", minWidth: 0 }}>
+                  גרור אל תוך הערה ↩
+                </Typography>
               )}
             </Box>
 
@@ -563,7 +742,14 @@ const NotebookPage = () => {
                         {mediaTypeLabels[group.mediaType] || "שיעור"}
                       </Typography>
                       <Box sx={{ width: "1px", alignSelf: "stretch", bgcolor: "rgba(255,255,255,0.55)", flexShrink: 0 }} />
-                      <Typography variant="caption" fontWeight={700} noWrap sx={{ minWidth: 0 }}>
+                      {/* Wrapped rather than cut off. A lecture's real name is
+                          longer than this column is wide, and an ellipsis in
+                          the heading that says WHICH lecture these bookmarks
+                          belong to defeats the grouping. overflowWrap covers
+                          the case wrapping alone cannot: a title with no spaces
+                          in it, which would otherwise push the coloured bar out
+                          past the edge of the panel. */}
+                      <Typography variant="caption" fontWeight={700} sx={{ minWidth: 0, lineHeight: 1.3, overflowWrap: "anywhere" }}>
                         {group.mediaTitle}
                       </Typography>
                     </Box>
@@ -577,14 +763,34 @@ const NotebookPage = () => {
                             mediaTitle: group.mediaTitle,
                             noteText: bm.note,
                           })}
+                          // Dragged into a note, where it becomes a source chip
+                          // — an inline reference that reopens the lecture at
+                          // this second. The payload is the bookmark, not the
+                          // markup: what a chip is made of belongs to
+                          // utilities/noteSource.js, and the sidebar should not
+                          // have to know.
+                          draggable
+                          onDragStart={(event) => {
+                            event.dataTransfer.setData(
+                              BOOKMARK_DRAG_MIME,
+                              JSON.stringify(bookmarkDragPayload(bm, group.mediaTitle))
+                            );
+                            event.dataTransfer.effectAllowed = "copy";
+                          }}
                           sx={{
                             display: "flex", alignItems: "center", gap: 1,
                             borderRadius: 2, mb: 0.5,
+                            cursor: "grab",
+                            "&:active": { cursor: "grabbing" },
                             ...listRowSx,
                           }}
                         >
                           <PlayCircleOutlineIcon fontSize="small" sx={{ color: "primary.main", flexShrink: 0 }} />
-                          <Typography variant="body2" noWrap sx={{ flexGrow: 1, minWidth: 0 }}>
+                          {/* One line per bookmark keeps the list scannable,
+                              but the full text is a hover away — the row is
+                              also what gets dragged into a note, so knowing
+                              which one it is matters. */}
+                          <Typography variant="body2" noWrap title={bm.note?.trim() || ""} sx={{ flexGrow: 1, minWidth: 0 }}>
                             {bm.note?.trim() || "(ללא כותרת)"}
                           </Typography>
                           <Chip
@@ -651,6 +857,14 @@ const NotebookPage = () => {
                 onSave={() => handleSave(note)}
                 onDelete={() => setDeleteTargets([note])}
                 onOpenSource={openSource}
+                // A bookmark dropped anywhere on the card is written into the
+                // note's body at the point it landed. The card owns the drop
+                // (it is the target the user aims at); the editor owns the
+                // caret, and this is the one line that joins them.
+                onDropSource={(bookmark, point) => {
+                  editorApis.current.get(note.id)?.insertSource(bookmark, point);
+                  setActiveNoteId(note.id);
+                }}
               />
             ))
           )}
@@ -684,6 +898,34 @@ const NotebookPage = () => {
         onNext={sourceIndex < sourceTrail.length - 1 ? () => setSourceIndex(sourceIndex + 1) : null}
       />
       )}
+
+      {/* Mounted only while it is open, for the same reason the source window
+          is: it seeds its plan from the current selection on open, and a closed
+          copy holding a plan for notes that have since been unticked is state
+          nobody asked it to keep. */}
+      {splitOpen && (
+        <ExportSplitDialog
+          open
+          notes={notesToExport}
+          exporting={exporting}
+          onClose={() => setSplitOpen(false)}
+          // Not an export yet: the plan goes on to the same last question every
+          // other export answers, and the dialog stays open behind it so that
+          // cancelling comes back to the arrangement rather than losing it.
+          onExport={(books, format) => askSources({ format, books })}
+        />
+      )}
+
+      <ExportSourcesDialog
+        open={Boolean(pendingExport)}
+        current={sourceStyle}
+        exporting={exporting}
+        summary={pendingExport?.books
+          ? `${pendingExport.books.length} קבצים · ${pendingExport.format === "pdf" ? "PDF" : "Word"}`
+          : `${notesToExport.length} הערות · ${pendingExport?.format === "pdf" ? "PDF" : "Word"}`}
+        onChoose={runExport}
+        onClose={() => setPendingExport(null)}
+      />
 
       <ConfirmingDeletionDialog
         open={Boolean(deleteTargets)}

@@ -43,18 +43,24 @@ import { roles, roleLabels } from "../../../utilities/constant";
 // reach the bar through a single "תוכן אישי" dropdown. Three separate tabs
 // for three personal shelves crowded out the places everyone actually browses,
 // and they grow with every new kind of thing a user can keep.
+// "הקורסים שלי" is here rather than under "תוכן אישי" because it is not a
+// collection the user built — it is what they have been enrolled in, and it now
+// decides which lessons the archive shows them. That makes it a place to browse,
+// which is what this row is for.
 const studentLinks = [
   { label: "ארכיון", to: "/archive" },
+  { label: "הקורסים שלי", to: "/my-courses" },
   { label: "מפגשים", to: "/sessions" },
   { label: "תרומה", to: "/donate" },
 ];
 
-// Lecturers get the courses entry — they run their own courses — but nothing
-// else: uploading is the "העלאת מדיה" button on the archive page itself, so it
-// needs no separate nav entry.
+// Lecturers get the management entry as well — they run their own courses. Both
+// appear: a lecturer can be enrolled in a colleague's course like anyone else,
+// and the two screens answer different questions. "ניהול קורסים" rather than
+// "קורסים" so the pair is not two tabs with indistinguishable names.
 const lecturerLinks = [
   ...studentLinks,
-  { label: "קורסים", to: "/courses" },
+  { label: "ניהול קורסים", to: "/courses" },
 ];
 
 const adminLinks = [
@@ -307,7 +313,7 @@ const Navbar = () => {
             },
           }}
         >
-          {PERSONAL_SHELVES.map(({ label, path, Icon }) => (
+          {PERSONAL_SHELVES.map(({ label, path, Icon, iconColour }) => (
             <MenuItem
               key={path}
               component={Link}
@@ -320,7 +326,7 @@ const Navbar = () => {
                   stacked rows align, which in a horizontal strip is just a hole
                   between the icon and its own label. The gap is a margin-LEFT
                   because RTL puts the icon to the right of the text it labels. */}
-              <ListItemIcon sx={{ minWidth: 0, ml: 1, color: "primary.main" }}>
+              <ListItemIcon sx={{ minWidth: 0, ml: 1, color: iconColour || "primary.main" }}>
                 <Icon fontSize="small" />
               </ListItemIcon>
               {/* The lettering has to be set on the TEXT, not only on the row:
@@ -346,14 +352,27 @@ const Navbar = () => {
           </IconButton>
         </Tooltip>
 
-        {/* User block — desktop only. */}
+        {/* User block — desktop only. The avatar and the name are the link to
+            the account page: it is where a user looks for their own settings,
+            and it costs no room in a bar that is already full. */}
         <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 1.5 }}>
-          <Avatar sx={{ width: 34, height: 34, bgcolor: "transparent", color: "primary.main", border: "1.5px solid", borderColor: "primary.main", fontSize: 14, fontWeight: 700 }}>
-            {avatarInitial(user)}
-          </Avatar>
-          <Typography variant="body2" fontWeight={600} color="primary.main" sx={{ display: { xs: "none", sm: "block" } }}>
-            {user?.display_name}
-          </Typography>
+          <Tooltip title="החשבון שלי">
+            <Box
+              component={Link}
+              to="/profile"
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, textDecoration: "none" }}
+            >
+              <Avatar
+                src={user?.avatar_url || undefined}
+                sx={{ width: 34, height: 34, bgcolor: "transparent", color: "primary.main", border: "1.5px solid", borderColor: "primary.main", fontSize: 14, fontWeight: 700 }}
+              >
+                {avatarInitial(user)}
+              </Avatar>
+              <Typography variant="body2" fontWeight={600} color="primary.main" sx={{ display: { xs: "none", sm: "block" } }}>
+                {user?.display_name}
+              </Typography>
+            </Box>
+          </Tooltip>
           <Button
             size="small"
             variant="outlined"
@@ -459,12 +478,15 @@ const Navbar = () => {
               personal collections rather than places to browse, and they are the
               same three the top bar's "תוכן אישי" dropdown offers. */}
           <List>
-            {PERSONAL_SHELVES.map(({ label, path, Icon }) => (
+            {PERSONAL_SHELVES.map(({ label, path, Icon, iconColour }) => (
               <ListItem key={path} disablePadding>
                 {/* Navigation does NOT close the drawer — it stays open until the
                     user explicitly closes it with the X button (or Esc). */}
                 <ListItemButton component={Link} to={path} selected={pathname === path}>
-                  <Icon fontSize="small" sx={{ color: "primary.main", ml: 1 }} />
+                  {/* The LABEL stays navy in every row: only the icon carries the
+                      shelf's own colour, so the list still reads as one column of
+                      links rather than as two of them in different inks. */}
+                  <Icon fontSize="small" sx={{ color: iconColour || "primary.main", ml: 1 }} />
                   <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 800, color: "primary.main" }} />
                 </ListItemButton>
               </ListItem>

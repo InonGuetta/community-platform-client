@@ -66,6 +66,14 @@ const ERROR_MESSAGES = {
   "saves/deletePlaylist": "מחיקת הרשימה נכשלה",
   "saves/addItem": "ההוספה לרשימה נכשלה",
   "saves/removeItem": "ההסרה מהרשימה נכשלה",
+  // The notebook. Its successes all have inline feedback — the card's "not
+  // saved" line clears, the note appears, the card goes — but its failures had
+  // none, and each of the three is invisible without one: a save that did not
+  // happen looks identical to one that did until the page is reloaded, and a
+  // reorder is applied optimistically and then quietly re-fetched away.
+  "notes/update": "שמירת ההערה נכשלה",
+  "notes/delete": "מחיקת ההערה נכשלה",
+  "notes/reorder": "שינוי סדר ההערות נכשל",
 };
 
 // The Hebrew for a specific reason — a duplicate email, an expired session —

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { createPeerMesh } from "./peerMesh";
 import { describeMediaError, mediaDevicesUnavailable } from "./mediaErrors";
+import { toggleTrackKind, hasTrackKind } from "./mediaToggles";
 import { SOCKET_EVENTS, SOCKET_LIFECYCLE } from "../../../utilities/socketEvents";
 import { logger } from "../../../utilities/logger";
 
@@ -28,10 +29,27 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
   const [connected, setConnected] = useState(false);
   const [mediaError, setMediaError] = useState(null);
   const [roomError, setRoomError] = useState(null);
+  // Mirrors of the tracks' own `enabled` flags. The track is the truth; these
+  // exist because React cannot re-render on a property of a MediaStreamTrack.
+  const [micOn, setMicOn] = useState(true);
+  const [cameraOn, setCameraOn] = useState(true);
+  // Whether there is a device to control at all. Separate from the two above
+  // because "muted" and "you have no microphone" are different things to show,
+  // and conflating them is how a user with no microphone was shown an enabled,
+  // unmuted-looking button that did nothing when pressed.
+  const [hasMic, setHasMic] = useState(false);
+  const [hasCamera, setHasCamera] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [messages, setMessages] = useState([]);
 
   const socketRef = useRef(null);
   const meshRef = useRef(null);
   const localStreamRef = useRef(null);
+  // The camera track, kept aside while a screen is being shared so that stopping
+  // the share can put it back. Without it, ending a share leaves every peer
+  // receiving a track that has ended — a frozen last frame rather than a face.
+  const cameraTrackRef = useRef(null);
+  const screenTrackRef = useRef(null);
 
   // Held in a ref and read at call time, so the room's lifecycle does not
   // depend on the parent memoising this. It used to sit in the effect's
@@ -132,6 +150,13 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
       mesh.removePeer(socketId);
     });
 
+    // The sender's own message comes back from the server too, so everyone —
+    // including whoever typed it — renders the same list in the same order. No
+    // optimistic local copy, and therefore nothing to reconcile when the two
+    // orders disagree.
+    on(SOCKET_EVENTS.CHAT_MESSAGE, (message) => setMessages((prev) => [...prev, message]));
+    on(SOCKET_EVENTS.CHAT_HISTORY, (history) => setMessages(Array.isArray(history) ? history : []));
+
     on(SOCKET_EVENTS.SESSION_ENDED, () => onEndRef.current?.());
     on(SOCKET_EVENTS.JOIN_ERROR, ({ message }) => {
       logger.warn(`[VideoRoom] join refused: ${message}`);
@@ -155,6 +180,12 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
             return;
           }
           localStreamRef.current = stream;
+          cameraTrackRef.current = stream.getVideoTracks()[0] ?? null;
+          // Read from the stream that actually arrived, not from what was asked
+          // for: getUserMedia can return audio-only when a camera is missing or
+          // refused, and the controls have to describe what is really there.
+          setHasMic(hasTrackKind(stream, "audio"));
+          setHasCamera(hasTrackKind(stream, "video"));
           mesh.setLocalStream(stream);
           upsertStream("local", stream, "אני");
         } catch (err) {
@@ -173,13 +204,95 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
       cancelled = true;
       mesh.closeAll();
       localStreamRef.current?.getTracks().forEach((track) => track.stop());
+      // Stopped separately: a screen capture is not part of localStream, and
+      // leaving it running keeps the browser's "sharing your screen" banner up
+      // after the user has left the room.
+      screenTrackRef.current?.stop();
       localStreamRef.current = null;
-      socket.removeAllListeners();
-      socket.disconnect();
+      cameraTrackRef.current = null;
+      screenTrackRef.current = null;
       socketRef.current = null;
       meshRef.current = null;
+      socket.removeAllListeners();
+      socket.disconnect();
     };
   }, [roomToken]);
+
+  // ── In-room controls ──────────────────────────────────────────────────────
+  //
+  // The rule itself lives in mediaToggles.js, where it can be tested without a
+  // browser or a microphone. What is left here is the React half: keeping the
+  // label in step with the tracks.
+  //
+  // null means there was nothing of that kind to toggle, and it is deliberately
+  // not the same as false. Leaving the indicator alone in that case is the
+  // point — the previous version returned early and left it reading "live" for a
+  // user who had no microphone at all.
+  const toggleMic = useCallback(() => {
+    const next = toggleTrackKind(localStreamRef.current, "audio");
+    if (next !== null) setMicOn(next);
+  }, []);
+
+  const toggleCamera = useCallback(() => {
+    const next = toggleTrackKind(localStreamRef.current, "video");
+    if (next !== null) setCameraOn(next);
+  }, []);
+
+  // The local tile shows whatever is being SENT, so it follows the share. Declared
+  // before the two callbacks that use it — a const is not hoisted, and reaching
+  // it from above is a runtime error rather than a lint nicety.
+  const upsertLocalPreview = useCallback((stream) => {
+    setStreams((prev) => prev.map((s) => (s.id === "local" ? { ...s, stream } : s)));
+  }, []);
+
+  const stopSharing = useCallback(async () => {
+    screenTrackRef.current?.stop();
+    screenTrackRef.current = null;
+    // Back to the camera on every peer. If there was never a camera — the user
+    // joined with none — this replaces with null, which is a valid sender state
+    // meaning "sending nothing".
+    await meshRef.current?.replaceVideoTrack(cameraTrackRef.current ?? null);
+    if (cameraTrackRef.current && localStreamRef.current) {
+      upsertLocalPreview(localStreamRef.current);
+    }
+    setSharing(false);
+  }, [upsertLocalPreview]);
+
+  const shareScreen = useCallback(async () => {
+    if (sharing) return stopSharing();
+    if (!navigator.mediaDevices?.getDisplayMedia) {
+      setMediaError("הדפדפן הזה אינו תומך בשיתוף מסך.");
+      return;
+    }
+    try {
+      const display = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const track = display.getVideoTracks()[0];
+      screenTrackRef.current = track;
+
+      // The browser's own "stop sharing" control lives outside this page, so the
+      // track ending is the only notice we get that the user used it. Without
+      // this the button would still read "stop", and every peer would keep the
+      // last frame.
+      track.addEventListener("ended", () => { stopSharing(); });
+
+      await meshRef.current?.replaceVideoTrack(track);
+      upsertLocalPreview(display);
+      setSharing(true);
+    } catch (err) {
+      // Cancelling the picker is a NotAllowedError, and it is not a failure —
+      // the user simply changed their mind.
+      if (err?.name !== "NotAllowedError") {
+        logger.error("[VideoRoom] screen share failed:", err);
+        setMediaError("לא ניתן לשתף מסך.");
+      }
+    }
+  }, [sharing, stopSharing, upsertLocalPreview]);
+
+  const sendMessage = useCallback((text) => {
+    const body = String(text ?? "").trim();
+    if (!body) return;
+    socketRef.current?.emit(SOCKET_EVENTS.CHAT_MESSAGE, { text: body });
+  }, []);
 
   // Only asks; the room closes when the server confirms with "session-ended".
   // Leaving immediately would have navigated a non-host away even though the
@@ -191,5 +304,9 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
 
   const leave = useCallback(() => onEndRef.current?.(), []);
 
-  return { streams, connected, mediaError, roomError, endSession, leave };
+  return {
+    streams, connected, mediaError, roomError, endSession, leave,
+    micOn, cameraOn, hasMic, hasCamera, sharing, toggleMic, toggleCamera, shareScreen,
+    messages, sendMessage,
+  };
 };

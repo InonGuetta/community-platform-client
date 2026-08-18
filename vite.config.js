@@ -38,6 +38,18 @@ export default defineConfig({
     include: ["src/**/*.test.{js,jsx}"],
     environment: "node",
     setupFiles: ["./vitest.setup.js"],
+    // Vitest's default is 5 seconds, which the form tests run right up against.
+    // They are slow for a real reason — userEvent types a password one
+    // character at a time, each one a full React render in jsdom — so on a
+    // machine running several jsdom files at once they crossed it, and the
+    // suite started failing a different two or three tests on every run.
+    //
+    // Raised rather than made faster: those tests type into the form because
+    // that is what a user does, and the alternative is fireEvent, which sets a
+    // value without the events a controlled input actually receives. This is
+    // still a hang detector — nothing here should take fifteen seconds — it is
+    // just no longer a load detector as well.
+    testTimeout: 15000,
     // Mirrors LOG_LEVEL=error in the server's test/setup.js, and for the same
     // reason: several of these tests drive failure paths on purpose (every
     // retry, every 401), and at the dev default of "debug" the real assertion

@@ -5,7 +5,8 @@
     "dev": "vite",
     "build": "vite build",
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "verify": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@emotion/react": "^11.0.0",

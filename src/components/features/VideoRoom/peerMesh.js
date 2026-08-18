@@ -124,8 +124,38 @@ export const createPeerMesh = ({ createConnection, emit, onStream, onPeerLost, l
     await flushPending(peerId, entry);
   };
 
+  // Swap the video every peer is receiving, without renegotiating.
+  //
+  // RTCRtpSender.replaceTrack is what makes screen sharing a button rather than a
+  // reconnection: the transceiver, the SDP and the ICE state all stay as they
+  // are, and only the bytes change. Tearing the peers down and rebuilding them —
+  // the obvious alternative — would drop everyone's audio for the length of a
+  // handshake, every time somebody shared a screen or stopped.
+  //
+  // Returns the count so the caller can tell "nobody is connected yet" (in which
+  // case the new track still becomes the local stream and will be attached to the
+  // next peer that arrives) from "this did nothing".
+  const replaceVideoTrack = async (track) => {
+    let replaced = 0;
+    for (const [peerId, entry] of peers) {
+      const sender = entry.pc.getSenders().find((s) => s.track?.kind === "video");
+      // A peer with no video sender is one we joined with no camera at all — its
+      // transceiver is recvonly, and there is nothing to replace.
+      if (!sender) continue;
+      try {
+        await sender.replaceTrack(track);
+        replaced++;
+      } catch (err) {
+        log(`${peerId}: ⚠ could not replace the video track — ${err?.message ?? err}`);
+      }
+    }
+    log(`replaced the outgoing video track on ${replaced} peer(s)`);
+    return replaced;
+  };
+
   return {
     setLocalStream,
+    replaceVideoTrack,
 
     // We are an existing member and someone new arrived: we make the offer.
     // Only existing members are notified, so both sides never offer at once.

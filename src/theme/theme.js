@@ -8,12 +8,20 @@ const PALETTES = {
     mode: "light",
     primary: { main: "#1a4a66" },   // navy — logo, headings, nav links
     secondary: { main: "#17a2c4" },  // teal — upload button, accents
+    // Purple — the user's OWN material: the save control and the personal
+    // shelves it fills. A colour of its own rather than the navy the rest of the
+    // nav is drawn in, because those rows are not places to browse; and not the
+    // teal either, which already means "the site's accent" on the upload button.
+    // Stated here, in the palette, so it lightens in dark mode like every other
+    // colour instead of being a hex repeated at each use site.
+    personal: { main: "#7e57c2" },
     background: { default: "#f3f5f7" },
   },
   dark: {
     mode: "dark",
     primary: { main: "#5fb0cf" },   // lightened navy/teal for contrast on dark
     secondary: { main: "#29b6d8" },
+    personal: { main: "#b39ddb" },
     background: { default: "#0f1417", paper: "#1a2228" },
   },
 };

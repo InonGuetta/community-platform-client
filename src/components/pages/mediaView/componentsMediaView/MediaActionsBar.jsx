@@ -14,7 +14,7 @@ import SaveMenu from "./SaveMenu";
 // The same icons the personal shelves are labelled with — a button and the shelf
 // it fills have to look like the same thing, and two independent imports stayed
 // matched only for as long as nobody changed one of them.
-import { likeIcons, saveIcons } from "../../personal/personalShelves";
+import { likeIcons, saveIcons, LIKE_COLOUR, SAVE_COLOUR } from "../../personal/personalShelves";
 
 // The like / save / download / share row, and the overlays behind it.
 //
@@ -62,10 +62,10 @@ const pillButtonSx = {
 // the hover tint is derived from that same value instead of a made-up
 // `success.lighter`, which is not a key MUI defines.
 const likedSx = {
-  color: "success.main",
-  borderColor: "success.main",
+  color: LIKE_COLOUR,
+  borderColor: LIKE_COLOUR,
   "&:hover": {
-    borderColor: "success.main",
+    borderColor: LIKE_COLOUR,
     bgcolor: (theme) => alpha(theme.palette.success.main, 0.08),
   },
 };
@@ -74,14 +74,26 @@ const likedSx = {
 // half opens the lists. One outline drawn on the CONTAINER rather than on each
 // half, so the two read as one pill and not as two buttons that happen to touch.
 //
-// The saved state colours the border and the icon and leaves the LABEL alone.
-// That is the difference from the like pill above, and it is deliberate: this
-// control has a second, unlit half sitting inside the same outline, and colouring
+// The bookmark itself is purple in BOTH states — it is the mark that means
+// "saved" on this site, and it is the same purple the saved shelf is drawn in
+// throughout the nav, so the button and the shelf it fills are recognisably one
+// thing. Purple rather than the like button's green: two adjacent pills in the
+// same colour would read as saying the same thing, and these two say different
+// things. Imported alongside the icons rather than named again here, for the
+// same reason the icons are.
+//
+// What the SAVED state changes is the outline and the caret beside it, not the
+// LABEL. That is the difference from the like pill above, and it is deliberate:
+// this control has a second half sitting inside the same outline, and colouring
 // the text as well made the whole thing read as pressed rather than as filed.
-// Teal, the app's accent, rather than the like button's green: two adjacent pills
-// lit the same colour would read as saying the same thing, and these two say
-// different things. Taken from the palette so it lightens in dark mode on its own.
-const savedColour = "secondary.main";
+const savedColour = SAVE_COLOUR;
+
+// The OUTLINE, though, stays the app's teal — deliberately not the bookmark's
+// purple. The icon says what this control is and is drawn the same either way;
+// the outline is the only thing that says whether this particular lecture is
+// filed, and in teal that state reads as a state rather than as more of the icon.
+// Two separate values on purpose: they are answering two different questions.
+const savedBorderColour = "secondary.main";
 
 const savePillSx = (isSaved) => ({
   ...pillSizeSx,
@@ -90,19 +102,18 @@ const savePillSx = (isSaved) => ({
   overflow: "hidden",
   borderRadius: 999,
   border: "1px solid",
-  borderColor: isSaved ? savedColour : "divider",
+  borderColor: isSaved ? savedBorderColour : "divider",
   // Inherited by the caret half, which is the second thing that lights up.
   color: isSaved ? savedColour : "text.secondary",
-  "&:hover": { borderColor: isSaved ? savedColour : "text.disabled" },
+  "&:hover": { borderColor: isSaved ? savedBorderColour : "text.disabled" },
 });
 
 // The wide half. Text-variant, so the container's outline is the only border.
 //
-// The LABEL is pinned to text.primary in both states while the icon takes the
-// colour — that is the whole point of the saved styling here, and the icon has to
-// be coloured explicitly because MUI's endIcon otherwise inherits the button's
-// own text colour, which is exactly the one being held neutral.
-const saveMainSx = (isSaved) => ({
+// The LABEL is pinned to text.primary while the icon carries the purple — the
+// icon has to be coloured explicitly because MUI's endIcon otherwise inherits
+// the button's own text colour, which is exactly the one being held neutral.
+const saveMainSx = () => ({
   flex: 1,
   minWidth: 0,
   px: 1.5,
@@ -115,7 +126,7 @@ const saveMainSx = (isSaved) => ({
   "& .MuiButton-endIcon": {
     ml: -0.25,
     mr: 0.75,
-    color: isSaved ? savedColour : "text.primary",
+    color: savedColour,
     "& svg": { fontSize: 22 },
   },
 });
@@ -181,7 +192,7 @@ const MediaActionsBar = ({
             onClick={onToggleSave}
             aria-pressed={isSaved}
             endIcon={isSaved ? <saveIcons.on /> : <saveIcons.off />}
-            sx={saveMainSx(isSaved)}
+            sx={saveMainSx()}
           >
             {isSaved ? "נשמר" : "שמירה"}
           </Button>

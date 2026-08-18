@@ -58,9 +58,26 @@ const TextViewer = ({ mediaId }) => {
   }
 
   return (
+    // sandbox, with no allowances at all, and the empty value is the whole point.
+    //
+    // A blob: URL inherits the origin of the page that created it, so without this
+    // the frame runs as this application: same cookies, same localStorage, and a
+    // reachable window.parent. The content is a document somebody uploaded. The
+    // server does sanitise the Word conversion before serving it as HTML, and that
+    // is the real defence — but it means one sanitiser configuration is the only
+    // thing standing between an uploaded file and the signed-in session, forever.
+    // This makes the frame an opaque origin, so a gap in that configuration stops
+    // being a way into the app.
+    //
+    // If a PDF ever fails to display here, the fix is `sandbox="allow-scripts"` on
+    // its own — NOT with allow-same-origin. The two together are the documented
+    // way to have no sandbox at all: a frame granted both can reach into its own
+    // sandbox attribute and remove it.
     <Box
       component="iframe"
       src={blobUrl}
+      sandbox=""
+      title="תצוגת המסמך"
       width="100%"
       height={650}
       sx={{ border: "none", borderRadius: 2, display: "block" }}

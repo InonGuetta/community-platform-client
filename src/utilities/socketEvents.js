@@ -13,12 +13,17 @@ export const SOCKET_EVENTS = {
   LEAVE_ROOM: "leave-room",
   END_SESSION: "end-session",
 
+  // Chat, which travels over the signalling socket rather than the peer mesh —
+  // see the server's copy for why.
+  CHAT_MESSAGE: "chat-message",
+
   // Server → client
   USER_JOINED: "user-joined",
   USER_LEFT: "user-left",
   SESSION_ENDED: "session-ended",
   JOIN_ERROR: "join-error",
   SESSION_ERROR: "session-error",
+  CHAT_HISTORY: "chat-history",
 
   // WebRTC signalling, relayed in both directions
   OFFER: "offer",

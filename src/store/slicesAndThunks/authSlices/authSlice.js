@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { login, register, logout } from "./authPost";
+import { login, register, logout, resetPassword } from "./authPost";
+import { updateProfile } from "./authPut";
 import { fetchMe } from "./authGet";
 import { statuses } from "../../../utilities/constant";
 
@@ -77,6 +78,32 @@ const authSlice = createSlice({
       .addCase(register.rejected, (state, action) => {
         state.loginStatus = statuses.failed;
         state.error = action.payload;
+      })
+
+      // A completed reset IS a login — the server mints the cookie with it — so
+      // it lands here the same way, and the user arrives signed in rather than
+      // back at a form asking for the password they chose four seconds ago.
+      .addCase(resetPassword.pending, (state) => {
+        state.loginStatus = statuses.loading;
+        state.error = null;
+        state.activeFetchMeRequestId = null;
+      })
+      .addCase(resetPassword.fulfilled, (state, action) => {
+        state.loginStatus = statuses.succeeded;
+        state.status = statuses.succeeded;
+        state.user = action.payload.user;
+        state.initialized = true;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.loginStatus = statuses.failed;
+        state.error = action.payload;
+      })
+
+      // The saved row comes back complete, so it replaces the held one rather
+      // than being merged into it — a merge would keep whatever the server just
+      // decided not to change.
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
       })
 
       .addCase(fetchMe.pending, (state, action) => {

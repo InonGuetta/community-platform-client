@@ -18,6 +18,44 @@ export const register = createAsyncThunk("auth/register", async ({ email, passwo
   }
 });
 
+// Deliberately NOT reported through the slice's error state. The server answers
+// identically whether or not the address has an account, so the page must say
+// the same thing either way — anything else would rebuild, in the UI, exactly
+// the enumeration oracle the endpoint refuses to be.
+export const requestPasswordReset = createAsyncThunk("auth/forgotPassword", async (email, { rejectWithValue }) => {
+  try {
+    return await authApi.forgotPassword(email);
+  } catch (err) {
+    return rejectWithValue(rejectionOf(err, "Could not send the reset link"));
+  }
+});
+
+// Answers with the user and a fresh cookie, so it lands in the slice exactly
+// like a login — which is what it is.
+export const resetPassword = createAsyncThunk("auth/resetPassword", async ({ token, password }, { rejectWithValue }) => {
+  try {
+    return await authApi.resetPassword({ token, password });
+  } catch (err) {
+    return rejectWithValue(rejectionOf(err, "Password reset failed"));
+  }
+});
+
+export const verifyEmail = createAsyncThunk("auth/verifyEmail", async (token, { rejectWithValue }) => {
+  try {
+    return await authApi.verifyEmail(token);
+  } catch (err) {
+    return rejectWithValue(rejectionOf(err, "Email verification failed"));
+  }
+});
+
+export const changePassword = createAsyncThunk("auth/changePassword", async (payload, { rejectWithValue }) => {
+  try {
+    return await authApi.changePassword(payload);
+  } catch (err) {
+    return rejectWithValue(rejectionOf(err, "Password change failed"));
+  }
+});
+
 export const logout = createAsyncThunk("auth/logout", async (_, { rejectWithValue }) => {
   try {
     await authApi.logout();

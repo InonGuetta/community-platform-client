@@ -34,6 +34,38 @@ const HEADING_SIZE = 14;
 const TITLE_SIZE = 17;
 const LINE_HEIGHT = 1.7;
 
+// The sources cited on a page, printed at the foot of THAT page.
+//
+// Smaller and tighter than the body, in the blue the notebook already uses for
+// a source chip, so a reference reads as apparatus rather than as more text.
+const FOOTNOTE_SIZE = 9;
+const FOOTNOTE_LINE_HEIGHT = 1.35;
+const FOOTNOTE_COLOR = [21, 101, 187];
+// Between the last line of body text and the rule above the notes.
+const FOOTNOTE_GAP = 3;
+
+// Marks are written into the text as "[1]" — see utilities/noteFootnotes.js.
+// This is how a line is asked which sources it cites.
+const MARK_PATTERN = /\[(\d+)\]/g;
+// Deduplicated: one line can easily cite the same lecture twice — "ראה [1]
+// ושוב [1]" — and a page's foot wants one entry per source, not one per mark.
+const marksIn = (line) => [...new Set([...line.matchAll(MARK_PATTERN)].map((match) => Number(match[1])))];
+
+/**
+ * Turn one logical line into the VISUAL order a PDF stores text in.
+ *
+ * Exported, and taking the bidi instance as an argument, for one reason: this
+ * is the single most consequential line in the file and the hardest to reason
+ * about, and a test that reimplemented it would be testing its own copy. The
+ * caller below already loads bidi-js; a test loads its own and gets the same
+ * function.
+ *
+ * Paragraph direction is RTL: this is Hebrew, and it decides where a line that
+ * is entirely digits or Latin ends up.
+ */
+export const createVisualiser = (bidi) => (line) =>
+  bidi.getReorderedString(line, bidi.getEmbeddingLevels(line, "rtl"));
+
 const toBase64 = (buffer) => {
   const bytes = new Uint8Array(buffer);
   // Chunked rather than one spread: a 48KB font is ~48k arguments, which
@@ -69,19 +101,21 @@ const loadFontBase64 = () => {
  * no heading; the notebook exports one per note, where the heading is the note's
  * title — which is why this takes a list rather than a single string. A section
  * with neither heading nor text is skipped rather than printed as a blank gap.
+ *
+ * `footnotes` is an optional `{ 1: "lecture · point · 12:22", … }`. Any "[1]"
+ * appearing in the text is then printed at the foot of the page it landed on —
+ * which is a thing only this writer can do, because it is the only part of the
+ * system that knows where the pages break. A caller with no sources passes
+ * nothing and the document is unchanged.
  */
-export const downloadHebrewPdf = async ({ title, sections, filename }) => {
+export const downloadHebrewPdf = async ({ title, sections, filename, footnotes = {} }) => {
   const [{ jsPDF }, { default: bidiFactory }, fontBase64] = await Promise.all([
     import("jspdf"),
     import("bidi-js"),
     loadFontBase64(),
   ]);
 
-  const bidi = bidiFactory();
-  // Paragraph direction is RTL: this is Hebrew, and it decides where a line that
-  // is entirely digits or Latin ends up.
-  const toVisual = (line) =>
-    bidi.getReorderedString(line, bidi.getEmbeddingLevels(line, "rtl"));
+  const toVisual = createVisualiser(bidiFactory());
 
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   doc.addFileToVFS(FONT_VFS, fontBase64);
@@ -92,29 +126,93 @@ export const downloadHebrewPdf = async ({ title, sections, filename }) => {
   const rightEdge = PAGE.width - MARGIN.x;
   let y = MARGIN.top;
 
+  const drawLine = (logicalLine, atY) => {
+    // isInputVisual is the load-bearing flag. Left to itself, jsPDF reverses
+    // the whole string when it spots RTL characters — a blunt flip that gets
+    // the Hebrew right and silently reverses every Latin word and number
+    // inside it ("Whisper" → "repsihW", "15-17" → "71-51"). Declaring the
+    // input already-visual suppresses that pass and leaves bidi-js's correct
+    // ordering intact. "right" makes the line END at the right margin rather
+    // than start there and run off the page.
+    doc.text(toVisual(logicalLine), rightEdge, atY, {
+      align: "right",
+      isInputVisual: true,
+      isOutputVisual: true,
+    });
+  };
+
+  // The sources cited so far on the page being written, in the order their
+  // marks appeared. Emptied by every page break.
+  let pageMarks = [];
+  const footnoteStep = (FOOTNOTE_SIZE * FOOTNOTE_LINE_HEIGHT) / 2.835;
+
+  // A footnote can be longer than one line — a lecture title plus the point
+  // inside it plus a timestamp — so the block's height is measured in LINES,
+  // not in entries. Measured at the footnote's own size, because
+  // splitTextToSize breaks against whatever size is currently set.
+  const footnoteLinesFor = (marks) => {
+    if (marks.length === 0) return [];
+    doc.setFontSize(FOOTNOTE_SIZE);
+    return marks.flatMap((mark) => doc.splitTextToSize(`[${mark}] ${footnotes[mark]}`, maxWidth));
+  };
+
+  const footnoteHeight = (marks) =>
+    marks.length === 0 ? 0 : FOOTNOTE_GAP + footnoteLinesFor(marks).length * footnoteStep;
+
+  // Print this page's sources and start the next page's collection empty.
+  const flushFootnotes = () => {
+    if (pageMarks.length === 0) return;
+
+    const lines = footnoteLinesFor(pageMarks);
+    // Bottom-aligned: the notes sit ON the bottom margin however much body text
+    // is above them, which is what makes them read as the foot of the page
+    // rather than as a paragraph that happens to be last.
+    const top = Math.max(MARGIN.top, PAGE.height - MARGIN.bottom - lines.length * footnoteStep);
+
+    doc.setDrawColor(...FOOTNOTE_COLOR);
+    doc.setLineWidth(0.2);
+    // A short rule, as a footnote separator has been since long before
+    // computers — a full-width line reads as a table.
+    doc.line(rightEdge - 50, top - 2, rightEdge, top - 2);
+
+    doc.setTextColor(...FOOTNOTE_COLOR);
+    doc.setFontSize(FOOTNOTE_SIZE);
+    lines.forEach((line, index) => drawLine(line, top + footnoteStep * (index + 0.75)));
+    doc.setTextColor(0, 0, 0);
+
+    pageMarks = [];
+  };
+
+  const startPage = () => {
+    flushFootnotes();
+    doc.addPage();
+    y = MARGIN.top;
+  };
+
   // Line breaking happens on the LOGICAL string and reordering only after, per
   // line. Doing it the other way round would break lines at positions that do
   // not exist in the reading order.
   const writeBlock = (block, size, gapAfter) => {
     doc.setFontSize(size);
     const lineStep = (size * LINE_HEIGHT) / 2.835; // pt → mm
+
     for (const logicalLine of doc.splitTextToSize(block, maxWidth)) {
-      if (y + lineStep > PAGE.height - MARGIN.bottom) {
-        doc.addPage();
-        y = MARGIN.top;
+      // What this line would ADD to the foot of the page, which is part of
+      // whether the line itself still fits: a line carrying the first mark of a
+      // three-line source needs room for both.
+      const arriving = marksIn(logicalLine).filter((mark) => footnotes[mark] && !pageMarks.includes(mark));
+      const reserved = footnoteHeight([...pageMarks, ...arriving]);
+
+      if (y + lineStep > PAGE.height - MARGIN.bottom - reserved) {
+        // The line moves to the next page, and so do its sources — which is why
+        // the marks are committed after this and not before.
+        startPage();
       }
-      // isInputVisual is the load-bearing flag. Left to itself, jsPDF reverses
-      // the whole string when it spots RTL characters — a blunt flip that gets
-      // the Hebrew right and silently reverses every Latin word and number
-      // inside it ("Whisper" → "repsihW", "15-17" → "71-51"). Declaring the
-      // input already-visual suppresses that pass and leaves bidi-js's correct
-      // ordering intact. "right" makes the line END at the right margin rather
-      // than start there and run off the page.
-      doc.text(toVisual(logicalLine), rightEdge, y, {
-        align: "right",
-        isInputVisual: true,
-        isOutputVisual: true,
-      });
+      pageMarks.push(...arriving);
+
+      // Restored because measuring the footnotes above changed it.
+      doc.setFontSize(size);
+      drawLine(logicalLine, y);
       y += lineStep;
     }
     y += gapAfter;
@@ -137,6 +235,9 @@ export const downloadHebrewPdf = async ({ title, sections, filename }) => {
     if (section.text) writeText(section.text);
     y += 4;
   }
+
+  // The last page never breaks, so nothing else would print its sources.
+  flushFootnotes();
 
   doc.save(filename);
 };

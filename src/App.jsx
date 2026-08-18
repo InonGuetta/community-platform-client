@@ -10,12 +10,17 @@ import ProtectedRoute from "./components/pages/auth/ProtectedRoute";
 import SignIn from "./components/pages/auth/SignIn";
 import SignUp from "./components/pages/auth/SignUp";
 import GoogleCallback from "./components/pages/auth/GoogleCallback";
+import ForgotPassword from "./components/pages/auth/ForgotPassword";
+import ResetPassword from "./components/pages/auth/ResetPassword";
+import VerifyEmail from "./components/pages/auth/VerifyEmail";
+import ProfilePage from "./components/pages/profile/ProfilePage";
 import ArchivePage from "./components/pages/archive/ArchivePage";
 import MediaViewPage from "./components/pages/mediaView/MediaViewPage";
 import SessionsPage from "./components/pages/sessions/SessionsPage";
 import SessionRoom from "./components/pages/sessions/SessionRoom";
 import UsersPage from "./components/pages/users/UsersPage";
 import CoursesPage from "./components/pages/courses/CoursesPage";
+import MyCoursesPage from "./components/pages/courses/MyCoursesPage";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import DonatePage from "./components/pages/donate/DonatePage";
 import NotebookPage from "./components/pages/notebook/NotebookPage";
@@ -24,7 +29,18 @@ import PlaylistPage from "./components/pages/personal/PlaylistPage";
 import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE } from "./components/pages/personal/personalShelves";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
 
-const AUTH_PATHS = ["/sign-in", "/sign-up", "/auth/google/callback"];
+// Pages that render WITHOUT the navigation bar: they are reached by someone who
+// is not signed in, and the recovery three by someone who by definition cannot
+// be — a nav bar full of links they would be redirected away from is noise on
+// the one screen that has to be simple.
+const AUTH_PATHS = [
+  "/sign-in",
+  "/sign-up",
+  "/auth/google/callback",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+];
 
 // Mac-style page transition: each time the route changes, the new page slides
 // in gradually from the side with a fade. Keying off the pathname remounts this
@@ -89,15 +105,30 @@ const App = () => {
             <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
+          {/* Recovery, unprotected by necessity: whoever needs these cannot sign
+              in. The token in the URL is the credential. */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/archive" replace />} />
           <Route path="/archive" element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
           <Route path="/media/:id" element={<ProtectedRoute><MediaViewPage /></ProtectedRoute>} />
           <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
-          <Route path="/sessions/:roomToken" element={<ProtectedRoute><SessionRoom /></ProtectedRoute>} />
+          {/* By id, not by room token. The token is a credential the server
+              hands out only to a caller it has decided may enter — putting it in
+              the URL made it a shared secret that was also published in the
+              sessions list and kept in browser history. */}
+          <Route path="/sessions/:id" element={<ProtectedRoute><SessionRoom /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute allowedRoles={["admin"]}><UsersPage /></ProtectedRoute>} />
           {/* Lecturers manage their own courses here, so this is not admin-only —
               the page itself hides the controls for courses they do not teach. */}
           <Route path="/courses" element={<ProtectedRoute allowedRoles={["lecturer", "admin"]}><CoursesPage /></ProtectedRoute>} />
+          {/* The student's side of the same feature, and a separate route rather
+              than a mode of the one above: that page manages courses, this one
+              answers "what am I in". Open to everyone — a lecturer may also be
+              enrolled in someone else's course. */}
+          <Route path="/my-courses" element={<ProtectedRoute><MyCoursesPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
           <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
           {/* The personal shelves take their paths from personalShelves.js, the

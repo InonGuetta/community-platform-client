@@ -37,10 +37,19 @@ export const ERROR_CODES = {
   EMAIL_TAKEN: "EMAIL_TAKEN",
   LAST_ACTIVE_ADMIN: "LAST_ACTIVE_ADMIN",
 
+  // Account recovery.
+  INVALID_RESET_TOKEN: "INVALID_RESET_TOKEN",
+  WEAK_PASSWORD: "WEAK_PASSWORD",
+  NO_PASSWORD_SET: "NO_PASSWORD_SET",
+
+  // Donations.
+  RECURRING_UNAVAILABLE: "RECURRING_UNAVAILABLE",
+
   // Resources.
   MEDIA_NOT_FOUND: "MEDIA_NOT_FOUND",
   SESSION_NOT_FOUND: "SESSION_NOT_FOUND",
   SESSION_FORBIDDEN: "SESSION_FORBIDDEN",
+  SESSION_NOT_STARTED: "SESSION_NOT_STARTED",
   BOOKMARK_NOT_FOUND: "BOOKMARK_NOT_FOUND",
   NOTE_NOT_FOUND: "NOTE_NOT_FOUND",
   COURSE_NOT_FOUND: "COURSE_NOT_FOUND",
@@ -112,9 +121,20 @@ const ERROR_CODE_HE = {
   [ERROR_CODES.LAST_ACTIVE_ADMIN]:
     "לא ניתן להסיר את המנהל הפעיל האחרון — יש למנות מנהל אחר קודם",
 
+  // Each of these tells the user which of three different things to do next,
+  // which is the whole test for whether a code earns its place.
+  [ERROR_CODES.INVALID_RESET_TOKEN]:
+    "הקישור אינו תקף או שפג תוקפו. אפשר לבקש קישור חדש.",
+  [ERROR_CODES.WEAK_PASSWORD]: "הסיסמה חייבת להכיל לפחות 8 תווים",
+  [ERROR_CODES.NO_PASSWORD_SET]:
+    "החשבון הזה מתחבר עם Google ואין לו סיסמה לשינוי",
+  [ERROR_CODES.RECURRING_UNAVAILABLE]:
+    "תרומה חודשית אינה זמינה עדיין. אפשר לתרום סכום חד-פעמי.",
+
   [ERROR_CODES.MEDIA_NOT_FOUND]: "המדיה לא נמצאה",
   [ERROR_CODES.SESSION_NOT_FOUND]: "המפגש לא נמצא",
   [ERROR_CODES.SESSION_FORBIDDEN]: "המפגש לא נמצא או שאין לך הרשאה",
+  [ERROR_CODES.SESSION_NOT_STARTED]: "המפגש עדיין לא נפתח על ידי המארח",
   [ERROR_CODES.BOOKMARK_NOT_FOUND]: "הסימנייה לא נמצאה",
   [ERROR_CODES.NOTE_NOT_FOUND]: "ההערה לא נמצאה",
   [ERROR_CODES.COURSE_NOT_FOUND]: "הקורס לא נמצא",

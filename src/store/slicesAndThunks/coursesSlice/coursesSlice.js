@@ -13,6 +13,10 @@ const coursesSlice = createSlice({
   initialState: {
     items: [],
     myCourses: [],
+    // Its own status, not the shared one: `status` tracks the management screen's
+    // full catalogue fetch, and a student's page never issues that request — so
+    // reading it would leave them on an idle spinner forever.
+    myCoursesStatus: statuses.idle,
     studentsByCourse: {},
     status: statuses.idle,
     error: null,
@@ -26,7 +30,15 @@ const coursesSlice = createSlice({
       .addCase(fetchAllCourses.fulfilled, (state, action) => { state.status = statuses.succeeded; state.items = action.payload; })
       .addCase(fetchAllCourses.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
-      .addCase(fetchMyCourses.fulfilled, (state, action) => { state.myCourses = action.payload; })
+      .addCase(fetchMyCourses.pending, (state) => { state.myCoursesStatus = statuses.loading; })
+      .addCase(fetchMyCourses.fulfilled, (state, action) => {
+        state.myCoursesStatus = statuses.succeeded;
+        state.myCourses = action.payload;
+      })
+      .addCase(fetchMyCourses.rejected, (state, action) => {
+        state.myCoursesStatus = statuses.failed;
+        state.error = action.payload?.message;
+      })
 
       .addCase(fetchCourseStudents.fulfilled, (state, action) => {
         state.studentsByCourse[action.payload.courseId] = action.payload.students;

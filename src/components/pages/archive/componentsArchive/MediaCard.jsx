@@ -18,6 +18,12 @@ import { mediaApi } from "../../../../api/mediaApi";
 import DownloadMenu from "../../../features/DownloadMenu/DownloadMenu";
 import { mediaTypeLabels, mediaTypeAccents } from "../../../../utilities/constant";
 import { canManageMedia } from "../../../../utilities/permissions";
+// The same icon the like BUTTON uses, from the file that owns the pair. Its
+// header says why: a shelf and the control that fills it have to look like one
+// thing, and two independent imports stay matched only until one is changed.
+import { likeIcons } from "../../personal/personalShelves";
+
+const LikeIcon = likeIcons.on;
 
 const TYPE_COLOR = { video: "warning", audio: "info", text: "success" };
 
@@ -274,14 +280,25 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
       )}
       {/* Attribution. course_title is absent for the general library, which is
           most of the archive today — so the row only appears once there is
-          something to say. */}
-      {(item.course_title || item.lecturer_name) && (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+          something to say. The like count joins it on the same principle: it
+          appears once somebody has actually liked the lecture, because "0" is a
+          worse thing to print on every card in the archive than nothing at all. */}
+      {(item.course_title || item.lecturer_name || item.like_count > 0) && (
+        <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.5, mt: 1 }}>
           {item.course_title && (
             <Chip label={item.course_title} size="small" color="primary" variant="outlined" />
           )}
           {item.lecturer_name && (
             <Chip label={item.lecturer_name} size="small" variant="outlined" />
+          )}
+          {item.like_count > 0 && (
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 0.25, ms: "auto", color: "text.secondary" }}
+              aria-label={`${item.like_count} אהבו`}
+            >
+              <LikeIcon sx={{ fontSize: 15 }} />
+              <Typography variant="caption" fontWeight={700}>{item.like_count}</Typography>
+            </Box>
           )}
         </Box>
       )}

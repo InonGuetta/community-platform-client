@@ -8,6 +8,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { ThemeProvider } from "@mui/material/styles";
 import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
 import { buildTheme } from "../../../theme/theme";
+import { PERSONAL_SHELVES } from "../../pages/personal/personalShelves";
 import Navbar from "./Navbar";
 
 // What the navigation offers is decided by the signed-in user's role, and the
@@ -118,12 +119,18 @@ describe("the personal-content dropdown", () => {
     return screen.getByRole("menu");
   };
 
-  test("holds the three personal shelves and nothing else", async () => {
+  // Derived from PERSONAL_SHELVES rather than listing the paths here, because
+  // that is precisely the invariant: the dropdown is BUILT from that file, and a
+  // second hand-written list is what this guards against. Pinning the paths made
+  // the test fail on the day a fourth shelf was added — which is noise, not a
+  // finding, while a shelf that exists in the file and never reaches the menu
+  // still fails exactly as it should.
+  test("holds every personal shelf, and nothing else", async () => {
     renderNavbar("student");
     const menu = await openPersonal();
 
     expect(within(menu).getAllByRole("menuitem").map((i) => i.getAttribute("href")))
-      .toEqual(["/notebook", "/likes", "/saved"]);
+      .toEqual(PERSONAL_SHELVES.map((shelf) => shelf.path));
   });
 
   // A menu is not a dialog. MUI locks body scroll for anything modal, and with
@@ -146,9 +153,9 @@ describe("the personal-content dropdown", () => {
     renderNavbar("admin");
     const hrefs = topBarLinks();
 
-    expect(hrefs).not.toContain("/notebook");
-    expect(hrefs).not.toContain("/likes");
-    expect(hrefs).not.toContain("/saved");
+    for (const shelf of PERSONAL_SHELVES) {
+      expect(hrefs).not.toContain(shelf.path);
+    }
   });
 
   // The panel is meant to read as the bar carrying on downwards, and it is drawn

@@ -104,7 +104,16 @@ const SignIn = () => {
         התחברות עם Google
       </Button>
 
-      <Typography textAlign="center" mt={4} variant="body2" color="#757575">
+      {/* The way back in for someone who cannot get in, which is the one place
+          it is any use — a user who has forgotten their password is looking at
+          this screen when they find out. */}
+      <Typography textAlign="center" mt={3} variant="body2">
+        <Link to="/forgot-password" style={{ color: "#5a5a5a", textDecoration: "none" }}>
+          שכחת סיסמה?
+        </Link>
+      </Typography>
+
+      <Typography textAlign="center" mt={2} variant="body2" color="#757575">
         אין לך חשבון?{" "}
         <Link to="/sign-up" style={{ color: "#424242", fontWeight: 500, textDecoration: "none" }}>הרשמה</Link>
       </Typography>

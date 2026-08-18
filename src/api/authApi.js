@@ -18,6 +18,29 @@ export const authApi = {
     await axiosInstance.post("/auth/logout");
   },
 
+  // ── Account recovery ──────────────────────────────────────────────────────
+  //
+  // The first of these answers the same way whether or not the address has an
+  // account, so the caller must not branch on its result to tell the user
+  // anything — see controllersAuth.forgotPassword.
+  forgotPassword: async (email) =>
+    (await axiosInstance.post("/auth/forgot-password", { email })).data,
+
+  // Answers with the user: a successful reset opens a session, rather than
+  // sending someone back to the login form to type the password they just chose.
+  resetPassword: async ({ token, password }) =>
+    (await axiosInstance.post("/auth/reset-password", { token, password })).data,
+
+  verifyEmail: async (token) =>
+    (await axiosInstance.post("/auth/verify-email", { token })).data,
+
+  // ── The signed-in user's own account ──────────────────────────────────────
+  updateProfile: async ({ displayName, avatarUrl }) =>
+    (await axiosInstance.patch("/auth/me", { displayName, avatarUrl })).data,
+
+  changePassword: async ({ currentPassword, newPassword }) =>
+    (await axiosInstance.post("/auth/change-password", { currentPassword, newPassword })).data,
+
   // A full-page navigation, not a request: OAuth redirects the browser to
   // Google and back, so it cannot be an XHR. Absolute, since axiosInstance's
   // baseURL plays no part.

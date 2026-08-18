@@ -93,9 +93,39 @@ const FONT_ATTRIBUTES = { color: SAFE_COLOR, size: /^[1-7]$/ };
 const SAFE_IMAGE_SRC = /^data:image\/(png|jpe?g|gif|webp|bmp);base64,[a-z0-9+/=\s]+$/i;
 const IMG_ATTRIBUTES = { src: SAFE_IMAGE_SRC, alt: /^[\s\S]*$/ };
 
+// A source chip: the reference a bookmark leaves behind when it is dragged into
+// a note. utilities/noteSource.js builds these and reads them back; this is the
+// half that decides they may survive a round-trip through the database, and the
+// two are asserted to agree in noteHtml.test.js.
+//
+// Every value here is inert. data-* attributes do nothing on their own — the
+// note card is what gives them meaning, by opening the lecture they name — and
+// they are bounded rather than free text so a chip cannot be used to grow a note
+// body without limit. `contenteditable` is allowed only as "false", which is the
+// value that makes the chip a single object to the caret; "true" is not a thing
+// a stored note should be able to ask for.
+//
+// Note what is NOT here: no href, no src, no event handler. A chip points at a
+// lecture id, and an id is not a URL.
+const SOURCE_CHIP_ATTRIBUTES = {
+  "data-media-id": /^\d{1,10}$/,
+  "data-timestamp": /^\d{1,7}$/,
+  "data-media-title": /^[\s\S]{0,120}$/,
+  // The bookmark's own title, which the chip shows on its second line and the
+  // export prints in the footnote. Bounded exactly as the lecture title is.
+  "data-note": /^[\s\S]{0,120}$/,
+  // What colours the chip. An enumeration and not free text: it is turned
+  // straight into a background colour, so the only values worth keeping are the
+  // three that name one. Anything else is dropped and the chip stays neutral.
+  "data-media-type": /^(video|audio|text)$/,
+  // Marks the chip's second line so it can be styled apart from the first.
+  "data-chip-line": /^note$/,
+  "contenteditable": /^false$/i,
+};
+
 // The attributes each tag may carry beyond `style`, which every allowed element
 // may have and which is filtered separately below.
-const TAG_ATTRIBUTES = { FONT: FONT_ATTRIBUTES, IMG: IMG_ATTRIBUTES };
+const TAG_ATTRIBUTES = { FONT: FONT_ATTRIBUTES, IMG: IMG_ATTRIBUTES, SPAN: SOURCE_CHIP_ATTRIBUTES };
 
 // Everything an allowed element is permitted to carry: a colour, a size, or —
 // for an image — its embedded source.
@@ -167,14 +197,18 @@ export const noteBodyToHtml = (body) => {
   return sanitizeNoteHtml(body);
 };
 
-// The words with the markup taken off — for the list preview, for searching, and
-// for the text the source window is opened with. Those three want a sentence,
-// and would otherwise be matching and displaying tag names.
-export const noteHtmlToPlainText = (body) => {
-  if (!body) return "";
-  if (!looksLikeHtml(body)) return body.replace(CARET_HOLDER, "");
-
-  const fragment = parseFragment(body);
+// The words in a fragment that has ALREADY been parsed.
+//
+// Split out of noteHtmlToPlainText for the export, which parses a body itself
+// to swap source chips for footnote marks and then wants the text of what is
+// left. Serializing that back to a string and handing it to the function below
+// would not merely be wasteful — it would be wrong: a body whose only markup
+// was the chip stops looking like HTML the moment the chip is gone, so the
+// entities in it would be printed as "&nbsp;" instead of read as spaces.
+//
+// One implementation, two doors. The alternative was a second copy of these
+// three rules, which is how the preview and the export drift apart.
+export const fragmentToPlainText = (fragment) => {
   // An image has no words, but it is not nothing either: without a stand-in, a
   // note that is one screenshot reads as an empty note everywhere text is shown
   // — in the list preview, in the search index and in the export.
@@ -185,6 +219,15 @@ export const noteHtmlToPlainText = (body) => {
   for (const block of fragment.querySelectorAll("div, p, li")) block.append("\n");
 
   return fragment.textContent.replace(CARET_HOLDER, "").replace(/\n{3,}/g, "\n\n").trim();
+};
+
+// The words with the markup taken off — for the list preview, for searching, and
+// for the text the source window is opened with. Those three want a sentence,
+// and would otherwise be matching and displaying tag names.
+export const noteHtmlToPlainText = (body) => {
+  if (!body) return "";
+  if (!looksLikeHtml(body)) return body.replace(CARET_HOLDER, "");
+  return fragmentToPlainText(parseFragment(body));
 };
 
 // A body of "<div><br></div>" is what an emptied editor leaves behind, and it is

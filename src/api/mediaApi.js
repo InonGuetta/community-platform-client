@@ -32,6 +32,12 @@ export const mediaApi = {
     await axiosInstance.delete(`/media/delete/${id}`);
   },
 
+  // The lectures this user has started and not finished, newest first. Built
+  // from the same watch positions the player has been recording all along —
+  // until now they were only ever read back one lecture at a time, to resume it.
+  continueWatching: async () =>
+    (await axiosInstance.get("/media/continue-watching")).data,
+
   // Playback position, per user per item. Both sides of the resume feature.
   getProgress: async (id) => (await axiosInstance.get(`/media/${id}/progress`)).data,
 

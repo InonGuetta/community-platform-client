@@ -3,6 +3,7 @@
 // DOMParser, so unlike most utilities here it genuinely needs a DOM.
 import { test, expect, describe } from "vitest";
 import { sanitizeNoteHtml, noteBodyToHtml, noteHtmlToPlainText, isNoteHtmlEmpty } from "./noteHtml";
+import { sourceChipHtml, sourceFromChip, SOURCE_CHIP_SELECTOR } from "./noteSource";
 
 // notes.body changed meaning when the toolbar arrived: it holds markup now, and
 // it holds the plain text of every note written before that. Both readings have
@@ -123,6 +124,143 @@ describe("notes written before the toolbar existed", () => {
   // swallowed by a parser.
   test("text containing an angle bracket is not mistaken for markup", () => {
     expect(noteHtmlToPlainText("2 < 3")).toBe("2 < 3");
+  });
+});
+
+// A bookmark dragged into a note becomes a chip in the note's body, which means
+// two files have to agree: noteSource.js builds the markup, noteHtml.js decides
+// what markup is allowed to come back out of the database. They are in separate
+// modules on purpose — one is about a feature, the other about safety — and
+// that is exactly the arrangement that drifts, so the agreement is asserted
+// here rather than described in a comment in each.
+describe("a source chip, dragged in from the sidebar", () => {
+  const chip = sourceChipHtml({
+    mediaId: 12, timestampSeconds: 742, mediaTitle: "בבא קמא ב", note: "בעניין יתרו", mediaType: "audio",
+  });
+
+  test("what noteSource builds is what the sanitizer lets back through", () => {
+    const cleaned = sanitizeNoteHtml(chip);
+
+    expect(cleaned).toContain('data-media-id="12"');
+    expect(cleaned).toContain('data-timestamp="742"');
+    expect(cleaned).toContain('data-media-title="בבא קמא ב"');
+    // The bookmark's own title, which only the export's footnote prints — and
+    // which is therefore the attribute most likely to be dropped by a
+    // sanitizer nobody told about it.
+    expect(cleaned).toContain('data-note="בעניין יתרו"');
+    // Without this the caret walks into the chip and the reference can be
+    // edited one letter at a time into something that points nowhere.
+    expect(cleaned).toContain('contenteditable="false"');
+  });
+
+  test("a chip survives a round-trip and still names its lecture", () => {
+    const body = document.createElement("div");
+    body.innerHTML = noteBodyToHtml(sanitizeNoteHtml(`כתוב כאן ${chip} והמשך`));
+
+    expect(sourceFromChip(body.querySelector(SOURCE_CHIP_SELECTOR))).toEqual({
+      mediaId: 12,
+      timestampSeconds: 742,
+      mediaTitle: "בבא קמא ב",
+      note: "בעניין יתרו",
+      mediaType: "audio",
+      // The bookmark's own words, which is what the source window prints in its
+      // header — not the chip's raw text, which is two lines now.
+      noteText: "בעניין יתרו",
+    });
+  });
+
+  // The chip's attributes are the ONLY ones a span may now carry, and every one
+  // of them is inert. A note body is user input that has been through a
+  // database; a span that could carry a click handler or a URL would be a way
+  // to make one note act on another visit.
+  test("a span may still carry nothing that acts", () => {
+    const cleaned = sanitizeNoteHtml(
+      '<span onclick="steal()" href="http://x" data-media-id="4" contenteditable="true" title="x">א</span>'
+    );
+    expect(cleaned).toBe('<span data-media-id="4">א</span>');
+  });
+
+  test("a chip claiming something that is not a lecture id is not a chip", () => {
+    const cleaned = sanitizeNoteHtml('<span data-media-id="javascript:alert(1)">א</span>');
+    expect(cleaned).toBe("<span>א</span>");
+    expect(sourceFromChip(Object.assign(document.createElement("span"), { innerHTML: "" }))).toBe(null);
+  });
+
+  // A title is carried on the chip so the dialog opened from it has the real
+  // one, but a note body must not become a place to store arbitrary text.
+  test("the carried title is bounded", () => {
+    const long = "כ".repeat(400);
+    expect(sanitizeNoteHtml(`<span data-media-id="1" data-media-title="${long}">א</span>`))
+      .toBe('<span data-media-id="1">א</span>');
+    expect(sourceChipHtml({ mediaId: 1, mediaTitle: long })).toContain(`data-media-title="${"כ".repeat(120)}"`);
+  });
+
+  // The chip is the sentence's source, so it reads as part of the sentence
+  // everywhere the note is shown as words: the list preview, the search index
+  // and the PDF export. Both of its lines are text — the break between them is
+  // a real <br>, which is exactly why they do not run together into one word.
+  test("a chip reads as both its lines in plain text", () => {
+    expect(noteHtmlToPlainText(`ראה ${chip}`)).toBe("ראה ▶ בבא קמא ב · 12:22\nבעניין יתרו");
+  });
+
+  // What the user actually wrote at that second. A reference saying only
+  // "שיעור · 45:12" is an address; this is what is AT the address, and without
+  // it a note full of chips says nothing about why any of them are there.
+  test("the bookmark's own words are shown on the chip, on their own line", () => {
+    expect(chip).toContain('<br><span data-chip-line="note">בעניין יתרו</span>');
+    expect(sanitizeNoteHtml(chip)).toContain('data-chip-line="note"');
+  });
+
+  test("a long note is cut to its first words on the chip but kept in full on it", () => {
+    const long = "בעניין יתרו ומשה רבנו ומה שכתב הרמבם בהלכות דעות פרק ראשון";
+    const built = sourceChipHtml({ mediaId: 1, mediaTitle: "שיעור", note: long });
+
+    expect(built).toContain(`data-note="${long}"`);
+    expect(noteHtmlToPlainText(built)).toContain("…");
+    expect(noteHtmlToPlainText(built)).toContain("בעניין יתרו ומשה רבנו");
+  });
+
+  test("a bookmark with no words of its own gets no second line", () => {
+    const built = sourceChipHtml({ mediaId: 1, timestampSeconds: 5, mediaTitle: "שיעור" });
+
+    expect(built).not.toContain("data-chip-line");
+    expect(built).not.toContain("<br>");
+  });
+
+  // The chip carries the accent of the KIND of lecture it came from, so a
+  // bookmark dragged out of an orange group does not land as a blue chip.
+  test("the media type survives, and only the three that name a colour", () => {
+    for (const type of ["video", "audio", "text"]) {
+      const built = sourceChipHtml({ mediaId: 1, mediaTitle: "שיעור", mediaType: type });
+      expect(sanitizeNoteHtml(built)).toContain(`data-media-type="${type}"`);
+    }
+
+    // It is turned straight into a background colour, so anything that does not
+    // name one is refused at both ends: never written, never read back.
+    expect(sourceChipHtml({ mediaId: 1, mediaTitle: "שיעור", mediaType: "url(x)" }))
+      .not.toContain("data-media-type");
+    expect(sanitizeNoteHtml('<span data-media-id="1" data-media-type="url(x)">א</span>'))
+      .toBe('<span data-media-id="1">א</span>');
+  });
+
+  // The chip sits INSIDE a sentence, so its label has to stay about the size of
+  // a word or two. A full lecture title made a blue box wider than the editor,
+  // and since an inline-block cannot break itself the note ran off the side of
+  // its own card. Nothing is lost by shortening: the whole title is still
+  // carried on the chip and printed in the export's footnote.
+  test("a long lecture name is shortened in the label but kept on the chip", () => {
+    const long = "שיעור בעניין ארבעה אבות נזיקין ובדין שור המועד והתם וכל הנלווה";
+    const built = sourceChipHtml({ mediaId: 1, timestampSeconds: 60, mediaTitle: long });
+
+    expect(built).toContain(`data-media-title="${long}"`);
+    expect(noteHtmlToPlainText(built).length).toBeLessThan(long.length);
+    expect(noteHtmlToPlainText(built)).toContain("…");
+    // Still recognisable: the shortening takes the tail, not the name.
+    expect(noteHtmlToPlainText(built)).toContain("שיעור בעניין ארבעה אבות");
+  });
+
+  test("a name short enough to show is not given an ellipsis it does not need", () => {
+    expect(noteHtmlToPlainText(chip)).not.toContain("…");
   });
 });
 

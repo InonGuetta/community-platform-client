@@ -6,6 +6,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
+import Tooltip from "@mui/material/Tooltip";
 import { donationsApi } from "../../../api/donationsApi";
 
 const PRESET_AMOUNTS = [50, 100, 250, 500];
@@ -43,9 +44,20 @@ const DonateForm = () => {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box>
         <Typography variant="subtitle2" mb={1}>סוג תרומה</Typography>
+        {/* "חודשי" is disabled rather than removed, and the server refuses it
+            too. It was selectable and produced a ONE-OFF charge labelled
+            monthly — a donor would have set up what they believed was a standing
+            order and been billed once. Harmless today only because no card is
+            ever collected; a trap the moment payments go live. Making it real
+            needs a Stripe Subscription, which needs a saved payment method,
+            which needs the Elements form this page does not have yet. */}
         <ToggleButtonGroup value={type} exclusive onChange={(_, v) => v && setType(v)} size="small">
           <ToggleButton value="one_time">חד פעמי</ToggleButton>
-          <ToggleButton value="monthly">חודשי</ToggleButton>
+          <Tooltip title="תרומה חודשית תתאפשר בקרוב">
+            <span>
+              <ToggleButton value="monthly" disabled>חודשי</ToggleButton>
+            </span>
+          </Tooltip>
         </ToggleButtonGroup>
       </Box>
 

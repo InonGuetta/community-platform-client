@@ -1,7 +1,12 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import CloseIcon from "@mui/icons-material/Close";
 import { sanitizeNoteHtml, isNoteHtmlEmpty } from "../../../../utilities/noteHtml";
+import { mediaTypeAccents } from "../../../../utilities/constant";
+import { sourceChipHtml, sourceFromChip, SOURCE_CHIP_SELECTOR } from "../../../../utilities/noteSource";
 
 // The note body, as a contentEditable rather than a TextField — which is the
 // whole reason the toolbar can do anything. A textarea holds characters; bold is
@@ -65,10 +70,52 @@ const readFontSizePx = () => {
   return Number.isFinite(size) ? Math.round(size) : null;
 };
 
-const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, onError, placeholder }, ref) => {
+// Where in the document a point is, as a collapsed range — for a bookmark
+// dropped into the middle of a paragraph, which has to land under the pointer
+// rather than at the end of the note.
+//
+// Two spellings of the same thing, and no browser has both: caretRangeFromPoint
+// is WebKit and Blink, caretPositionFromPoint is the standard one Firefox
+// implements. Anything with neither (jsdom, for one) gets null, and the caller
+// falls back to the caret's last known home.
+const caretRangeAt = (x, y) => {
+  if (typeof document.caretRangeFromPoint === "function") {
+    return document.caretRangeFromPoint(x, y);
+  }
+  if (typeof document.caretPositionFromPoint === "function") {
+    const position = document.caretPositionFromPoint(x, y);
+    if (!position) return null;
+    const range = document.createRange();
+    range.setStart(position.offsetNode, position.offset);
+    range.collapse(true);
+    return range;
+  }
+  return null;
+};
+
+const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, onError, onOpenSource, placeholder }, ref) => {
   const editorRef = useRef(null);
+  // The editor and the image controls that float over it. Their positions are
+  // measured against this, so it is the element they are both inside.
+  const frameRef = useRef(null);
   // The last selection that was inside THIS editor. See the third note above.
   const savedRange = useRef(null);
+
+  // The object the pointer is on, and where it sits inside the frame — the
+  // outline and the delete button are drawn from this.
+  //
+  // "Object" is either of the two things in a note body that are not text: a
+  // pasted picture, or a source chip. Both have the same problem — they cannot
+  // be removed by typing, and selecting one exactly with a mouse is fiddly — so
+  // both get the same answer, and the only difference between them is the word
+  // in the tooltip.
+  //
+  // Measured into state rather than done in CSS because of the button. A
+  // :hover rule can outline something, but the control that removes it cannot
+  // live INSIDE the contentEditable — anything in there is part of the note,
+  // gets saved with it, and can be typed into. So it is a sibling, positioned
+  // over the object, which means somebody has to know where the object is.
+  const [framed, setFramed] = useState(null);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -95,6 +142,81 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
   // belongs anyway.
   const emitChange = () => onChange(editorRef.current?.innerHTML ?? "");
 
+  // Measure an object so the outline and the X can be drawn over it. Called on
+  // hover and again whenever the box could have moved under a pointer that has
+  // not left it — scrolling the editor, most of all.
+  const frameObject = useCallback((element, kind) => {
+    const frame = frameRef.current;
+    const editor = editorRef.current;
+    if (!frame || !editor || !element?.isConnected) {
+      setFramed(null);
+      return;
+    }
+
+    const box = element.getBoundingClientRect();
+    const origin = frame.getBoundingClientRect();
+    const view = editor.getBoundingClientRect();
+
+    // Clipped to the part of the object that is actually ON SCREEN.
+    //
+    // The editor scrolls inside itself but these controls are drawn outside it,
+    // so nothing clips them: an image scrolled half past the top gave a
+    // negative offset, and the outline and the X were painted over the card's
+    // own title. Cropping to the intersection keeps both inside the box they
+    // describe, and the button lands on the visible top edge rather than on an
+    // edge that has scrolled away.
+    //
+    // Only when there is something to crop AGAINST. An unlaid-out editor
+    // measures as a zero-height box at the origin, and cropping to that would
+    // hide every control in the note rather than position it — so an
+    // unmeasurable viewport means "no clipping information", not "nothing is
+    // visible".
+    const measurable = view.height > 0 && box.height > 0;
+    const top = measurable ? Math.max(box.top, view.top) : box.top;
+    const bottom = measurable ? Math.min(box.bottom, view.bottom) : box.bottom;
+
+    // Scrolled out of sight, or down to a sliver too small to aim at.
+    if (measurable && bottom - top < 12) {
+      setFramed(null);
+      return;
+    }
+
+    setFramed({
+      element,
+      kind,
+      top: top - origin.top,
+      left: box.left - origin.left,
+      width: box.width,
+      height: bottom - top,
+    });
+  }, []);
+
+  // What the pointer is over, if it is over something removable. A chip is
+  // asked about via closest() because the pointer lands on the text node inside
+  // it, not on the span.
+  const removableAt = (target) => {
+    if (target?.tagName === "IMG") return { element: target, kind: "image" };
+    const chip = target?.closest?.(SOURCE_CHIP_SELECTOR);
+    return chip ? { element: chip, kind: "source" } : null;
+  };
+
+  // Removing a pasted screenshot or a source chip, neither of which had an
+  // answer before this beyond selecting it exactly and pressing Delete — and an
+  // image on its own line, or a one-word chip mid-sentence, is surprisingly
+  // hard to select exactly.
+  //
+  // No confirmation: this is an edit like any other, it is undone by not saving
+  // the note, and a dialog in front of every deleted picture would make
+  // arranging a page of them unbearable.
+  const removeFramed = () => {
+    framed?.element.remove();
+    setFramed(null);
+    emitChange();
+    editorRef.current?.focus();
+  };
+
+  const FRAMED_LABEL = { image: "מחיקת התמונה", source: "מחיקת המקור" };
+
   // Put the caret back where it was before running a command. Three cases, in
   // order: the selection is still in the editor and nothing needs doing; there
   // is a remembered one to restore; or this editor has never been in — in which
@@ -111,6 +233,25 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
       range.selectNodeContents(editor);
       range.collapse(false);
     }
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  };
+
+  // Put the caret where the pointer let go, so a dropped bookmark lands in the
+  // sentence it was aimed at. A point outside this editor — a drop on the
+  // card's margin, or a browser that cannot answer the question — falls back to
+  // the caret's last position, which is still a deliberate place rather than a
+  // guess.
+  const placeCaretAt = (point) => {
+    const editor = editorRef.current;
+    editor?.focus();
+
+    const range = point ? caretRangeAt(point.x, point.y) : null;
+    if (!range || !editor?.contains(range.startContainer)) {
+      restoreSelection();
+      return;
+    }
+    const selection = document.getSelection();
     selection?.removeAllRanges();
     selection?.addRange(range);
   };
@@ -177,6 +318,22 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
       emitChange();
       reportFormats();
     },
+
+    // A bookmark dropped into the note, written in as a source chip — see
+    // utilities/noteSource.js for what that is and why it is a span rather than
+    // a link. `point` is where the pointer let go, in client coordinates.
+    //
+    // insertHTML rather than DOM surgery for the same reason setFontSize leans
+    // on execCommand: it splits whatever node the caret is standing in and
+    // leaves the undo stack intact, and doing that by hand is how an editor
+    // starts becoming a library.
+    insertSource(bookmark, point) {
+      if (!editorRef.current || !bookmark?.mediaId) return;
+      placeCaretAt(point);
+      document.execCommand("insertHTML", false, sourceChipHtml(bookmark));
+      emitChange();
+      reportFormats();
+    },
   }));
 
   const insertImage = (file) => {
@@ -221,7 +378,15 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
   const showPlaceholder = isNoteHtmlEmpty(html);
 
   return (
-    <Box sx={{ position: "relative", flexGrow: 1, display: "flex" }}>
+    <Box
+      ref={frameRef}
+      sx={{ position: "relative", flexGrow: 1, display: "flex" }}
+      // On the FRAME, not on the editor: the delete button is outside the
+      // editable box, so a mouse travelling from the picture to the X leaves
+      // the editor — and clearing on the editor's own mouseleave would take the
+      // button away a pixel before it could be pressed.
+      onMouseLeave={() => setFramed(null)}
+    >
       <Box
         ref={editorRef}
         component="div"
@@ -230,7 +395,12 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
         role="textbox"
         aria-multiline="true"
         aria-label="גוף ההערה"
-        onInput={emitChange}
+        onInput={() => {
+          emitChange();
+          // Typing moves everything below the caret, so a frame measured a
+          // moment ago is now drawn somewhere the object no longer is.
+          if (framed) setFramed(null);
+        }}
         onBlur={() => {
           rememberSelection();
           onChange(sanitizeNoteHtml(editorRef.current?.innerHTML ?? ""));
@@ -238,6 +408,22 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
         onPaste={handlePaste}
         onKeyUp={reportFormats}
         onMouseUp={reportFormats}
+        // A source chip opens the lecture it names. The chip is
+        // contenteditable="false", so this click never had a caret to place and
+        // there is nothing to take away from the user by handling it.
+        onClick={(event) => {
+          const source = sourceFromChip(event.target);
+          if (source) onOpenSource?.(source);
+        }}
+        onMouseOver={(event) => {
+          const found = removableAt(event.target);
+          if (found) frameObject(found.element, found.kind);
+          else if (framed) setFramed(null);
+        }}
+        // The editor scrolls inside itself, so the object moves while the
+        // pointer does not. Re-measured rather than hidden: a frame that
+        // disappears when you scroll a long note is a frame you cannot use.
+        onScroll={() => { if (framed) frameObject(framed.element, framed.kind); }}
         // Focus does two things: it reports the formats under the caret, and it
         // tells the page which of its stacked editors the toolbar now drives.
         onFocus={() => { onFocus?.(); reportFormats(); }}
@@ -258,8 +444,118 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
           // routinely wider than this box. Scaled down to fit rather than
           // allowed to force the whole page sideways.
           "& img": { maxWidth: "100%", height: "auto", borderRadius: 4, display: "block", my: 1 },
+          // A source chip — a bookmark dragged in from the sidebar. Styled from
+          // here rather than with inline CSS on the element itself so it follows
+          // the theme into dark mode, and so the sanitizer has one less kind of
+          // style attribute to have an opinion about.
+          "& span[data-media-id]": {
+            display: "inline-block",
+            px: 0.75,
+            py: 0.25,
+            mx: 0.25,
+            borderRadius: 1.5,
+            // The neutral case: a chip carrying no media type, which is every
+            // chip written before the type was recorded. The three real colours
+            // are below.
+            bgcolor: "primary.main",
+            color: "#fff",
+            fontSize: "0.8em",
+            fontWeight: 700,
+            lineHeight: 1.45,
+            verticalAlign: "middle",
+            cursor: "pointer",
+            userSelect: "none",
+            // An inline-block cannot break itself, so without these two a
+            // lecture with a long name produced a chip wider than the editor
+            // and the note ran off the side of its own card. maxWidth pins it
+            // to the column; overflowWrap lets the label wrap inside the chip
+            // instead of pushing its edge outwards — and it stays ONE box, so
+            // the outline drawn round it on hover is still a rectangle.
+            maxWidth: "100%",
+            overflowWrap: "anywhere",
+            // Darkened rather than switched to a named "dark" shade: the three
+            // accents are fixed hex values with no dark variant of their own.
+            "&:hover": { filter: "brightness(0.88)" },
+          },
+
+          // A source keeps the colour of the KIND of lecture it came from —
+          // orange for video, blue for audio, green for text — which is the
+          // same accent the archive's cards and the sidebar's own bookmark
+          // headers use. Dragging a bookmark out of an orange group and having
+          // it land as a blue chip made the two into different things; they are
+          // the same thing in two places.
+          '& span[data-media-id][data-media-type="video"]': { bgcolor: mediaTypeAccents.video },
+          '& span[data-media-id][data-media-type="audio"]': { bgcolor: mediaTypeAccents.audio },
+          '& span[data-media-id][data-media-type="text"]': { bgcolor: mediaTypeAccents.text },
+
+          // The chip's second line: what the user wrote at that second. Lighter
+          // and slightly smaller than the lecture's name above it, because the
+          // name is the address and this is the content.
+          '& span[data-media-id] span[data-chip-line="note"]': {
+            display: "block",
+            fontSize: "0.95em",
+            fontWeight: 500,
+            opacity: 0.95,
+          },
         }}
       />
+
+      {/* The object under the pointer — a picture or a source chip: an outline
+          saying which one is meant, and the one control it needs. Both are
+          OUTSIDE the contentEditable — anything inside it would be part of the
+          note, would be saved with it, and could be typed into. */}
+      {framed?.element.isConnected && (
+        <>
+          <Box
+            aria-hidden
+            sx={{
+              position: "absolute",
+              // Held a little off the object so the outline reads as being
+              // AROUND it rather than as a border someone added to it — which
+              // matters most for a chip, which already has a filled background
+              // of its own.
+              top: framed.top - 2,
+              // Physical left, not insetInlineStart: the number came out of
+              // getBoundingClientRect, which is physical — and the page is
+              // right-to-left, so a logical property would mirror it onto the
+              // wrong side of the note.
+              left: framed.left - 2,
+              width: framed.width + 4,
+              height: framed.height + 4,
+              border: "2px solid",
+              borderColor: "primary.main",
+              borderRadius: "6px",
+              pointerEvents: "none",
+            }}
+          />
+          <Tooltip title={FRAMED_LABEL[framed.kind]}>
+            <IconButton
+              size="small"
+              onClick={removeFramed}
+              aria-label={FRAMED_LABEL[framed.kind]}
+              sx={{
+                position: "absolute",
+                // The object's top-right corner, which is where the note's own
+                // text begins in a right-to-left notebook — so the button sits
+                // at its start, not trailing off its end.
+                top: framed.top,
+                left: framed.left + framed.width,
+                transform: "translate(-50%, -50%)",
+                bgcolor: "error.main",
+                color: "#fff",
+                boxShadow: 2,
+                // A chip is barely taller than its own text, so a button sized
+                // for a screenshot would bury it. Both sizes still clear the
+                // 24px the corner needs to stay pressable.
+                p: framed.kind === "source" ? 0 : 0.25,
+                "&:hover": { bgcolor: "error.dark" },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: framed.kind === "source" ? 13 : 16 }} />
+            </IconButton>
+          </Tooltip>
+        </>
+      )}
 
       {showPlaceholder && (
         // A real element rather than the :empty::before trick: an emptied

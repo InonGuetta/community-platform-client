@@ -18,6 +18,7 @@ import { changePassword } from "../../../store/slicesAndThunks/authSlices/authPo
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { hebrewForError } from "../../../utilities/apiError";
 import { roleLabels } from "../../../utilities/constant";
+import RoleRequestCard from "./RoleRequestCard";
 
 // The user's own account, which nobody could edit before this — an admin could
 // change anyone's display name and nobody could change their own.
@@ -134,6 +135,11 @@ const ProfilePage = () => {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Between the profile and the password, because it is about WHO the
+            account is rather than how it is secured. Renders nothing for an
+            admin, who has nothing left to ask for. */}
+        <RoleRequestCard />
 
         <Card sx={{ borderRadius: 2 }}>
           <CardContent component="form" onSubmit={handleChangePassword} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

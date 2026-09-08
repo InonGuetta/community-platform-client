@@ -27,9 +27,20 @@ import { SOURCE_CHIP_SELECTOR, sourceFromChip, sourceFootnoteLabel, CHIP_MARKER 
 export const footnoteMark = (number) => `[${number}]`;
 export const FOOTNOTE_MARK_PATTERN = /\[(\d+)\]/g;
 
-// A source is a lecture AT a moment — the same lecture bookmarked twice is two
-// references — which is the same identity the notebook's source trail uses.
-const identityOf = (source) => `${source.mediaId}:${source.timestampSeconds ?? ""}`;
+// A source is a lecture AT a moment, or a book AT a paragraph — the same lecture
+// bookmarked twice is two references — which is the same identity the notebook's
+// source trail uses.
+//
+// The chunk is part of the key for the reason the timestamp is. Without it every
+// passage marked in one sefer shared a key (both timestamps being null) and the
+// whole book collapsed into a single numbered footnote, labelled by whichever
+// passage happened to be cited first.
+//
+// The page is there for exactly the same reason, one anchor kind later: a mark
+// made on a page of the original carries neither a timestamp nor a chunk, so two
+// of them in one sefer would have shared a key in their turn.
+const identityOf = (source) =>
+  `${source.mediaId}:${source.timestampSeconds ?? ""}:${source.chunkId ?? ""}:${source.pageNumber ?? ""}`;
 
 /**
  * Collects the sources of a document and hands out their numbers.

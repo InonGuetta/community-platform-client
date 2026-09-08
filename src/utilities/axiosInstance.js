@@ -1,10 +1,16 @@
 import axios from "axios";
 import { logger } from "./logger";
 import { ERROR_CODES } from "./apiError";
+import { serializeParams } from "./queryParams";
 
 const axiosInstance = axios.create({
   baseURL: "/api",
   withCredentials: true,
+  // Lists go out as a repeated parameter, not as `key[]=`. See queryParams.js:
+  // the bracketed form arrives at Express 5 as a parameter whose NAME contains
+  // the brackets, so the filter is silently ignored and the request still
+  // answers 200.
+  paramsSerializer: serializeParams,
 });
 
 // ── Tracing every call to the API ───────────────────────────────────────────

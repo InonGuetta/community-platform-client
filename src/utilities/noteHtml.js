@@ -110,6 +110,15 @@ const IMG_ATTRIBUTES = { src: SAFE_IMAGE_SRC, alt: /^[\s\S]*$/ };
 const SOURCE_CHIP_ATTRIBUTES = {
   "data-media-id": /^\d{1,10}$/,
   "data-timestamp": /^\d{1,7}$/,
+  // Where in a book the chip points, and what it cites. Both are plain integers
+  // and both are bounded exactly as the id above is — a chunk id is a SERIAL,
+  // and no book has a seven-digit page. Without them here the chip still renders
+  // and still survives being typed, and then loses its anchor the first time the
+  // note goes through the database — a reference that quietly stops opening
+  // anything. That is the failure this allowlist exists to prevent, and
+  // noteHtml.test.js asserts a chip built by noteSource survives it.
+  "data-chunk-id": /^\d{1,10}$/,
+  "data-page": /^\d{1,6}$/,
   "data-media-title": /^[\s\S]{0,120}$/,
   // The bookmark's own title, which the chip shows on its second line and the
   // export prints in the footnote. Bounded exactly as the lecture title is.

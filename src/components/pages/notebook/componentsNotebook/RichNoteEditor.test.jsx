@@ -152,6 +152,11 @@ describe("a source chip in the body", () => {
     expect(onOpenSource).toHaveBeenCalledWith({
       mediaId: 12,
       timestampSeconds: 742,
+      // Null for a recording, which has no paragraph and no page — and null
+      // rather than absent, so a chip written before books were bookmarkable
+      // reads the same as one pointing at a lecture today.
+      chunkId: null,
+      pageNumber: null,
       mediaTitle: "בבא קמא ב",
       note: "",
       mediaType: null,

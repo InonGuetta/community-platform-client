@@ -51,6 +51,7 @@ export const ERROR_CODES = {
   SESSION_FORBIDDEN: "SESSION_FORBIDDEN",
   SESSION_NOT_STARTED: "SESSION_NOT_STARTED",
   BOOKMARK_NOT_FOUND: "BOOKMARK_NOT_FOUND",
+  BOOKMARK_ANCHOR_INVALID: "BOOKMARK_ANCHOR_INVALID",
   NOTE_NOT_FOUND: "NOTE_NOT_FOUND",
   COURSE_NOT_FOUND: "COURSE_NOT_FOUND",
   TRANSCRIPT_NOT_FOUND: "TRANSCRIPT_NOT_FOUND",
@@ -61,6 +62,8 @@ export const ERROR_CODES = {
   NO_TRANSCRIPT_CONTENT: "NO_TRANSCRIPT_CONTENT",
   NO_KEY_POINTS: "NO_KEY_POINTS",
   UNSUPPORTED_TEXT_FORMAT: "UNSUPPORTED_TEXT_FORMAT",
+  UNVIEWABLE_TEXT_FORMAT: "UNVIEWABLE_TEXT_FORMAT",
+  DOCUMENT_UNREADABLE: "DOCUMENT_UNREADABLE",
   ALREADY_QUEUED: "ALREADY_QUEUED",
   ALREADY_RUNNING: "ALREADY_RUNNING",
 
@@ -136,6 +139,11 @@ const ERROR_CODE_HE = {
   [ERROR_CODES.SESSION_FORBIDDEN]: "המפגש לא נמצא או שאין לך הרשאה",
   [ERROR_CODES.SESSION_NOT_STARTED]: "המפגש עדיין לא נפתח על ידי המארח",
   [ERROR_CODES.BOOKMARK_NOT_FOUND]: "הסימנייה לא נמצאה",
+  // The generic "שמירת הסימנייה נכשלה" would send the user to press the same
+  // button again, which is the one thing that cannot work: the text on screen
+  // describes a version of the book that no longer exists.
+  [ERROR_CODES.BOOKMARK_ANCHOR_INVALID]:
+    "הקטע הזה כבר לא קיים בספר — ייתכן שהספר עובד מחדש. רענן את העמוד וסמן שוב.",
   [ERROR_CODES.NOTE_NOT_FOUND]: "ההערה לא נמצאה",
   [ERROR_CODES.COURSE_NOT_FOUND]: "הקורס לא נמצא",
   [ERROR_CODES.TRANSCRIPT_NOT_FOUND]: "התמלול לא נמצא",
@@ -148,6 +156,15 @@ const ERROR_CODE_HE = {
   [ERROR_CODES.NO_KEY_POINTS]: "ניתוח ה-AI לא הפיק נקודות מפתח",
   [ERROR_CODES.UNSUPPORTED_TEXT_FORMAT]:
     "לא ניתן להפיק סיכום מקובץ מסוג זה. נתמכים: PDF, DOCX, TXT.",
+  // The old binary Word format. Saying which action fixes it matters more than
+  // saying what went wrong: the file is fine, it is only unreadable by anything
+  // in this stack, and re-saving it takes a moment.
+  [ERROR_CODES.UNVIEWABLE_TEXT_FORMAT]:
+    "לא ניתן להציג קובץ מסוג .doc. שמרו אותו כ־.docx והעלו מחדש — או הורידו אותו כדי לפתוח במחשב.",
+  // The same sentence the extraction path stores in transcripts.error_message,
+  // so a file that fails both ways says the same thing on both screens.
+  [ERROR_CODES.DOCUMENT_UNREADABLE]:
+    "לא ניתן לקרוא את הקובץ — ייתכן שהוא פגום או מוגן בסיסמה.",
   [ERROR_CODES.ALREADY_QUEUED]: "הפעולה כבר רצה עבור מדיה זו",
   [ERROR_CODES.ALREADY_RUNNING]: "הפעולה כבר רצה עבור מדיה זו",
 

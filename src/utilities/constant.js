@@ -39,5 +39,37 @@ export const listRowSx = {
 // only stops the user early, and one that is too high surfaces the server's 400.
 export const playlistTitleMaxLength = 120;
 
+// ── Attribution ─────────────────────────────────────────────────────────────
+//
+// media_items.creator_name answers "who said this" and is ONE column, but it is
+// not called one thing: a lecture has a מרצה and a book has a מחבר. The wording
+// is a rendering decision keyed on media_type, which is why it lives here beside
+// the other display labels rather than being written out at each screen.
+//
+// Two columns would have meant a "which one do I read?" branch in every query,
+// every card and every filter, for what is a single fact.
+export const creatorLabels = { video: "שם המרצה", audio: "שם המרצה", text: "שם המחבר" };
+
+// The same fact, worded for a card or a heading rather than a form field.
+export const creatorPrefixes = { video: "מרצה", audio: "מרצה", text: "מחבר" };
+
+// What the server stores when nobody said. Mirrors DEFAULT_CREATOR in the
+// server's servicesMedia.js — the two repositories share no code, so this is a
+// copy, and it is display-only: the client never WRITES this value, it only
+// recognises it. The upload form leaves the field blank and lets the server
+// decide, so a drift here cannot produce a wrong row.
+export const defaultCreatorName = "כללי";
+
+// Mirrors CREATOR_NAME_MAX in the server's servicesMedia.js and VARCHAR(120) in
+// migration 020, for the same reason playlistTitleMaxLength does: a cap that is
+// too low only stops the user early, and one that is too high surfaces the
+// server's 400.
+export const creatorNameMaxLength = 120;
+
+// Mirrors TAGS_PER_ITEM_MAX in the server's servicesTags.js. Not a storage
+// limit — a legibility one: a card showing fifteen tags shows nothing, and an
+// item tagged with everything is findable under nothing.
+export const MAX_TAGS = 8;
+
 export const roleLabels = { student: "תלמיד", lecturer: "מרצה", admin: "מנהל" };
 export const sessionTypeLabels = { "1on1": "אחד על אחד", group: "קבוצה", webinar: "וובינר" };

@@ -34,6 +34,18 @@ export const coursesApi = {
     await axiosInstance.delete(`/courses/${courseId}/students/${studentId}`);
   },
 
+  // Who this lecturer teaches, across every course they run. No id in the path
+  // on purpose — the server answers for the CALLER, which is what makes it safe
+  // to expose to a lecturer at all: there is no parameter to point elsewhere.
+  getMyStudents: async () => (await axiosInstance.get("/courses/my-students")).data,
+
+  // The type-ahead behind "add a student". The server answers an empty list
+  // below two characters and caps the result at twenty, so this is a search and
+  // not a membership dump — do not be tempted to call it with an empty q to
+  // "just get everyone".
+  searchEnrollable: async (courseId, q) =>
+    (await axiosInstance.get(`/courses/${courseId}/enrollable-students`, { params: { q } })).data,
+
   getStudentCourses: async (studentId) =>
     (await axiosInstance.get(`/courses/students/${studentId}/enrollments`)).data,
 };

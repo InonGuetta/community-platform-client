@@ -7,6 +7,7 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import UploadIcon from "@mui/icons-material/Upload";
 import FilterBar from "./componentsArchive/FilterBar";
+import EditTagsDialog from "./componentsArchive/EditTagsDialog";
 import MediaGrid from "./componentsArchive/MediaGrid";
 import UploadMedia from "../../features/UploadMedia/UploadMedia";
 import SmartSearch from "../../features/SmartSearch/SmartSearch";
@@ -18,8 +19,12 @@ import { isPrivileged } from "../../../utilities/permissions";
 const ArchivePage = () => {
   const {
     filteredMedia, status, typeFilter, hasActiveFilter,
+    creatorFilter, knownCreators, handleCreatorFilter,
+    tagIds, excludedTagIds, tagTree, handleCycleTag, handleRemoveTag, handleClearTags,
+    dates, handleDateFilter, handleClearFilters,
     handleFilter, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
+    tagTargetItem, handleEditTags, handleEditTagsCancel, handleEditTagsSave,
     handleTogglePublish,
   } = useArchivePageController();
   const { isUploadOpen } = useSelector((state) => state.ui);
@@ -56,7 +61,24 @@ const ArchivePage = () => {
         {tab === 0 && (
           <>
             <Box sx={{ mb: 3 }}>
-              <FilterBar typeFilter={typeFilter} onFilter={handleFilter} onSearch={handleSearch} />
+              <FilterBar
+                typeFilter={typeFilter}
+                onFilter={handleFilter}
+                onSearch={handleSearch}
+                creatorFilter={creatorFilter}
+                knownCreators={knownCreators}
+                onCreatorFilter={handleCreatorFilter}
+                tagIds={tagIds}
+                excludedTagIds={excludedTagIds}
+                tagTree={tagTree}
+                onCycleTag={handleCycleTag}
+                onRemoveTag={handleRemoveTag}
+                onClearTags={handleClearTags}
+                uploadedAfter={dates.uploadedAfter}
+                uploadedBefore={dates.uploadedBefore}
+                onDateFilter={handleDateFilter}
+                onClearAll={handleClearFilters}
+              />
             </Box>
             <MediaGrid
               items={filteredMedia}
@@ -65,6 +87,7 @@ const ArchivePage = () => {
               user={user}
               onDelete={handleDeleteRequest}
               onTogglePublish={handleTogglePublish}
+              onEditTags={handleEditTags}
               emptyActionLabel={canUpload ? "העלאת מדיה" : undefined}
               onEmptyAction={handleOpenUpload}
               filtered={hasActiveFilter}
@@ -95,6 +118,17 @@ const ArchivePage = () => {
       />
 
       <UploadMedia open={isUploadOpen} />
+
+      {/* Tagging an item that already exists — the only way to tag anything that
+          was uploaded before the taxonomy, and the reason the filter had nothing
+          to filter. */}
+      <EditTagsDialog
+        open={Boolean(tagTargetItem)}
+        item={tagTargetItem}
+        tagTree={tagTree}
+        onClose={handleEditTagsCancel}
+        onSave={handleEditTagsSave}
+      />
 
       <ConfirmingDeletionDialog
         open={!!deleteTargetId}

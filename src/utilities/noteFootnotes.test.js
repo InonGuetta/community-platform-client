@@ -208,3 +208,44 @@ describe("the Word document's footnotes", () => {
     expect(wordFootnoteList(registry)).toContain("&lt;script&gt;");
   });
 });
+
+// Two passages marked in one sefer are two references. They share a media id and
+// both have a null timestamp, so before the chunk joined the key they collapsed
+// into one numbered footnote — labelled by whichever was cited first, and
+// pointing every citation in the document at that one passage.
+describe("two passages in the same book", () => {
+  test("are numbered separately", () => {
+    const registry = createSourceRegistry();
+    const first = registry.mark({ mediaId: 9, timestampSeconds: null, chunkId: 55, mediaTitle: "שערי תשובה", pageNumber: 47 });
+    const second = registry.mark({ mediaId: 9, timestampSeconds: null, chunkId: 61, mediaTitle: "שערי תשובה", pageNumber: 52 });
+
+    expect(first).toBe(1);
+    expect(second).toBe(2);
+    expect(registry.labels()[1]).toContain("עמ׳ 47");
+    expect(registry.labels()[2]).toContain("עמ׳ 52");
+  });
+
+  test("but the same passage cited twice is still one reference", () => {
+    const registry = createSourceRegistry();
+    const source = { mediaId: 9, timestampSeconds: null, chunkId: 55, mediaTitle: "שערי תשובה", pageNumber: 47 };
+    expect(registry.mark(source)).toBe(1);
+    expect(registry.mark({ ...source })).toBe(1);
+  });
+
+  // The same collapse, one anchor kind later. A mark made on a page of the
+  // original scan has no timestamp AND no chunk, so two of them in one sefer
+  // matched on every field the key knew about.
+  test("two places marked on the pages of the original are numbered separately", () => {
+    const registry = createSourceRegistry();
+    const onPage = (pageNumber) => ({
+      mediaId: 9, timestampSeconds: null, chunkId: null, mediaTitle: "שערי תשובה", pageNumber,
+    });
+
+    expect(registry.mark(onPage(9))).toBe(1);
+    expect(registry.mark(onPage(41))).toBe(2);
+    expect(registry.mark(onPage(9))).toBe(1);
+
+    expect(registry.labels()[1]).toContain("עמ׳ 9");
+    expect(registry.labels()[2]).toContain("עמ׳ 41");
+  });
+});

@@ -25,6 +25,7 @@ import IosShareIcon from "@mui/icons-material/IosShare";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
@@ -43,15 +44,23 @@ import { fetchBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bo
 import { clearBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksSlice";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { statuses, mediaTypeLabels, mediaTypeAccents, listRowSx } from "../../../utilities/constant";
-import { formatTime } from "../../../utilities/formatTime";
 import { isSaveShortcut } from "../../../utilities/keyboard";
 import { noteBodyToHtml, noteHtmlToPlainText, sanitizeNoteHtml } from "../../../utilities/noteHtml";
 import { BOOKMARK_DRAG_MIME, bookmarkDragPayload } from "../../../utilities/noteSource";
+import {
+  inReadingOrder, placeShortLabel, isTextBookmark, isPageBookmark,
+} from "../../../utilities/bookmarks";
 import { downloadNotesPdf, downloadNotesWord, downloadNotebooks } from "../../../utilities/notesExport";
 import { SOURCE_STYLES } from "../../../utilities/noteFootnotes";
 
 // Identity of a source entry, for keeping the trail free of duplicates.
-const sourceKey = (entry) => `${entry.mediaId}:${entry.timestampSeconds ?? ""}`;
+//
+// A source is a lecture AT a moment, or a book AT a paragraph. The chunk is part
+// of the identity for the same reason the timestamp is: two passages marked in
+// one sefer are two references, and keying on the media id alone would collapse
+// them into a single trail entry that lands on whichever was opened last.
+const sourceKey = (entry) =>
+  `${entry.mediaId}:${entry.timestampSeconds ?? ""}:${entry.chunkId ?? ""}:${entry.pageNumber ?? ""}`;
 
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" }) : "";
@@ -207,8 +216,13 @@ const NotebookPage = () => {
       }
       group.items.push(bm);
     }
+    // Each group re-sorted rather than trusted: a bookmark created from the
+    // source window is appended to the slice and would otherwise sit at the
+    // bottom of its lecture however early it points. The comparator used to be
+    // a bare timestamp subtraction, which is NaN for every bookmark in a book —
+    // so a sefer's group was in no order at all. See utilities/bookmarks.js.
     for (const group of groups) {
-      group.items.sort((a, b) => a.timestamp_seconds - b.timestamp_seconds);
+      group.items = inReadingOrder(group.items);
     }
     return groups;
   }, [bookmarks, search]);
@@ -218,11 +232,7 @@ const NotebookPage = () => {
   // time and stops at the first entry past the playhead, so a newly created
   // bookmark sitting at the end would make it highlight the wrong one.
   const sourceBookmarks = useMemo(
-    () => (source
-      ? bookmarks
-        .filter((bm) => bm.media_id === source.mediaId)
-        .sort((a, b) => a.timestamp_seconds - b.timestamp_seconds)
-      : []),
+    () => (source ? inReadingOrder(bookmarks.filter((bm) => bm.media_id === source.mediaId)) : []),
     [bookmarks, source]
   );
 
@@ -760,8 +770,18 @@ const NotebookPage = () => {
                           onClick={() => openSource({
                             mediaId: group.mediaId,
                             timestampSeconds: bm.timestamp_seconds,
+                            // The book half. Without it the window opened the
+                            // sefer at its first paragraph — second zero of a
+                            // thing with no seconds — however far in the
+                            // bookmark actually pointed.
+                            chunkId: bm.chunk_id ?? null,
+                            // The third kind's half of the anchor. Without it two
+                            // marks on different pages of one sefer are one entry
+                            // in the trail, and the window opens on whichever was
+                            // looked at last.
+                            pageNumber: bm.page_number ?? null,
                             mediaTitle: group.mediaTitle,
-                            noteText: bm.note,
+                            noteText: bm.note || bm.quoted_text,
                           })}
                           // Dragged into a note, where it becomes a source chip
                           // — an inline reference that reopens the lecture at
@@ -785,17 +805,31 @@ const NotebookPage = () => {
                             ...listRowSx,
                           }}
                         >
-                          <PlayCircleOutlineIcon fontSize="small" sx={{ color: "primary.main", flexShrink: 0 }} />
+                          {/* A book does not play. Same size and colour, so the
+                              list still reads as one list. */}
+                          {isTextBookmark(bm) || isPageBookmark(bm)
+                            ? <MenuBookIcon fontSize="small" sx={{ color: "primary.main", flexShrink: 0 }} />
+                            : <PlayCircleOutlineIcon fontSize="small" sx={{ color: "primary.main", flexShrink: 0 }} />}
                           {/* One line per bookmark keeps the list scannable,
                               but the full text is a hover away — the row is
                               also what gets dragged into a note, so knowing
                               which one it is matters. */}
-                          <Typography variant="body2" noWrap title={bm.note?.trim() || ""} sx={{ flexGrow: 1, minWidth: 0 }}>
-                            {bm.note?.trim() || "(ללא כותרת)"}
+                          {/* The marked words stand in when nothing was written,
+                              exactly as on the lecture page's list: "(ללא כותרת)"
+                              on every row of a sefer is a list nobody can read. */}
+                          <Typography
+                            variant="body2"
+                            noWrap
+                            title={bm.note?.trim() || bm.quoted_text?.trim() || ""}
+                            sx={{ flexGrow: 1, minWidth: 0 }}
+                          >
+                            {bm.note?.trim() || bm.quoted_text?.trim() || "(ללא כותרת)"}
                           </Typography>
                           <Chip
                             size="small"
-                            label={formatTime(bm.timestamp_seconds)}
+                            // formatTime(null) is "0:00", so every bookmark in
+                            // every sefer wore a timestamp it does not have.
+                            label={placeShortLabel(bm)}
                             sx={{ height: 18, fontSize: "0.65rem", flexShrink: 0 }}
                           />
                         </ListItemButton>
@@ -889,6 +923,8 @@ const NotebookPage = () => {
         onCloseAll={() => { setSourceIndex(-1); setSourceTrail([]); }}
         mediaId={source?.mediaId}
         timestampSeconds={source?.timestampSeconds}
+        chunkId={source?.chunkId}
+        pageNumber={source?.pageNumber}
         fallbackTitle={source?.mediaTitle}
         noteText={source?.noteText}
         bookmarks={sourceBookmarks}

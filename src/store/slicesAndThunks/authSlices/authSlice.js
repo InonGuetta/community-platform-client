@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { login, register, logout, resetPassword } from "./authPost";
+import { login, register, logout, resetPassword, requestRole } from "./authPost";
 import { updateProfile } from "./authPut";
 import { fetchMe } from "./authGet";
 import { statuses } from "../../../utilities/constant";
@@ -144,6 +144,16 @@ const authSlice = createSlice({
         state.status = statuses.idle;
         state.loginStatus = statuses.idle;
         state.initialized = true;
+      })
+
+      // MERGED into the stored user, not assigned over it: the endpoint answers
+      // with the columns it touched, and replacing would drop avatar_url and
+      // created_at from the profile screen the moment somebody applies.
+      .addCase(requestRole.fulfilled, (state, action) => {
+        state.user = { ...state.user, ...action.payload };
+      })
+      .addCase(requestRole.rejected, (state, action) => {
+        state.error = action.payload?.message;
       });
   },
 });

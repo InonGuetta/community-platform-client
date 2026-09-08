@@ -86,10 +86,25 @@ const shorten = (value, limit) => {
 // than repeat the character.
 export const CHIP_MARKER = "▶";
 
-const chipLabel = (mediaTitle, timestampSeconds) => {
-  const title = shorten(mediaTitle || "שיעור", CHIP_LABEL_CHARS);
-  const stamp = timestampSeconds == null ? "" : ` · ${formatTime(timestampSeconds)}`;
-  return `${CHIP_MARKER} ${title}${stamp}`;
+// Where the reference points, in the units its medium has. A recording has a
+// minute; a sefer has a page, and had nothing at all before migration 023 made
+// the page derivable — in which case the chip names the book and stops, which is
+// still a complete reference.
+//
+// CHIP_MARKER stays the same triangle for both. It says "this opens something",
+// which is as true of a book as of a lecture, and a second marker for text would
+// have to be taught to noteFootnotes (which strips it before printing) and to
+// pdfFontCoverage.test.js (which checks the embedded font has a glyph for it) —
+// two files changed so the icon could be marginally more apt.
+const chipStamp = ({ timestampSeconds, pageNumber }) => {
+  if (Number.isInteger(pageNumber)) return ` · עמ׳ ${pageNumber}`;
+  if (timestampSeconds == null) return "";
+  return ` · ${formatTime(timestampSeconds)}`;
+};
+
+const chipLabel = (source) => {
+  const title = shorten(source.mediaTitle || "שיעור", CHIP_LABEL_CHARS);
+  return `${CHIP_MARKER} ${title}${chipStamp(source)}`;
 };
 
 // The media types this chip knows how to colour, and the one attribute that
@@ -115,10 +130,22 @@ const MEDIA_TYPES = new Set(["video", "audio", "text"]);
  * inside the chip's own text node after an insert, and the next thing the user
  * types is swallowed by a reference that is supposed to be atomic.
  */
-export const sourceChipHtml = ({ mediaId, timestampSeconds, mediaTitle, note, mediaType }) => {
+export const sourceChipHtml = ({
+  mediaId, timestampSeconds, mediaTitle, note, mediaType, chunkId, pageNumber,
+}) => {
   const attributes = [
     `data-media-id="${escapeAttribute(mediaId)}"`,
     timestampSeconds == null ? "" : `data-timestamp="${escapeAttribute(Math.floor(timestampSeconds))}"`,
+    // Where in a BOOK this points. The chunk is what the reader can scroll to —
+    // a character offset alone stops meaning anything the moment the text is
+    // re-extracted, which is why migration 026 stores the id and why the chip
+    // carries the id rather than the offset.
+    //
+    // The page is carried too, and is not derivable from the chunk here: the
+    // note may be read, exported or printed long after the bookmark it came from
+    // was deleted, and this markup is then the only record of the citation.
+    Number.isInteger(chunkId) ? `data-chunk-id="${escapeAttribute(chunkId)}"` : "",
+    Number.isInteger(pageNumber) ? `data-page="${escapeAttribute(pageNumber)}"` : "",
     `data-media-title="${escapeAttribute(String(mediaTitle || "").slice(0, MAX_CHIP_TITLE))}"`,
     note ? `data-note="${escapeAttribute(String(note).slice(0, MAX_CHIP_NOTE))}"` : "",
     // What colours it. A chip written before this attribute existed simply has
@@ -132,7 +159,7 @@ export const sourceChipHtml = ({ mediaId, timestampSeconds, mediaTitle, note, me
     ? `<br><span data-chip-line="note">${escapeText(shorten(note, CHIP_NOTE_CHARS))}</span>`
     : "";
 
-  return `<span ${attributes}>${escapeText(chipLabel(mediaTitle, timestampSeconds))}${noteLine}</span>&nbsp;`;
+  return `<span ${attributes}>${escapeText(chipLabel({ mediaTitle, timestampSeconds, pageNumber }))}${noteLine}</span>&nbsp;`;
 };
 
 /**
@@ -148,10 +175,17 @@ export const sourceFromChip = (element) => {
   if (!Number.isInteger(mediaId) || mediaId <= 0) return null;
 
   const stamp = chip.getAttribute("data-timestamp");
+  const chunk = chip.getAttribute("data-chunk-id");
+  const page = chip.getAttribute("data-page");
   const note = chip.getAttribute("data-note") || "";
   return {
     mediaId,
     timestampSeconds: stamp === null ? null : Number(stamp),
+    // Null rather than undefined for both, so a chip written before books were
+    // bookmarkable reads the same as one pointing at a recording — absent, not
+    // missing. The source window branches on chunkId being an integer.
+    chunkId: chunk === null ? null : Number(chunk),
+    pageNumber: page === null ? null : Number(page),
     mediaTitle: chip.getAttribute("data-media-title") || chip.textContent.trim(),
     note,
     mediaType: chip.getAttribute("data-media-type") || null,
@@ -173,10 +207,13 @@ export const sourceFromChip = (element) => {
  * Built from the same fields the chip carries, so a note exported today says
  * exactly what it said when it was written.
  */
-export const sourceFootnoteLabel = ({ mediaTitle, note, timestampSeconds }) => [
+export const sourceFootnoteLabel = ({ mediaTitle, note, timestampSeconds, pageNumber }) => [
   String(mediaTitle || "").trim() || "שיעור",
   String(note || "").trim(),
-  timestampSeconds == null ? "" : formatTime(timestampSeconds),
+  // The page when there is one, and never a minute alongside it. "עמ׳ 47" is how
+  // a person cites a sefer and how they would go and find the passage again;
+  // a timestamp on a book would be 0:00 for every reference in the document.
+  Number.isInteger(pageNumber) ? `עמ׳ ${pageNumber}` : (timestampSeconds == null ? "" : formatTime(timestampSeconds)),
 ].filter(Boolean).join(" · ");
 
 /**
@@ -187,6 +224,12 @@ export const sourceFootnoteLabel = ({ mediaTitle, note, timestampSeconds }) => [
 export const bookmarkDragPayload = (bookmark, mediaTitle) => ({
   mediaId: bookmark.media_id,
   timestampSeconds: bookmark.timestamp_seconds,
+  // The book half of the anchor. Both are carried for every bookmark and one of
+  // the two is always null, which is the same shape the row itself has — a
+  // payload that dropped the null half would make a text bookmark arrive looking
+  // like a recording with no timestamp.
+  chunkId: bookmark.chunk_id ?? null,
+  pageNumber: bookmark.page_number ?? null,
   mediaTitle: mediaTitle || bookmark.media_title || "",
   note: bookmark.note || "",
   // Which of video / audio / text this came from, so the chip carries the same

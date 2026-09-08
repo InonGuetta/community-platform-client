@@ -10,8 +10,12 @@ export const authApi = {
   login: async ({ email, password }) =>
     (await axiosInstance.post("/auth/login", { email, password })).data,
 
-  register: async ({ email, password, displayName }) =>
-    (await axiosInstance.post("/auth/register", { email, password, displayName })).data,
+  // `requestedRole` and not `role`: what is sent is an APPLICATION. The server
+  // stores it in its own column and creates every account as a student
+  // regardless — see the server's servicesAuth.register. Naming it `role` here
+  // would suggest to the next reader that the client decides, which it does not.
+  register: async ({ email, password, displayName, requestedRole }) =>
+    (await axiosInstance.post("/auth/register", { email, password, displayName, requestedRole })).data,
 
   // Returns nothing useful — the point is the cleared cookie.
   logout: async () => {
@@ -37,6 +41,12 @@ export const authApi = {
   // ── The signed-in user's own account ──────────────────────────────────────
   updateProfile: async ({ displayName, avatarUrl }) =>
     (await axiosInstance.patch("/auth/me", { displayName, avatarUrl })).data,
+
+  // Asking for a lecturer or admin role from inside the app. Takes no id — the
+  // server acts on the session's own user, which is what makes it safe to
+  // expose to everyone.
+  requestRole: async (requestedRole) =>
+    (await axiosInstance.post("/auth/request-role", { requestedRole })).data,
 
   changePassword: async ({ currentPassword, newPassword }) =>
     (await axiosInstance.post("/auth/change-password", { currentPassword, newPassword })).data,

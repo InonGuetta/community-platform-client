@@ -25,6 +25,21 @@ export const mediaApi = {
   upload: async (formData, onUploadProgress) =>
     (await axiosInstance.post("/media/upload", formData, { onUploadProgress })).data,
 
+  // Every tag in use, with how many items carry it. One endpoint for two
+  // consumers — the upload form's autocomplete and the archive's filter — so the
+  // two cannot end up showing different vocabularies.
+  tags: async () => (await axiosInstance.get("/media/tags")).data,
+
+  // The creator list for the filter menu. Its own call because the listing is
+  // filtered server-side now — deriving the menu from the rows on screen would
+  // leave it holding only whatever was already chosen.
+  creators: async () => (await axiosInstance.get("/media/creators")).data,
+
+  // What an item looks like it is about, from its title. Offered right after an
+  // upload so the archive does not fill up with untagged items — which is how it
+  // reached nineteen items and no tagged rows at all.
+  tagSuggestions: async (id) => (await axiosInstance.get(`/media/${id}/tag-suggestions`)).data,
+
   update: async (id, payload) =>
     (await axiosInstance.put(`/media/update/${id}`, payload)).data,
 
@@ -53,10 +68,4 @@ export const mediaApi = {
   // bytes are produced rather than after a wait.
   downloadAudioUrl: (id) => `${API_ROOT}/media/${id}/download/audio`,
 
-  // The one case that streams through axios instead: a document is converted to
-  // HTML server-side and rendered into an iframe from an object URL, so the
-  // bytes have to arrive here rather than at an element. responseType "blob"
-  // stops axios trying to parse them.
-  fetchBlob: async (id) =>
-    (await axiosInstance.get(`/media/${id}/stream`, { responseType: "blob" })).data,
 };

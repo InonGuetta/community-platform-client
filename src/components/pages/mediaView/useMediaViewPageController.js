@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
+import { openingPageFrom, TIME_PARAM } from "../../../utilities/deepLink";
 import { fetchOneMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
 import { fetchBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksGet";
 import { createBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPost";
@@ -86,6 +87,57 @@ const useMediaViewPageController = () => {
   const handleCreateBookmark = (timestampSeconds, note) =>
     dispatch(createBookmark({ mediaId: Number(id), timestampSeconds, note }));
 
+  // The same action for a book. A separate function rather than a nullable
+  // argument on the one above, because the two anchor in DIFFERENT coordinate
+  // spaces — seconds and character offsets — and one function taking either is
+  // one call site away from sending an offset as a timestamp.
+  //
+  // Takes the whole anchor as an object. The reader produces one of three
+  // shapes now — a passage in the extracted text, a paragraph, or a rectangle on
+  // a page of the original — and spreading it keeps this function from having to
+  // know which, or from growing a positional argument per field. `truncated` is
+  // the viewer's own UI concern and is dropped here rather than sent.
+  const handleCreateTextBookmark = ({
+    chunkId, charPosition, charEnd, quotedText, note, pageNumber, rect,
+  }) =>
+    dispatch(createBookmark({
+      mediaId: Number(id),
+      chunkId,
+      charPosition,
+      charEnd,
+      quotedText,
+      note,
+      pageNumber,
+      rect,
+    }));
+
+  // Where the reader should scroll. Set by clicking a bookmark, and the object
+  // wrapper is deliberate: clicking the SAME bookmark twice must scroll again,
+  // and a bare value would be an unchanged one the effect ignores.
+  //
+  // It carries the BOOKMARK, not its offset. The reader resolves the paragraph
+  // through chunk_id, which is a fact the row carries, rather than by searching
+  // for a chunk whose range contains the offset — a search that still finds
+  // something after a book is re-extracted, and finds the wrong thing.
+  //
+  // `?page=` seeds it, and that is the whole of "open the book where I was".
+  // A page from a link is a place in exactly the sense a bookmark is, so it is
+  // expressed in the shape the viewer already resolves — page and no rectangle,
+  // which is what it does for a bookmark that names a page and nothing finer.
+  // No second mechanism, and no second thing to keep in step.
+  //
+  // Read once, in the initialiser: a link is a starting position, not a leash.
+  // Re-reading it would drag a reader who has scrolled on back to where they
+  // arrived, every time anything re-rendered.
+  const [searchParams] = useSearchParams();
+  const [readerTarget, setReaderTarget] = useState(() => {
+    const page = openingPageFrom(searchParams);
+    return page ? { bookmark: { page_number: page } } : null;
+  });
+  // Clicking a bookmark afterwards simply replaces it — last one wins, which is
+  // the right precedence and costs nothing to arrange.
+  const jumpToBookmark = (bookmark) => setReaderTarget({ bookmark });
+
   // ── Playback position ──────────────────────────────────────────────────────
 
   const [currentTime, setCurrentTime] = useState(0);
@@ -94,8 +146,7 @@ const useMediaViewPageController = () => {
   // Smart-search deep link: /media/:id?t=SECONDS starts the player there. An
   // explicit link wins over Resume Playback; otherwise fall back to the saved
   // position so the player picks up where the viewer left off.
-  const [searchParams] = useSearchParams();
-  const seekOnReady = Number(searchParams.get("t")) || resumePosition;
+  const seekOnReady = Number(searchParams.get(TIME_PARAM)) || resumePosition;
 
   // currentTime updates on every tick because the notes panel and the share
   // dialog both show it; the DB write is throttled, because they are not the
@@ -120,6 +171,7 @@ const useMediaViewPageController = () => {
 
   return {
     media, bookmarks,
+    handleCreateTextBookmark, readerTarget, jumpToBookmark,
     seekOnReady, currentTime, handlePlayerProgress,
     handleCreateBookmark,
     isLiked, toggleLike,

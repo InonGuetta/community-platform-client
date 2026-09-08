@@ -25,7 +25,9 @@ import { createBookmark } from "../../../../store/slicesAndThunks/bookmarksSlice
 import { mediaApi } from "../../../../api/mediaApi";
 import { mediaTypes } from "../../../../utilities/constant";
 import { formatTime } from "../../../../utilities/formatTime";
+import { isPageBookmark } from "../../../../utilities/bookmarks";
 import { truncateWords } from "../../../../utilities/truncateWords";
+import { continueReadingHref } from "../../../../utilities/deepLink";
 
 // Where the remembered position and size are kept. One key for every source, on
 // purpose: having dragged the window somewhere and sized it, the user has said
@@ -86,7 +88,7 @@ const arrowSx = {
 // buttons would be three different outcomes wearing the same word.
 const SourcePreviewDialog = ({
   open, onClose, onCloseCurrent, onCloseAll,
-  mediaId, timestampSeconds, fallbackTitle, noteText,
+  mediaId, timestampSeconds, chunkId, pageNumber, fallbackTitle, noteText,
   bookmarks = [],
   trailPosition, trailLength, onPrev, onNext,
 }) => {
@@ -137,10 +139,81 @@ const SourcePreviewDialog = ({
     dispatch(createBookmark({ mediaId: Number(media.id), timestampSeconds, note }));
   }, [dispatch, media?.id]);
 
+  // The same act for a book, in the other coordinate space. A separate function
+  // rather than one taking either, for the reason the lecture page gives: an
+  // offset and a number of seconds are both integers, and one function accepting
+  // both is one call site away from storing a position as a timestamp.
+  const handleCreateTextBookmark = useCallback(({
+    chunkId: chunk, charPosition, charEnd, quotedText, note, pageNumber, rect,
+  }) => {
+    if (!media?.id) return;
+    return dispatch(createBookmark({
+      mediaId: Number(media.id),
+      chunkId: chunk,
+      charPosition,
+      charEnd,
+      quotedText,
+      note,
+      pageNumber,
+      rect,
+    }));
+  }, [dispatch, media?.id]);
+
+  // Where the reader should scroll. Seeded from the source that was opened — a
+  // bookmark in the sidebar, or a chip inside a note — and then re-set by
+  // clicking a row in this window's own list.
+  //
+  // The bookmark row itself, because the viewer reads the anchor off it.
+  //
+  // A place in a book is addressed by its PAGE now. The viewer renders the
+  // original file, and the character offsets a text bookmark carries describe
+  // the extracted string — which is not what is on the screen. Every kind of
+  // bookmark in a book records the page it was taken from, so the row is enough
+  // for all of them; the rectangle, when there is one, makes it exact.
+  const [readerTarget, setReaderTarget] = useState(null);
+  // See MediaViewPage: the handle and the lines it lands on are in different
+  // parts of this window, so whether a bookmark is in hand is held above both.
+  //
+  // Two shapes, because there are two ways to be a place in a book: a paragraph
+  // of the extracted text, or a rectangle on a page of the original. A page mark
+  // is looked up in the list rather than rebuilt, because the viewer needs its
+  // rectangle to know where on the page to scroll.
+  //
+  // The chunk is what a chip from the extracted-text era carries, and it is
+  // asked about first because a bookmark of that kind ALSO holds a page — one
+  // copied from its paragraph as a citation. Matching on the page first would
+  // pair such a chip with whatever OTHER mark happens to sit on the same page.
+  //
+  // The bare `{ page_number }` at the end is the honest fallback: the chip named
+  // a page and the bookmark behind it is gone, so the page is still reachable
+  // and nothing else is.
+  useEffect(() => {
+    const found = Number.isInteger(chunkId)
+      ? bookmarks.find((b) => b.chunk_id === chunkId)
+      : bookmarks.find((b) => isPageBookmark(b) && b.page_number === pageNumber);
+
+    setReaderTarget(found ?? (Number.isInteger(pageNumber) ? { page_number: pageNumber } : null));
+  }, [chunkId, pageNumber, mediaId, bookmarks]);
+
   const seekTo = timestampSeconds ?? 0;
+
+  // Which page of the book this window is showing. Reported by the viewer as the
+  // reader scrolls; null until a document has been opened and laid out.
+  const [readerPage, setReaderPage] = useState(null);
+  // Reset with the source, or page 70 of one sefer follows the reader into the
+  // next one and the link points at a place they were never at.
+  useEffect(() => { setReaderPage(null); }, [mediaId]);
   const title = media?.title || fallbackTitle || "שיעור";
   const notePreview = truncateWords(noteText, NOTE_PREVIEW_WORDS);
   const isText = media?.media_type === mediaTypes.text;
+
+  // Where the reader is, carried out to the full page. `t` is already read on
+  // the other side by useMediaViewPageController; `page` is answered there in
+  // the next step — until then it is simply an unread parameter, which is what
+  // makes this half safe to land on its own.
+  const continueHref = continueReadingHref({
+    mediaId, isText, page: readerPage, playedTo: currentTime, bookmarkSeconds: seekTo,
+  });
 
   return (
     <FloatingWindow
@@ -206,7 +279,7 @@ const SourcePreviewDialog = ({
               preview floats instead of navigating. */}
           <Button
             component={RouterLink}
-            to={`/media/${mediaId}${seekTo > 0 ? `?t=${seekTo}` : ""}`}
+            to={continueHref}
             target="_blank"
             rel="noopener noreferrer"
             startIcon={<OpenInFullIcon />}
@@ -252,7 +325,16 @@ const SourcePreviewDialog = ({
       ) : (
         <>
           {isText ? (
-            <TextViewer mediaId={media.id} />
+            // The same component the lecture page mounts, so the two cannot
+            // drift — and a book opened from a note is the same book, marked the
+            // same way, as one opened from the archive.
+            <TextViewer
+              media={media}
+              bookmarks={bookmarks}
+              onAddBookmark={handleCreateTextBookmark}
+              jumpTo={readerTarget}
+              onPageChange={setReaderPage}
+            />
           ) : (
             <MediaPlayer
               ref={playerRef}
@@ -276,8 +358,14 @@ const SourcePreviewDialog = ({
                 <NotesPanel
                   bookmarks={bookmarks}
                   currentTime={currentTime}
-                  onCreateBookmark={handleCreateBookmark}
-                  onSeek={seekPlayer}
+                  // Withheld for a book, exactly as on the lecture page: there
+                  // is no playhead to read a position off, so the panel hides
+                  // its form and points at the reader instead of offering a
+                  // button that could only ever store second zero.
+                  onCreateBookmark={isText ? undefined : handleCreateBookmark}
+                  onSeek={isText ? undefined : seekPlayer}
+                  onSeekText={isText ? setReaderTarget : undefined}
+                  isText={isText}
                 />
               }
             />

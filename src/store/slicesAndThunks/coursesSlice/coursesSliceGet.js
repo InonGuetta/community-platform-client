@@ -30,3 +30,21 @@ export const fetchCourseStudents = createAsyncThunk(
     }
   }
 );
+
+// Every distinct person enrolled in any course this lecturer teaches.
+//
+// Kept out of the enrolment-per-course state: that is keyed by course id and
+// answers "who is in THIS course", while this answers "who learns with me at
+// all" and is one flat list. Merging them would mean the second view
+// recomputing the first every render from data it does not have.
+export const fetchMyStudents = createAsyncThunk(
+  "courses/myStudents",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await coursesApi.getMyStudents();
+    } catch (err) {
+      return rejectWithValue(rejectionOf(err, "Failed to load your students"));
+    }
+  }
+);
+

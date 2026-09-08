@@ -15,4 +15,19 @@ export const usersApi = {
   remove: async (id) => {
     await axiosInstance.delete(`/users/delete-user/${id}`);
   },
+
+  // ── Role approval ─────────────────────────────────────────────────────────
+  //
+  // Admin-only, like everything else in this file — routersUsers guards the
+  // whole router. "/pending" is a literal segment and is declared before "/:id"
+  // on the server; reordering there makes this 400 rather than 404, which is the
+  // confusing failure to remember if this ever stops working.
+  pending: async () => (await axiosInstance.get("/users/pending")).data,
+
+  approve: async (id) => (await axiosInstance.post(`/users/${id}/approve`)).data,
+
+  // `reason` is optional and is what the refusal email quotes. Sent even when
+  // empty so the body shape does not change between the two cases.
+  reject: async (id, reason) =>
+    (await axiosInstance.post(`/users/${id}/reject`, { reason: reason || null })).data,
 };

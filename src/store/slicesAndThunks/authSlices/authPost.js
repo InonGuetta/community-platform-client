@@ -10,9 +10,9 @@ export const login = createAsyncThunk("auth/login", async ({ email, password }, 
   }
 });
 
-export const register = createAsyncThunk("auth/register", async ({ email, password, displayName }, { rejectWithValue }) => {
+export const register = createAsyncThunk("auth/register", async ({ email, password, displayName, requestedRole }, { rejectWithValue }) => {
   try {
-    return await authApi.register({ email, password, displayName });
+    return await authApi.register({ email, password, displayName, requestedRole });
   } catch (err) {
     return rejectWithValue(rejectionOf(err, "Registration failed"));
   }
@@ -65,3 +65,19 @@ export const logout = createAsyncThunk("auth/logout", async (_, { rejectWithValu
     return rejectWithValue(rejectionOf(err, "Logout failed"));
   }
 });
+
+// Asking for a role after registration.
+//
+// Answers with the caller's own updated row, so the slice can replace the stored
+// user and the pending banner appears without a refetch of /auth/me.
+export const requestRole = createAsyncThunk(
+  "auth/requestRole",
+  async (requestedRole, { rejectWithValue }) => {
+    try {
+      return await authApi.requestRole(requestedRole);
+    } catch (err) {
+      return rejectWithValue(rejectionOf(err, "Failed to submit the request"));
+    }
+  }
+);
+

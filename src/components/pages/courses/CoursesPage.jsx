@@ -14,6 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CourseFormDialog from "./componentsCourses/CourseFormDialog";
 import CourseRoster from "./componentsCourses/CourseRoster";
+import MyStudents from "./componentsCourses/MyStudents";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useCoursesPageController from "./useCoursesPageController";
@@ -21,7 +22,7 @@ import { statuses } from "../../../utilities/constant";
 
 const CoursesPage = () => {
   const {
-    courses, status, lecturers, students, isAdmin, canManage,
+    courses, status, lecturers, isAdmin, canManage, myStudents,
     createOpen, setCreateOpen,
     editCourse, setEditCourse,
     deleteTarget, setDeleteTarget,
@@ -44,6 +45,15 @@ const CoursesPage = () => {
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
           קורס חדש
         </Button>
+      </Box>
+
+      {/* "My students" sits ABOVE the course list, because it is the answer to
+          the question a lecturer opens this tab with — how many people am I
+          actually teaching — and the per-course rosters below are the detail.
+          It renders its own empty state rather than being hidden, so a lecturer
+          with no students sees where they will appear. */}
+      <Box sx={{ mb: 3 }}>
+        <MyStudents students={myStudents} />
       </Box>
 
       {courses.length === 0 ? (
@@ -95,8 +105,10 @@ const CoursesPage = () => {
               )}
               <CourseRoster
                 courseId={course.id}
-                students={students}
-                canEnroll={isAdmin}
+                // Ownership, not role. The server gates enrolment on managing
+                // THIS course, so an admin sees the picker everywhere and a
+                // lecturer only on the courses they teach.
+                canEnroll={canManage(course)}
                 onEnroll={handleEnroll}
                 onUnenroll={handleUnenroll}
               />

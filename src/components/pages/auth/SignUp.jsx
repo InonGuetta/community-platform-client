@@ -14,7 +14,10 @@ import { authApi } from "../../../api/authApi";
 import { clearError } from "../../../store/slicesAndThunks/authSlices/authSlice";
 import { selectLoginStatus, selectAuthError } from "../../../store/selectors/authSelectors";
 import { hebrewForError } from "../../../utilities/apiError";
-import { statuses } from "../../../utilities/constant";
+import { emailProblem } from "../../../utilities/emailShape";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { statuses, roles, roleLabels } from "../../../utilities/constant";
 import AuthLayout from "./AuthLayout";
 import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
 
@@ -26,8 +29,21 @@ const SignUp = () => {
   const navigate = useNavigate();
   const loginStatus = useSelector(selectLoginStatus);
   const error = useSelector(selectAuthError);
-  const [form, setForm] = useState({ email: "", password: "", displayName: "" });
+  // requestedRole, not role — this is an APPLICATION. The server creates every
+  // account as a student whatever is sent here and stores the request separately;
+  // lecturer and admin only take effect once an admin approves.
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    displayName: "",
+    requestedRole: roles.student,
+  });
   const [showPassword, setShowPassword] = useState(false);
+  // Shown only after the field has been left, not while it is being typed in:
+  // "חסרה סיומת בדומיין" appears on every keystroke otherwise, and an error that
+  // is wrong until you finish is an error people learn to ignore.
+  const [emailTouched, setEmailTouched] = useState(false);
+  const emailError = emailTouched ? emailProblem(form.email) : null;
 
   useEffect(() => { dispatch(clearError()); }, [dispatch]);
 
@@ -35,6 +51,11 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Checked again here, because a form can be submitted with Enter without the
+    // field ever losing focus. The server checks it a third time — this only
+    // saves the round trip.
+    setEmailTouched(true);
+    if (emailProblem(form.email)) return;
     const result = await dispatch(register(form));
     if (result.meta.requestStatus === "fulfilled") navigate("/archive");
   };
@@ -46,6 +67,38 @@ const SignUp = () => {
       {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{hebrewForError(error, FALLBACK)}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
+        {/* Exclusive by construction — ToggleButtonGroup with `exclusive`, so
+            "choose exactly one" is the control's own behaviour rather than
+            something the handler has to enforce. `|| prev` keeps a selection:
+            clicking the active button would otherwise deselect it and submit
+            with nothing chosen. */}
+        <Box>
+          <Typography variant="body2" sx={{ mb: 1, color: "text.secondary" }}>
+            אני נרשם כ־
+          </Typography>
+          <ToggleButtonGroup
+            value={form.requestedRole}
+            exclusive
+            fullWidth
+            onChange={(_, next) =>
+              setForm((prev) => ({ ...prev, requestedRole: next || prev.requestedRole }))
+            }
+            size="small"
+          >
+            {[roles.student, roles.lecturer, roles.admin].map((role) => (
+              <ToggleButton key={role} value={role}>{roleLabels[role]}</ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+          {/* Said before submitting, not after. Somebody who picks "מרצה" and is
+              then dropped into a student view with no explanation reads it as a
+              bug in the signup rather than as a step that is still pending. */}
+          {form.requestedRole !== roles.student && (
+            <Alert severity="info" sx={{ mt: 1.5, borderRadius: 2 }}>
+              הרשמה כ{roleLabels[form.requestedRole]} טעונה אישור מנהל. עד לאישור
+              החשבון ייפתח עם הרשאות תלמיד.
+            </Alert>
+          )}
+        </Box>
         <TextField
           label="שם תצוגה"
           name="displayName"
@@ -66,6 +119,9 @@ const SignUp = () => {
           variant="standard"
           value={form.email}
           onChange={handleChange}
+          onBlur={() => setEmailTouched(true)}
+          error={Boolean(emailError)}
+          helperText={emailError || " "}
           required
           fullWidth
           sx={floatingLabelSx}

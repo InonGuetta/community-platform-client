@@ -13,6 +13,7 @@ import MediaInsightsTabs from "./componentsMediaView/MediaInsightsTabs";
 import NotesPanel from "./componentsMediaView/NotesPanel";
 import MediaActionsBar from "./componentsMediaView/MediaActionsBar";
 import useMediaViewPageController from "./useMediaViewPageController";
+import { creatorPrefixes } from "../../../utilities/constant";
 
 // Presentation only. Everything that dispatches, selects or derives from server
 // data lives in useMediaViewPageController — see its header for where that line
@@ -26,6 +27,7 @@ const MediaViewPage = () => {
   const controller = useMediaViewPageController();
   const {
     media, bookmarks, transcript,
+    handleCreateTextBookmark, readerTarget, jumpToBookmark,
     seekOnReady, currentTime, handlePlayerProgress,
     handleCreateBookmark,
     isLiked, toggleLike,
@@ -90,15 +92,40 @@ const MediaViewPage = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: 1, mb: 2 }}>
         <Typography variant="h5" fontWeight={700}>{media.title}</Typography>
+        {/* "מרצה" or "מחבר" by media type — one column, worded for what it is.
+            Always present: creator_name is NOT NULL and reads "כללי" when nobody
+            said, so this never collapses into a title that looks unattributed by
+            accident rather than on purpose. */}
+        {media.creator_name && (
+          <Typography variant="body2" color="text.secondary">
+            {creatorPrefixes[media.media_type] || creatorPrefixes.video}: {media.creator_name}
+          </Typography>
+        )}
       </Box>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Box ref={mediaBoxRef}>
             {isText ? (
-              <TextViewer mediaId={media.id} />
+              // The book, as it was uploaded, and nothing else.
+              //
+              // There used to be a second view here beside it — the extracted
+              // text, laid out line by line, with the toggle to switch between
+              // them. It is gone. What it offered that the original does not is
+              // reflowed text; what it cost is that the words in it are the
+              // OCR's reading of the page, and in this archive that reading is
+              // frequently wrong. A reader comparing two versions of a sefer,
+              // one of which is unreliable, is a reader doing proofreading they
+              // did not ask for. The original is the book; the extracted text
+              // stays where it was always useful — the search and the summary.
+              <TextViewer
+                media={media}
+                bookmarks={bookmarks}
+                onAddBookmark={handleCreateTextBookmark}
+                jumpTo={readerTarget?.bookmark ?? null}
+              />
             ) : (
               <MediaPlayer
                 ref={playerRef}
@@ -133,8 +160,17 @@ const MediaViewPage = () => {
                 <NotesPanel
                   bookmarks={bookmarks}
                   currentTime={currentTime}
-                  onCreateBookmark={handleCreateBookmark}
-                  onSeek={seekPlayer}
+                  // Not passed for a book: there is no playhead to read a
+                  // position off, so the panel hides its form entirely and
+                  // points at the reader instead. Withheld rather than merely
+                  // unused, so the panel cannot grow a path back to it.
+                  onCreateBookmark={isText ? undefined : handleCreateBookmark}
+                  // A bookmark in a book scrolls the reader; one on a recording
+                  // seeks the player. Same click, two coordinate spaces, and the
+                  // panel picks by which field the bookmark carries.
+                  onSeek={isText ? undefined : seekPlayer}
+                  onSeekText={isText ? jumpToBookmark : undefined}
+                  isText={isText}
                 />
               }
             />

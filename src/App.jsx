@@ -5,6 +5,7 @@ import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { buildTheme } from "./theme/theme";
 import { ColorModeContext } from "./theme/colorMode";
 import Navbar from "./components/layout/navbar/Navbar";
+import PendingRoleBanner from "./components/layout/navbar/PendingRoleBanner";
 import GlobalSnackbar from "./components/features/Notification/GlobalSnackbar";
 import ProtectedRoute from "./components/pages/auth/ProtectedRoute";
 import SignIn from "./components/pages/auth/SignIn";
@@ -99,7 +100,15 @@ const App = () => {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {!AUTH_PATHS.includes(pathname) && <Navbar />}
+        {/* Directly under the bar, on every signed-in page, and outside the
+            page-transition wrapper so it does not slide in and out on every
+            navigation — it is a standing state, not page content. */}
+        {!AUTH_PATHS.includes(pathname) && (
+          <>
+            <Navbar />
+            <PendingRoleBanner />
+          </>
+        )}
         <PageTransition pathname={pathname}>
           <Routes location={location}>
             <Route path="/sign-in" element={<SignIn />} />

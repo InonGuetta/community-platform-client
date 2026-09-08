@@ -163,6 +163,11 @@ describe("a source chip, dragged in from the sidebar", () => {
       mediaTitle: "בבא קמא ב",
       note: "בעניין יתרו",
       mediaType: "audio",
+      // Absent, not missing. A recording has no paragraph and no page, and a
+      // chip written before books were bookmarkable reads the same way — which
+      // is what lets the source window branch on chunkId being an integer.
+      chunkId: null,
+      pageNumber: null,
       // The bookmark's own words, which is what the source window prints in its
       // header — not the chip's raw text, which is two lines now.
       noteText: "בעניין יתרו",
@@ -280,5 +285,65 @@ describe("the words, with the markup taken off", () => {
     expect(isNoteHtmlEmpty("<div><br></div>")).toBe(true);
     expect(isNoteHtmlEmpty("")).toBe(true);
     expect(isNoteHtmlEmpty("<b>א</b>")).toBe(false);
+  });
+});
+
+// The same agreement, for the other kind of source. A chip pointing into a sefer
+// carries a paragraph and a page instead of a second, and both are new — so both
+// are exactly the attributes a sanitizer nobody told about would drop. The
+// failure is silent and delayed: the chip renders, survives being typed, and
+// loses its anchor the first time the note goes through the database.
+describe("a source chip pointing at a passage in a book", () => {
+  const chip = sourceChipHtml({
+    mediaId: 9,
+    mediaTitle: "שערי תשובה",
+    note: "יסוד הסוגיה",
+    mediaType: "text",
+    chunkId: 55,
+    pageNumber: 47,
+  });
+
+  test("the anchor and the citation survive the sanitizer", () => {
+    const cleaned = sanitizeNoteHtml(chip);
+    expect(cleaned).toContain('data-chunk-id="55"');
+    expect(cleaned).toContain('data-page="47"');
+    expect(cleaned).toContain('data-media-type="text"');
+  });
+
+  test("it round-trips back with the same anchor it was built from", () => {
+    const body = document.createElement("div");
+    body.innerHTML = noteBodyToHtml(sanitizeNoteHtml(`כתוב כאן ${chip} והמשך`));
+
+    expect(sourceFromChip(body.querySelector(SOURCE_CHIP_SELECTOR))).toEqual({
+      mediaId: 9,
+      timestampSeconds: null,
+      chunkId: 55,
+      pageNumber: 47,
+      mediaTitle: "שערי תשובה",
+      note: "יסוד הסוגיה",
+      mediaType: "text",
+      noteText: "יסוד הסוגיה",
+    });
+  });
+
+  // A book has no clock, and formatTime(null) is "0:00" — so a chip that fell
+  // back to a timestamp would print "0:00" beside every sefer in the notebook.
+  test("it is labelled by page, never by a time it does not have", () => {
+    expect(chip).toContain("עמ׳ 47");
+    expect(chip).not.toContain("0:00");
+  });
+
+  // .txt and .docx have no pages, and neither does a PDF whose boundaries could
+  // not be derived. Naming the book and stopping is still a complete reference.
+  test("a book with no page number names the book and stops", () => {
+    const noPage = sourceChipHtml({ mediaId: 9, mediaTitle: "שערי תשובה", mediaType: "text", chunkId: 55 });
+    expect(noPage).toContain("שערי תשובה");
+    expect(noPage).not.toContain("data-page");
+    expect(noPage).not.toContain("0:00");
+  });
+
+  test("a chunk id that is not a number is not carried", () => {
+    expect(sanitizeNoteHtml('<span data-media-id="1" data-chunk-id="javascript:1">א</span>'))
+      .toBe('<span data-media-id="1">א</span>');
   });
 });

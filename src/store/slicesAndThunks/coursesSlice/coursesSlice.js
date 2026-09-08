@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchAllCourses, fetchMyCourses, fetchCourseStudents } from "./coursesSliceGet";
+import { fetchAllCourses, fetchMyCourses, fetchCourseStudents, fetchMyStudents } from "./coursesSliceGet";
 import { createCourse, enrollStudent } from "./coursesSlicePost";
 import { updateCourse } from "./coursesSlicePut";
 import { deleteCourse, unenrollStudent } from "./coursesSliceDelete";
@@ -18,6 +18,9 @@ const coursesSlice = createSlice({
     // reading it would leave them on an idle spinner forever.
     myCoursesStatus: statuses.idle,
     studentsByCourse: {},
+    // Flat, not keyed by course: this is "everyone who learns with me", which is
+    // a different question from studentsByCourse's "who is in course N".
+    myStudents: [],
     status: statuses.idle,
     error: null,
   },
@@ -79,7 +82,13 @@ const coursesSlice = createSlice({
           if (course) course.student_count = state.studentsByCourse[courseId].length;
         }
       })
-      .addCase(unenrollStudent.rejected, (state, action) => { state.error = action.payload?.message; });
+      .addCase(unenrollStudent.rejected, (state, action) => { state.error = action.payload?.message; })
+
+      // A flat list, separate from studentsByCourse: that map answers "who is in
+      // this course", this answers "who learns with me at all". One is keyed by
+      // course, the other is not keyed at all.
+      .addCase(fetchMyStudents.fulfilled, (state, action) => { state.myStudents = action.payload; })
+      .addCase(fetchMyStudents.rejected, (state, action) => { state.error = action.payload?.message; });
   },
 });
 

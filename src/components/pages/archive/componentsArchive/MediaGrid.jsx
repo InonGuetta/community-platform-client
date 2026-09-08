@@ -26,7 +26,7 @@ const MediaCardSkeleton = () => (
 // `emptyMessage` defaults to the archive's wording, which is what every existing
 // caller relies on; the likes page overrides it because "no media found" reads
 // as a fault there rather than as an empty personal list.
-const MediaGrid = ({ items, status, onView, user, onDelete, onTogglePublish, emptyActionLabel, onEmptyAction, filtered = false, emptyMessage = "לא נמצאה מדיה" }) => {
+const MediaGrid = ({ items, status, onView, user, onDelete, onTogglePublish, onEditTags, emptyActionLabel, onEmptyAction, filtered = false, emptyMessage = "לא נמצאה מדיה" }) => {
   // Skeletons only on the first load (no items yet). `media.status` is shared with
   // mutations like upload (uploadMedia.pending → loading), so gating on an empty
   // list keeps the existing grid visible during an upload instead of flashing
@@ -58,7 +58,7 @@ const MediaGrid = ({ items, status, onView, user, onDelete, onTogglePublish, emp
     <Grid container spacing={3}>
       {items.map((item) => (
         <Grid item xs={12} sm={6} md={4} key={item.id}>
-          <MediaCard item={item} onView={onView} user={user} onDelete={onDelete} onTogglePublish={onTogglePublish} />
+          <MediaCard item={item} onView={onView} user={user} onDelete={onDelete} onTogglePublish={onTogglePublish} onEditTags={onEditTags} />
         </Grid>
       ))}
     </Grid>

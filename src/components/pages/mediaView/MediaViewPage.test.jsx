@@ -26,6 +26,8 @@ vi.mock("../../features/MediaPlayer/MediaPlayer", async () => {
   const { forwardRef } = await import("react");
   return { default: forwardRef((props, ref) => <div ref={ref} data-testid="player" />) };
 });
+// A document is the uploaded file itself. The extracted-text reader that used
+// to stand in front of it is gone, so the page mounts TextViewer directly again.
 vi.mock("./componentsMediaView/TextViewer", () => ({
   default: () => <div data-testid="text-viewer" />,
 }));
@@ -115,7 +117,10 @@ describe("which tabs a media type offers", () => {
     expect(screen.queryByTestId("text-viewer")).not.toBeInTheDocument();
   });
 
-  test("a document gets the text viewer instead", () => {
+  // A document gets the READER — the extracted text, which is the only view a
+  // bookmark can be placed in. The original file is still reachable through the
+  // reader's own toggle; that belongs to the reader's tests, not this one.
+  test("a document gets the reader instead", () => {
     renderPage({ media: book, isText: true });
     expect(screen.getByTestId("text-viewer")).toBeInTheDocument();
     expect(screen.queryByTestId("player")).not.toBeInTheDocument();

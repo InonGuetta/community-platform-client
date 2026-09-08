@@ -16,7 +16,8 @@ import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import { alpha, lighten } from "@mui/material/styles";
 import { mediaApi } from "../../../../api/mediaApi";
 import DownloadMenu from "../../../features/DownloadMenu/DownloadMenu";
-import { mediaTypeLabels, mediaTypeAccents } from "../../../../utilities/constant";
+import { mediaTypeLabels, mediaTypeAccents, creatorPrefixes } from "../../../../utilities/constant";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { canManageMedia } from "../../../../utilities/permissions";
 // The same icon the like BUTTON uses, from the file that owns the pair. Its
 // header says why: a shelf and the control that fills it have to look like one
@@ -76,7 +77,7 @@ const CornerBracket = ({ accent, placement }) => {
   );
 };
 
-const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
+const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags }) => {
   const isVideo = item.media_type === "video";
   // Both fall back for a media_type the client doesn't know yet: the icon so an
   // unrecognised item still renders, and the accent because alpha()/lighten()
@@ -246,6 +247,18 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
             </span>
           </Tooltip>
         )}
+        {canManage && onEditTags && (
+          <Tooltip title="עריכת תגיות">
+            <IconButton
+              size="small"
+              aria-label={`עריכת תגיות של ${item.title}`}
+              onClick={(e) => { e.stopPropagation(); onEditTags(item); }}
+              sx={actionButtonSx}
+            >
+              <LocalOfferIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
         {canDelete(user, item) && (
           <IconButton
             size="small"
@@ -283,13 +296,22 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
           something to say. The like count joins it on the same principle: it
           appears once somebody has actually liked the lecture, because "0" is a
           worse thing to print on every card in the archive than nothing at all. */}
-      {(item.course_title || item.lecturer_name || item.like_count > 0) && (
+      {(item.course_title || item.creator_name || item.like_count > 0) && (
         <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.5, mt: 1 }}>
           {item.course_title && (
             <Chip label={item.course_title} size="small" color="primary" variant="outlined" />
           )}
-          {item.lecturer_name && (
-            <Chip label={item.lecturer_name} size="small" variant="outlined" />
+          {/* Attribution reads creator_name, not the lecturer_name the SQL still
+              computes from the linked accounts. The two answer different
+              questions: creator_name is who SAID it (free text, "כללי" when
+              nobody said), lecturer_name is which ACCOUNT is responsible. Only
+              the first belongs on a card. */}
+          {item.creator_name && (
+            <Chip
+              label={`${creatorPrefixes[item.media_type] || creatorPrefixes.video}: ${item.creator_name}`}
+              size="small"
+              variant="outlined"
+            />
           )}
           {item.like_count > 0 && (
             <Box
@@ -300,6 +322,18 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish }) => {
               <Typography variant="caption" fontWeight={700}>{item.like_count}</Typography>
             </Box>
           )}
+        </Box>
+      )}
+      {/* Tags, on their own row BELOW the attribution: they answer "what kind of
+          thing is this", which is a different question from "who said it", and
+          mixing the two into one wrapping row made both hard to scan. The
+          attribution comes first because it is what a reader looks for on a card
+          they are scanning — the tags are how they got here. */}
+      {(item.tags || []).length > 0 && (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+          {item.tags.map((tag) => (
+            <Chip key={tag} label={tag} size="small" color="secondary" variant="outlined" />
+          ))}
         </Box>
       )}
     </CardContent>

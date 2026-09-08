@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllUsers } from "../../../store/slicesAndThunks/usersSlice/usersSliceGet";
-import { createUser } from "../../../store/slicesAndThunks/usersSlice/usersSlicePost";
+import { createUser, approveUser, rejectUser } from "../../../store/slicesAndThunks/usersSlice/usersSlicePost";
 import { updateUser } from "../../../store/slicesAndThunks/usersSlice/usersSlicePut";
 import { deleteUser } from "../../../store/slicesAndThunks/usersSlice/usersSliceDelete";
 import { selectAllUsers, selectUsersStatus } from "../../../store/selectors/usersSelectors";
@@ -24,6 +24,18 @@ const useUsersPageController = () => {
   useEffect(() => {
     dispatch(fetchAllUsers());
   }, [dispatch]);
+
+  // The waiting list is DERIVED from the same array the table renders, not
+  // fetched separately. One source, so a decision cannot leave the account in
+  // the queue and in the table at once — which is exactly what a second request
+  // would produce while it was in flight.
+  //
+  // It also means the search box does not filter it: a search for a name should
+  // not hide a pending request that needs a decision.
+  const pendingApprovals = users.filter((u) => u.approval_status === "pending");
+
+  const handleApprove = (id) => dispatch(approveUser(id));
+  const handleReject = (id, reason) => dispatch(rejectUser({ id, reason }));
 
   const filteredUsers = users.filter((u) =>
     u.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -54,6 +66,7 @@ const useUsersPageController = () => {
 
   return {
     filteredUsers, status, search, setSearch,
+    pendingApprovals, handleApprove, handleReject,
     isAdmin, currentUserId: currentUser?.id,
     isCreateOpen, setIsCreateOpen,
     editUser, setEditUser,

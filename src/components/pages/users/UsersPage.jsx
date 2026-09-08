@@ -6,6 +6,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import UsersHeader from "./componentsUsers/UsersHeader";
 import UsersTable from "./componentsUsers/UsersTable";
+import PendingApprovals from "./componentsUsers/PendingApprovals";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import DialogTitle from "../../features/Dialogs/DialogTitle";
 import DialogContent from "../../features/Dialogs/DialogContent";
@@ -50,11 +51,21 @@ const UsersPage = () => {
     handleCreateUser, handleUpdateUser, handleToggleActive,
     handleDeleteClick, handleDeleteConfirm,
     closeDeleteDialog,
+    pendingApprovals, handleApprove, handleReject,
   } = useUsersPageController();
 
   return (
     <Box sx={{ p: 3 }}>
       <UsersHeader onSearch={setSearch} onCreateClick={() => setIsCreateOpen(true)} />
+      {/* Above the table, and absent entirely when the queue is empty — a
+          request is a task, and a task rendered as one more chip in a long
+          table is a task nobody performs. */}
+      <PendingApprovals
+        pending={pendingApprovals}
+        currentUserId={currentUserId}
+        onApprove={handleApprove}
+        onReject={handleReject}
+      />
       <UsersTable
         users={filteredUsers}
         onEdit={setEditUser}

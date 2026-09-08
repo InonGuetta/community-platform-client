@@ -17,6 +17,7 @@
     "axios": "^1.0.0",
     "bidi-js": "^1.0.3",
     "jspdf": "^4.2.1",
+    "pdfjs-dist": "^5.4.296",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-player": "^2.0.0",

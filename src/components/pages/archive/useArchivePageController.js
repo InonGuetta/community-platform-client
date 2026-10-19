@@ -10,6 +10,9 @@ import { openUpload } from "../../../store/slicesAndThunks/uiSlice";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { mediaApi } from "../../../api/mediaApi";
 import { readFilters, writeFilters } from "./archiveFilterParams";
+import { toggleType, pressAllTypes } from "./componentsArchive/typeSelection";
+import { readSort, DEFAULT_SORT } from "./componentsArchive/sortOptions";
+import { readDuration, durationParams, lengthApplies } from "./componentsArchive/durationOptions";
 import {
   buildTagRelations,
   normalizeSelection,
@@ -40,7 +43,10 @@ const useArchivePageController = () => {
   // than an error.
   const initial = useMemo(() => readFilters(searchParams), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [typeFilter, setTypeFilter] = useState(initial.typeFilter);
+  // Which media types are shown; empty is all of them — see typeSelection.js.
+  const [selectedTypes, setSelectedTypes] = useState(initial.selectedTypes);
+  // Which card comes first. Not a filter — see componentsArchive/sortOptions.js.
+  const [sortOrder, setSortOrder] = useState(initial.sortOrder);
   const [searchQuery, setSearchQuery] = useState(initial.searchQuery);
   const [creatorFilter, setCreatorFilter] = useState(initial.creatorFilter);
   // Two lists, not one. `tagIds` says which branches to look in; `excludedTagIds`
@@ -52,6 +58,16 @@ const useArchivePageController = () => {
   const [tagIds, setTagIds] = useState(initial.tagIds);
   const [excludedTagIds, setExcludedTagIds] = useState(initial.excludedTagIds);
   const [dates, setDates] = useState(initial.dates);
+  // One of the length ranges in componentsArchive/durationOptions.js, or "".
+  const [durationRange, setDurationRange] = useState(initial.durationRange);
+
+  // With only "קריאה" chosen a length has nothing to apply to — a book has none —
+  // so a range left over from before is dropped rather than kept as a filter
+  // that would hide every card on the page with no field on screen to say why.
+  const lengthOffered = lengthApplies(selectedTypes);
+  useEffect(() => {
+    if (!lengthOffered && durationRange) setDurationRange("");
+  }, [lengthOffered, durationRange]);
   // Fetched rather than derived from the loaded media: a tag can exist in the
   // vocabulary before anything the archive currently holds carries it.
   // The whole taxonomy — a few hundred rows, fetched once. The drill-down then
@@ -141,16 +157,18 @@ const useArchivePageController = () => {
   // its own.
   useEffect(() => {
     const next = writeFilters({
-      typeFilter,
+      selectedTypes,
       searchQuery,
       creatorFilter,
       tagIds,
       excludedTagIds,
       dates,
+      sortOrder,
+      durationRange,
     }).toString();
     if (next === searchParams.toString()) return;
     setSearchParams(next, { replace: true });
-  }, [typeFilter, searchQuery, creatorFilter, tagIds, excludedTagIds, dates, searchParams, setSearchParams]);
+  }, [selectedTypes, searchQuery, creatorFilter, tagIds, excludedTagIds, dates, sortOrder, durationRange, searchParams, setSearchParams]);
 
   // ── Filtering happens in ONE place, and it is the server ─────────────────
   //
@@ -167,12 +185,21 @@ const useArchivePageController = () => {
   // everything else changes on a click and fires immediately.
   const debouncedSearch = useDebounced(searchQuery, 300);
 
+  // Memoised: it is an object, and the request below would otherwise go out
+  // again on every render. Gated on lengthOffered as well as cleared by the
+  // effect above, so the one render between the two cannot send it either.
+  const length = useMemo(
+    () => durationParams(lengthOffered ? durationRange : ""),
+    [lengthOffered, durationRange]
+  );
+
   useEffect(() => {
     dispatch(
       fetchAllMedia({
         // Omitted rather than sent empty: an absent parameter is "no filter",
         // and sending "" would have the server compare against an empty string.
-        ...(typeFilter && { type: typeFilter }),
+        // A list: sent as `type=video&type=audio`, any of which may match.
+        ...(selectedTypes.length > 0 && { type: selectedTypes }),
         ...(debouncedSearch && { search: debouncedSearch }),
         ...(creatorFilter && { creator: creatorFilter }),
         ...(tagIds.length > 0 && { tagIds }),
@@ -183,11 +210,25 @@ const useArchivePageController = () => {
         ...(excludedTagIds.length > 0 && { excludeTagIds: excludedTagIds }),
         ...(dates.uploadedAfter && { uploadedAfter: dates.uploadedAfter }),
         ...(dates.uploadedBefore && { uploadedBefore: dates.uploadedBefore }),
+        // The server's own default is the same newest-first, so the default is
+        // not sent — the request for the archive as it opens is unchanged.
+        ...(sortOrder !== DEFAULT_SORT && { sort: sortOrder }),
+        // Seconds, either end optional. Spelled out key by key rather than
+        // spread from durationParams: server/test/mediaFilterMirror.test.js
+        // reads THIS block to check every name against the server's, and a
+        // spread would hide both of them from it.
+        ...(length.minDuration !== undefined && { minDuration: length.minDuration }),
+        ...(length.maxDuration !== undefined && { maxDuration: length.maxDuration }),
       })
     );
-  }, [dispatch, typeFilter, debouncedSearch, creatorFilter, tagIds, excludedTagIds, dates]);
+  }, [dispatch, selectedTypes, debouncedSearch, creatorFilter, tagIds, excludedTagIds, dates, sortOrder, length]);
 
-  const handleFilter = (type) => setTypeFilter(type);
+  // An order, not a filter: none of the clears below touch it.
+  const handleSortChange = (value) => setSortOrder(readSort(value));
+
+  // See typeSelection.js for what each press means.
+  const handleToggleType = (type) => setSelectedTypes((prev) => toggleType(prev, type));
+  const handlePressAllTypes = () => setSelectedTypes(pressAllTypes());
   const handleCreatorFilter = (name) => setCreatorFilter(name);
   // Both lists, always. An exclusion left behind by a "clear" is a filter that is
   // still narrowing the archive with nothing on screen that says so — the exact
@@ -220,14 +261,17 @@ const useArchivePageController = () => {
   // into "only this branch", from a control labelled "remove".
   const handleRemoveTag = (id) => applyTagDecision(forgetTag(tagRelations, tagSelection, id));
   const handleDateFilter = (key, value) => setDates((prev) => ({ ...prev, [key]: value }));
+  const handleDurationFilter = (value) => setDurationRange(readDuration(value));
 
   // Clears everything INSIDE the panel — not the type toggle and not the search
   // box, which are visible at all times and were never hidden from the user.
   const handleClearFilters = () => {
+    setSelectedTypes([]);
     setCreatorFilter("");
     setTagIds([]);
     setExcludedTagIds([]);
     setDates({ uploadedAfter: "", uploadedBefore: "" });
+    setDurationRange("");
   };
   const handleSearch = (query) => setSearchQuery(query);
   const handleOpenMedia = (id) => navigate(`/media/${id}`);
@@ -297,7 +341,7 @@ const useArchivePageController = () => {
   // Whether the empty grid is due to an active filter/search (vs a truly empty
   // archive) — lets the empty state choose between "no results" and the upload CTA.
   const hasActiveFilter = Boolean(
-    typeFilter ||
+    selectedTypes.length ||
       searchQuery ||
       creatorFilter ||
       tagIds.length ||
@@ -305,15 +349,18 @@ const useArchivePageController = () => {
       // filter, so an empty grid under one is "no results", not an empty archive.
       excludedTagIds.length ||
       dates.uploadedAfter ||
-      dates.uploadedBefore
+      dates.uploadedBefore ||
+      (lengthOffered && durationRange)
   );
 
   return {
-    filteredMedia, status, typeFilter, hasActiveFilter,
+    filteredMedia, status, selectedTypes, hasActiveFilter,
+    sortOrder, handleSortChange,
+    durationRange, handleDurationFilter, lengthOffered,
     creatorFilter, knownCreators, handleCreatorFilter,
     tagIds, excludedTagIds, tagTree, handleCycleTag, handleRemoveTag, handleClearTags,
     dates, handleDateFilter, handleClearFilters,
-    handleFilter, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
+    handleToggleType, handlePressAllTypes, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
     tagTargetItem, handleEditTags, handleEditTagsCancel, handleEditTagsSave,
     handleTogglePublish,

@@ -40,6 +40,16 @@ export const mediaApi = {
   // reached nineteen items and no tagged rows at all.
   tagSuggestions: async (id) => (await axiosInstance.get(`/media/${id}/tag-suggestions`)).data,
 
+  // A tag that does not exist yet, proposed from an item's tagging dialog with
+  // the place in the tree it belongs. A lecturer's waits for an admin and is
+  // attached to the item on approval; an admin's is created and attached at once
+  // (the answer then has status "approved" and the new tag_id).
+  tagProposals: async (id) => (await axiosInstance.get(`/media/${id}/tag-proposals`)).data,
+  proposeTag: async (id, { name, parentId }) =>
+    (await axiosInstance.post(`/media/${id}/tag-proposals`, { name, parentId })).data,
+  withdrawTagProposal: async (id, proposalId) =>
+    (await axiosInstance.delete(`/media/${id}/tag-proposals/${proposalId}`)).data,
+
   update: async (id, payload) =>
     (await axiosInstance.put(`/media/update/${id}`, payload)).data,
 

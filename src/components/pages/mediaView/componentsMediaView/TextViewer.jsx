@@ -5,6 +5,7 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { mediaApi } from "../../../../api/mediaApi";
+import { pdfStates } from "../../../../utilities/constant";
 
 // Lazy, and that is the whole reason it is a separate module. pdf.js is ~130KB
 // gzipped plus a worker of its own; the archive, the notebook and the player
@@ -93,6 +94,9 @@ const PdfViewer = lazy(() => import("./PdfViewer"));
 const SANDBOXED_FORMATS = { pdf: false };
 const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) => {
   const [loaded, setLoaded] = useState(false);
+  // Reported by the viewer below. Starts as "loading" rather than unknown,
+  // because that is what it is: the lazy chunk has not even arrived yet.
+  const [pdfState, setPdfState] = useState(pdfStates.loading);
   const mediaId = media?.id;
 
   // Answered by the server, from the same rule the streaming route refuses with.
@@ -118,6 +122,8 @@ const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) =
     // whose whole point is the page underneath. `flex-end` is direction-aware,
     // so in this RTL application it lands on the LEFT, which is where it was
     // asked for and where a secondary action sits in the rest of the app.
+    //
+    // And AFTER the document, not before it: see the PDF branch below.
     <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1, flexWrap: "wrap" }}>
       <Button
         size="small"
@@ -161,9 +167,22 @@ const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) =
             bookmarks={bookmarks}
             jumpTo={jumpTo}
             onPageChange={onPageChange}
+            onStatusChange={setPdfState}
           />
         </Suspense>
-        {escapeHatch}
+
+        {/* Not while the book is still opening.
+            There are two waits stacked here — the lazy chunk, then pdf.js
+            reading a file that can run to 26MB — and through both of them this
+            was the only thing on the screen: a link out of a view that had not
+            shown anything yet, floating under a spinner.
+
+            A FAILURE brings it straight back, and that is not a nicety. The
+            alert the viewer shows when it cannot open a file ends with "אפשר
+            לפתוח אותו בכרטיסייה חדשה" — it points at this button, so hiding it
+            in the one state that needs it would leave that sentence pointing at
+            nothing. */}
+        {pdfState !== pdfStates.loading && escapeHatch}
       </Box>
     );
   }

@@ -10,6 +10,7 @@ import QueueStatus from "./componentsAdmin/QueueStatus";
 import SystemHealth from "./componentsAdmin/SystemHealth";
 import PipelineTrouble from "./componentsAdmin/PipelineTrouble";
 import DonationsLedger from "./componentsAdmin/DonationsLedger";
+import TagProposals from "./componentsAdmin/TagProposals";
 import { adminApi } from "../../../api/adminApi";
 
 const AdminDashboard = () => {
@@ -92,6 +93,14 @@ const AdminDashboard = () => {
         <Grid item xs={12} md={5}>
           <Paper sx={{ p: 3 }}>
             <SystemHealth health={health} />
+          </Paper>
+        </Grid>
+
+        {/* Its own load, outside the 30s refresh: a decision is made by the
+            admin on this screen, and the list refreshes after each one. */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3 }}>
+            <TagProposals />
           </Paper>
         </Grid>
 

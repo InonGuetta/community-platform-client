@@ -36,7 +36,7 @@ import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 // being downloaded rather than saying a generic "file", so a user who sees two
 // entries can tell which one is the lecture and which one is its text.
 const FILE_OPTION = {
-  [mediaTypes.audio]: { label: "הורדת אודיו", Icon: AudiotrackOutlinedIcon },
+  [mediaTypes.audio]: { label: "הורדת שמע", Icon: AudiotrackOutlinedIcon },
   [mediaTypes.video]: { label: "הורדת וידאו", Icon: VideocamOutlinedIcon },
   [mediaTypes.text]: { label: "הורדת המסמך", Icon: DescriptionOutlinedIcon },
 };
@@ -126,7 +126,7 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
         sx={itemSx}
       >
         <ListItemIcon><AudiotrackOutlinedIcon fontSize="small" /></ListItemIcon>
-        <ListItemText primary="הורדת אודיו בלבד" />
+        <ListItemText primary="הורדת שמע בלבד" />
       </MenuItem>
     );
   }

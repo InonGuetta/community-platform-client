@@ -1,17 +1,24 @@
 // @vitest-environment jsdom
-import { test, expect, describe, vi } from "vitest";
+import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import TextViewer from "./TextViewer";
 
 // The real one loads pdf.js and a worker. What this file is about is WHICH of
 // the two paths a format takes, so the viewer only has to be identifiable.
-let lastPdfProps = null;
-vi.mock("./PdfViewer", () => ({
-  default: (props) => {
-    lastPdfProps = props;
+// Stands in for the real viewer, and reports a state the way it does. Default
+// "ready": most tests here are about which path a format takes, not the wait.
+const pdfMock = vi.hoisted(() => ({ props: null, state: "ready" }));
+vi.mock("./PdfViewer", async () => {
+  const { useEffect } = await import("react");
+  const PdfViewerStub = ({ onStatusChange, ...rest }) => {
+    pdfMock.props = { onStatusChange, ...rest };
+    useEffect(() => {
+      onStatusChange?.(pdfMock.state);
+    }, [onStatusChange]);
     return <div data-testid="pdf-viewer" />;
-  },
-}));
+  };
+  return { default: PdfViewerStub };
+});
 
 // Showing the original file — the whole of what a document page shows.
 //
@@ -28,6 +35,9 @@ const PDF = { id: 9, media_type: "text", file_ext: "pdf", can_view_inline: true 
 const DOC = { id: 9, media_type: "text", file_ext: "doc", can_view_inline: false };
 
 const frame = () => document.querySelector("iframe");
+const wayOut = () => screen.queryByRole("link", { name: /פתיחה בכרטיסייה חדשה/ });
+
+beforeEach(() => { pdfMock.state = "ready"; });
 
 describe("which of the two paths a format takes", () => {
   // The browser's viewer reads a PDF perfectly and tells us nothing: not which
@@ -78,8 +88,8 @@ describe("being asked to open at a place", () => {
     render(<TextViewer media={PDF} jumpTo={{ page_number: 70 }} onPageChange={onPageChange} />);
     await screen.findByTestId("pdf-viewer");
 
-    expect(lastPdfProps.jumpTo).toEqual({ page_number: 70 });
-    expect(lastPdfProps.onPageChange).toBe(onPageChange);
+    expect(pdfMock.props.jumpTo).toEqual({ page_number: 70 });
+    expect(pdfMock.props.onPageChange).toBe(onPageChange);
   });
 
   // A .docx or a .txt has no viewer of ours and therefore no pages at all. The
@@ -109,6 +119,51 @@ describe("a file that cannot be displayed", () => {
     render(<TextViewer media={DOC} />);
     expect(screen.getByText(/\.doc/)).toBeInTheDocument();
     expect(screen.getByText(/docx/)).toBeInTheDocument();
+  });
+});
+
+// While a book is opening there are two waits stacked — the lazy pdf.js chunk,
+// then reading a file that can run to 26MB — and through both of them this link
+// was the ONLY thing on the screen: a way out of a view that had not shown
+// anything yet, floating under a spinner.
+describe("the way out, while the book is still opening", () => {
+  test("is not offered before there is a document to look at", async () => {
+    pdfMock.state = "loading";
+    render(<TextViewer media={PDF} />);
+    await screen.findByTestId("pdf-viewer");
+
+    expect(wayOut()).not.toBeInTheDocument();
+  });
+
+  test("and appears once there is", async () => {
+    render(<TextViewer media={PDF} />);
+    await screen.findByTestId("pdf-viewer");
+
+    expect(wayOut()).toBeInTheDocument();
+  });
+
+  // The state that MUST bring it back. The alert the viewer shows when it cannot
+  // open a file ends with "אפשר לפתוח אותו בכרטיסייה חדשה" — it points at this
+  // button, so hiding it here would leave that sentence pointing at nothing.
+  test("and comes back when the document cannot be opened at all", async () => {
+    pdfMock.state = "error";
+    render(<TextViewer media={PDF} />);
+    await screen.findByTestId("pdf-viewer");
+
+    expect(wayOut()).toBeInTheDocument();
+  });
+
+  // Only the PDF path waits. An iframe that never fires onLoad — a blocked
+  // plugin, which is the very case this link exists for — would otherwise leave
+  // a reader with a spinner and no way out at all.
+  test("a format shown in a frame keeps offering it throughout", () => {
+    render(<TextViewer media={{ ...PDF, file_ext: "docx" }} />);
+    expect(wayOut()).toBeInTheDocument();
+  });
+
+  test("and so does a file that cannot be embedded", () => {
+    render(<TextViewer media={DOC} />);
+    expect(wayOut()).toBeInTheDocument();
   });
 });
 

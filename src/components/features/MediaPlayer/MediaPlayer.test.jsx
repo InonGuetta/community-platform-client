@@ -198,7 +198,7 @@ describe("the downloads in the settings menu", () => {
     openSettings();
 
     expect(screen.getByText("הורדת וידאו")).toBeInTheDocument();
-    expect(screen.getByText("הורדת אודיו בלבד")).toBeInTheDocument();
+    expect(screen.getByText("הורדת שמע בלבד")).toBeInTheDocument();
     expect(screen.getByText("הורדת תמלול (PDF)")).toBeInTheDocument();
   });
 
@@ -208,7 +208,7 @@ describe("the downloads in the settings menu", () => {
     renderPlayer("audio");
     openSettings();
 
-    expect(screen.getByText("הורדת אודיו")).toBeInTheDocument();
+    expect(screen.getByText("הורדת שמע")).toBeInTheDocument();
     expect(screen.queryByText("הורדת תמלול (PDF)")).not.toBeInTheDocument();
   });
 });

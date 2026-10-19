@@ -80,17 +80,26 @@ describe("where a bookmark is made", () => {
 
 // ── F6 ──────────────────────────────────────────────────────────────────────
 describe("what a row says", () => {
-  test("a passage shows its note, its words and its page", () => {
+  test("a passage shows its note and its page", () => {
     withStore(<NotesPanel bookmarks={[passage]} isText />);
     expect(screen.getByText("יסוד הסוגיה")).toBeInTheDocument();
-    expect(screen.getByText("„ואמר רבי יוחנן” · עמ׳ 47")).toBeInTheDocument();
+    expect(screen.getByText("עמ׳ 47")).toBeInTheDocument();
   });
 
-  // "(ללא הערה)" on every row is a list nobody can read, and that is what a
-  // book's bookmarks looked like before a passage carried its text.
-  test("a passage with no note is titled by the words that were marked", () => {
+  // The marked words are NOT shown. In this archive `quoted_text` is the OCR's
+  // reading of a photographed page and is frequently wrong, so printing it in
+  // the reader's own list misquotes the passage rather than identifying it —
+  // see bookmarkLines in utilities/bookmarks.js.
+  test("but never the words the OCR made of the page", () => {
+    withStore(<NotesPanel bookmarks={[passage]} isText />);
+    expect(screen.queryByText(/ואמר רבי יוחנן/)).not.toBeInTheDocument();
+  });
+
+  // The page takes over as the identity, which is what it was chosen to be. A
+  // page number answers "which one is this"; "(ללא הערה)" does not.
+  test("a passage with no note is titled by its place", () => {
     withStore(<NotesPanel bookmarks={[{ ...passage, note: null }]} isText />);
-    expect(screen.getByText("ואמר רבי יוחנן")).toBeInTheDocument();
+    expect(screen.getByText("עמ׳ 47")).toBeInTheDocument();
     expect(screen.queryByText("(ללא הערה)")).not.toBeInTheDocument();
   });
 

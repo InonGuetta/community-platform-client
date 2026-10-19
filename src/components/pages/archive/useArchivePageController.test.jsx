@@ -46,6 +46,12 @@ vi.mock("../../../api/mediaApi", () => ({
   },
 }));
 
+// The listing request as a plain action, so a test can read what was asked for.
+vi.mock("../../../store/slicesAndThunks/mediaSlice/mediaGet", async (importOriginal) => ({
+  ...(await importOriginal()),
+  fetchAllMedia: (arg) => ({ type: "media/fetchAll", meta: { arg } }),
+}));
+
 const useArchivePageController = (await import("./useArchivePageController")).default;
 
 let api;
@@ -79,7 +85,7 @@ beforeEach(() => {
 describe("arriving with a filter in the address", () => {
   it("opens showing the filter the link describes", async () => {
     await open("/archive?type=video&q=וירא&creator=הרב כהן&tags=2&not=5&from=2026-01-01");
-    expect(api.typeFilter).toBe("video");
+    expect(api.selectedTypes).toEqual(["video"]);
     expect(api.creatorFilter).toBe("הרב כהן");
     expect(api.tagIds).toEqual([2]);
     expect(api.excludedTagIds).toEqual([5]);
@@ -114,8 +120,42 @@ describe("arriving with a filter in the address", () => {
 
   it("ignores a filter value that is not usable rather than passing it on", async () => {
     await open("/archive?type=banana&from=never");
-    expect(api.typeFilter).toBe("");
+    expect(api.selectedTypes).toEqual([]);
     expect(api.dates.uploadedAfter).toBe("");
+  });
+});
+
+describe("the media-type toggle", () => {
+  it("is and / and: two types pressed are both shown", async () => {
+    await open("/archive?type=video");
+    await act(async () => api.handleToggleType("audio"));
+    expect(api.selectedTypes).toEqual(["video", "audio"]);
+  });
+
+  it("from the default, pressing a type shows that type alone", async () => {
+    await open("/archive");
+    await act(async () => api.handleToggleType("video"));
+    expect(api.selectedTypes).toEqual(["video"]);
+  });
+
+  it("הכל shows everything, and pressing it again changes nothing", async () => {
+    await open("/archive?type=video,audio");
+    await act(async () => api.handlePressAllTypes());
+    expect(api.selectedTypes).toEqual([]);
+    await act(async () => api.handlePressAllTypes());
+    expect(api.selectedTypes).toEqual([]);
+  });
+
+  it("taking out the last type goes back to everything", async () => {
+    await open("/archive?type=text");
+    await act(async () => api.handleToggleType("text"));
+    expect(api.selectedTypes).toEqual([]);
+  });
+
+  it("sends the chosen types to the server as a list", async () => {
+    await open("/archive?type=video,audio");
+    const request = dispatch.mock.calls.map(([action]) => action?.meta?.arg).find((arg) => arg?.type);
+    expect(request?.type).toEqual(["video", "audio"]);
   });
 });
 
@@ -145,9 +185,11 @@ describe("the address follows the filter", () => {
 
   it("writes the other filters too", async () => {
     await open();
-    await act(async () => api.handleFilter("audio"));
+    // From "everything", pressing קריאה shows reading alone; then שמע joins it.
+    await act(async () => api.handleToggleType("text"));
+    await act(async () => api.handleToggleType("audio"));
     await act(async () => api.handleDateFilter("uploadedAfter", "2026-05-05"));
-    await waitFor(() => expect(url()).toContain("type=audio"));
+    await waitFor(() => expect(url()).toContain("type=audio%2Ctext"));
     expect(url()).toContain("from=2026-05-05");
   });
 
@@ -157,13 +199,103 @@ describe("the address follows the filter", () => {
     await act(async () => api.handleClearFilters());
     await waitFor(() => expect(url()).not.toContain("tags="));
     expect(url()).not.toContain("not=");
-    // The type toggle is outside the panel and is deliberately not cleared by it.
-    expect(url()).toContain("type=video");
+    // The type toggle lives inside the panel, so clearing the panel clears it.
+    expect(url()).not.toContain("type=");
   });
 
   it("clears both lists when the tags are cleared", async () => {
     await open("/archive?tags=2&not=5");
     await act(async () => api.handleClearTags());
     await waitFor(() => expect(url()).toBe(""));
+  });
+});
+
+describe("the sort order", () => {
+  // The listing requests dispatched, newest last.
+  const requests = () =>
+    dispatch.mock.calls.map(([action]) => action).filter((a) => a?.type === "media/fetchAll").map((a) => a.meta.arg);
+
+  it("sends nothing for the default, so the opening request is unchanged", async () => {
+    await open();
+    expect(api.sortOrder).toBe("newest");
+    expect(requests().at(-1)).not.toHaveProperty("sort");
+  });
+
+  it("asks the server for the chosen order, and writes it into the address", async () => {
+    await open();
+    await act(async () => api.handleSortChange("liked"));
+    await waitFor(() => expect(requests().at(-1)).toMatchObject({ sort: "liked" }));
+    await waitFor(() => expect(url()).toContain("sort=liked"));
+  });
+
+  it("opens in the order a shared link names, beside its filters", async () => {
+    await open("/archive?type=audio&sort=title");
+    expect(api.sortOrder).toBe("title");
+    expect(requests().at(-1)).toMatchObject({ sort: "title", type: ["audio"] });
+  });
+
+  // An order is not a filter: it hides nothing, so it is not counted as one and
+  // "ניקוי הכל" leaves it where it is.
+  it("is not an active filter, and clearing the filters keeps it", async () => {
+    await open("/archive?sort=oldest");
+    expect(api.hasActiveFilter).toBe(false);
+    await act(async () => api.handleClearFilters());
+    expect(api.sortOrder).toBe("oldest");
+    await waitFor(() => expect(url()).toContain("sort=oldest"));
+  });
+
+  it("an unknown value from the menu falls back to the default", async () => {
+    await open("/archive?sort=title");
+    await act(async () => api.handleSortChange("banana"));
+    expect(api.sortOrder).toBe("newest");
+  });
+});
+
+describe("the length filter", () => {
+  const lastRequest = () =>
+    dispatch.mock.calls.map(([action]) => action).filter((a) => a?.type === "media/fetchAll").at(-1)?.meta.arg;
+
+  it("sends nothing about length until a range is chosen", async () => {
+    await open();
+    expect(lastRequest()).not.toHaveProperty("minDuration");
+    expect(lastRequest()).not.toHaveProperty("maxDuration");
+  });
+
+  it("sends the chosen range in seconds, and writes its name into the address", async () => {
+    await open();
+    await act(async () => api.handleDurationFilter("medium"));
+    await waitFor(() => expect(lastRequest()).toMatchObject({ minDuration: 900, maxDuration: 1800 }));
+    await waitFor(() => expect(url()).toContain("len=medium"));
+    expect(api.hasActiveFilter).toBe(true);
+  });
+
+  it("an open-ended range sends only its one end", async () => {
+    await open("/archive?len=xlong");
+    expect(lastRequest()).toMatchObject({ minDuration: 3600 });
+    expect(lastRequest()).not.toHaveProperty("maxDuration");
+  });
+
+  // A book has no length: a range kept under "reading only" would hide every
+  // card on the page with no field on screen to explain it.
+  it("is not offered with only reading chosen, and a range left over is dropped", async () => {
+    await open("/archive?len=short");
+    expect(api.lengthOffered).toBe(true);
+    await act(async () => api.handleToggleType("text"));
+    expect(api.lengthOffered).toBe(false);
+    await waitFor(() => expect(api.durationRange).toBe(""));
+    expect(lastRequest()).not.toHaveProperty("maxDuration");
+    await waitFor(() => expect(url()).not.toContain("len="));
+  });
+
+  it("a link naming reading only and a length opens with no length", async () => {
+    await open("/archive?type=text&len=long");
+    await waitFor(() => expect(api.durationRange).toBe(""));
+    expect(lastRequest()).not.toHaveProperty("minDuration");
+  });
+
+  it("is cleared with the other filters", async () => {
+    await open("/archive?len=long");
+    await act(async () => api.handleClearFilters());
+    expect(api.durationRange).toBe("");
   });
 });

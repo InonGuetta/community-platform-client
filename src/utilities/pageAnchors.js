@@ -105,6 +105,68 @@ export const scrollTopForMark = ({ pageTop, pageHeight, boxHeight = 0, rect = nu
   return Math.max(0, top - boxHeight / 2 + markHeight / 2);
 };
 
+/**
+ * Where the scroll has to move so that zooming keeps the point under the
+ * pointer where it was.
+ *
+ * Without this, zooming pushes whatever you were reading off the screen: the
+ * content above the pointer grows, and every pixel it gains moves your line
+ * down. The reader then hunts for the sentence they were on — which is the same
+ * hunt a bookmark exists to remove.
+ *
+ * The arithmetic is not `contentY * ratio`, and the difference is not
+ * academic. The document is pages separated by gaps, and a gap does NOT grow
+ * when the pages do. On page 300 of a sefer there are 300 gaps above the
+ * pointer; scaling them along with the pages puts the reader roughly a
+ * screenful away from where they were. So the page the pointer is in is found
+ * first, and only the pages are scaled.
+ *
+ * @param {object} view
+ * @param {number} view.scrollTop - before the zoom.
+ * @param {number} view.pointerOffset - pointer distance from the box's top edge.
+ * @param {number} view.padTop - space above the first page.
+ * @param {number} view.gap - space between two pages, which does not scale.
+ * @param {number} view.pageHeight - a page now.
+ * @param {number} view.nextPageHeight - a page after the zoom.
+ */
+export const zoomedScrollTop = ({
+  scrollTop, pointerOffset, padTop = 0, gap = 0, pageHeight, nextPageHeight,
+}) => {
+  const now = Number(pageHeight);
+  const next = Number(nextPageHeight);
+  const from = Number(scrollTop) + Number(pointerOffset);
+  if (!Number.isFinite(now) || !Number.isFinite(next) || !Number.isFinite(from)) return null;
+  if (now <= 0 || next <= 0) return null;
+
+  // Above the first page there is nothing that scales, so nothing moves.
+  const intoPages = from - Number(padTop);
+  if (intoPages <= 0) return Math.max(0, Number(scrollTop));
+
+  const block = now + Number(gap);
+  const index = Math.floor(intoPages / block);
+  // Clamped at 1 because the pointer may be in the gap BELOW a page, and a gap
+  // has no inside to interpolate: the point stays on that page's bottom edge.
+  const ratio = Math.min(1, (intoPages - index * block) / now);
+
+  const nextFrom = Number(padTop) + index * (next + Number(gap)) + ratio * next;
+  return Math.max(0, nextFrom - Number(pointerOffset));
+};
+
+/**
+ * A wheel event's vertical delta in pixels, whatever unit it arrived in.
+ *
+ * A trackpad reports pixels, but a mouse can report LINES and some report
+ * pages. Treating a delta of 3 lines as 3 pixels makes zooming with a mouse
+ * wheel feel broken rather than slow.
+ */
+export const wheelDeltaPixels = (event, viewportHeight = 0) => {
+  const delta = Number(event?.deltaY);
+  if (!Number.isFinite(delta)) return 0;
+  if (event?.deltaMode === 1) return delta * 16;  // lines
+  if (event?.deltaMode === 2) return delta * (Number(viewportHeight) || 16);
+  return delta;
+};
+
 export const pageAnchorFromSelection = (selection) => {
   if (!selection || selection.isCollapsed || selection.rangeCount === 0) return null;
 

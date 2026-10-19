@@ -1,4 +1,6 @@
-import { mediaTypes } from "../../../utilities/constant";
+import { readTypes } from "./componentsArchive/typeSelection";
+import { readSort, DEFAULT_SORT } from "./componentsArchive/sortOptions";
+import { readDuration } from "./componentsArchive/durationOptions";
 
 // The archive's filters, as an address.
 //
@@ -31,15 +33,23 @@ export const FILTER_PARAMS = {
   excluded: "not",
   from: "from",
   to: "to",
+  sort: "sort",
+  length: "len",
 };
 
 export const EMPTY_FILTERS = {
-  typeFilter: "",
+  // Empty is every type — see componentsArchive/typeSelection.js.
+  selectedTypes: [],
   searchQuery: "",
   creatorFilter: "",
   tagIds: [],
   excludedTagIds: [],
   dates: { uploadedAfter: "", uploadedBefore: "" },
+  // An order rather than a filter, but it belongs in a shared link all the same:
+  // "the most liked shiurim on שבת" is a link somebody means to send.
+  sortOrder: DEFAULT_SORT,
+  // Empty is every length — see componentsArchive/durationOptions.js.
+  durationRange: "",
 };
 
 // Ids arrive comma-joined — `tags=2,5` rather than `tags=2&tags=5`. Shorter, and
@@ -65,12 +75,13 @@ const readDate = (value) => (ISO_DATE.test(value || "") ? value : "");
  */
 export const readFilters = (searchParams) => {
   const get = (key) => searchParams?.get(FILTER_PARAMS[key]) ?? "";
-  const type = get("type");
   return {
-    // Checked against the vocabulary rather than passed through: `type=banana`
-    // would otherwise be a filter that matches nothing, with a control on screen
-    // showing no type selected to explain it.
-    typeFilter: Object.values(mediaTypes).includes(type) ? type : "",
+    // Comma-joined like the tags — `type=video,audio` — and checked against the
+    // vocabulary rather than passed through: `type=banana` would otherwise be a
+    // filter that matches nothing, with no pressed button on screen to explain
+    // it. A link from before the toggle was a multi-select is `type=video`, and
+    // still means what it did.
+    selectedTypes: readTypes(get("type").split(",").map((t) => t.trim())),
     searchQuery: get("search"),
     creatorFilter: get("creator"),
     tagIds: readIds(get("tags")),
@@ -79,6 +90,10 @@ export const readFilters = (searchParams) => {
       uploadedAfter: readDate(get("from")),
       uploadedBefore: readDate(get("to")),
     },
+    // An unknown order is the default rather than an error, like everything else
+    // read from an address.
+    sortOrder: readSort(get("sort")),
+    durationRange: readDuration(get("length")),
   };
 };
 
@@ -95,12 +110,15 @@ export const writeFilters = (filters) => {
   const set = (key, value) => {
     if (value) params.set(FILTER_PARAMS[key], value);
   };
-  set("type", filters?.typeFilter);
+  set("type", (filters?.selectedTypes || []).join(","));
   set("search", filters?.searchQuery);
   set("creator", filters?.creatorFilter);
   set("tags", (filters?.tagIds || []).join(","));
   set("excluded", (filters?.excludedTagIds || []).join(","));
   set("from", filters?.dates?.uploadedAfter);
   set("to", filters?.dates?.uploadedBefore);
+  // The default is left out, so the archive as it opens is still a clean URL.
+  if (filters?.sortOrder !== DEFAULT_SORT) set("sort", filters?.sortOrder);
+  set("length", filters?.durationRange);
   return params;
 };

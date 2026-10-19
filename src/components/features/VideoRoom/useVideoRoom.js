@@ -61,6 +61,11 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
     onEndRef.current = onEnd;
   }, [onEnd]);
 
+  // TODO(CR): the per-room state above (messages, sharing, micOn, cameraOn,
+  // hasMic, hasCamera, mediaError, roomError) is never reset when roomToken
+  // changes. Moving from one room to another without unmounting carries the
+  // previous room's chat and a "sharing" button state that no longer matches any
+  // track. Reset them at the top of this effect.
   useEffect(() => {
     if (!roomToken) return undefined;
 

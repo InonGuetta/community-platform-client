@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { test, expect, describe } from "vitest";
 import {
-  rectWithin, pageAnchorFromSelection, scrollTopForMark, MAX_QUOTE_CHARS,
+  rectWithin, pageAnchorFromSelection, scrollTopForMark, zoomedScrollTop,
+  wheelDeltaPixels, MAX_QUOTE_CHARS,
 } from "./pageAnchors";
 
 // Turning a selection on a rendered page into a place that can be stored.
@@ -160,6 +161,98 @@ describe("where to scroll to reach a mark", () => {
     expect(scrollTopForMark({
       pageTop: PAGE_TOP, pageHeight: 800, boxHeight: 600, rect: { y: 0.5 },
     })).toBe(11200 + 400 - 300);
+  });
+});
+
+// ── Zooming without losing your place ───────────────────────────────────────
+//
+// Zoom used to push whatever you were reading off the screen: the content above
+// the pointer grows, and every pixel it gains moves your line down.
+
+describe("keeping the point under the pointer still while zooming", () => {
+  // A page 800 tall with 16px between pages, 8px above the first.
+  const layout = { padTop: 8, gap: 16, pageHeight: 800, nextPageHeight: 1000 };
+
+  test("the point under the pointer does not move", () => {
+    // Pointer 300 into the box, looking at content 5,000 down.
+    const before = { scrollTop: 4700, pointerOffset: 300 };
+    const after = zoomedScrollTop({ ...layout, ...before });
+
+    // Where the point was, expressed as page + fraction, must be unchanged.
+    const place = (contentY, height) => {
+      const into = contentY - 8;
+      const index = Math.floor(into / (height + 16));
+      return { index, ratio: (into - index * (height + 16)) / height };
+    };
+    const was = place(4700 + 300, 800);
+    const is = place(after + 300, 1000);
+
+    expect(is.index).toBe(was.index);
+    expect(is.ratio).toBeCloseTo(was.ratio, 6);
+  });
+
+  // The reason this is not `contentY * ratio`. On page 300 there are 300 gaps
+  // above the pointer, and a gap does not grow when the pages do — scaling them
+  // along with the pages lands the reader about a screenful away.
+  test("the gaps between pages are not scaled with them", () => {
+    const deep = { ...layout, scrollTop: 244_000, pointerOffset: 300 };
+    const exact = zoomedScrollTop(deep);
+    const naive = (deep.scrollTop + deep.pointerOffset) * (1000 / 800) - deep.pointerOffset;
+
+    expect(Math.abs(naive - exact)).toBeGreaterThan(500);
+  });
+
+  test("zooming out is the same arithmetic backwards", () => {
+    const inThen = zoomedScrollTop({ ...layout, scrollTop: 4700, pointerOffset: 300 });
+    const backOut = zoomedScrollTop({
+      ...layout, pageHeight: 1000, nextPageHeight: 800,
+      scrollTop: inThen, pointerOffset: 300,
+    });
+    expect(backOut).toBeCloseTo(4700, 6);
+  });
+
+  // Nothing above the first page scales, so nothing there moves.
+  test("at the very top of the document nothing moves", () => {
+    expect(zoomedScrollTop({ ...layout, scrollTop: 0, pointerOffset: 4 })).toBe(0);
+  });
+
+  test("the scroll never goes above the document", () => {
+    expect(zoomedScrollTop({ ...layout, scrollTop: 0, pointerOffset: 900 }))
+      .toBeGreaterThanOrEqual(0);
+  });
+
+  // The pointer can sit in the gap BELOW a page. A gap has no inside to
+  // interpolate, so the point stays on that page's bottom edge.
+  test("a pointer resting between two pages stays with the page above it", () => {
+    const inGap = zoomedScrollTop({ ...layout, scrollTop: 800, pointerOffset: 12 });
+    expect(Number.isFinite(inGap)).toBe(true);
+    expect(inGap).toBeGreaterThan(0);
+  });
+
+  test("an unmeasured page yields nothing rather than a wrong number", () => {
+    expect(zoomedScrollTop({ ...layout, pageHeight: 0, scrollTop: 10, pointerOffset: 10 })).toBeNull();
+    expect(zoomedScrollTop({ ...layout, nextPageHeight: NaN, scrollTop: 10, pointerOffset: 10 })).toBeNull();
+  });
+});
+
+// A trackpad reports pixels, but a mouse can report LINES and some report pages.
+// Treating 3 lines as 3 pixels makes a mouse wheel feel broken rather than slow.
+describe("reading a wheel's delta", () => {
+  test("pixels are pixels", () => {
+    expect(wheelDeltaPixels({ deltaY: 120, deltaMode: 0 })).toBe(120);
+  });
+
+  test("lines become pixels", () => {
+    expect(wheelDeltaPixels({ deltaY: 3, deltaMode: 1 })).toBe(48);
+  });
+
+  test("pages become the height of what is on screen", () => {
+    expect(wheelDeltaPixels({ deltaY: 1, deltaMode: 2 }, 600)).toBe(600);
+  });
+
+  test("nonsense is no movement at all", () => {
+    expect(wheelDeltaPixels({ deltaY: NaN })).toBe(0);
+    expect(wheelDeltaPixels(null)).toBe(0);
   });
 });
 

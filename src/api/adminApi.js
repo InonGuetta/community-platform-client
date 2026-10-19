@@ -16,6 +16,14 @@ export const adminApi = {
   donations: async (status) =>
     (await axiosInstance.get("/admin/donations", { params: status ? { status } : {} })).data,
 
+  // New tags lecturers asked for. Approve may correct the name and the place:
+  // pass `parentId` (null for a root) only to move it.
+  tagProposals: async () => (await axiosInstance.get("/admin/tag-proposals")).data,
+  approveTagProposal: async (id, changes = {}) =>
+    (await axiosInstance.post(`/admin/tag-proposals/${id}/approve`, changes)).data,
+  rejectTagProposal: async (id, reason) =>
+    (await axiosInstance.post(`/admin/tag-proposals/${id}/reject`, { reason })).data,
+
   // The dashboard refreshes these together every 30s and renders them as one
   // view, so a partial result is not useful — Promise.all is the right shape and
   // belongs here rather than repeated at the call site.

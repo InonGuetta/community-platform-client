@@ -4,6 +4,18 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import EditTagsDialog from "./EditTagsDialog";
 
+// The section under the picker talks to the server and reads the role from the
+// store; it has its own tests (TagProposalsSection.test.jsx). Here it is a stub
+// whose one button does what an admin's "הוסף תגית" does to the dialog — hands
+// back a tag that already exists on the server.
+vi.mock("../../../features/TagPicker/TagProposalsSection", () => ({
+  default: ({ onTagCreated }) => (
+    <button type="button" onClick={() => onTagCreated({ id: 99, name: "שבת הגדול", parent_id: 1 })}>
+      stub-create-tag
+    </button>
+  ),
+}));
+
 // Tagging an item that already exists.
 //
 // The two things worth pinning here are the two that would be silent:
@@ -12,10 +24,12 @@ import EditTagsDialog from "./EditTagsDialog";
 //     the card. Five names in this taxonomy occur in two branches, so a
 //     name-matched tag would be re-saved under whichever branch was found first
 //     and the item would change place in the tree it is filtered by;
-//   · a pick from the taxonomy and something typed leave by different doors —
-//     ids as `tagIds`, strings as `tags`, which become new root-level tags. Send
-//     a typed tag as an id and the request is a 400; send a picked one as a name
-//     and it becomes a duplicate root tag beside the one it was picked from.
+//   · typing no longer creates a tag. A new one is proposed through "הוסף תגית"
+//     and waits for an admin; a name typed into the picker and saved would be
+//     refused by the server, so the picker must not produce one;
+//   · a tag an ADMIN creates from the dialog is already on the item server-side,
+//     and the save REPLACES the item's tags — so unless the dialog adds it to
+//     the selection, saving takes it straight back off.
 
 const TREE = [
   { id: 1, name: 'תנ"ך', parent_id: null },
@@ -84,16 +98,21 @@ describe("saving", () => {
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(7, { tagIds: [5], tags: [] }));
   });
 
-  // Typed tags travel as names and become root-level tags; sending one as an id
-  // is a 400, and sending a picked one as a name duplicates it at the root.
-  it("sends something typed as a name, beside the ids", async () => {
+  // A typed name used to become a root tag on save. Now it would be a 400, so
+  // the picker must not turn it into a value at all.
+  it("does not turn something typed into a tag", async () => {
     const { onSave, user } = draw();
     const field = screen.getByRole("combobox");
     await user.type(field, "שיעור לנוער{enter}");
     await save(user);
-    await waitFor(() =>
-      expect(onSave).toHaveBeenCalledWith(7, { tagIds: [5], tags: ["שיעור לנוער"] })
-    );
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith(7, { tagIds: [5], tags: [] }));
+  });
+
+  it("keeps a tag an admin just created in the selection it saves", async () => {
+    const { onSave, user } = draw();
+    await user.click(screen.getByRole("button", { name: "stub-create-tag" }));
+    await save(user);
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith(7, { tagIds: [5, 99], tags: [] }));
   });
 
   it("closes without saving when cancelled", async () => {

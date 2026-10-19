@@ -50,6 +50,11 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
           </Typography>
         )}
 
+        {/* TODO(CR): other participants' messages carry no name — only an
+            alignment and a time — so in a room of more than two nobody can tell
+            who wrote what. The server already knows the sender's user id; have it
+            add display_name to the message (socketManager CHAT_MESSAGE) and show
+            it here. */}
         {messages.map((message, i) => {
           const mine = Number(message.userId) === Number(myUserId);
           return (

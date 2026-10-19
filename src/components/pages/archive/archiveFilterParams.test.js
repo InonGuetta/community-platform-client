@@ -12,14 +12,16 @@ const write = (filters) => writeFilters(filters).toString();
 
 describe("reading a filter out of an address", () => {
   it("reads every filter the panel holds", () => {
-    const filters = read("type=video&q=וירא&creator=הרב כהן&tags=2,5&not=7&from=2026-01-01&to=2026-02-01");
+    const filters = read("type=video&q=וירא&creator=הרב כהן&tags=2,5&not=7&from=2026-01-01&to=2026-02-01&sort=liked&len=medium");
     expect(filters).toEqual({
-      typeFilter: "video",
+      selectedTypes: ["video"],
       searchQuery: "וירא",
       creatorFilter: "הרב כהן",
       tagIds: [2, 5],
       excludedTagIds: [7],
       dates: { uploadedAfter: "2026-01-01", uploadedBefore: "2026-02-01" },
+      sortOrder: "liked",
+      durationRange: "medium",
     });
   });
 
@@ -37,7 +39,8 @@ describe("reading a filter out of an address", () => {
 
 describe("values a person or a chat client mangled", () => {
   it("drops a media type that does not exist", () => {
-    expect(read("type=banana").typeFilter).toBe("");
+    expect(read("type=banana").selectedTypes).toEqual([]);
+    expect(read("type=video,banana").selectedTypes).toEqual(["video"]);
   });
 
   it("drops tag ids that are not ids", () => {
@@ -65,7 +68,14 @@ describe("values a person or a chat client mangled", () => {
 
 describe("writing a filter into an address", () => {
   it("leaves out everything that is not set", () => {
-    expect(write({ ...EMPTY_FILTERS, typeFilter: "audio" })).toBe("type=audio");
+    expect(write({ ...EMPTY_FILTERS, selectedTypes: ["audio"] })).toBe("type=audio");
+  });
+
+  // The toggle is a multi-select; several types travel as one parameter.
+  it("writes several media types comma-joined, and reads them back", () => {
+    const address = write({ ...EMPTY_FILTERS, selectedTypes: ["video", "audio"] });
+    expect(address).toBe("type=video%2Caudio");
+    expect(read(address).selectedTypes).toEqual(["video", "audio"]);
   });
 
   it("says nothing at all for an unfiltered archive", () => {
@@ -102,5 +112,39 @@ describe("an address survives the round trip", () => {
     const cleaned = write(read("type=banana&tags=2,abc&from=never"));
     expect(cleaned).toBe("tags=2");
     expect(write(read(cleaned))).toBe(cleaned);
+  });
+});
+
+describe("the sort order in the address", () => {
+  it("is newest first when the address says nothing", () => {
+    expect(read("").sortOrder).toBe("newest");
+  });
+
+  it("drops an order that does not exist rather than sending it", () => {
+    expect(read("sort=banana").sortOrder).toBe("newest");
+  });
+
+  // The archive as it opens is still a clean URL.
+  it("leaves the default out of the address, and writes any other", () => {
+    expect(write({ ...EMPTY_FILTERS })).toBe("");
+    expect(write({ ...EMPTY_FILTERS, sortOrder: "title" })).toBe("sort=title");
+  });
+
+  it("round-trips with the filters beside it", () => {
+    const filters = { ...EMPTY_FILTERS, selectedTypes: ["audio"], sortOrder: "creator" };
+    expect(read(write(filters))).toEqual(filters);
+  });
+});
+
+describe("the length range in the address", () => {
+  it("is named, not given in seconds, and drops a name it does not know", () => {
+    expect(read("len=short").durationRange).toBe("short");
+    expect(read("len=900").durationRange).toBe("");
+    expect(read("").durationRange).toBe("");
+  });
+
+  it("is written only when one is chosen", () => {
+    expect(write({ ...EMPTY_FILTERS })).toBe("");
+    expect(write({ ...EMPTY_FILTERS, durationRange: "xlong" })).toBe("len=xlong");
   });
 });

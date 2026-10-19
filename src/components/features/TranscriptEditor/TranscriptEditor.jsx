@@ -151,7 +151,7 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.5, color: "text.secondary" }}>
           <CircularProgress size={18} />
           <Typography variant="body2">
-            מתמלל את האודיו באמצעות Whisper. בדרך כלל לוקח 1–3 דקות להקלטה של 30 דקות.
+            מתמלל את השמע באמצעות Whisper. בדרך כלל לוקח 1–3 דקות להקלטה של 30 דקות.
           </Typography>
         </Box>
       )}

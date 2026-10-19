@@ -159,6 +159,8 @@ describe("a source chip, dragged in from the sidebar", () => {
 
     expect(sourceFromChip(body.querySelector(SOURCE_CHIP_SELECTOR))).toEqual({
       mediaId: 12,
+      // No bookmark behind it, so no id: a chip that is only a copy.
+      bookmarkId: null,
       timestampSeconds: 742,
       mediaTitle: "בבא קמא ב",
       note: "בעניין יתרו",
@@ -316,6 +318,8 @@ describe("a source chip pointing at a passage in a book", () => {
 
     expect(sourceFromChip(body.querySelector(SOURCE_CHIP_SELECTOR))).toEqual({
       mediaId: 9,
+      // No bookmark behind it, so no id: a chip that is only a copy.
+      bookmarkId: null,
       timestampSeconds: null,
       chunkId: 55,
       pageNumber: 47,
@@ -345,5 +349,24 @@ describe("a source chip pointing at a passage in a book", () => {
   test("a chunk id that is not a number is not carried", () => {
     expect(sanitizeNoteHtml('<span data-media-id="1" data-chunk-id="javascript:1">א</span>'))
       .toBe('<span data-media-id="1">א</span>');
+  });
+});
+
+describe("the references line marker", () => {
+  test("survives on a paragraph", () => {
+    expect(sanitizeNoteHtml('<p data-references="true">x</p>')).toBe('<p data-references="true">x</p>');
+  });
+
+  test("any other value, or any other attribute on a paragraph, does not", () => {
+    expect(sanitizeNoteHtml('<p data-references="yes" onclick="x()" class="a">x</p>')).toBe("<p>x</p>");
+  });
+});
+
+describe("a chip's bookmark id", () => {
+  test("survives the sanitizer, and only as a number", () => {
+    expect(sanitizeNoteHtml('<span data-media-id="4" data-bookmark-id="77">x</span>'))
+      .toBe('<span data-media-id="4" data-bookmark-id="77">x</span>');
+    expect(sanitizeNoteHtml('<span data-media-id="4" data-bookmark-id="7x">x</span>'))
+      .toBe('<span data-media-id="4">x</span>');
   });
 });

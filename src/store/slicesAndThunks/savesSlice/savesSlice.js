@@ -120,7 +120,9 @@ const savesSlice = createSlice({
         state.playlistsStatus = statuses.succeeded;
         state.playlists = action.payload;
         // Only here, and only with the id these rows were actually loaded for.
-        state.playlistsForMediaId = action.meta.arg;
+        // The thunk takes an options object — the saved page calls it with no
+        // mediaId at all, and then these rows describe no lecture.
+        state.playlistsForMediaId = action.meta.arg?.mediaId ?? null;
       })
       .addCase(fetchPlaylists.rejected, (state) => {
         state.playlistsStatus = statuses.failed;

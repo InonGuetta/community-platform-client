@@ -119,6 +119,10 @@ const SOURCE_CHIP_ATTRIBUTES = {
   // noteHtml.test.js asserts a chip built by noteSource survives it.
   "data-chunk-id": /^\d{1,10}$/,
   "data-page": /^\d{1,6}$/,
+  // The bookmark a chip IS, when it is one — see noteSource.js. Stripped, the
+  // chip would fall back to its own copy of the name and stop following the
+  // bookmark it was made from.
+  "data-bookmark-id": /^\d{1,10}$/,
   "data-media-title": /^[\s\S]{0,120}$/,
   // The bookmark's own title, which the chip shows on its second line and the
   // export prints in the footnote. Bounded exactly as the lecture title is.
@@ -134,7 +138,14 @@ const SOURCE_CHIP_ATTRIBUTES = {
 
 // The attributes each tag may carry beyond `style`, which every allowed element
 // may have and which is filtered separately below.
-const TAG_ATTRIBUTES = { FONT: FONT_ATTRIBUTES, IMG: IMG_ATTRIBUTES, SPAN: SOURCE_CHIP_ATTRIBUTES };
+// The references line a note's dropped chips collect on — see
+// utilities/noteSource.js. Without this the marker was stripped at the first
+// blur, and the line stopped being pinned to the foot of the note.
+const PARAGRAPH_ATTRIBUTES = { "data-references": /^true$/ };
+
+const TAG_ATTRIBUTES = {
+  FONT: FONT_ATTRIBUTES, IMG: IMG_ATTRIBUTES, SPAN: SOURCE_CHIP_ATTRIBUTES, P: PARAGRAPH_ATTRIBUTES,
+};
 
 // Everything an allowed element is permitted to carry: a colour, a size, or —
 // for an image — its embedded source.

@@ -77,6 +77,11 @@ export const setUnauthorizedHandler = (handler) => {
 // already handles that one), and /auth/login answers 401 for wrong credentials.
 // Treating those as an expiry would fight the existing handling and would wipe
 // state while the user is simply typing their password wrong.
+// TODO(CR): the prefix is broader than the reasoning above. It also exempts
+// PATCH /auth/me (profile edit) and POST /auth/request-role, which are ordinary
+// authenticated calls — a 401 there IS an expired session, yet the UI keeps
+// showing a signed-in user. Exempt only the endpoints that answer 401 as normal
+// traffic: GET /auth/me, /auth/login, /auth/change-password.
 const isAuthRequest = (url = "") => url.startsWith("/auth/");
 
 // ── Retrying a request the server never processed ───────────────────────────

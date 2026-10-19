@@ -17,8 +17,17 @@ export const savesApi = {
   // The user's own lists. `mediaId` asks the server to mark which of them
   // already hold that lecture — the save menu cannot draw a checkbox without
   // both halves, so they travel together rather than as two requests.
-  listPlaylists: async (mediaId) =>
-    (await axiosInstance.get("/saves/playlists", { params: mediaId ? { mediaId } : undefined })).data,
+  //
+  // `withItems` asks for the lectures INSIDE each list, which is what the saved
+  // page draws under each heading. Opt-in, because the save menu opens over a
+  // lecture to tick checkboxes and has no use for the contents of every list.
+  listPlaylists: async ({ mediaId = null, withItems = false } = {}) =>
+    (await axiosInstance.get("/saves/playlists", {
+      params: {
+        ...(mediaId ? { mediaId } : {}),
+        ...(withItems ? { withItems: "1" } : {}),
+      },
+    })).data,
 
   // One list with the media rows inside it, for the page that opens it. The
   // title comes back too — that page is reachable by URL alone and has a heading

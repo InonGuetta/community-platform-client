@@ -18,6 +18,8 @@ import { mediaApi } from "../../../../api/mediaApi";
 import DownloadMenu from "../../../features/DownloadMenu/DownloadMenu";
 import { mediaTypeLabels, mediaTypeAccents, creatorPrefixes } from "../../../../utilities/constant";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { lengthLabel } from "./durationOptions";
 import { canManageMedia } from "../../../../utilities/permissions";
 // The same icon the like BUTTON uses, from the file that owns the pair. Its
 // header says why: a shelf and the control that fills it have to look like one
@@ -78,6 +80,8 @@ const CornerBracket = ({ accent, placement }) => {
 };
 
 const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags }) => {
+  // Recordings only: a book's duration is always null, and lengthLabel says so.
+  const length = item.media_type === "text" ? null : lengthLabel(item.duration_seconds);
   const isVideo = item.media_type === "video";
   // Both fall back for a media_type the client doesn't know yet: the icon so an
   // unrecognised item still renders, and the accent because alpha()/lighten()
@@ -296,7 +300,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags }
           something to say. The like count joins it on the same principle: it
           appears once somebody has actually liked the lecture, because "0" is a
           worse thing to print on every card in the archive than nothing at all. */}
-      {(item.course_title || item.creator_name || item.like_count > 0) && (
+      {(item.course_title || item.creator_name || item.like_count > 0 || length) && (
         <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.5, mt: 1 }}>
           {item.course_title && (
             <Chip label={item.course_title} size="small" color="primary" variant="outlined" />
@@ -311,6 +315,18 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags }
               label={`${creatorPrefixes[item.media_type] || creatorPrefixes.video}: ${item.creator_name}`}
               size="small"
               variant="outlined"
+            />
+          )}
+          {/* How long the recording runs — what the length filter in the panel
+              chooses by, so the card shows the number the filter is using. Absent
+              for a book and for a length that was never measured. */}
+          {length && (
+            <Chip
+              icon={<AccessTimeIcon />}
+              label={length}
+              size="small"
+              variant="outlined"
+              aria-label={`אורך: ${length}`}
             />
           )}
           {item.like_count > 0 && (

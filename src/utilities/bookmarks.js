@@ -133,21 +133,31 @@ export const placeShortLabel = (bookmark) => {
 
 // What the row says, on its two lines.
 //
-// The note is the user's own words and wins the first line whenever there is
-// one. Failing that the quoted passage stands in, because "(ללא הערה)" on every
-// row of a list is a list nobody can read — which is what a book's bookmarks
-// looked like before a passage carried its text.
+// ── Why the marked words are NOT one of them ───────────────────────────────
 //
-// The second line collects what is left: the quote, when it is not already the
-// title, and then the place. Joined rather than stacked so the row stays two
-// lines however much it carries.
+// They used to be: the quoted passage stood in when nothing had been written,
+// on the argument that "(ללא הערה)" down a whole list is a list nobody can
+// read. That argument assumed the words were the words.
+//
+// In this archive they are not. `quoted_text` on a bookmark in a sefer is what
+// the OCR made of a photographed page, and the OCR here is frequently wrong —
+// „שונגיקי־בקרבן”, „מבאמתי”. Printing that beside a page number does not
+// identify the passage, it misquotes it, and a misquotation shown in the
+// reader's own list is worse than no quotation: it looks like something they
+// marked and said.
+//
+// It is still STORED. It costs nothing, it is what the reader's selection
+// covered, and the day the extraction is good enough it can be shown again
+// without a migration. This is a decision about display, not about the record.
+//
+// So the place takes over as the identity, which is what it was chosen to be:
+// the whole reason a mark on a page is a rectangle and not a phrase is that
+// geometry does not depend on the reading being right.
 export const bookmarkLines = (bookmark) => {
   const note = String(bookmark?.note ?? "").trim();
-  const quote = String(bookmark?.quoted_text ?? "").trim();
   const place = placeLabel(bookmark);
 
-  const title = note || quote || "(ללא הערה)";
-  const detail = [quote && quote !== title ? `„${quote}”` : "", place].filter(Boolean).join(" · ");
-
-  return { title, detail };
+  // No "(ללא הערה)" any more. A page number is a real answer to "which one is
+  // this", and an apology is not.
+  return { title: note || place, detail: note ? place : "" };
 };

@@ -18,11 +18,13 @@ import { isPrivileged } from "../../../utilities/permissions";
 
 const ArchivePage = () => {
   const {
-    filteredMedia, status, typeFilter, hasActiveFilter,
+    filteredMedia, status, selectedTypes, hasActiveFilter,
     creatorFilter, knownCreators, handleCreatorFilter,
     tagIds, excludedTagIds, tagTree, handleCycleTag, handleRemoveTag, handleClearTags,
     dates, handleDateFilter, handleClearFilters,
-    handleFilter, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
+    handleToggleType, handlePressAllTypes, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
+    sortOrder, handleSortChange,
+    durationRange, handleDurationFilter, lengthOffered,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
     tagTargetItem, handleEditTags, handleEditTagsCancel, handleEditTagsSave,
     handleTogglePublish,
@@ -62,8 +64,14 @@ const ArchivePage = () => {
           <>
             <Box sx={{ mb: 3 }}>
               <FilterBar
-                typeFilter={typeFilter}
-                onFilter={handleFilter}
+                selectedTypes={selectedTypes}
+                onToggleType={handleToggleType}
+                onPressAllTypes={handlePressAllTypes}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
+                durationRange={durationRange}
+                onDurationFilter={handleDurationFilter}
+                lengthOffered={lengthOffered}
                 onSearch={handleSearch}
                 creatorFilter={creatorFilter}
                 knownCreators={knownCreators}

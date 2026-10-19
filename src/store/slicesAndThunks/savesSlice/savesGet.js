@@ -27,9 +27,13 @@ export const fetchSavedIds = createAsyncThunk("saves/fetchIds", async (_, { reje
 // ticks that belong to a different item.
 export const fetchPlaylists = createAsyncThunk(
   "saves/fetchPlaylists",
-  async (mediaId, { rejectWithValue }) => {
+  // An object rather than a bare mediaId, because there are now two callers
+  // asking two different questions of the same endpoint: the save menu wants the
+  // names and which of them hold one lecture, the saved page wants the names and
+  // what is inside each.
+  async (options = {}, { rejectWithValue }) => {
     try {
-      return await savesApi.listPlaylists(mediaId);
+      return await savesApi.listPlaylists(options);
     } catch (err) {
       return rejectWithValue(rejectionOf(err, "Failed to fetch lists"));
     }

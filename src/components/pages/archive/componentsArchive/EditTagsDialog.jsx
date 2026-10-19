@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import TagPicker from "../../../features/TagPicker/TagPicker";
+import TagProposalsSection from "../../../features/TagPicker/TagProposalsSection";
 
 // Tagging an item that already exists.
 //
@@ -50,6 +51,9 @@ const EMPTY = [];
 const EditTagsDialog = ({ open, item, tagTree = EMPTY, onClose, onSave }) => {
   const [chosen, setChosen] = useState([]);
   const [saving, setSaving] = useState(false);
+  // Tags an admin created from this dialog — see SuggestTagsDialog.
+  const [created, setCreated] = useState([]);
+  const allNodes = useMemo(() => (created.length ? [...tagTree, ...created] : tagTree), [tagTree, created]);
 
   // Re-seeded whenever a different item is opened. Without the id in the
   // dependencies the dialog would keep the first item's tags for the second,
@@ -62,16 +66,21 @@ const EditTagsDialog = ({ open, item, tagTree = EMPTY, onClose, onSave }) => {
     // other, so anything left over is a tag the tree no longer holds — dropped
     // here rather than re-saved by accident.
     setChosen(known);
+    setCreated([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, item?.id, item?.tag_ids?.join(","), tagTree]);
 
   if (!item) return null;
 
+  const handleTagCreated = (node) => {
+    setCreated((prev) => [...prev, node]);
+    setChosen((prev) => [...prev, node]);
+  };
+
   const handleSave = async () => {
     setSaving(true);
-    // Two lists, because the server takes them differently: a pick from the
-    // taxonomy is an id, and anything typed is a name that becomes a new
-    // root-level tag.
+    // Two lists, the shape the server takes. Only ids are produced now — a new
+    // tag is proposed through "הוסף תגית" and waits for approval.
     await onSave(item.id, {
       tagIds: chosen.filter((tag) => typeof tag !== "string").map((tag) => tag.id),
       tags: chosen.filter((tag) => typeof tag === "string"),
@@ -86,7 +95,13 @@ const EditTagsDialog = ({ open, item, tagTree = EMPTY, onClose, onSave }) => {
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
           התגיות קובעות איפה הפריט יימצא בסינון ובחיפוש.
         </Typography>
-        <TagPicker nodes={tagTree} value={chosen} onChange={setChosen} />
+        <TagPicker nodes={allNodes} value={chosen} onChange={setChosen} />
+        <TagProposalsSection
+          itemId={item.id}
+          nodes={allNodes}
+          active={open}
+          onTagCreated={handleTagCreated}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={saving}>ביטול</Button>

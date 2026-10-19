@@ -138,6 +138,12 @@ const useMediaViewPageController = () => {
   // the right precedence and costs nothing to arrange.
   const jumpToBookmark = (bookmark) => setReaderTarget({ bookmark });
 
+  // The page the reader is showing, as it reports it while scrolling. A note
+  // started from this page points at it — see useLessonNotebook. Null until a
+  // document has been laid out, and for a recording, which has no pages.
+  const [readerPage, setReaderPage] = useState(null);
+  useEffect(() => { setReaderPage(null); }, [id]);
+
   // ── Playback position ──────────────────────────────────────────────────────
 
   const [currentTime, setCurrentTime] = useState(0);
@@ -172,6 +178,7 @@ const useMediaViewPageController = () => {
   return {
     media, bookmarks,
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
+    readerPage, handleReaderPageChange: setReaderPage,
     seekOnReady, currentTime, handlePlayerProgress,
     handleCreateBookmark,
     isLiked, toggleLike,

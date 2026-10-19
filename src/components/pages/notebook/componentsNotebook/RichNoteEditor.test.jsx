@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
-import { test, expect, describe, vi } from "vitest";
+import { test, expect, describe, vi, beforeEach, afterEach } from "vitest";
+import { createRef } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import RichNoteEditor from "./RichNoteEditor";
 import { sourceChipHtml } from "../../../../utilities/noteSource";
@@ -151,6 +152,8 @@ describe("a source chip in the body", () => {
 
     expect(onOpenSource).toHaveBeenCalledWith({
       mediaId: 12,
+      // No bookmark behind it, so no id: a chip that is only a copy.
+      bookmarkId: null,
       timestampSeconds: 742,
       // Null for a recording, which has no paragraph and no page — and null
       // rather than absent, so a chip written before books were bookmarkable
@@ -170,5 +173,187 @@ describe("a source chip in the body", () => {
     fireEvent.click(editor);
 
     expect(onOpenSource).not.toHaveBeenCalled();
+  });
+});
+
+// A chip's name cannot be typed over — the chip is contenteditable="false" — so
+// it is renamed from a control beside it, like the X that removes it.
+describe("renaming a source chip", () => {
+  const chip = sourceChipHtml({ mediaId: 49, pageNumber: 14, mediaTitle: "תורה תמימה", note: "הפנייה כללית" });
+
+  const rename = (editor, value) => {
+    fireEvent.mouseOver(editor.querySelector("span[data-media-id]"));
+    fireEvent.click(screen.getByLabelText("שינוי שם ההפניה"));
+    const field = screen.getByLabelText("שם ההפניה");
+    expect(field).toHaveValue("הפנייה כללית");
+    fireEvent.change(field, { target: { value } });
+  };
+
+  test("saving writes the new name into the note, keeping where it points", () => {
+    const { editor, onChange } = setup(`<p>טקסט</p><p>${chip}</p>`);
+    rename(editor, "פירוש רש״י");
+    fireEvent.click(screen.getByRole("button", { name: "שמירה" }));
+
+    const saved = onChange.mock.calls.at(-1)[0];
+    expect(saved).toContain('data-note="פירוש רש״י"');
+    expect(saved).toContain('data-page="14"');
+    expect(saved).not.toContain("הפנייה כללית");
+  });
+
+  test("Enter saves too", () => {
+    const { editor, onChange } = setup(`<p>${chip}</p>`);
+    rename(editor, "מקור");
+    fireEvent.keyDown(screen.getByLabelText("שם ההפניה"), { key: "Enter" });
+    expect(onChange.mock.calls.at(-1)[0]).toContain('data-note="מקור"');
+  });
+
+  test("cancelling leaves the chip as it was", () => {
+    const { editor } = setup(`<p>${chip}</p>`);
+    rename(editor, "לא יישמר");
+    fireEvent.click(screen.getByRole("button", { name: "ביטול" }));
+    expect(editor.querySelector("span[data-media-id]").getAttribute("data-note")).toBe("הפנייה כללית");
+  });
+
+  // Both controls on the chip's right-hand corner, the pencil just inside the
+  // X — not on opposite corners, where the pencil sat at first.
+  test("the rename and delete buttons sit side by side on the right", () => {
+    const { editor } = setup(`<p>${chip}</p>`);
+    const element = editor.querySelector("span[data-media-id]");
+    element.getBoundingClientRect = () => ({ top: 50, bottom: 80, height: 30, left: 100, right: 180, width: 80 });
+    fireEvent.mouseOver(element);
+
+    const left = (label) => parseFloat(getComputedStyle(screen.getByLabelText(label)).left);
+    expect(left("מחיקת המקור")).toBe(180);
+    expect(left("שינוי שם ההפניה")).toBe(160);
+  });
+
+  test("a picture is not offered a name", () => {
+    const { editor } = setup(IMAGE);
+    fireEvent.mouseOver(editor.querySelector("img"));
+    expect(screen.queryByLabelText("שינוי שם ההפניה")).not.toBeInTheDocument();
+  });
+});
+
+// Where a dragged bookmark lands. On a line of writing: in the sentence, where
+// the pointer let go. Anywhere blank — an empty note, an empty line, the empty
+// stretch under the last line — on the references line at the foot of the note.
+describe("dropping a bookmark into a note", () => {
+  const BOOKMARK = { mediaId: 12, timestampSeconds: 742, mediaTitle: "בבא קמא ב", note: "כאן" };
+
+  const setupWithHandle = (html) => {
+    const handle = createRef();
+    const onChange = vi.fn();
+    render(<RichNoteEditor ref={handle} html={html} onChange={onChange} />);
+    return { handle, onChange, editor: screen.getByRole("textbox") };
+  };
+
+  // jsdom has no layout, so the browser's "which caret is under this point" and
+  // the line's box are both supplied by the test, and insertHTML is observed
+  // rather than performed.
+  const pointAt = (node, offset, box) => {
+    const range = document.createRange();
+    range.setStart(node, offset);
+    range.collapse(true);
+    document.caretRangeFromPoint = () => range;
+    if (box) node.parentElement.getBoundingClientRect = () => box;
+  };
+
+  let execCommand;
+  beforeEach(() => {
+    execCommand = vi.fn();
+    document.execCommand = execCommand;
+  });
+  afterEach(() => {
+    delete document.caretRangeFromPoint;
+  });
+
+  test("into an empty note: to the foot, with a line above it to write on", () => {
+    const { handle, editor, onChange } = setupWithHandle("");
+    handle.current.insertSource(BOOKMARK, { x: 100, y: 20 });
+
+    expect(execCommand).not.toHaveBeenCalledWith("insertHTML", expect.anything(), expect.anything());
+    const line = editor.querySelector('p[data-references="true"]');
+    expect(line.querySelector("span[data-media-id]").getAttribute("data-media-id")).toBe("12");
+    expect(editor.lastElementChild).toBe(line);
+    expect(editor.firstElementChild).not.toBe(line);
+    expect(onChange).toHaveBeenLastCalledWith(expect.stringContaining('data-references="true"'));
+  });
+
+  test("onto a line of writing: into the sentence, where the pointer let go", () => {
+    const { handle, editor } = setupWithHandle("<p>שורה של טקסט</p>");
+    const text = editor.querySelector("p").firstChild;
+    pointAt(text, 4, { top: 0, bottom: 30, height: 30 });
+
+    handle.current.insertSource(BOOKMARK, { x: 100, y: 20 });
+
+    expect(execCommand).toHaveBeenCalledWith("insertHTML", false, expect.stringContaining('data-media-id="12"'));
+    expect(editor.querySelector('p[data-references]')).toBe(null);
+  });
+
+  test("into the empty stretch below the writing: to the foot, not onto the last line", () => {
+    const { handle, editor } = setupWithHandle("<p>שורה של טקסט</p>");
+    const text = editor.querySelector("p").firstChild;
+    // The browser answers a point below the text with the end of the last line.
+    pointAt(text, text.length, { top: 0, bottom: 30, height: 30 });
+
+    handle.current.insertSource(BOOKMARK, { x: 100, y: 200 });
+
+    expect(execCommand).not.toHaveBeenCalledWith("insertHTML", expect.anything(), expect.anything());
+    expect(editor.lastElementChild.matches('p[data-references="true"]')).toBe(true);
+    expect(editor.firstElementChild.textContent).toBe("שורה של טקסט");
+  });
+
+  test("onto an empty line between paragraphs: to the foot", () => {
+    const { handle, editor } = setupWithHandle("<p>א</p><p><br></p><p>ב</p>");
+    const empty = editor.children[1];
+    const range = document.createRange();
+    range.setStart(empty, 0);
+    document.caretRangeFromPoint = () => range;
+
+    handle.current.insertSource(BOOKMARK, { x: 100, y: 40 });
+
+    expect(execCommand).not.toHaveBeenCalledWith("insertHTML", expect.anything(), expect.anything());
+    expect(editor.lastElementChild.matches('p[data-references="true"]')).toBe(true);
+  });
+
+  test("a second blank drop joins the references already there", () => {
+    const { handle, editor } = setupWithHandle("");
+    handle.current.insertSource(BOOKMARK, { x: 1, y: 1 });
+    handle.current.insertSource({ ...BOOKMARK, mediaId: 13 }, { x: 1, y: 1 });
+
+    const lines = editor.querySelectorAll('p[data-references="true"]');
+    expect(lines).toHaveLength(1);
+    expect([...lines[0].querySelectorAll("span[data-media-id]")].map((c) => c.getAttribute("data-media-id")))
+      .toEqual(["12", "13"]);
+  });
+});
+
+// A chip that is a bookmark is renamed by renaming the bookmark — the note
+// itself is not edited, so it is not marked as changed.
+describe("renaming a chip that is a bookmark", () => {
+  const linked = sourceChipHtml({
+    mediaId: 49, timestampSeconds: 60, mediaTitle: "שיחה", note: "הפנייה כללית", bookmarkId: 77,
+  });
+
+  test("renames the bookmark, shows the new name, and leaves the note unchanged", () => {
+    const onRenameSource = vi.fn();
+    const { editor, onChange } = setup(`<p>${linked}</p>`, { onRenameSource });
+    fireEvent.mouseOver(editor.querySelector("span[data-media-id]"));
+    fireEvent.click(screen.getByLabelText("שינוי שם ההפניה"));
+    fireEvent.change(screen.getByLabelText("שם ההפניה"), { target: { value: "  פתיחה  " } });
+    fireEvent.click(screen.getByRole("button", { name: "שמירה" }));
+
+    expect(onRenameSource).toHaveBeenCalledWith(77, "פתיחה");
+    expect(editor.querySelector("span[data-media-id]").getAttribute("data-note")).toBe("פתיחה");
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  test("with nobody to tell, it is renamed in the note like any chip", () => {
+    const { editor, onChange } = setup(`<p>${linked}</p>`);
+    fireEvent.mouseOver(editor.querySelector("span[data-media-id]"));
+    fireEvent.click(screen.getByLabelText("שינוי שם ההפניה"));
+    fireEvent.change(screen.getByLabelText("שם ההפניה"), { target: { value: "פתיחה" } });
+    fireEvent.click(screen.getByRole("button", { name: "שמירה" }));
+    expect(onChange).toHaveBeenLastCalledWith(expect.stringContaining('data-note="פתיחה"'));
   });
 });

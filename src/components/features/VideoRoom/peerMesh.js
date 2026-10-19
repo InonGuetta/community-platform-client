@@ -135,6 +135,15 @@ export const createPeerMesh = ({ createConnection, emit, onStream, onPeerLost, l
   // Returns the count so the caller can tell "nobody is connected yet" (in which
   // case the new track still becomes the local stream and will be attached to the
   // next peer that arrives) from "this did nothing".
+  // TODO(CR): the comment above promises the new track "becomes the local stream
+  // and will be attached to the next peer that arrives", but nothing here
+  // touches `localStream`. attachLocalMedia() keeps adding the CAMERA track, so
+  // anyone who joins while a screen is being shared sees the presenter's face,
+  // not the screen. Keep the current outgoing video track in this closure and
+  // have attachLocalMedia use it in place of the stream's own video track.
+  // Related: after replaceTrack(null) the sender's track is null, so the
+  // `s.track?.kind === "video"` lookup below no longer finds it — find the video
+  // sender through getTransceivers() / receiver.track.kind instead.
   const replaceVideoTrack = async (track) => {
     let replaced = 0;
     for (const [peerId, entry] of peers) {

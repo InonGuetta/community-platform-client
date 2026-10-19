@@ -144,27 +144,46 @@ describe("what the row reads", () => {
     expect(title).toBe("יסוד הסוגיה");
   });
 
-  // "(ללא הערה)" on every row is a list nobody can read, which is what a book's
-  // bookmarks looked like before a passage carried its text.
-  test("the marked passage stands in when nothing was written", () => {
-    const { title } = bookmarkLines({ char_position: 1, chunk_id: 5, quoted_text: "ואמר רבי" });
-    expect(title).toBe("ואמר רבי");
+  // ── The marked words are not shown at all any more ───────────────────────
+  //
+  // They used to stand in as the title, on the argument that "(ללא הערה)" down a
+  // whole list is a list nobody can read. That argument assumed the words were
+  // the words. In this archive `quoted_text` is what the OCR made of a
+  // photographed page and is frequently wrong — „שונגיקי־בקרבן”, „מבאמתי” —
+  // so printing it beside a page number does not identify the passage, it
+  // misquotes it, in the reader's own list.
+  test("the marked passage is never shown, however wrong the reading was", () => {
+    const misread = { page_number: 3, rect_x: 0.1, rect_y: 0.2, rect_w: 0.3, rect_h: 0.02,
+                      quoted_text: "שונגיקי־בקרבן" };
+    const { title, detail } = bookmarkLines(misread);
+
+    expect(title).not.toContain("שונגיקי");
+    expect(detail).not.toContain("שונגיקי");
   });
 
-  test("a bookmark with neither still says something", () => {
-    expect(bookmarkLines({ timestamp_seconds: 30 }).title).toBe("(ללא הערה)");
+  // It is still STORED — this is a decision about display, not about the record.
+  test("but it is still on the bookmark, for the day the reading is good enough", () => {
+    const misread = { page_number: 3, rect_x: 0.1, quoted_text: "שונגיקי־בקרבן" };
+    expect(misread.quoted_text).toBe("שונגיקי־בקרבן");
   });
 
-  test("the second line carries the quote and the page together", () => {
+  // The place takes over as the identity, which is what it was chosen to be: a
+  // rectangle on a page does not depend on the reading being right. A page
+  // number answers "which one is this"; an apology does not.
+  test("a bookmark with no note is named by its place, not by an apology", () => {
+    expect(bookmarkLines({ page_number: 3, rect_x: 0.1 }).title).toBe("עמ׳ 3");
+    expect(bookmarkLines({ timestamp_seconds: 30 }).title).toBe("בזמן 0:30");
+  });
+
+  // And then the place is not repeated underneath itself.
+  test("the second line is empty when the place is already the title", () => {
+    expect(bookmarkLines({ page_number: 3, rect_x: 0.1 }).detail).toBe("");
+  });
+
+  test("the second line is the place whenever the note took the first", () => {
     const { detail } = bookmarkLines({
       char_position: 1, chunk_id: 5, page_number: 12, note: "יסוד", quoted_text: "ואמר רבי",
     });
-    expect(detail).toBe("„ואמר רבי” · עמ׳ 12");
-  });
-
-  // Otherwise the same words appear twice, once per line.
-  test("the quote is not repeated when it is already the title", () => {
-    const { detail } = bookmarkLines({ char_position: 1, chunk_id: 5, page_number: 12, quoted_text: "ואמר רבי" });
     expect(detail).toBe("עמ׳ 12");
   });
 
@@ -222,8 +241,9 @@ describe("telling a place on a page apart", () => {
     expect(placeShortLabel(pageMark)).toBe("עמ׳ 9");
   });
 
-  test("its words are its title, as they are everywhere else", () => {
-    expect(bookmarkLines({ ...pageMark, note: null }).title).toBe("בָּעֵת הַהִוא לֵאמֹר");
+  test("its words are NOT its title — see 'what the row reads'", () => {
+    // The page is, because the page is the part that was not read by an OCR.
+    expect(bookmarkLines({ ...pageMark, note: null }).title).toBe("עמ׳ 9");
     expect(bookmarkLines(pageMark).detail).toContain("עמ׳ 9");
   });
 

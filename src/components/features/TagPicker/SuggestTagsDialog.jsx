@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import CheckIcon from "@mui/icons-material/Check";
 import AddIcon from "@mui/icons-material/Add";
 import TagPicker from "./TagPicker";
+import TagProposalsSection from "./TagProposalsSection";
 
 // The moment after an upload, when the archive asks what the item is about.
 //
@@ -54,6 +55,10 @@ const SuggestTagsDialog = ({
   onSave,
 }) => {
   const [chosen, setChosen] = useState([]);
+  // Tags an admin created from this dialog. The tree in `nodes` was fetched
+  // before they existed, and the picker can only show a tag it has a node for.
+  const [created, setCreated] = useState([]);
+  const allNodes = useMemo(() => (created.length ? [...nodes, ...created] : nodes), [nodes, created]);
 
   // Seeded from the suggestions each time the dialog opens on a new item — every
   // one pre-accepted, because the common case is that they are right and the
@@ -67,6 +72,7 @@ const SuggestTagsDialog = ({
     if (!open) return;
     const byId = new Map(nodes.map((node) => [node.id, node]));
     setChosen(suggestions.map((s) => byId.get(s.id)).filter(Boolean));
+    setCreated([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, item?.id, suggestedKey, nodes]);
 
@@ -82,9 +88,17 @@ const SuggestTagsDialog = ({
     );
   };
 
+  // An admin's new tag is already attached on the server; it joins the
+  // selection so the save below — which replaces the item's tags — keeps it.
+  const handleTagCreated = (node) => {
+    setCreated((prev) => [...prev, node]);
+    setChosen((prev) => [...prev, node]);
+  };
+
   const handleSave = () =>
-    // The two lists the server takes: a pick from the taxonomy is an id, and
-    // anything typed is a name that becomes a new root-level tag.
+    // The two lists the server takes. Only ids are produced now — a new tag is
+    // proposed through "הוסף תגית" — but `tags` stays in the shape the server
+    // accepts.
     onSave(item.id, {
       tagIds: chosen.filter((tag) => typeof tag !== "string").map((tag) => tag.id),
       tags: chosen.filter((tag) => typeof tag === "string"),
@@ -141,7 +155,7 @@ const SuggestTagsDialog = ({
         )}
 
         <TagPicker
-          nodes={nodes}
+          nodes={allNodes}
           value={chosen}
           onChange={setChosen}
           label={suggestions.length > 0 ? "התגיות שיישמרו" : "תגיות"}
@@ -150,6 +164,12 @@ const SuggestTagsDialog = ({
               ? "אפשר להוסיף או להסיר כאן כל תגית, גם כזו שלא הוצעה."
               : "לא נמצאה הצעה מהכותרת — אפשר לבחור ידנית."
           }
+        />
+        <TagProposalsSection
+          itemId={item.id}
+          nodes={allNodes}
+          active={open}
+          onTagCreated={handleTagCreated}
         />
       </DialogContent>
       <DialogActions>

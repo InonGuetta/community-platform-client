@@ -39,3 +39,10 @@ export const tagOptionsFrom = (nodes = []) => {
   );
 };
 
+
+// The names from the root down to `id`, inclusive — the place a tag sits, or
+// (given a parent id) the place a new one would. Empty for the root itself.
+export const pathOf = (relations, id) =>
+  id == null
+    ? []
+    : [...relations.ancestorsOf(id), id].map((a) => relations.byId.get(a)?.name).filter(Boolean);

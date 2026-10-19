@@ -6,10 +6,13 @@ import Typography from "@mui/material/Typography";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { mediaApi } from "../../../../api/mediaApi";
+import { pdfStates } from "../../../../utilities/constant";
 import { logger } from "../../../../utilities/logger";
-import PdfToolbar, { clampPage } from "./PdfToolbar";
+import PdfToolbar, { clampPage, clampZoom } from "./PdfToolbar";
 import BookmarkNotePanel from "./BookmarkNotePanel";
-import { pageAnchorFromSelection, scrollTopForMark } from "../../../../utilities/pageAnchors";
+import {
+  pageAnchorFromSelection, scrollTopForMark, zoomedScrollTop, wheelDeltaPixels,
+} from "../../../../utilities/pageAnchors";
 import { isPageBookmark, pageMarksFor } from "../../../../utilities/bookmarks";
 import { outputScaleFor } from "../../../../utilities/canvasScale";
 
@@ -44,6 +47,22 @@ pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 const MARK_YELLOW = "#fff59d";
 const FLASH_YELLOW = "#ffc400";
 const FLASH_MS = 1600;
+
+// ── The two spacings, named once ──────────────────────────────────────────
+//
+// Used BOTH in the layout below and in the zoom arithmetic, and they have to be
+// the same numbers or zooming lands somewhere near where the reader was rather
+// than on it. Written once so they cannot drift: a gap changed in the sx and
+// forgotten in the arithmetic would be a slow, silent misplacement that grows
+// with every page down the book.
+const PAGE_GAP = 16;
+const BOX_PAD = 8;
+
+// How fast a wheel zooms. Multiplicative rather than a fixed step, because a
+// trackpad pinch arrives as a stream of small deltas and 0.25 per event — what
+// the toolbar buttons use — would be violent. The divisor is what makes one
+// firm mouse notch (deltaY 120) a little under a 50% change.
+const WHEEL_ZOOM_DIVISOR = 300;
 
 // How far outside the viewport a page starts rendering. Two screens ahead, so
 // scrolling meets a drawn page rather than a blank one — and no further, because
@@ -180,7 +199,7 @@ const PdfPage = ({ pdf, pageNumber, scale, width, height, observe, marks, flashe
       sx={{
         position: "relative",
         width, height,
-        mx: "auto", mb: 2,
+        mx: "auto", mb: `${PAGE_GAP}px`,
         bgcolor: "#fff",
         boxShadow: 2,
         // See textLayerSx: pdf.js writes every span's font size in terms of this.
@@ -233,6 +252,15 @@ const PdfViewer = ({
   onAddBookmark,
   bookmarks = [],
   jumpTo = null,
+  // Whether there is a document on the screen yet, reported outward.
+  //
+  // "loading" covers both waits and they look the same from outside: the lazy
+  // chunk arriving, and then pdf.js opening a file that can run to 26MB. Only
+  // this component can tell them apart from "there is a page to look at", and
+  // until it said so, anything rendered beside it had to guess — which is why
+  // the way out of this view sat above an empty box for as long as the book
+  // took to open.
+  onStatusChange,
   // Which page is being read, reported outward as it changes.
   //
   // The page was private to this component, which meant that anything wanting
@@ -266,6 +294,10 @@ const PdfViewer = ({
   // A zoom changes every page's height, so the scroll position lands somewhere
   // else entirely. This remembers where to put it back.
   const restoreTo = useRef(null);
+  // What a wheel zoom asked to keep still. Finer than restoreTo, which puts the
+  // reader at the top of a page: this keeps the LINE under the pointer where it
+  // was, which is the whole point of zooming with the pointer over a word.
+  const anchorTo = useRef(null);
   // The mark this viewer has already scrolled to. See the jump effect below:
   // that effect deliberately retries, and this is what stops it repeating.
   const jumpedFor = useRef(null);
@@ -524,6 +556,15 @@ const PdfViewer = ({
     onPageChange?.(page);
   }, [page, onPageChange]);
 
+  // Three states and not a boolean, because "failed" is not "still loading".
+  // The alert this component shows on failure ends with "אפשר לפתוח אותו
+  // בכרטיסייה חדשה" — it points AT the button, so a failure has to be the one
+  // case that brings the button back rather than the case that hides it.
+  useEffect(() => {
+    if (error) { onStatusChange?.(pdfStates.error); return; }
+    onStatusChange?.(pdf && pageSize ? pdfStates.ready : pdfStates.loading);
+  }, [error, pdf, pageSize, onStatusChange]);
+
   const changeZoom = useCallback((next) => {
     // Captured BEFORE the scale changes, because the moment it does every page
     // above the reader grows or shrinks and the scroll offset means something
@@ -533,13 +574,74 @@ const PdfViewer = ({
   }, [page]);
 
   useEffect(() => {
-    if (restoreTo.current === null) return;
+    // The pointer's request wins, and clears the other: both run off a change
+    // of `scale`, and letting them both fire would scroll twice — once to the
+    // line, then away from it to the top of its page.
+    const anchor = anchorTo.current;
+    if (anchor) {
+      anchorTo.current = null;
+      restoreTo.current = null;
+      const frame = requestAnimationFrame(() => {
+        const box = containerRef.current;
+        const top = zoomedScrollTop({ ...anchor, padTop: BOX_PAD, gap: PAGE_GAP });
+        if (box && top !== null) box.scrollTop = top;
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+
+    if (restoreTo.current === null) return undefined;
     const wanted = restoreTo.current;
     restoreTo.current = null;
     // After the browser has laid the new sizes out, not before.
     const frame = requestAnimationFrame(() => goToPage(wanted));
     return () => cancelAnimationFrame(frame);
   }, [scale, goToPage]);
+
+  // ── Zooming inside the document instead of zooming the page ──────────────
+  //
+  // Ctrl+wheel is the browser's own zoom gesture, and a trackpad pinch arrives
+  // as exactly the same event. With nothing listening, both went to the browser
+  // and it enlarged the whole application — the header, the notes panel, the
+  // sefer, all of it — when what the reader wanted was a closer look at one
+  // line of one page.
+  //
+  // The listener is attached by hand rather than with onWheel, and that is the
+  // part with teeth: React attaches wheel listeners as PASSIVE, and
+  // preventDefault inside a passive listener does nothing at all. It would have
+  // looked like a working handler that the browser overruled every time.
+  //
+  // It is attached to the scrolling box, so it only ever fires while the
+  // pointer is inside the document. Anywhere else on the page the gesture still
+  // belongs to the browser, which is right — a reader who wants the whole site
+  // bigger must still be able to say so.
+  useEffect(() => {
+    const box = containerRef.current;
+    if (!box || !pageSize) return undefined;
+
+    const onWheel = (event) => {
+      // metaKey as well as ctrlKey: a pinch on a Mac trackpad reports ctrl, but
+      // Cmd+wheel is the same intent from the keyboard there.
+      if (!event.ctrlKey && !event.metaKey) return;
+      // Before the early return below, so a gesture at the zoom ceiling still
+      // does not fall through and enlarge the whole application instead.
+      event.preventDefault();
+
+      const delta = wheelDeltaPixels(event, box.clientHeight);
+      const next = clampZoom(zoom * Math.exp(-delta / WHEEL_ZOOM_DIVISOR));
+      if (next === zoom) return;
+
+      anchorTo.current = {
+        scrollTop: box.scrollTop,
+        pointerOffset: event.clientY - box.getBoundingClientRect().top,
+        pageHeight: Math.round(pageSize.height * scale),
+        nextPageHeight: Math.round(pageSize.height * (fitScale ?? 1) * next),
+      };
+      setZoom(next);
+    };
+
+    box.addEventListener("wheel", onWheel, { passive: false });
+    return () => box.removeEventListener("wheel", onWheel);
+  }, [zoom, scale, fitScale, pageSize]);
 
   // ── Which pages are near enough to draw ──────────────────────────────────
   //
@@ -631,7 +733,11 @@ const PdfViewer = ({
       <Box
         ref={containerRef}
         data-pdf-scroll=""
-        sx={{ maxHeight: "70vh", overflowY: "auto", bgcolor: "action.hover", p: 1, borderRadius: 2 }}
+        sx={{
+          maxHeight: "70vh", overflowY: "auto", bgcolor: "action.hover",
+          // See PAGE_GAP / BOX_PAD: the zoom arithmetic reads these same numbers.
+          p: `${BOX_PAD}px`, borderRadius: 2,
+        }}
       >
         {Array.from({ length: pdf.numPages }, (_, i) => (
           <PdfPage

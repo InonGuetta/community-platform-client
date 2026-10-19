@@ -56,6 +56,9 @@ export const ERROR_CODES = {
   COURSE_NOT_FOUND: "COURSE_NOT_FOUND",
   TRANSCRIPT_NOT_FOUND: "TRANSCRIPT_NOT_FOUND",
   PLAYLIST_TITLE_TAKEN: "PLAYLIST_TITLE_TAKEN",
+  TAG_EXISTS: "TAG_EXISTS",
+  TAG_PARENT_NOT_FOUND: "TAG_PARENT_NOT_FOUND",
+  TAG_PROPOSAL_DECIDED: "TAG_PROPOSAL_DECIDED",
 
   // The transcript pipeline.
   NO_TRANSCRIPT_TEXT: "NO_TRANSCRIPT_TEXT",
@@ -150,6 +153,9 @@ const ERROR_CODE_HE = {
   // Without this the user saw the generic "יצירת הרשימה נכשלה" and retried the
   // same name, which is the one thing that cannot work.
   [ERROR_CODES.PLAYLIST_TITLE_TAKEN]: "כבר קיימת רשימה בשם הזה",
+  [ERROR_CODES.TAG_EXISTS]: "התגית כבר קיימת במקום הזה — אפשר לבחור אותה מהרשימה",
+  [ERROR_CODES.TAG_PARENT_NOT_FOUND]: "תגית האב לא נמצאה — ייתכן שנמחקה. יש לבחור שוב",
+  [ERROR_CODES.TAG_PROPOSAL_DECIDED]: "ההצעה כבר הוכרעה, כנראה על ידי מנהל אחר",
 
   [ERROR_CODES.NO_TRANSCRIPT_TEXT]: "אין טקסט תמלול לתיקון",
   [ERROR_CODES.NO_TRANSCRIPT_CONTENT]: "אין עדיין תוכן תמלול — הפעל תמלול קודם",

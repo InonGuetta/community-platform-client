@@ -49,6 +49,11 @@ vi.mock("./componentsMediaView/ShareDialog", () => ({
 vi.mock("./componentsMediaView/SaveMenu", () => ({
   default: () => <div data-testid="save-menu" />,
 }));
+// Owns its own dispatches (the notes slice), so it would need a store too. What
+// matters here is only that the page puts it under the lesson, for both kinds.
+vi.mock("./componentsMediaView/LessonNotebook", () => ({
+  default: ({ isText }) => <div data-testid="lesson-notebook" data-text={String(isText)} />,
+}));
 
 import MediaViewPage from "./MediaViewPage";
 
@@ -189,5 +194,45 @@ describe("who is offered the summary action", () => {
   test("not for audio, however privileged the viewer", () => {
     renderPage({ media: audio, isText: false, canEditTranscript: true, transcript: null });
     expect(generateButton()).not.toBeInTheDocument();
+  });
+});
+
+// The lesson's own notebook sits under it, whatever kind of lesson it is — and
+// is told which kind, because a note on a book carries no moment in time.
+describe("the lesson notebook", () => {
+  test("is under a recording, told it is not a book", () => {
+    renderPage({ media: audio, isText: false });
+    expect(screen.getByTestId("lesson-notebook")).toHaveAttribute("data-text", "false");
+  });
+
+  test("is under a book, told it is one", () => {
+    renderPage({ media: book, isText: true });
+    expect(screen.getByTestId("lesson-notebook")).toHaveAttribute("data-text", "true");
+  });
+});
+
+// Under the player or the reader, for every kind of lesson.
+describe("the date line", () => {
+  const at = "2026-09-07T10:00:00Z";
+
+  test("a published recording says when it was published", () => {
+    renderPage({ media: { ...audio, created_at: at, is_published: true } });
+    expect(screen.getByTestId("media-date")).toHaveTextContent("פורסם בתאריך: 7 בספטמבר 2026");
+  });
+
+  test("a book says it too", () => {
+    renderPage({ media: { ...book, created_at: at, is_published: true }, isText: true });
+    expect(screen.getByTestId("media-date")).toHaveTextContent("פורסם בתאריך: 7 בספטמבר 2026");
+  });
+
+  // Only a privileged viewer sees a draft at all, and it must not claim to be out.
+  test("a draft says it is one, and when it was uploaded", () => {
+    renderPage({ media: { ...audio, created_at: at, is_published: false } });
+    expect(screen.getByTestId("media-date")).toHaveTextContent("טיוטה · הועלה בתאריך: 7 בספטמבר 2026");
+  });
+
+  test("no date, no line", () => {
+    renderPage({ media: { ...audio, created_at: null } });
+    expect(screen.queryByTestId("media-date")).not.toBeInTheDocument();
   });
 });

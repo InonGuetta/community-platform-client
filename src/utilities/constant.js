@@ -3,10 +3,19 @@ export const statuses = { idle: "idle", loading: "loading", succeeded: "succeede
 export const mediaTypes = { video: "video", audio: "audio", text: "text" };
 export const sessionTypes = { oneOnOne: "1on1", group: "group", webinar: "webinar" };
 
+// What the PDF viewer can be, from outside it.
+//
+// Here rather than exported from PdfViewer itself, and that is the whole point:
+// PdfViewer is imported LAZILY so that pdf.js and its 1MB worker never enter the
+// main bundle. A plain `import { PDF_READY } from "./PdfViewer"` beside the lazy
+// one would undo that silently — the build would still succeed, the split would
+// simply stop happening, and everyone opening the archive would pay for it.
+export const pdfStates = { loading: "loading", ready: "ready", error: "error" };
+
 // Hebrew display labels, keyed by the raw stored value (media_type / role /
 // session_type). Display-only — nothing persists or filters by these labels, so
 // the single source of truth here can't drift across components.
-export const mediaTypeLabels = { video: "וידאו", audio: "אודיו", text: "טקסט" };
+export const mediaTypeLabels = { video: "וידאו", audio: "שמע", text: "קריאה" };
 
 // The accent each media type is identified by across the app — the archive
 // card's corner brackets and type chip, and the notebook's bookmark headers.

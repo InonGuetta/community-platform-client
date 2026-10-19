@@ -24,8 +24,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
+import { iconForBookmark } from "../../../utilities/mediaIcons";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
@@ -35,6 +34,7 @@ import NoteToolbar from "./componentsNotebook/NoteToolbar";
 import NoteCard from "./componentsNotebook/NoteCard";
 import ExportSplitDialog from "./componentsNotebook/ExportSplitDialog";
 import ExportSourcesDialog from "./componentsNotebook/ExportSourcesDialog";
+import UntitledNoteDialog from "./componentsNotebook/UntitledNoteDialog";
 import { useDragReorder, dropIndicatorSx } from "./componentsNotebook/useDragReorder";
 import { fetchNotes } from "../../../store/slicesAndThunks/notesSlice/notesGet";
 import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost";
@@ -46,10 +46,11 @@ import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { statuses, mediaTypeLabels, mediaTypeAccents, listRowSx } from "../../../utilities/constant";
 import { isSaveShortcut } from "../../../utilities/keyboard";
 import { noteBodyToHtml, noteHtmlToPlainText, sanitizeNoteHtml } from "../../../utilities/noteHtml";
-import { BOOKMARK_DRAG_MIME, bookmarkDragPayload } from "../../../utilities/noteSource";
 import {
-  inReadingOrder, placeShortLabel, isTextBookmark, isPageBookmark,
-} from "../../../utilities/bookmarks";
+  BOOKMARK_DRAG_MIME, bookmarkDragPayload, bookmarkNames, syncChipNames,
+} from "../../../utilities/noteSource";
+import { updateBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPut";
+import { inReadingOrder, placeShortLabel, bookmarkLines } from "../../../utilities/bookmarks";
 import { downloadNotesPdf, downloadNotesWord, downloadNotebooks } from "../../../utilities/notesExport";
 import { SOURCE_STYLES } from "../../../utilities/noteFootnotes";
 
@@ -68,6 +69,13 @@ const formatDate = (value) =>
 // The sticky navbar's height, which this page's own height is measured against.
 const NAVBAR_HEIGHT = 64;
 
+// TODO(CR): ~1000 lines, and the page dispatches and selects directly — against
+// the project rule that page logic lives in useXxxPageController.js ("does it
+// dispatch or select? then it belongs in the controller"). Extract a
+// useNotebookPageController (create/update/save/reorder, the bookmark fetch, the
+// notify calls) so the component is layout only. The same applies, smaller, to
+// SessionsPage, SessionRoom, ProfilePage, MyCoursesPage, CollectionPage and
+// PlaylistPage, which also call useDispatch/useSelector themselves.
 const NotebookPage = () => {
   const dispatch = useDispatch();
   const { items, status } = useSelector((state) => state.notes);
@@ -165,13 +173,19 @@ const NotebookPage = () => {
   // with newlines for everything written before it. Computed once per change to
   // the list rather than per render: the conversion parses HTML, and doing it
   // for every note on every keystroke would be a parse per note per character.
+  // Every chip that is a bookmark shows that bookmark's current name — this page
+  // holds all of the user's bookmarks, so all of them. A rename in the sidebar,
+  // under a lesson's "הערות אישיות", or with a chip's pencil is one value seen
+  // everywhere. See syncChipNames.
+  const names = useMemo(() => bookmarkNames(bookmarks), [bookmarks]);
+
   const baselines = useMemo(() => {
     const map = new Map();
     for (const note of items) {
-      map.set(note.id, { title: note.title || "", body: noteBodyToHtml(note.body) });
+      map.set(note.id, { title: note.title || "", body: syncChipNames(noteBodyToHtml(note.body), names) });
     }
     return map;
-  }, [items]);
+  }, [items, names]);
 
   const draftFor = (id) => drafts[id] ?? baselines.get(id) ?? { title: "", body: "" };
 
@@ -265,11 +279,12 @@ const NotebookPage = () => {
   // The draft is dropped only on success: a failed save must leave the user's
   // typing exactly where it is, which is the whole reason the store's copy is
   // not treated as the truth until it agrees.
-  const handleSave = async (note, { announce = false } = {}) => {
+  const handleSave = async (note, { announce = false, title } = {}) => {
     const draft = draftFor(note.id);
     const res = await dispatch(updateNote({
       id: note.id,
-      title: draft.title,
+      // The name given in the untitled-note dialog, when there was one.
+      title: title ?? draft.title,
       body: sanitizeNoteHtml(draft.body),
     }));
     if (res.meta.requestStatus === "fulfilled") {
@@ -281,6 +296,25 @@ const NotebookPage = () => {
       // cursor near one, so that path says so out loud instead.
       if (announce) dispatch(notify({ message: "ההערה נשמרה", severity: "success" }));
     }
+  };
+
+  // A card with no title asks for one before it is saved — the same question,
+  // in the same dialog, as the notebook strip under a lesson. See
+  // UntitledNoteDialog for why it is a question and not a refusal.
+  const [titlePrompt, setTitlePrompt] = useState(null);
+
+  const requestSave = (note, options = {}) => {
+    if (!draftFor(note.id).title.trim()) {
+      setTitlePrompt({ note, options });
+      return;
+    }
+    handleSave(note, options);
+  };
+
+  const confirmTitle = (name) => {
+    const prompt = titlePrompt;
+    setTitlePrompt(null);
+    if (prompt) handleSave(prompt.note, { ...prompt.options, title: name });
   };
 
   // Ctrl+S / Cmd+S saves the card the caret is in, and only that one.
@@ -310,7 +344,7 @@ const NotebookPage = () => {
         dispatch(notify({ message: "אין שינויים לשמירה", severity: "info" }));
         return;
       }
-      handleSave(note, { announce: true });
+      requestSave(note, { announce: true });
     };
   });
 
@@ -422,7 +456,15 @@ const NotebookPage = () => {
     () => filtered.filter((note) => selectedIds.has(note.id)),
     [filtered, selectedIds]
   );
-  const notesToExport = selectedNotes.length > 0 ? selectedNotes : filtered;
+  // With the bookmarks' current names in their chips: an export is read away
+  // from this page, where a name saved before a rename would be the only one.
+  const notesToExport = useMemo(
+    () => (selectedNotes.length > 0 ? selectedNotes : filtered).map((note) => {
+      const body = syncChipNames(note.body, names);
+      return body === note.body ? note : { ...note, body };
+    }),
+    [selectedNotes, filtered, names]
+  );
 
   // An export the user has asked for, held while the one remaining question is
   // put to them. `{ format }` is the whole notebook to one file; a `books` list
@@ -781,7 +823,10 @@ const NotebookPage = () => {
                             // looked at last.
                             pageNumber: bm.page_number ?? null,
                             mediaTitle: group.mediaTitle,
-                            noteText: bm.note || bm.quoted_text,
+                            // The note alone. What the OCR made of the page is
+                            // not something to print in a window header — see
+                            // bookmarkLines in utilities/bookmarks.js.
+                            noteText: bm.note,
                           })}
                           // Dragged into a note, where it becomes a source chip
                           // — an inline reference that reopens the lecture at
@@ -805,25 +850,28 @@ const NotebookPage = () => {
                             ...listRowSx,
                           }}
                         >
-                          {/* A book does not play. Same size and colour, so the
-                              list still reads as one list. */}
-                          {isTextBookmark(bm) || isPageBookmark(bm)
-                            ? <MenuBookIcon fontSize="small" sx={{ color: "primary.main", flexShrink: 0 }} />
-                            : <PlayCircleOutlineIcon fontSize="small" sx={{ color: "primary.main", flexShrink: 0 }} />}
+                          {/* A book does not play, and a filmed shiur is not a
+                              recorded one. Same size and colour, so the list
+                              still reads as one list — see utilities/mediaIcons. */}
+                          {(() => {
+                            const Icon = iconForBookmark(bm);
+                            return <Icon fontSize="small" sx={{ color: "primary.main", flexShrink: 0 }} />;
+                          })()}
                           {/* One line per bookmark keeps the list scannable,
                               but the full text is a hover away — the row is
                               also what gets dragged into a note, so knowing
                               which one it is matters. */}
-                          {/* The marked words stand in when nothing was written,
-                              exactly as on the lecture page's list: "(ללא כותרת)"
-                              on every row of a sefer is a list nobody can read. */}
+                          {/* The place stands in when nothing was written. It
+                              used to be the marked words, which in this archive
+                              are the OCR's reading of a photographed page and
+                              are frequently wrong — see bookmarkLines. */}
                           <Typography
                             variant="body2"
                             noWrap
-                            title={bm.note?.trim() || bm.quoted_text?.trim() || ""}
+                            title={bookmarkLines(bm).title}
                             sx={{ flexGrow: 1, minWidth: 0 }}
                           >
-                            {bm.note?.trim() || bm.quoted_text?.trim() || "(ללא כותרת)"}
+                            {bookmarkLines(bm).title}
                           </Typography>
                           <Chip
                             size="small"
@@ -888,9 +936,11 @@ const NotebookPage = () => {
                 // cap, a file that would not read. Silence would look like a
                 // paste that simply did nothing.
                 onError={(message) => dispatch(notify({ message, severity: "warning" }))}
-                onSave={() => handleSave(note)}
+                onSave={() => requestSave(note)}
                 onDelete={() => setDeleteTargets([note])}
                 onOpenSource={openSource}
+                // The pencil on a chip that is a bookmark renames the bookmark.
+                onRenameSource={(bookmarkId, name) => dispatch(updateBookmark({ id: bookmarkId, note: name }))}
                 // A bookmark dropped anywhere on the card is written into the
                 // note's body at the point it landed. The card owns the drop
                 // (it is the target the user aims at); the editor owns the
@@ -961,6 +1011,12 @@ const NotebookPage = () => {
           : `${notesToExport.length} הערות · ${pendingExport?.format === "pdf" ? "PDF" : "Word"}`}
         onChoose={runExport}
         onClose={() => setPendingExport(null)}
+      />
+
+      <UntitledNoteDialog
+        open={Boolean(titlePrompt)}
+        onCancel={() => setTitlePrompt(null)}
+        onSave={confirmTitle}
       />
 
       <ConfirmingDeletionDialog

@@ -103,6 +103,9 @@ const saveBlob = (blob, filename) => {
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
+  // TODO(CR): a 0ms delay is not "after the download started" — Firefox and
+  // Safari can still be reading the blob on the next tick, and a large export
+  // then downloads as a failed/empty file. A few seconds is the usual margin.
   setTimeout(() => URL.revokeObjectURL(url), 0);
 };
 

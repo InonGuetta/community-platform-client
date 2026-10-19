@@ -15,11 +15,12 @@ import { ROOT_GROUP, tagOptionsFrom } from "./tagOptions";
 //
 // ── Two kinds of value ──────────────────────────────────────────────────────
 //
-// A pick from the taxonomy is an OBJECT with an id; anything typed is a STRING.
-// Both are allowed and they travel to the server differently — ids as `tagIds`,
-// strings as `tags`, which become new root-level tags. The id is what
-// disambiguates the five names that occur in two branches: a name could not say
-// which was meant.
+// A pick from the taxonomy is an OBJECT with an id, and that is the only kind
+// this produces. Typing used to be allowed too, and whatever was typed became a
+// root tag on save; a new tag now goes through "הוסף תגית" (TagProposalsSection)
+// with a place in the tree, and waits for an admin's approval. The string
+// branches below stay because a caller may still hold a value from before.
+// The id is what disambiguates the five names that occur in two branches.
 //
 // The relations come from the filter's own model rather than a second walk of
 // the tree — the path shown beside each option is the same path the drill-down
@@ -39,8 +40,8 @@ const TagPicker = ({
   return (
     <Autocomplete
       multiple
-      freeSolo
       options={options}
+      noOptionsText="לא נמצאה תגית כזו — אפשר להוסיף אותה עם «הוסף תגית»"
       value={value}
       onChange={(_, next) => onChange(next.slice(0, max))}
       // An option is an object from the taxonomy; a typed one is a string. Both
@@ -56,7 +57,7 @@ const TagPicker = ({
         <TextField
           {...params}
           label={label}
-          placeholder={value.length >= max ? "" : "סוג התוכן — בחר או הקלד"}
+          placeholder={value.length >= max ? "" : "סוג התוכן — חיפוש ובחירה מהרשימה"}
           helperText={helperText}
         />
       )}

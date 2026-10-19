@@ -131,7 +131,7 @@ const MEDIA_TYPES = new Set(["video", "audio", "text"]);
  * types is swallowed by a reference that is supposed to be atomic.
  */
 export const sourceChipHtml = ({
-  mediaId, timestampSeconds, mediaTitle, note, mediaType, chunkId, pageNumber,
+  mediaId, timestampSeconds, mediaTitle, note, mediaType, chunkId, pageNumber, bookmarkId,
 }) => {
   const attributes = [
     `data-media-id="${escapeAttribute(mediaId)}"`,
@@ -146,6 +146,9 @@ export const sourceChipHtml = ({
     // was deleted, and this markup is then the only record of the citation.
     Number.isInteger(chunkId) ? `data-chunk-id="${escapeAttribute(chunkId)}"` : "",
     Number.isInteger(pageNumber) ? `data-page="${escapeAttribute(pageNumber)}"` : "",
+    // The bookmark this chip IS, when it came from one. Its name is then the
+    // bookmark's, not this markup's — see syncChipNames below.
+    Number.isInteger(bookmarkId) ? `data-bookmark-id="${escapeAttribute(bookmarkId)}"` : "",
     `data-media-title="${escapeAttribute(String(mediaTitle || "").slice(0, MAX_CHIP_TITLE))}"`,
     note ? `data-note="${escapeAttribute(String(note).slice(0, MAX_CHIP_NOTE))}"` : "",
     // What colours it. A chip written before this attribute existed simply has
@@ -177,9 +180,11 @@ export const sourceFromChip = (element) => {
   const stamp = chip.getAttribute("data-timestamp");
   const chunk = chip.getAttribute("data-chunk-id");
   const page = chip.getAttribute("data-page");
+  const bookmark = chip.getAttribute("data-bookmark-id");
   const note = chip.getAttribute("data-note") || "";
   return {
     mediaId,
+    bookmarkId: bookmark === null ? null : Number(bookmark),
     timestampSeconds: stamp === null ? null : Number(stamp),
     // Null rather than undefined for both, so a chip written before books were
     // bookmarkable reads the same as one pointing at a recording — absent, not
@@ -223,6 +228,9 @@ export const sourceFootnoteLabel = ({ mediaTitle, note, timestampSeconds, pageNu
  */
 export const bookmarkDragPayload = (bookmark, mediaTitle) => ({
   mediaId: bookmark.media_id,
+  // So the chip dropped into a note is that bookmark, not a copy of it:
+  // renamed in either place, it is renamed in both.
+  bookmarkId: Number.isInteger(bookmark.id) ? bookmark.id : null,
   timestampSeconds: bookmark.timestamp_seconds,
   // The book half of the anchor. Both are carried for every bookmark and one of
   // the two is always null, which is the same shape the row itself has — a
@@ -238,3 +246,201 @@ export const bookmarkDragPayload = (bookmark, mediaTitle) => ({
   // is two things to the reader, not one.
   mediaType: bookmark.media_type || null,
 });
+
+/**
+ * Whether a note belongs to one lesson, for the notebook strip on that lesson's
+ * own page.
+ *
+ * Two ways in, and both count. A note TAKEN on the lesson carries its id in
+ * `media_id`. A note written anywhere else that QUOTES it carries a source chip
+ * in its body — the same `data-media-id` attribute sourceChipHtml writes above.
+ * A notebook that showed only the first would hide exactly the notes where the
+ * user connected this shiur to something else, which are the ones worth seeing
+ * next to it.
+ *
+ * Matched on the attribute as written rather than by parsing the body: this
+ * runs over every note on every render of the page, and the attribute is
+ * produced in one place — this file — so its shape is known. The closing quote
+ * is what stops lesson 4 from matching a chip for lesson 49.
+ */
+export const isNoteAboutMedia = (note, mediaId) => {
+  const id = Number(mediaId);
+  if (!Number.isInteger(id) || id <= 0 || !note) return false;
+  if (Number(note.media_id) === id) return true;
+  return typeof note.body === "string" && note.body.includes(`data-media-id="${id}"`);
+};
+
+// The name a reference gets when the user has not given it one: a note started
+// from a lesson's page is about the lesson in general until they say what part.
+export const GENERAL_REFERENCE_LABEL = "הפנייה כללית";
+
+/**
+ * Rename a chip already in a note body, in place.
+ *
+ * The name is the chip's second line — the same `data-note` a bookmark's text
+ * travels in when it is dragged in — so a renamed chip opens, exports and
+ * footnotes exactly as one that arrived with that name. Both halves are kept in
+ * step: the attribute holds the full name (capped as sourceChipHtml caps it),
+ * and the visible line the shortened one.
+ *
+ * An empty name removes the line rather than leaving an empty one behind, which
+ * is the chip a bookmark with no note produces.
+ *
+ * Returns whether it was a chip at all, so a caller can tell a rename from a
+ * click that landed on nothing.
+ */
+export const renameSourceChip = (chip, name) => {
+  if (!chip?.matches?.(SOURCE_CHIP_SELECTOR)) return false;
+  const clean = String(name ?? "").trim().slice(0, MAX_CHIP_NOTE);
+  let line = chip.querySelector('span[data-chip-line="note"]');
+
+  if (!clean) {
+    chip.removeAttribute("data-note");
+    if (line?.previousSibling?.nodeName === "BR") line.previousSibling.remove();
+    line?.remove();
+    return true;
+  }
+
+  chip.setAttribute("data-note", clean);
+  if (!line) {
+    const doc = chip.ownerDocument;
+    line = doc.createElement("span");
+    line.setAttribute("data-chip-line", "note");
+    chip.append(doc.createElement("br"), line);
+  }
+  line.textContent = shorten(clean, CHIP_NOTE_CHARS);
+  return true;
+};
+
+// ── The references line at the foot of a note ───────────────────────────────
+//
+// A chip dropped on blank space — an empty note, an empty line, the space under
+// the last paragraph — goes to the END of the note rather than wherever the
+// pointer happened to be, and every such chip collects on one line there. The
+// editor pins that line to the bottom of its box (RichNoteEditor's sx), so in a
+// note that has not been written yet the reference sits where a footnote would,
+// with the page above it left to write on.
+//
+// A chip dropped ONTO a line of text still lands in the sentence — that is a
+// citation of something in particular, and moving it would break the sentence
+// it was aimed at.
+//
+// The line is a <p data-references="true">. The attribute is the only thing
+// that marks it, so noteHtml's sanitizer has to let it through on a P.
+export const REFERENCES_SELECTOR = 'p[data-references]';
+
+export const referencesBlockHtml = (chipsHtml) => `<p data-references="true">${chipsHtml}</p>`;
+
+// The writing in a node, ignoring the chips inside it: a line that holds only
+// references is not a line of text to cite into.
+export const hasWrittenText = (node) => {
+  if (!node) return false;
+  const doc = node.ownerDocument;
+  const walker = doc.createTreeWalker(node, 4 /* NodeFilter.SHOW_TEXT */);
+  for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+    if (text.parentElement?.closest?.(SOURCE_CHIP_SELECTOR)) continue;
+    if (text.textContent.replace(/[\s\u200B\u00A0]/g, "")) return true;
+  }
+  return false;
+};
+
+const BLOCK_TAGS = new Set(["P", "DIV", "UL", "OL", "LI"]);
+
+/**
+ * Append a chip to the note's references line, creating the line if the note
+ * has none. Works on the editor's live element; the caller emits the change.
+ *
+ * Two things are tidied on the way, both so the pinned line has something
+ * sensible above it:
+ *
+ *   * an EMPTY note gets an empty paragraph to write in first, or the only line
+ *     in the box would be the references and there would be nowhere to type;
+ *   * loose inline content at the root — what a note written before the
+ *     toolbar is made of, text and <br>s — is wrapped in a <div>. The pinning
+ *     is a flex column, and a bare <br> in a flex container stops breaking the
+ *     line, which would run every sentence of an old note together.
+ *
+ * Returns the paragraph the user should be writing in when the note was empty,
+ * so the caret can be put there; null otherwise.
+ */
+export const appendToReferences = (editor, chipHtml) => {
+  const doc = editor.ownerDocument;
+  let block = editor.querySelector(`:scope > ${REFERENCES_SELECTOR}`);
+  if (block) {
+    block.insertAdjacentHTML("beforeend", chipHtml);
+    return null;
+  }
+
+  let writeHere = null;
+  if (!hasWrittenText(editor) && !editor.querySelector("img")) {
+    // Chips left loose in an otherwise empty note move into the new line too.
+    const loose = [...editor.querySelectorAll(SOURCE_CHIP_SELECTOR)];
+    editor.innerHTML = "";
+    writeHere = doc.createElement("p");
+    writeHere.appendChild(doc.createElement("br"));
+    editor.appendChild(writeHere);
+    block = doc.createElement("p");
+    block.setAttribute("data-references", "true");
+    for (const chip of loose) block.append(chip, "\u00A0");
+  } else {
+    let run = null;
+    for (const child of [...editor.childNodes]) {
+      const isBlock = child.nodeType === 1 && BLOCK_TAGS.has(child.tagName);
+      if (isBlock) { run = null; continue; }
+      if (!run) {
+        run = doc.createElement("div");
+        editor.insertBefore(run, child);
+      }
+      run.appendChild(child);
+    }
+    block = doc.createElement("p");
+    block.setAttribute("data-references", "true");
+  }
+  block.insertAdjacentHTML("beforeend", chipHtml);
+  editor.appendChild(block);
+  return writeHere;
+};
+
+// ── A chip that IS a bookmark ───────────────────────────────────────────────
+//
+// A chip made from a bookmark carries that bookmark's id, and its name is the
+// bookmark's note — one value, not a copy of it taken at the moment the chip
+// was written. Rename the bookmark under "הערות אישיות" and every chip pointing
+// at it says the new name; rename the chip with its pencil and it is the
+// bookmark that is renamed (RichNoteEditor's onRenameSource).
+//
+// The note body still stores a name in `data-note`, and has to: a note is
+// exported, printed and read long after a bookmark may have been deleted, and
+// that markup is then the only record of what the reference was called. So the
+// stored name is the fallback, and the live one wins wherever it is known —
+// which is what this does, at the moment a note is shown or exported.
+
+/** id → name, from a list of bookmark rows. A bookmark with no note names nothing. */
+export const bookmarkNames = (bookmarks = []) =>
+  new Map(
+    bookmarks
+      .filter((b) => Number.isInteger(b?.id))
+      .map((b) => [b.id, String(b.note ?? "").trim()])
+  );
+
+/**
+ * The same markup, with every chip that is a known bookmark carrying that
+ * bookmark's current name. A chip whose bookmark is not in `names` (deleted, or
+ * belonging to a lesson this screen did not load) keeps the name it was saved
+ * with. The input is returned untouched when nothing differs, so a caller can
+ * compare strings to tell whether anything changed.
+ */
+export const syncChipNames = (html, names) => {
+  if (!html || !names?.size || !html.includes("data-bookmark-id")) return html;
+  const body = new DOMParser().parseFromString(`<body>${html}</body>`, "text/html").body;
+  let changed = false;
+  for (const chip of body.querySelectorAll(`${SOURCE_CHIP_SELECTOR}[data-bookmark-id]`)) {
+    const id = Number(chip.getAttribute("data-bookmark-id"));
+    if (!names.has(id)) continue;
+    const name = names.get(id);
+    if ((chip.getAttribute("data-note") || "") === name.slice(0, MAX_CHIP_NOTE)) continue;
+    renameSourceChip(chip, name);
+    changed = true;
+  }
+  return changed ? body.innerHTML : html;
+};

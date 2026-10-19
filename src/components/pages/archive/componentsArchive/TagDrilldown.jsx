@@ -255,13 +255,13 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
       </Box>
 
       {/* Searching the vocabulary, not the archive — this finds a TAG, and
-          choosing it is what filters. */}
+          choosing it is what filters. Centred, like the type toggle above it. */}
       <TextField
         size="small"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="חיפוש תגית..."
-        sx={{ maxWidth: 260 }}
+        sx={{ alignSelf: "center", width: "100%", maxWidth: 260 }}
         slotProps={{
           input: {
             startAdornment: (

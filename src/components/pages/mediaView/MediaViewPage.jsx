@@ -12,8 +12,10 @@ import { mediaApi } from "../../../api/mediaApi";
 import MediaInsightsTabs from "./componentsMediaView/MediaInsightsTabs";
 import NotesPanel from "./componentsMediaView/NotesPanel";
 import MediaActionsBar from "./componentsMediaView/MediaActionsBar";
+import LessonNotebook from "./componentsMediaView/LessonNotebook";
 import useMediaViewPageController from "./useMediaViewPageController";
 import { creatorPrefixes } from "../../../utilities/constant";
+import { formatHebrewDate } from "../../../utilities/formatDate";
 
 // Presentation only. Everything that dispatches, selects or derives from server
 // data lives in useMediaViewPageController — see its header for where that line
@@ -28,6 +30,7 @@ const MediaViewPage = () => {
   const {
     media, bookmarks, transcript,
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
+    readerPage, handleReaderPageChange,
     seekOnReady, currentTime, handlePlayerProgress,
     handleCreateBookmark,
     isLiked, toggleLike,
@@ -82,6 +85,19 @@ const MediaViewPage = () => {
     playerRef.current?.seekTo(seconds);
   }, []);
 
+  // A source chip in the lesson notebook below points at this lesson. The
+  // notebook sits under the fold, so moving the player without bringing it back
+  // into view would be a jump the user cannot see.
+  const revealMedia = () => mediaBoxRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+  const seekFromNotebook = (seconds) => {
+    seekPlayer(seconds);
+    revealMedia();
+  };
+  const jumpFromNotebook = (bookmark) => {
+    if (bookmark) jumpToBookmark(bookmark);
+    revealMedia();
+  };
+
   if (!media) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -125,6 +141,7 @@ const MediaViewPage = () => {
                 bookmarks={bookmarks}
                 onAddBookmark={handleCreateTextBookmark}
                 jumpTo={readerTarget?.bookmark ?? null}
+                onPageChange={handleReaderPageChange}
               />
             ) : (
               <MediaPlayer
@@ -139,6 +156,27 @@ const MediaViewPage = () => {
               />
             )}
           </Box>
+          {/* Outside the measured box on purpose: the side panel takes its
+              height from that box, and a line of text inside it would make the
+              panel a line taller than the player it sits beside.
+
+              The date is the upload's — media_items keeps no separate
+              publication date. A draft says so rather than claiming to be
+              published, since the people who can see one are exactly the
+              people who know it is not. */}
+          {formatHebrewDate(media.created_at) && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              data-testid="media-date"
+              // "start" is the right-hand side in this right-to-left page —
+              // under the start of the player, where the title above it begins.
+              sx={{ mt: 1, textAlign: "start" }}
+            >
+              {media.is_published === false ? "טיוטה · הועלה בתאריך: " : "פורסם בתאריך: "}
+              {formatHebrewDate(media.created_at)}
+            </Typography>
+          )}
         </Grid>
 
         <Grid item xs={12} md={4}>
@@ -201,6 +239,15 @@ const MediaViewPage = () => {
         </Box>
       )}
 
+      <LessonNotebook
+        media={media}
+        isText={isText}
+        currentTime={currentTime}
+        readerPage={readerPage}
+        bookmarks={bookmarks}
+        onSeek={seekFromNotebook}
+        onJumpTo={jumpFromNotebook}
+      />
     </Box>
   );
 };

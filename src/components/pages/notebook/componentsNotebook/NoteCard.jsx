@@ -8,12 +8,12 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import RichNoteEditor from "./RichNoteEditor";
 import { hasDragType } from "./useDragReorder";
 import { formatTime } from "../../../../utilities/formatTime";
 import { noteHtmlToPlainText } from "../../../../utilities/noteHtml";
 import { BOOKMARK_DRAG_MIME } from "../../../../utilities/noteSource";
+import { iconForMediaType } from "../../../../utilities/mediaIcons";
 
 // One note, open for editing. The notebook stacks these — every note is on the
 // page at once, one under the other, and the user scrolls between them instead
@@ -38,7 +38,8 @@ const NoteCard = ({
   note, draft, isDirty, isActive,
   editorRef, cardRef,
   onDraftChange, onFormatsChange, onFocus, onError,
-  onSave, onDelete, onOpenSource, onDropSource,
+  onSave, onDelete, onOpenSource, onDropSource, onRenameSource,
+  editorMinHeight,
 }) => {
   const [sourceHovering, setSourceHovering] = useState(false);
 
@@ -110,7 +111,12 @@ const NoteCard = ({
         />
       </Box>
 
-      {note.media_id && (
+      {note.media_id && (() => {
+        // The same picture the bookmark sidebar draws for this lecture. It was a
+        // play triangle for everything, including notes taken on a filmed shiur
+        // and on a sefer — see utilities/mediaIcons.
+        const SourceIcon = iconForMediaType(note.media_type);
+        return (
         <Button
           // The source opens in a floating dialog over the notebook rather than
           // navigating: the user is writing *about* it, so the note has to stay
@@ -125,13 +131,14 @@ const NoteCard = ({
             // prints it in a header line.
             noteText: noteHtmlToPlainText(draft.body) || draft.title,
           })}
-          startIcon={<PlayCircleOutlineIcon />}
+          startIcon={<SourceIcon />}
           size="small"
           sx={{ alignSelf: "flex-start", textTransform: "none" }}
         >
           {`מתוך: ${note.media_title || "שיעור"}${note.timestamp_seconds != null ? ` · ${formatTime(note.timestamp_seconds)}` : ""}`}
         </Button>
-      )}
+        );
+      })()}
 
       <RichNoteEditor
         ref={editorRef}
@@ -144,6 +151,9 @@ const NoteCard = ({
         // does. They are the same idea at two scales: this note came from a
         // lecture, and this SENTENCE came from a moment in one.
         onOpenSource={onOpenSource}
+        // A chip that is a bookmark is renamed by renaming the bookmark.
+        onRenameSource={onRenameSource}
+        minHeight={editorMinHeight}
         placeholder="כתוב כאן את ההערה שלך... אפשר גם להדביק תמונות ולגרור לכאן סימניות."
       />
 

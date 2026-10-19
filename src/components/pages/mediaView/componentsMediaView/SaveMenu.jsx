@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Menu from "@mui/material/Menu";
@@ -20,6 +20,7 @@ import { fetchPlaylists } from "../../../../store/slicesAndThunks/savesSlice/sav
 import { createPlaylist, addMediaToPlaylist } from "../../../../store/slicesAndThunks/savesSlice/savesPost";
 import { renamePlaylist } from "../../../../store/slicesAndThunks/savesSlice/savesPatch";
 import { deletePlaylist, removeMediaFromPlaylist } from "../../../../store/slicesAndThunks/savesSlice/savesDelete";
+import { notify } from "../../../../store/slicesAndThunks/notificationSlice";
 import { statuses, playlistTitleMaxLength } from "../../../../utilities/constant";
 import { countLabel } from "../../../../utilities/countLabel";
 
@@ -27,11 +28,16 @@ import { countLabel } from "../../../../utilities/countLabel";
 // new one. The general save is NOT here — that is the button this menu hangs off
 // — so everything in this menu is about grouping something already kept.
 //
-// The menu deliberately stays open as rows are ticked: filing one lecture in
-// three lists is one trip, not three.
+// Ticking a list closes the menu a moment later, and a green toast names the
+// list the lecture went into. The pause is there so the tick is seen landing
+// before the menu goes. Un-ticking leaves the menu open: taking a lecture out
+// is usually a correction, and the user is still in the middle of it.
 
 // Anchored to a button at the BOTTOM of a panel, so the menu has to grow upwards
 // or it opens off-screen.
+// How long a fresh tick stays on screen before the menu closes.
+const CLOSE_AFTER_ADD_MS = 300;
+
 const ORIGINS = {
   anchorOrigin: { vertical: "top", horizontal: "right" },
   transformOrigin: { vertical: "bottom", horizontal: "right" },
@@ -111,10 +117,15 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
 
   const id = Number(mediaId) || null;
 
+  // The pending close after a tick. Cleared on unmount, so a menu that went away
+  // for some other reason is not told to close a third of a second later.
+  const closeTimer = useRef(null);
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+
   // Fetched on every open rather than once: the `contains` flags describe THIS
   // lecture, and the lists may have changed in another tab since the last look.
   useEffect(() => {
-    if (open && id) dispatch(fetchPlaylists(id));
+    if (open && id) dispatch(fetchPlaylists({ mediaId: id }));
   }, [dispatch, open, id]);
 
   // A half-typed list name should not be waiting there the next time the menu is
@@ -123,9 +134,22 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
     if (!open) { setCreating(false); setNewTitle(""); setEditing(null); }
   }, [open]);
 
-  const toggle = (playlist) => {
+  const toggle = async (playlist) => {
     const args = { playlistId: playlist.id, mediaId: id };
-    dispatch(playlist.contains ? removeMediaFromPlaylist(args) : addMediaToPlaylist(args));
+    if (playlist.contains) {
+      dispatch(removeMediaFromPlaylist(args));
+      return;
+    }
+
+    // The tick is optimistic, so it is already on screen; the menu closes without
+    // waiting for the server. The toast does wait — it says the lecture IS in the
+    // list, and only the server can say that. A failure has its own red toast.
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(onClose, CLOSE_AFTER_ADD_MS);
+    const result = await dispatch(addMediaToPlaylist(args));
+    if (result.meta.requestStatus === "fulfilled") {
+      dispatch(notify({ message: `השיעור נוסף לרשימה "${playlist.title}"`, severity: "success" }));
+    }
   };
 
   // Creating a list from here files the lecture into it straight away — wanting

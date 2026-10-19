@@ -4,6 +4,18 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import SuggestTagsDialog from "./SuggestTagsDialog";
 
+// The section under the picker talks to the server and reads the role from the
+// store; it has its own tests (TagProposalsSection.test.jsx). Here it is a stub
+// whose one button does what an admin's "הוסף תגית" does to the dialog — hands
+// back a tag that already exists on the server.
+vi.mock("./TagProposalsSection", () => ({
+  default: ({ onTagCreated }) => (
+    <button type="button" onClick={() => onTagCreated({ id: 99, name: "שבת הגדול", parent_id: 1 })}>
+      stub-create-tag
+    </button>
+  ),
+}));
+
 // The question asked right after an upload.
 //
 // It exists because the archive reached nineteen items with not one tagged row:
@@ -90,11 +102,16 @@ describe("changing the answer", () => {
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(7, { tagIds: [15, 220], tags: [] }));
   });
 
-  // Typing a tag that is not in the taxonomy is the picker's own behaviour and
-  // is pinned where the picker is exercised directly — see EditTagsDialog's
-  // "sends something typed as a name, beside the ids". Driving MUI's freeSolo
-  // input through two dialogs' worth of re-render to assert the same split
-  // twice buys nothing and costs a test that hangs.
+  // That typing creates no tag is the picker's own behaviour and is pinned
+  // where the picker is exercised directly — see EditTagsDialog's "does not
+  // turn something typed into a tag".
+
+  it("keeps a tag an admin just created in the selection it saves", async () => {
+    const { onSave, user } = draw({ suggestions: [] });
+    await user.click(screen.getByRole("button", { name: "stub-create-tag" }));
+    await save(user);
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith(7, { tagIds: [99], tags: [] }));
+  });
 });
 
 describe("when there is nothing to suggest", () => {

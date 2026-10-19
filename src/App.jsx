@@ -73,6 +73,11 @@ const App = () => {
 
   // Opt-in dark mode: defaults to light (existing experience unchanged) and only
   // flips when the user toggles it. Persisted so the choice survives reloads.
+  // TODO(CR): localStorage access is unguarded here and in toggle() below. In a
+  // browser with site data blocked (Safari private mode on older versions, some
+  // enterprise policies) getItem throws, and since this runs while rendering App
+  // the whole application fails to mount — a blank page. Wrap both in try/catch
+  // and fall back to "light", as utilities/floatingGeometry.js already does.
   const [mode, setMode] = useState(() =>
     localStorage.getItem("colorMode") === "dark" ? "dark" : "light"
   );

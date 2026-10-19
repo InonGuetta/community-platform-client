@@ -4,9 +4,19 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/Edit";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import { sanitizeNoteHtml, isNoteHtmlEmpty } from "../../../../utilities/noteHtml";
 import { mediaTypeAccents } from "../../../../utilities/constant";
-import { sourceChipHtml, sourceFromChip, SOURCE_CHIP_SELECTOR } from "../../../../utilities/noteSource";
+import {
+  sourceChipHtml, sourceFromChip, renameSourceChip, SOURCE_CHIP_SELECTOR, MAX_CHIP_NOTE,
+  appendToReferences, hasWrittenText, REFERENCES_SELECTOR,
+} from "../../../../utilities/noteSource";
 
 // The note body, as a contentEditable rather than a TextField — which is the
 // whole reason the toolbar can do anything. A textarea holds characters; bold is
@@ -93,7 +103,49 @@ const caretRangeAt = (x, y) => {
   return null;
 };
 
-const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, onError, onOpenSource, placeholder }, ref) => {
+// Whether a drop at `point` landed ON a line of writing — in which case the
+// chip belongs in that sentence — rather than on blank space, where it belongs
+// on the references line at the foot of the note (see appendToReferences).
+//
+// Two ways to be blank, and the second is the one that matters: a line with
+// nothing written on it, and the empty stretch BELOW the last line. The browser
+// answers a point down there with the nearest caret it can find, which is the
+// end of the last line of text — so without the height check, a chip dropped
+// into the empty half of a note would be written onto the end of its last
+// sentence.
+const LINE_SLACK_PX = 4;
+
+// How far left of the delete button's centre the rename button's centre sits,
+// on a hovered chip. See the controls at the bottom of the editor.
+const RENAME_OFFSET_PX = 20;
+const BLOCKS = "p, div, li";
+
+const droppedOnText = (editor, range, point) => {
+  const node = range.startContainer;
+  const element = node.nodeType === 3 ? node.parentElement : node;
+  if (element?.closest?.(REFERENCES_SELECTOR)) return false;
+
+  const block = element?.closest?.(BLOCKS);
+  const line = block && block !== editor && editor.contains(block) ? block : null;
+  const written = line ? hasWrittenText(line) : (node.nodeType === 3 && hasWrittenText(node.parentElement) && node.textContent.trim() !== "");
+  if (!written) return false;
+
+  const box = (line ?? range).getBoundingClientRect?.();
+  // An unmeasurable box (zero height) says nothing about where the point is,
+  // so it does not overrule the writing that is there.
+  if (!box || box.height === 0) return true;
+  return point.y <= box.bottom + LINE_SLACK_PX;
+};
+
+// `minHeight` is the empty page the box offers before anything is written.
+// The notebook wants a tall one — a note there is a page to fill. The strip
+// under a lesson does not: a new note there opens as one line and a reference
+// beneath it, and a tall box left that reference floating mid-card above a
+// blank stretch, reading as if it were in the middle of the note rather than at
+// its end.
+const RichNoteEditor = forwardRef(({
+  html, onChange, onFormatsChange, onFocus, onError, onOpenSource, onRenameSource, placeholder, minHeight = 280,
+}, ref) => {
   const editorRef = useRef(null);
   // The editor and the image controls that float over it. Their positions are
   // measured against this, so it is the element they are both inside.
@@ -217,6 +269,40 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
 
   const FRAMED_LABEL = { image: "מחיקת התמונה", source: "מחיקת המקור" };
 
+  // Renaming a chip — "הפנייה כללית" on a new lesson note, or whatever a
+  // dragged bookmark was called. The chip is contenteditable="false", so its
+  // name cannot be typed over in place; it is asked for in a dialog instead, and
+  // written back by renameSourceChip, which keeps the saved attribute and the
+  // visible line in step.
+  const [renaming, setRenaming] = useState(null);
+
+  const startRename = () => {
+    if (framed?.kind !== "source") return;
+    setRenaming({ element: framed.element, value: framed.element.getAttribute("data-note") || "" });
+    setFramed(null);
+  };
+
+  // A chip that IS a bookmark (data-bookmark-id) is renamed by renaming the
+  // bookmark: the name lives there, and every chip pointing at it — in this
+  // note, in others, and the row under "הערות אישיות" — follows. The chip on
+  // screen is updated at once so the dialog's answer shows immediately, but the
+  // note is NOT marked as changed: nothing about the note itself was edited,
+  // and a "not saved" warning for a name that is already saved would be false.
+  //
+  // A chip with no bookmark behind it is ordinary note content, renamed in the
+  // note and saved with it.
+  const finishRename = () => {
+    if (renaming && renameSourceChip(renaming.element, renaming.value)) {
+      const bookmarkId = Number(renaming.element.getAttribute("data-bookmark-id"));
+      if (onRenameSource && Number.isInteger(bookmarkId) && bookmarkId > 0) {
+        onRenameSource(bookmarkId, renaming.value.trim());
+      } else {
+        emitChange();
+      }
+    }
+    setRenaming(null);
+  };
+
   // Put the caret back where it was before running a command. Three cases, in
   // order: the selection is still in the editor and nothing needs doing; there
   // is a remembered one to restore; or this editor has never been in — in which
@@ -233,25 +319,6 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
       range.selectNodeContents(editor);
       range.collapse(false);
     }
-    selection?.removeAllRanges();
-    selection?.addRange(range);
-  };
-
-  // Put the caret where the pointer let go, so a dropped bookmark lands in the
-  // sentence it was aimed at. A point outside this editor — a drop on the
-  // card's margin, or a browser that cannot answer the question — falls back to
-  // the caret's last position, which is still a deliberate place rather than a
-  // guess.
-  const placeCaretAt = (point) => {
-    const editor = editorRef.current;
-    editor?.focus();
-
-    const range = point ? caretRangeAt(point.x, point.y) : null;
-    if (!range || !editor?.contains(range.startContainer)) {
-      restoreSelection();
-      return;
-    }
-    const selection = document.getSelection();
     selection?.removeAllRanges();
     selection?.addRange(range);
   };
@@ -328,9 +395,33 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
     // leaves the undo stack intact, and doing that by hand is how an editor
     // starts becoming a library.
     insertSource(bookmark, point) {
-      if (!editorRef.current || !bookmark?.mediaId) return;
-      placeCaretAt(point);
-      document.execCommand("insertHTML", false, sourceChipHtml(bookmark));
+      const editor = editorRef.current;
+      if (!editor || !bookmark?.mediaId) return;
+      const chip = sourceChipHtml(bookmark);
+      const range = point ? caretRangeAt(point.x, point.y) : null;
+
+      if (range && editor.contains(range.startContainer) && droppedOnText(editor, range, point)) {
+        // Onto a line of writing: into the sentence, where the pointer let go.
+        editor.focus();
+        const selection = document.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        document.execCommand("insertHTML", false, chip);
+      } else {
+        // Onto blank space: the references line at the end of the note.
+        const writeHere = appendToReferences(editor, chip);
+        editor.focus();
+        // A note that was empty opens a line above the reference to write on,
+        // and the caret goes there, so the next keystroke starts the note.
+        if (writeHere) {
+          const caret = document.createRange();
+          caret.selectNodeContents(writeHere);
+          caret.collapse(true);
+          const selection = document.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(caret);
+        }
+      }
       emitChange();
       reportFormats();
     },
@@ -428,7 +519,7 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
         // tells the page which of its stacked editors the toolbar now drives.
         onFocus={() => { onFocus?.(); reportFormats(); }}
         sx={{
-          flexGrow: 1, width: "100%", minHeight: 280,
+          flexGrow: 1, width: "100%", minHeight,
           p: 2, borderRadius: 1, overflowY: "auto",
           border: "1px solid", borderColor: "divider",
           outline: "none", lineHeight: 1.7,
@@ -440,6 +531,12 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
           // A list indents on the side the text starts from. Without this the
           // bullets sit on the left of a right-to-left line, detached from it.
           "& ul, & ol": { paddingInlineStart: "1.5rem", margin: "0.5rem 0" },
+          // The references line sits at the foot of the box however little is
+          // written above it — see appendToReferences. A column only while the
+          // note HAS such a line, so a note without one lays out as it always
+          // did.
+          [`&:has(> ${REFERENCES_SELECTOR})`]: { display: "flex", flexDirection: "column" },
+          [`& > ${REFERENCES_SELECTOR}`]: { marginTop: "auto", marginBottom: 0, paddingTop: "8px" },
           // A pasted screenshot is whatever size it was taken at, which is
           // routinely wider than this box. Scaled down to fit rather than
           // allowed to force the whole page sideways.
@@ -554,8 +651,61 @@ const RichNoteEditor = forwardRef(({ html, onChange, onFormatsChange, onFocus, o
               <CloseIcon sx={{ fontSize: framed.kind === "source" ? 13 : 16 }} />
             </IconButton>
           </Tooltip>
+          {/* A chip has a name a picture does not, so it gets a second control,
+              beside the X on the chip's right-hand corner — the start of the
+              line in a right-to-left note, where the eye already goes for the
+              X. Its centre is a fixed 20px in from the X's, which leaves a clear
+              gap between two 13px buttons. */}
+          {framed.kind === "source" && (
+            <Tooltip title="שינוי שם ההפניה">
+              <IconButton
+                size="small"
+                onClick={startRename}
+                aria-label="שינוי שם ההפניה"
+                sx={{
+                  position: "absolute",
+                  top: framed.top,
+                  left: framed.left + framed.width - RENAME_OFFSET_PX,
+                  transform: "translate(-50%, -50%)",
+                  bgcolor: "primary.main",
+                  color: "#fff",
+                  boxShadow: 2,
+                  p: 0,
+                  "&:hover": { bgcolor: "primary.dark" },
+                }}
+              >
+                <EditIcon sx={{ fontSize: 13 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </>
       )}
+
+      <Dialog open={Boolean(renaming)} onClose={() => setRenaming(null)} fullWidth maxWidth="xs">
+        <DialogTitle>שינוי שם ההפניה</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            margin="dense"
+            label="שם ההפניה"
+            value={renaming?.value ?? ""}
+            onChange={(e) => setRenaming((prev) => prev && { ...prev, value: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                finishRename();
+              }
+            }}
+            inputProps={{ maxLength: MAX_CHIP_NOTE }}
+            helperText="השאר ריק כדי להסיר את השם מההפניה"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRenaming(null)}>ביטול</Button>
+          <Button variant="contained" onClick={finishRename}>שמירה</Button>
+        </DialogActions>
+      </Dialog>
 
       {showPlaceholder && (
         // A real element rather than the :empty::before trick: an emptied

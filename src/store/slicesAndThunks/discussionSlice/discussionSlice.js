@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchConversation, searchInLesson } from "./discussionGet";
-import { startConversation, askQuestion } from "./discussionPost";
+import { startConversation, askQuestion, answerDelta } from "./discussionPost";
 import { statuses } from "../../../utilities/constant";
 
 // The "דיון עם AI" tab, kept PER LESSON. Moving from one lesson to another and
@@ -29,6 +29,15 @@ const lessonOf = (state, mediaId) => {
 // The question shown at once, before the server answers. Marked so it can be
 // found and replaced by the stored pair, or taken back if the answer fails.
 const pendingId = (requestId) => `pending-${requestId}`;
+
+// The answer while it is being written: grown by answerDelta, replaced by the
+// stored answer when the question is fulfilled, removed if it fails. It never
+// carries citations — the server sends those with the stored answer, and the
+// [n] markers in a draft are plain text until then.
+const draftId = (requestId) => `draft-${requestId}`;
+
+const withoutTemporary = (messages, requestId) =>
+  messages.filter((m) => m.id !== pendingId(requestId) && m.id !== draftId(requestId));
 
 const discussionSlice = createSlice({
   name: "discussion",
@@ -81,21 +90,33 @@ const discussionSlice = createSlice({
           pending: true,
         });
       })
+      .addCase(answerDelta, (state, action) => {
+        const { mediaId, requestId, text } = action.payload;
+        const lesson = lessonOf(state, mediaId);
+        // A piece for a question no longer on screen — its lesson was reset
+        // (signing out) — has nothing to attach to.
+        if (!lesson.messages.some((m) => m.id === pendingId(requestId))) return;
+        const draft = lesson.messages.find((m) => m.id === draftId(requestId));
+        if (draft) draft.content += text;
+        else lesson.messages.push({ id: draftId(requestId), role: "assistant", content: text, citations: [], streaming: true });
+      })
       .addCase(askQuestion.fulfilled, (state, action) => {
         const lesson = lessonOf(state, action.meta.arg.mediaId);
         lesson.asking = false;
         lesson.conversation = action.payload.conversation;
-        lesson.messages = lesson.messages
-          .filter((m) => m.id !== pendingId(action.meta.requestId))
+        // The stored pair replaces both the pending question and the draft:
+        // what stays on screen is what is in the database.
+        lesson.messages = withoutTemporary(lesson.messages, action.meta.requestId)
           .concat(action.payload.messages);
       })
       .addCase(askQuestion.rejected, (state, action) => {
-        // The server stores nothing for a failed answer, so the question is
-        // taken back off the screen too — the composer keeps it for a retry.
+        // The server stores nothing for a failed answer, so the question — and
+        // whatever of the answer had arrived — is taken back off the screen
+        // too. The composer keeps the question for a retry.
         const lesson = lessonOf(state, action.meta.arg.mediaId);
         lesson.asking = false;
         lesson.askError = action.payload ?? null;
-        lesson.messages = lesson.messages.filter((m) => m.id !== pendingId(action.meta.requestId));
+        lesson.messages = withoutTemporary(lesson.messages, action.meta.requestId);
       })
 
       .addCase(searchInLesson.pending, (state, action) => {

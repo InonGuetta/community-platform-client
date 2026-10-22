@@ -162,3 +162,26 @@ describe("citations", () => {
     expect(within(screen.getByTestId("message-user")).queryByRole("button")).not.toBeInTheDocument();
   });
 });
+
+describe("an answer as it is written", () => {
+  const draft = { id: "draft-r1", role: "assistant", content: "העיקר הוא תשובה [1]", citations: [], streaming: true };
+
+  test("the arriving answer replaces the 'thinking' line", () => {
+    render(<ChatPane chat={chat({ asking: true, messages: [{ ...question, pending: true }, draft] })} onSeek={() => {}} />);
+    expect(screen.queryByTestId("chat-thinking")).not.toBeInTheDocument();
+    const bubble = screen.getByTestId("message-assistant");
+    expect(bubble).toHaveTextContent("העיקר הוא תשובה [1]");
+    expect(bubble).toHaveAttribute("aria-busy", "true");
+  });
+
+  // Its citations arrive with the stored answer; until then [1] leads nowhere.
+  test("a draft's markers are not buttons yet", () => {
+    render(<ChatPane chat={chat({ asking: true, messages: [{ ...question, pending: true }, draft] })} onSeek={() => {}} />);
+    expect(within(screen.getByTestId("message-assistant")).queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  test("before the first piece, the 'thinking' line is there", () => {
+    render(<ChatPane chat={chat({ asking: true, messages: [{ ...question, pending: true }] })} />);
+    expect(screen.getByTestId("chat-thinking")).toBeInTheDocument();
+  });
+});

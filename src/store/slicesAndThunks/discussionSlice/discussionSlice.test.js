@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import reducer, { clearSearch, clearAskError } from "./discussionSlice";
 import { fetchConversation, searchInLesson } from "./discussionGet";
-import { startConversation, askQuestion } from "./discussionPost";
+import { startConversation, askQuestion, answerDelta } from "./discussionPost";
 
 // The "דיון עם AI" state, per lesson. Driven through the reducer with the
 // thunks' own action creators, so the action shapes are the real ones.
@@ -116,5 +116,40 @@ describe("smart search", () => {
     state = reducer(state, clearSearch(7));
     expect(state.byMediaId[7].search.results).toEqual([]);
     expect(state.byMediaId[7].messages).toHaveLength(1);
+  });
+});
+
+describe("an answer as it is written", () => {
+  const begin = () => reducer(initial(), askQuestion.pending("r1", { mediaId: 7, question: "מה העיקר?" }));
+
+  test("pieces grow one draft answer under the question", () => {
+    let state = begin();
+    state = reducer(state, answerDelta({ mediaId: 7, requestId: "r1", text: "העיקר " }));
+    state = reducer(state, answerDelta({ mediaId: 7, requestId: "r1", text: "הוא תשובה [1]." }));
+    const [, draft] = state.byMediaId[7].messages;
+    expect(draft).toMatchObject({ role: "assistant", content: "העיקר הוא תשובה [1].", streaming: true, citations: [] });
+    expect(state.byMediaId[7].messages).toHaveLength(2);
+  });
+
+  test("the stored answer replaces the draft, so the screen shows what is saved", () => {
+    let state = begin();
+    state = reducer(state, answerDelta({ mediaId: 7, requestId: "r1", text: "טיוטה" }));
+    state = reducer(state, askQuestion.fulfilled(
+      { conversation: { id: 17 }, messages: [{ id: 1, role: "user" }, { id: 2, role: "assistant", content: "סופי [1]" }] },
+      "r1", { mediaId: 7, question: "מה העיקר?" }
+    ));
+    expect(state.byMediaId[7].messages.map((m) => m.id)).toEqual([1, 2]);
+  });
+
+  test("a failed answer takes away whatever of it had arrived", () => {
+    let state = begin();
+    state = reducer(state, answerDelta({ mediaId: 7, requestId: "r1", text: "חצי" }));
+    state = reducer(state, askQuestion.rejected(null, "r1", { mediaId: 7, question: "מה העיקר?" }, { code: "AI_ANSWER_FAILED" }));
+    expect(state.byMediaId[7].messages).toEqual([]);
+  });
+
+  test("a piece for a question no longer on screen is dropped", () => {
+    const state = reducer(initial(), answerDelta({ mediaId: 7, requestId: "gone", text: "x" }));
+    expect(state.byMediaId[7].messages).toEqual([]);
   });
 });

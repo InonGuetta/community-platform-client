@@ -68,6 +68,11 @@ axiosInstance.interceptors.response.use(
 // undefined while the other is still evaluating. A callback keeps this module a
 // leaf of the import graph that knows nothing about Redux.
 let onUnauthorized = null;
+// For the one request that cannot go through axios — a streamed answer, read
+// with fetch (api/discussionApi.js) — so an expired session it meets ends the
+// session exactly as any other 401 does.
+export const reportUnauthorized = () => onUnauthorized?.();
+
 export const setUnauthorizedHandler = (handler) => {
   onUnauthorized = handler;
 };

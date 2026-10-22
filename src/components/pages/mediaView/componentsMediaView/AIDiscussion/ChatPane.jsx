@@ -104,6 +104,7 @@ const Bubble = ({ message, onOpen }) => {
   return (
     <Box
       data-testid={mine ? "message-user" : "message-assistant"}
+      aria-busy={message.streaming ? true : undefined}
       sx={{
         // The reader's own questions on the far side, the answers where the
         // eye starts — the start edge, which in this page is the right.
@@ -177,6 +178,9 @@ const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
   }
 
   const empty = chat.messages.length === 0;
+  // Once the first piece of the answer is on screen it is its own progress
+  // indicator; the "thinking" line is only for the wait before it.
+  const answerArriving = chat.messages.some((m) => m.streaming && m.content);
   // Two forms, because Hebrew merges the preposition with the article:
   // "ב" + "השיעור" is "בשיעור", never "בהשיעור".
   const source = isText ? "הספר" : "השיעור";
@@ -218,7 +222,7 @@ const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
 
         {chat.messages.map((m) => <Bubble key={m.id} message={m} onOpen={onOpen} />)}
 
-        {chat.asking && (
+        {chat.asking && !answerArriving && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }} data-testid="chat-thinking">
             <CircularProgress size={16} />
             <Typography variant="body2">מעיין {inSource}…</Typography>

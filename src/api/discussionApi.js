@@ -1,4 +1,5 @@
-import axiosInstance from "../utilities/axiosInstance";
+import axiosInstance, { reportUnauthorized } from "../utilities/axiosInstance";
+import { readEventStream } from "../utilities/eventStream";
 
 // The "דיון עם AI" tab on a lesson page. Everything is scoped to ONE lesson by
 // the id in the path; the server answers only from that lesson's text.
@@ -19,7 +20,28 @@ export const discussionApi = {
   startConversation: async (mediaId) =>
     (await axiosInstance.post(`/discussion/${mediaId}/conversation`)).data,
 
-  // { conversation, messages: [question, answer] }
-  ask: async (mediaId, question) =>
-    (await axiosInstance.post(`/discussion/${mediaId}/messages`, { question })).data,
+  // A question, answered as it is written. Resolves to
+  // { conversation, messages: [question, answer] } — the stored exchange —
+  // after calling onDelta(text) with each piece the server lets through.
+  //
+  // fetch rather than axiosInstance: axios in a browser cannot read a body
+  // while it is still arriving. What axiosInstance would have done for this
+  // request is done here by hand — the same /api base, the session cookie, an
+  // expired session reported to the same handler — and a refusal is thrown in
+  // axios's error shape, so the thunk's rejectionOf reads it unchanged.
+  askStream: async (mediaId, question, { onDelta, signal } = {}) => {
+    const res = await fetch(`/api/discussion/${mediaId}/messages/stream`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+      body: JSON.stringify({ question }),
+      signal,
+    });
+    if (!res.ok) {
+      if (res.status === 401) reportUnauthorized();
+      const data = await res.json().catch(() => ({}));
+      throw { response: { status: res.status, data } };
+    }
+    return readEventStream(res.body, onDelta);
+  },
 };

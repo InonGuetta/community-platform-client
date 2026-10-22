@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isPrivileged, canManageMedia } from "./permissions";
+import { isPrivileged, canManageMedia, canManageCourse } from "./permissions";
 
 // These cases are deliberately the same ones the server asserts in
 // test/permissions.test.js. The two files are the contract between what the UI
@@ -55,5 +55,23 @@ describe("canManageMedia", () => {
     expect(canManageMedia(OWNER, {})).toBe(false);
     expect(canManageMedia(null, ITEM)).toBe(false);
     expect(canManageMedia({ role: "lecturer" }, ITEM)).toBe(false);
+  });
+});
+
+// The same cases as the server's canManageCourse in test/permissions.test.js.
+describe("canManageCourse", () => {
+  const course = { lecturer_id: 7 };
+  it("lets an admin manage any course", () => {
+    expect(canManageCourse({ id: 1, role: "admin" }, course)).toBe(true);
+  });
+  it("lets a lecturer manage only the courses they teach", () => {
+    expect(canManageCourse({ id: 7, role: "lecturer" }, course)).toBe(true);
+    expect(canManageCourse({ id: 8, role: "lecturer" }, course)).toBe(false);
+  });
+  it("compares ids numerically", () => {
+    expect(canManageCourse({ id: "7", role: "lecturer" }, course)).toBe(true);
+  });
+  it("refuses a course with no lecturer to anyone but an admin", () => {
+    expect(canManageCourse({ id: 7, role: "lecturer" }, { lecturer_id: null })).toBe(false);
   });
 });

@@ -17,7 +17,8 @@ import TranscriptEditor from "../../../features/TranscriptEditor/TranscriptEdito
 // Writing a bookmark needs a player to read the time off, which the media page
 // has and a caller might not — as a slot, this component stays out of it and
 // simply omits the tab when nobody passes one.
-const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, onSeek }) => {
+// `tags` are the lesson's own tags, shown at the foot of the summary tab.
+const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, onSeek, tags = [] }) => {
   const {
     transcript, isText, keyPointHeadings,
     canEditTranscript, canGenerateHeadings,
@@ -42,8 +43,8 @@ const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, onSeek }) => 
   const tabs = [
     { key: "summary", label: "סיכום" },
     ...(isText ? [] : [{ key: "chapters", label: "פרקים" }]),
-    ...(notesPanel ? [{ key: "notes", label: "הערות אישיות" }] : []),
     ...(isText ? [] : [{ key: "transcript", label: "תמלול" }]),
+    ...(notesPanel ? [{ key: "notes", label: "הערות אישיות" }] : []),
   ];
   const activeTab = Math.min(tab, tabs.length - 1);
   const activeKey = tabs[activeTab]?.key;
@@ -68,6 +69,7 @@ const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, onSeek }) => 
             onGenerate={generateSummary}
             pollingStalled={pollingStalled}
             onRetryPolling={retryPolling}
+            tags={tags}
           />
         )}
         {activeKey === "chapters" && (

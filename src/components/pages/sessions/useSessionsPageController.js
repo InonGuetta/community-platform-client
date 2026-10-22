@@ -6,6 +6,8 @@ import { createSession, startSession } from "../../../store/slicesAndThunks/sess
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { selectAllRooms, selectSessionsStatus } from "../../../store/selectors/sessionsSelectors";
 import { hebrewForError } from "../../../utilities/apiError";
+import { selectUser } from "../../../store/selectors/authSelectors";
+import { isPrivileged } from "../../../utilities/permissions";
 
 const useSessionsPageController = () => {
   const dispatch = useDispatch();
@@ -54,10 +56,18 @@ const useSessionsPageController = () => {
     navigate(`/sessions/${result.payload.id}`);
   };
 
+  // Who may open a room, and which rooms are this user's to start — decided
+  // here rather than in the page, which used to select the user itself.
+  const user = useSelector(selectUser);
+  const canCreate = isPrivileged(user);
+  const isHost = (room) => Number(room.host_id) === Number(user?.id);
+
   return {
     rooms,
     upcoming,
     status,
+    canCreate,
+    isHost,
     createDialogOpen,
     setCreateDialogOpen,
     handleJoinRoom,

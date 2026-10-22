@@ -192,6 +192,7 @@ const MediaViewPage = () => {
           >
             <MediaInsightsTabs
               mediaId={media.id}
+              tags={media.tags}
               insights={controller}
               onSeek={seekPlayer}
               notesPanel={

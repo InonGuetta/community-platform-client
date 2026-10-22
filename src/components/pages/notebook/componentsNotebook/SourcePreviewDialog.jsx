@@ -352,6 +352,7 @@ const SourcePreviewDialog = ({
           <Box sx={{ display: "flex", flexDirection: "column", mt: 2 }}>
             <MediaInsightsTabs
               mediaId={media.id}
+              tags={media.tags}
               insights={insights}
               onSeek={seekPlayer}
               notesPanel={

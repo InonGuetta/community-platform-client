@@ -50,11 +50,6 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
           </Typography>
         )}
 
-        {/* TODO(CR): other participants' messages carry no name — only an
-            alignment and a time — so in a room of more than two nobody can tell
-            who wrote what. The server already knows the sender's user id; have it
-            add display_name to the message (socketManager CHAT_MESSAGE) and show
-            it here. */}
         {messages.map((message, i) => {
           const mine = Number(message.userId) === Number(myUserId);
           return (
@@ -73,6 +68,14 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
                 borderRadius: 1.5,
               }}
             >
+              {/* Who wrote it, for everyone but yourself — in a room of more than
+                  two, alignment alone could not say. The name comes from the
+                  server's verified row, never from the sender's payload. */}
+              {!mine && (
+                <Typography variant="caption" sx={{ color: "grey.400", display: "block", fontWeight: 600 }}>
+                  {message.displayName || "משתתף"}
+                </Typography>
+              )}
               <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
                 {message.text}
               </Typography>

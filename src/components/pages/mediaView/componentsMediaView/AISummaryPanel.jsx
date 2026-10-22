@@ -60,6 +60,10 @@ const AISummaryPanel = ({
   // wedged book job would spin here forever with no way to re-check.
   pollingStalled = false,
   onRetryPolling,
+  // The lesson's tags. Not part of the AI output — they are set by the person
+  // who uploaded it — but they answer the same question as the summary ("what
+  // is this about"), so they sit at the foot of the same tab.
+  tags = [],
 }) => {
   const status = transcript?.status;
   const summary = transcript?.ai_summary;
@@ -134,6 +138,21 @@ const AISummaryPanel = ({
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
             {keyPoints.map((point, i) => (
               <Chip key={i} label={point} size="small" variant="outlined" color="primary" />
+            ))}
+          </Box>
+        </>
+      )}
+
+      {/* Shown whatever the state of the summary: tags are set by hand, so a
+          lesson with no summary yet — or one still being produced — has them
+          all the same. The same chips the archive card shows. */}
+      {tags.length > 0 && (
+        <>
+          <Divider />
+          <Typography variant="subtitle2" fontWeight={600}>תגיות</Typography>
+          <Box data-testid="summary-tags" sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {tags.map((tag) => (
+              <Chip key={tag} label={tag} size="small" variant="outlined" color="secondary" />
             ))}
           </Box>
         </>

@@ -77,12 +77,14 @@ export const setUnauthorizedHandler = (handler) => {
 // already handles that one), and /auth/login answers 401 for wrong credentials.
 // Treating those as an expiry would fight the existing handling and would wipe
 // state while the user is simply typing their password wrong.
-// TODO(CR): the prefix is broader than the reasoning above. It also exempts
-// PATCH /auth/me (profile edit) and POST /auth/request-role, which are ordinary
-// authenticated calls — a 401 there IS an expired session, yet the UI keeps
-// showing a signed-in user. Exempt only the endpoints that answer 401 as normal
-// traffic: GET /auth/me, /auth/login, /auth/change-password.
-const isAuthRequest = (url = "") => url.startsWith("/auth/");
+// Exactly those, by method and path. It used to be every "/auth/" URL, which
+// also exempted PATCH /auth/me (the profile edit) and POST /auth/request-role —
+// ordinary authenticated calls, where a 401 IS an expired session, and the UI
+// kept showing a signed-in user. /auth/change-password stays exempt because it
+// answers 401 for a wrong CURRENT password, which is not an expiry either.
+const NORMAL_401 = new Set(["get /auth/me", "post /auth/login", "post /auth/change-password"]);
+const isAuthRequest = (config = {}) =>
+  NORMAL_401.has(`${(config.method || "get").toLowerCase()} ${config.url}`);
 
 // ── Retrying a request the server never processed ───────────────────────────
 //
@@ -197,7 +199,7 @@ const normalizeError = (error) => {
   // auth state is all that is needed — ProtectedRoute already redirects to
   // /sign-in once there is no user, so there is no navigation to perform from
   // outside React.
-  if (status === 401 && !isAuthRequest(error.config?.url)) {
+  if (status === 401 && !isAuthRequest(error.config)) {
     onUnauthorized?.();
   }
 

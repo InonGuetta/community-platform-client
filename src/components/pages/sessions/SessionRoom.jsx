@@ -1,14 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import VideoRoom from "../../features/VideoRoom/VideoRoom";
-import { selectUser } from "../../../store/selectors/authSelectors";
-import { joinSession } from "../../../store/slicesAndThunks/sessionsSlice/sessionsPost";
-import { hebrewForError } from "../../../utilities/apiError";
+import { useSessionRoomController } from "./useSessionRoomController";
 
 // The room, reached by session ID rather than by room token.
 //
@@ -23,43 +18,14 @@ import { hebrewForError } from "../../../utilities/apiError";
 // credential with the lifetime of one room, and the store is inspectable,
 // serialised into devtools and kept for the life of the tab. Leaving this page
 // drops it.
+
 const SessionRoom = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const user = useSelector(selectUser);
-
-  const [entry, setEntry] = useState({ status: "joining", roomToken: null, session: null, error: null });
-
-  useEffect(() => {
-    let cancelled = false;
-    setEntry({ status: "joining", roomToken: null, session: null, error: null });
-
-    dispatch(joinSession(id)).then((result) => {
-      if (cancelled) return;
-      if (result.meta.requestStatus === "fulfilled") {
-        setEntry({
-          status: "in",
-          roomToken: result.payload.roomToken,
-          session: result.payload.session,
-          error: null,
-        });
-      } else {
-        setEntry({
-          status: "refused",
-          roomToken: null,
-          session: null,
-          error: hebrewForError(result.payload, "לא ניתן להצטרף למפגש"),
-        });
-      }
-    });
-
-    return () => { cancelled = true; };
-  }, [dispatch, id]);
-
-  // useVideoRoom holds this in a ref so it no longer drives the room's
-  // lifecycle, but keeping it stable is correct regardless.
-  const handleEnd = useCallback(() => navigate("/sessions"), [navigate]);
+  const {
+    entry,
+    handleEnd,
+    isHost,
+    backToSessions,
+  } = useSessionRoomController();
 
   if (entry.status === "joining") {
     return (
@@ -74,18 +40,13 @@ const SessionRoom = () => {
       <Box sx={{ p: 3, maxWidth: 520, mx: "auto" }}>
         <Alert
           severity="info"
-          action={<Button color="inherit" size="small" onClick={() => navigate("/sessions")}>למפגשים</Button>}
+          action={<Button color="inherit" size="small" onClick={backToSessions}>למפגשים</Button>}
         >
           {entry.error}
         </Alert>
       </Box>
     );
   }
-
-  // The host check now comes from the session the join answered with, rather than
-  // from a room found in a list that may never have been fetched — which is what
-  // made a deep link or a refresh show a host the guest's controls.
-  const isHost = Number(entry.session?.host_id) === Number(user?.id);
 
   return (
     <Box sx={{ height: "calc(100vh - 64px)", display: "flex", flexDirection: "column" }}>

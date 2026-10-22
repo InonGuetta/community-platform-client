@@ -36,6 +36,8 @@ const formatDate = (value) =>
 
 const NoteCard = ({
   note, draft, isDirty, isActive,
+  // Ticked in the list down the side, for a bulk delete or an export.
+  isSelected = false,
   editorRef, cardRef,
   onDraftChange, onFormatsChange, onFocus, onError,
   onSave, onDelete, onOpenSource, onDropSource, onRenameSource,
@@ -89,8 +91,15 @@ const NoteCard = ({
         // toolbar at the top would otherwise be acting on something the user
         // cannot identify. A card a bookmark is hovering over says so more
         // loudly still: it is about to be written into.
-        borderColor: sourceHovering ? "success.main" : (isActive ? "primary.main" : "divider"),
-        ...(sourceHovering && { boxShadow: "0 0 0 3px rgba(46,125,50,0.18)" }),
+        borderColor: sourceHovering ? "success.main" : (isActive || isSelected ? "primary.main" : "divider"),
+        // A ticked note gets a thick frame, so the notes a bulk action is about
+        // to act on can be seen in the column itself, not only as ticks in the
+        // list beside it. Drawn as an outer ring on top of the 1px border rather
+        // than by widening the border, so ticking a note does not shift its
+        // contents by a pixel. A bookmark hovering over the card still wins.
+        ...(sourceHovering
+          ? { boxShadow: "0 0 0 3px rgba(46,125,50,0.18)" }
+          : isSelected && { boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}` }),
         transition: "border-color 0.2s, box-shadow 0.2s",
         // Where a card lands when the list scrolls to it. In the desktop layout
         // the column is its own scroll container and a small inset is enough; on

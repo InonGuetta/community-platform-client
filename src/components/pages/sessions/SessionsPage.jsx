@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -20,9 +19,7 @@ import DialogContent from "../../features/Dialogs/DialogContent";
 import DialogActions from "../../features/Dialogs/DialogActions";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import useSessionsPageController from "./useSessionsPageController";
-import { selectUser } from "../../../store/selectors/authSelectors";
 import { sessionTypes, sessionTypeLabels } from "../../../utilities/constant";
-import { isPrivileged } from "../../../utilities/permissions";
 
 // Enough of a lead that the default is a plan rather than "now", which is what
 // the unscheduled button next to it is already for.
@@ -43,9 +40,8 @@ const formatWhen = (value) =>
 const SessionsPage = () => {
   const {
     rooms, upcoming, createDialogOpen, setCreateDialogOpen,
-    handleJoinRoom, handleStartSession, handleCreateSession,
+    handleJoinRoom, handleStartSession, handleCreateSession, canCreate, isHost,
   } = useSessionsPageController();
-  const user = useSelector(selectUser);
   const [form, setForm] = useState({
     title: "",
     sessionType: "group",
@@ -53,9 +49,6 @@ const SessionsPage = () => {
     // Empty means "start it now", which is what this dialog has always done.
     scheduledAt: "",
   });
-
-  const canCreate = isPrivileged(user);
-  const isHost = (room) => Number(room.host_id) === Number(user?.id);
 
   return (
     <Box sx={{ p: 3 }}>

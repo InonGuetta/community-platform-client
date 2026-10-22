@@ -273,3 +273,47 @@ describe("stray signalling", () => {
     expect(() => mesh.removePeer("ghost")).not.toThrow();
   });
 });
+
+describe("screen sharing", () => {
+  // A transceiver whose receiver keeps its kind while the sender's track
+  // changes — the property the real sender lookup depends on.
+  const withVideoTransceiver = (pc) => {
+    const sender = {
+      track: { kind: "video", id: "camera" },
+      async replaceTrack(track) { this.track = track; },
+    };
+    pc.getTransceivers = () => [{ direction: "sendrecv", sender, receiver: { track: { kind: "video" } } }];
+    return sender;
+  };
+
+  test("a peer who arrives during a share is sent the screen, not the camera", async () => {
+    const { mesh, pcs } = build();
+    const screen = { kind: "video", id: "screen" };
+    await mesh.replaceVideoTrack(screen);
+    await mesh.offerTo("late");
+    expect(pcs[0].tracks).toContain(screen);
+    expect(pcs[0].tracks.some((t) => t.id === "camera")).toBe(false);
+  });
+
+  test("the camera can be put back after sending nothing", async () => {
+    const { mesh, pcs } = build();
+    await mesh.offerTo("peerA");
+    const sender = withVideoTransceiver(pcs[0]);
+
+    await mesh.replaceVideoTrack(null);
+    expect(sender.track).toBe(null);
+
+    const camera = { kind: "video", id: "camera-again" };
+    expect(await mesh.replaceVideoTrack(camera)).toBe(1);
+    expect(sender.track).toBe(camera);
+  });
+
+  test("a new local stream clears the override", async () => {
+    const { mesh, pcs } = build();
+    await mesh.replaceVideoTrack({ kind: "video", id: "screen" });
+    const camera = { kind: "video", id: "camera" };
+    mesh.setLocalStream({ getTracks: () => [camera] });
+    await mesh.offerTo("peerB");
+    expect(pcs[0].tracks).toEqual([camera]);
+  });
+});

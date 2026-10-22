@@ -106,7 +106,7 @@ describe("which tabs a media type offers", () => {
   test("audio and video get all four", () => {
     renderPage({ media: audio, isText: false });
     expect(screen.getAllByRole("tab").map((t) => t.textContent))
-      .toEqual(["סיכום", "פרקים", "הערות אישיות", "תמלול"]);
+      .toEqual(["סיכום", "פרקים", "תמלול", "הערות אישיות"]);
   });
 
   // A book has no timeline to place a chapter on and no transcript to edit.
@@ -208,6 +208,32 @@ describe("the lesson notebook", () => {
   test("is under a book, told it is one", () => {
     renderPage({ media: book, isText: true });
     expect(screen.getByTestId("lesson-notebook")).toHaveAttribute("data-text", "true");
+  });
+});
+
+// In the summary tab, after the key points — the same chips the archive card shows.
+describe("the tags in the summary tab", () => {
+  test("shows every tag of the lesson", () => {
+    renderPage({ media: { ...audio, tags: ["שבת", "הלכה"] } });
+    const row = screen.getByTestId("summary-tags");
+    expect(row).toHaveTextContent("שבת");
+    expect(row).toHaveTextContent("הלכה");
+  });
+
+  test("a book shows its tags too", () => {
+    renderPage({ media: { ...book, tags: ["תנ\"ך"] }, isText: true });
+    expect(screen.getByTestId("summary-tags")).toHaveTextContent("תנ\"ך");
+  });
+
+  // Tags are set by hand, not by the AI, so they do not wait for a summary.
+  test("shows them even before there is a summary", () => {
+    renderPage({ media: { ...audio, tags: ["שבת"] }, transcript: { status: "pending" } });
+    expect(screen.getByTestId("summary-tags")).toHaveTextContent("שבת");
+  });
+
+  test("no tags, no section", () => {
+    renderPage({ media: { ...audio, tags: [] } });
+    expect(screen.queryByTestId("summary-tags")).not.toBeInTheDocument();
   });
 });
 

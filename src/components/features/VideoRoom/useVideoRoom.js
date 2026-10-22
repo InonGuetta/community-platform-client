@@ -61,13 +61,22 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
     onEndRef.current = onEnd;
   }, [onEnd]);
 
-  // TODO(CR): the per-room state above (messages, sharing, micOn, cameraOn,
-  // hasMic, hasCamera, mediaError, roomError) is never reset when roomToken
-  // changes. Moving from one room to another without unmounting carries the
-  // previous room's chat and a "sharing" button state that no longer matches any
-  // track. Reset them at the top of this effect.
   useEffect(() => {
     if (!roomToken) return undefined;
+
+    // Everything above describes ONE room. Moving to another without unmounting
+    // used to carry the previous room's chat, errors and a "sharing" button
+    // that no longer matched any track. Each room starts from the same state a
+    // fresh mount would.
+    setStreams([]);
+    setMessages([]);
+    setSharing(false);
+    setMicOn(true);
+    setCameraOn(true);
+    setHasMic(false);
+    setHasCamera(false);
+    setMediaError(null);
+    setRoomError(null);
 
     let cancelled = false;
     const socket = io("/", { path: "/socket.io", autoConnect: false });

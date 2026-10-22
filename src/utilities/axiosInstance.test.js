@@ -10,8 +10,8 @@ beforeEach(() => {
   setUnauthorizedHandler(() => { fired++; });
 });
 
-const send = (status, url, data = { message: "Unauthorized" }) =>
-  rejected({ config: { url }, response: { status, data } }).catch((err) => err);
+const send = (status, url, data = { message: "Unauthorized" }, method = "get") =>
+  rejected({ config: { url, method }, response: { status, data } }).catch((err) => err);
 
 test("a 401 on a normal request reports the session as expired", async () => {
   const err = await send(401, "/media/get-all");
@@ -20,14 +20,30 @@ test("a 401 on a normal request reports the session as expired", async () => {
   expect(err.response.status).toBe(401);
 });
 
-// A 401 from these is ordinary traffic: /auth/me is what an anonymous visitor
-// gets on first load, and /auth/login answers 401 for a wrong password. Wiping
-// session state while someone mistypes their password would be worse than the
-// bug this fixes.
-describe("auth endpoints are not treated as an expiry", () => {
-  test.each(["/auth/login", "/auth/me", "/auth/logout", "/auth/register"])("%s does not fire", async (url) => {
-    await send(401, url, { message: "Invalid credentials" });
+// A 401 from these is ordinary traffic: GET /auth/me is what an anonymous
+// visitor gets on first load, /auth/login answers 401 for a wrong password, and
+// /auth/change-password for a wrong CURRENT password. Wiping session state
+// while someone mistypes their password would be worse than the bug this fixes.
+describe("the auth endpoints that answer 401 as normal traffic are not an expiry", () => {
+  test.each([
+    ["post", "/auth/login"],
+    ["get", "/auth/me"],
+    ["post", "/auth/change-password"],
+  ])("%s %s does not fire", async (method, url) => {
+    await send(401, url, { message: "Invalid credentials" }, method);
     expect(fired).toBe(0);
+  });
+});
+
+// The exemption used to be every "/auth/" URL, which also swallowed an expired
+// session on the profile edit and the role request — ordinary signed-in calls.
+describe("other auth calls are treated like any other request", () => {
+  test.each([
+    ["patch", "/auth/me"],
+    ["post", "/auth/request-role"],
+  ])("%s %s fires", async (method, url) => {
+    await send(401, url, { message: "Unauthorized" }, method);
+    expect(fired).toBe(1);
   });
 });
 

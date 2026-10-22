@@ -66,6 +66,24 @@ const PageTransition = ({ pathname, children }) => (
   </Box>
 );
 
+// The colour preference is a per-browser convenience: when storage is
+// unavailable the app simply starts light and forgets the choice on reload.
+const readColorMode = () => {
+  try {
+    return localStorage.getItem("colorMode") === "dark" ? "dark" : "light";
+  } catch {
+    return "light";
+  }
+};
+
+const saveColorMode = (mode) => {
+  try {
+    localStorage.setItem("colorMode", mode);
+  } catch {
+    // Not saved — the mode still applies for this visit.
+  }
+};
+
 const App = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -73,14 +91,10 @@ const App = () => {
 
   // Opt-in dark mode: defaults to light (existing experience unchanged) and only
   // flips when the user toggles it. Persisted so the choice survives reloads.
-  // TODO(CR): localStorage access is unguarded here and in toggle() below. In a
-  // browser with site data blocked (Safari private mode on older versions, some
-  // enterprise policies) getItem throws, and since this runs while rendering App
-  // the whole application fails to mount — a blank page. Wrap both in try/catch
-  // and fall back to "light", as utilities/floatingGeometry.js already does.
-  const [mode, setMode] = useState(() =>
-    localStorage.getItem("colorMode") === "dark" ? "dark" : "light"
-  );
+  // Wrapped, because localStorage can THROW — site data blocked by a policy or
+  // an older private mode — and this runs while App renders, so an unguarded
+  // read left the whole application unmounted: a blank page over a preference.
+  const [mode, setMode] = useState(readColorMode);
   const theme = useMemo(() => buildTheme(mode), [mode]);
   const colorMode = useMemo(
     () => ({
@@ -88,7 +102,7 @@ const App = () => {
       toggle: () =>
         setMode((prev) => {
           const next = prev === "dark" ? "light" : "dark";
-          localStorage.setItem("colorMode", next);
+          saveColorMode(next);
           return next;
         }),
     }),

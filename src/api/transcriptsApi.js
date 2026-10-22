@@ -5,7 +5,10 @@ import axiosInstance from "../utilities/axiosInstance";
 // a transcript that already exists. They answer immediately; the result arrives
 // through the status field the client polls on.
 export const transcriptsApi = {
-  get: async (mediaId) => (await axiosInstance.get(`/transcripts/${mediaId}`)).data,
+  // content: false — the chunks without their text (?content=0). A book's text
+  // is megabytes; its page needs only where each chunk is.
+  get: async (mediaId, { content = true } = {}) =>
+    (await axiosInstance.get(`/transcripts/${mediaId}`, content ? undefined : { params: { content: 0 } })).data,
 
   // mode: "hybrid" (default) | "semantic" | "keyword" — fused on the server.
   search: async ({ q, mode = "hybrid" }) =>

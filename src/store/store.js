@@ -9,6 +9,7 @@ import likesReducer from "./slicesAndThunks/likesSlice/likesSlice";
 import savesReducer from "./slicesAndThunks/savesSlice/savesSlice";
 import usersReducer from "./slicesAndThunks/usersSlice/usersSlice";
 import coursesReducer from "./slicesAndThunks/coursesSlice/coursesSlice";
+import discussionReducer from "./slicesAndThunks/discussionSlice/discussionSlice";
 import uiReducer from "./slicesAndThunks/uiSlice";
 import notificationReducer from "./slicesAndThunks/notificationSlice";
 import { notificationMiddleware } from "./middleware/notificationMiddleware";
@@ -27,6 +28,7 @@ const appReducer = combineReducers({
   saves: savesReducer,
   users: usersReducer,
   courses: coursesReducer,
+  discussion: discussionReducer,
   ui: uiReducer,
   notification: notificationReducer,
 });

@@ -13,6 +13,7 @@ import MediaInsightsTabs from "./componentsMediaView/MediaInsightsTabs";
 import NotesPanel from "./componentsMediaView/NotesPanel";
 import MediaActionsBar from "./componentsMediaView/MediaActionsBar";
 import LessonNotebook from "./componentsMediaView/LessonNotebook";
+import AIDiscussionPanel from "./componentsMediaView/AIDiscussion/AIDiscussionPanel";
 import useMediaViewPageController from "./useMediaViewPageController";
 import { creatorPrefixes } from "../../../utilities/constant";
 import { formatHebrewDate } from "../../../utilities/formatDate";
@@ -97,6 +98,16 @@ const MediaViewPage = () => {
     if (bookmark) jumpToBookmark(bookmark);
     revealMedia();
   };
+
+  // A search hit or a citation on a page of a book. Expressed as a bookmark
+  // that names a page and nothing finer — the shape the reader already resolves
+  // for `?page=` links — so there is no second way to turn the reader. A fresh
+  // object each time, so clicking the same page twice turns back to it after
+  // the reader has been scrolled away.
+  //
+  // Both this and the seek reveal the media: on a phone the tab sits under the
+  // player, and a jump the user cannot see looks like a click that did nothing.
+  const openPageFromDiscussion = (page) => jumpFromNotebook({ page_number: page });
 
   if (!media) {
     return (
@@ -210,6 +221,18 @@ const MediaViewPage = () => {
                   onSeek={isText ? undefined : seekPlayer}
                   onSeekText={isText ? jumpToBookmark : undefined}
                   isText={isText}
+                />
+              }
+              discussionPanel={
+                <AIDiscussionPanel
+                  mediaId={media.id}
+                  transcript={transcript}
+                  isText={isText}
+                  // A hit in a recording seeks the player; one in a book turns
+                  // the reader to its page. Each kind gets only the one that
+                  // fits, so a hit cannot try to seek a player that is absent.
+                  onSeek={isText ? undefined : seekFromNotebook}
+                  onOpenPage={isText ? openPageFromDiscussion : undefined}
                 />
               }
             />

@@ -55,6 +55,17 @@ vi.mock("./componentsMediaView/LessonNotebook", () => ({
   default: ({ isText }) => <div data-testid="lesson-notebook" data-text={String(isText)} />,
 }));
 
+// Owns its own dispatches through useAIDiscussionController. Its behaviour has
+// its own test; here only where it sits, and what it is handed, matters.
+vi.mock("./componentsMediaView/AIDiscussion/AIDiscussionPanel", () => ({
+  default: ({ isText, onSeek, onOpenPage }) => (
+    <div data-testid="discussion-panel" data-text={String(isText)}>
+      <button type="button" disabled={!onSeek} onClick={() => onSeek(754)}>seek-754</button>
+      <button type="button" disabled={!onOpenPage} onClick={() => onOpenPage(47)}>page-47</button>
+    </div>
+  ),
+}));
+
 import MediaViewPage from "./MediaViewPage";
 
 const audio = { id: 7, title: "שיעור בהלכות שבת", media_type: "audio", duration_seconds: 3600 };
@@ -103,17 +114,39 @@ test("shows a spinner rather than a broken page while the media is still loading
 // The tab set is built as a list precisely so a document can drop two of them.
 // Hard-coded indices used to point at the wrong panel the moment the set changed.
 describe("which tabs a media type offers", () => {
-  test("audio and video get all four", () => {
+  // "דיון עם AI" is last in the list — to the LEFT of "הערות אישיות" in this
+  // right-to-left row, which is where it was asked to be.
+  test("audio and video get all five, the discussion last", () => {
     renderPage({ media: audio, isText: false });
     expect(screen.getAllByRole("tab").map((t) => t.textContent))
-      .toEqual(["סיכום", "פרקים", "תמלול", "הערות אישיות"]);
+      .toEqual(["סיכום", "פרקים", "תמלול", "הערות אישיות", "דיון עם AI"]);
   });
 
   // A book has no timeline to place a chapter on and no transcript to edit.
-  test("a document drops chapters and transcript", () => {
+  test("a document drops chapters and transcript, and keeps the discussion", () => {
     renderPage({ media: book, isText: true });
     expect(screen.getAllByRole("tab").map((t) => t.textContent))
-      .toEqual(["סיכום", "הערות אישיות"]);
+      .toEqual(["סיכום", "הערות אישיות", "דיון עם AI"]);
+  });
+
+  test("a recording's discussion seeks the player, and has no reader to open", async () => {
+    renderPage({ media: audio, isText: false });
+    await userEvent.click(screen.getByRole("tab", { name: "דיון עם AI" }));
+    expect(screen.getByRole("button", { name: "seek-754" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "page-47" })).toBeDisabled();
+  });
+
+  // A book has no player; handing it one would let a hit seek nothing. What it
+  // has is the reader, turned through the same bookmark shape `?page=` uses.
+  test("a book's discussion opens pages in the reader, and has no player", async () => {
+    const jumpToBookmark = vi.fn();
+    renderPage({ media: book, isText: true, jumpToBookmark });
+    await userEvent.click(screen.getByRole("tab", { name: "דיון עם AI" }));
+    expect(screen.getByTestId("discussion-panel").dataset.text).toBe("true");
+    expect(screen.getByRole("button", { name: "seek-754" })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole("button", { name: "page-47" }));
+    expect(jumpToBookmark).toHaveBeenCalledWith({ page_number: 47 });
   });
 
   test("the player is only rendered for playable media", () => {

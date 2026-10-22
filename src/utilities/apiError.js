@@ -70,6 +70,10 @@ export const ERROR_CODES = {
   ALREADY_QUEUED: "ALREADY_QUEUED",
   ALREADY_RUNNING: "ALREADY_RUNNING",
 
+  // The "דיון עם AI" chat.
+  AI_NOT_READY: "AI_NOT_READY",
+  AI_ANSWER_FAILED: "AI_ANSWER_FAILED",
+
   // ── Client-originated ──────────────────────────────────────────────────────
   // These never come from the server; axiosInstance stamps them on failures the
   // server was never reached for, or answered in a shape it does not control.
@@ -173,6 +177,10 @@ const ERROR_CODE_HE = {
     "לא ניתן לקרוא את הקובץ — ייתכן שהוא פגום או מוגן בסיסמה.",
   [ERROR_CODES.ALREADY_QUEUED]: "הפעולה כבר רצה עבור מדיה זו",
   [ERROR_CODES.ALREADY_RUNNING]: "הפעולה כבר רצה עבור מדיה זו",
+  // Two different instructions: wait, or ask again. The generic failure would
+  // send someone with an unprocessed lesson to retry a question that cannot work.
+  [ERROR_CODES.AI_NOT_READY]: "השיעור עדיין בעיבוד — אפשר יהיה לשוחח עליו כשהעיבוד יסתיים",
+  [ERROR_CODES.AI_ANSWER_FAILED]: "לא הצלחנו לקבל תשובה כרגע. נסה לשאול שוב.",
 
   [ERROR_CODES.DB_UNAVAILABLE]: "מסד הנתונים אינו זמין כרגע, נסה שוב",
   [ERROR_CODES.INTERNAL]: "שגיאת שרת פנימית",

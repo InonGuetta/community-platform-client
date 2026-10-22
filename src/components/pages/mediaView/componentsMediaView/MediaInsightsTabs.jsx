@@ -18,7 +18,11 @@ import TranscriptEditor from "../../../features/TranscriptEditor/TranscriptEdito
 // has and a caller might not — as a slot, this component stays out of it and
 // simply omits the tab when nobody passes one.
 // `tags` are the lesson's own tags, shown at the foot of the summary tab.
-const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, onSeek, tags = [] }) => {
+//
+// "דיון עם AI" arrives as a slot for the same reason as the notes: it owns its
+// own dispatches and needs the page's player and reader to open a citation,
+// which the notebook's source preview does not offer. No slot, no tab.
+const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, discussionPanel = null, onSeek, tags = [] }) => {
   const {
     transcript, isText, keyPointHeadings,
     canEditTranscript, canGenerateHeadings,
@@ -45,6 +49,10 @@ const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, onSeek, tags 
     ...(isText ? [] : [{ key: "chapters", label: "פרקים" }]),
     ...(isText ? [] : [{ key: "transcript", label: "תמלול" }]),
     ...(notesPanel ? [{ key: "notes", label: "הערות אישיות" }] : []),
+    // Last in the list, which in this right-to-left row is to the LEFT of
+    // "הערות אישיות". Offered for books too: a book's text is in the same
+    // chunks a recording's transcript is.
+    ...(discussionPanel ? [{ key: "discuss", label: "דיון עם AI" }] : []),
   ];
   const activeTab = Math.min(tab, tabs.length - 1);
   const activeKey = tabs[activeTab]?.key;
@@ -52,7 +60,9 @@ const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, onSeek, tags 
   return (
     <>
       <Tabs value={activeTab} onChange={(_, v) => setTab(v)} variant="fullWidth" sx={{ mb: 2, flexShrink: 0 }}>
-        {tabs.map((t) => <Tab key={t.key} label={t.label} />)}
+        {/* minWidth 0 and tighter padding: five tabs share a third of the
+            page, and MUI's default 90px minimum would push the last one off. */}
+        {tabs.map((t) => <Tab key={t.key} label={t.label} sx={{ minWidth: 0, px: 1 }} />)}
       </Tabs>
 
       <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
@@ -83,6 +93,7 @@ const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, onSeek, tags 
           />
         )}
         {activeKey === "notes" && notesPanel}
+        {activeKey === "discuss" && discussionPanel}
         {activeKey === "transcript" && (
           <TranscriptEditor
             transcript={transcript}

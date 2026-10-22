@@ -1,0 +1,281 @@
+import { useEffect, useRef, useState } from "react";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import SendIcon from "@mui/icons-material/Send";
+import AddCommentIcon from "@mui/icons-material/AddCommentOutlined";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import { statuses } from "../../../../../utilities/constant";
+import { hebrewForError } from "../../../../../utilities/apiError";
+import { placeOf, canOpenPlace, openPlace } from "../../../../../utilities/discussionPlace";
+
+// The conversation with the AI about ONE lesson. Presentation only: `chat` is
+// what useAIDiscussionController hands it.
+//
+// Every answer is grounded in the lesson's own passages and cites them as [n].
+// Those markers become small buttons inside the text, and the passages are
+// listed again under the answer — each opening where it is: a moment in the
+// recording, a page of the book. A citation the user can check is the whole
+// point of answering from the lesson rather than from the model.
+
+// Mirrors MAX_QUESTION_CHARS in the server's controllersDiscussion.js.
+const MAX_QUESTION_CHARS = 1000;
+
+// Offered on an empty conversation, so the first question costs no thought.
+const SUGGESTIONS = [
+  "מה הנקודה המרכזית?",
+  "סכם בשלוש נקודות",
+  "אילו מקורות הוזכרו?",
+];
+
+// The answer's text, with each [n] turned into a button for passage n. A
+// marker with no citation behind it stays the plain text it is — the server
+// removes invented ones, so this is belt and braces, not a path that matters.
+const AnswerText = ({ content, citations, onOpen }) => {
+  const byN = new Map((citations ?? []).map((c) => [Number(c.n), c]));
+  const parts = String(content).split(/(\[\d+\])/g);
+  return parts.map((part, i) => {
+    const n = /^\[(\d+)\]$/.exec(part)?.[1];
+    const citation = n ? byN.get(Number(n)) : null;
+    if (!citation) return part;
+    const place = placeOf(citation);
+    const openable = onOpen.can(place);
+    return (
+      <Tooltip key={i} title={`${place.label}${citation.quote ? ` — ${citation.quote}…` : ""}`} arrow>
+        <Box
+          component={openable ? "button" : "span"}
+          type={openable ? "button" : undefined}
+          onClick={openable ? () => onOpen.go(place) : undefined}
+          aria-label={openable ? `מקור ${n}, ${place.label}` : undefined}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            mx: 0.25,
+            px: 0.5,
+            border: 0,
+            borderRadius: 1,
+            font: "inherit",
+            fontSize: "0.75em",
+            fontWeight: 700,
+            verticalAlign: "super",
+            lineHeight: 1.2,
+            color: "primary.main",
+            bgcolor: "action.selected",
+            cursor: openable ? "pointer" : "default",
+            "&:hover": openable ? { bgcolor: "primary.light", color: "primary.contrastText" } : undefined,
+          }}
+        >
+          {n}
+        </Box>
+      </Tooltip>
+    );
+  });
+};
+
+const Sources = ({ citations, onOpen }) => (
+  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }} data-testid="answer-sources">
+    {citations.map((c) => {
+      const place = placeOf(c);
+      const openable = onOpen.can(place);
+      return (
+        <Chip
+          key={c.n}
+          size="small"
+          variant="outlined"
+          color={openable ? "primary" : "default"}
+          icon={place.kind === "time" ? <PlayArrowIcon /> : place.kind === "page" ? <MenuBookIcon /> : undefined}
+          label={`[${c.n}] ${place.label}`}
+          onClick={openable ? () => onOpen.go(place) : undefined}
+        />
+      );
+    })}
+  </Box>
+);
+
+const Bubble = ({ message, onOpen }) => {
+  const mine = message.role === "user";
+  return (
+    <Box
+      data-testid={mine ? "message-user" : "message-assistant"}
+      sx={{
+        // The reader's own questions on the far side, the answers where the
+        // eye starts — the start edge, which in this page is the right.
+        alignSelf: mine ? "flex-end" : "flex-start",
+        maxWidth: mine ? "85%" : "100%",
+        px: 1.5,
+        py: 1,
+        borderRadius: 2,
+        bgcolor: mine ? "primary.main" : "action.hover",
+        color: mine ? "primary.contrastText" : "text.primary",
+        opacity: message.pending ? 0.7 : 1,
+      }}
+    >
+      <Typography variant="body2" component="div" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
+        {mine ? message.content : <AnswerText content={message.content} citations={message.citations} onOpen={onOpen} />}
+      </Typography>
+      {!mine && message.citations?.length > 0 && <Sources citations={message.citations} onOpen={onOpen} />}
+    </Box>
+  );
+};
+
+const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
+  const [draft, setDraft] = useState("");
+  const endRef = useRef(null);
+  const onOpen = {
+    can: (place) => canOpenPlace(place, { onSeek, onOpenPage }),
+    go: (place) => openPlace(place, { onSeek, onOpenPage }),
+  };
+
+  // Keep the newest message in view: the question as it is sent, the
+  // "thinking" line, then the answer.
+  useEffect(() => {
+    endRef.current?.scrollIntoView?.({ block: "end", behavior: "smooth" });
+  }, [chat.messages.length, chat.asking]);
+
+  const send = async (text = draft) => {
+    const question = text.trim();
+    if (!question || chat.asking) return;
+    setDraft("");
+    const answered = await chat.ask(question);
+    // The server kept nothing, so neither does the thread — but the words are
+    // put back, unless something new has been typed in the meantime.
+    if (!answered) setDraft((current) => current || question);
+  };
+
+  const onKeyDown = (e) => {
+    // Enter sends; Shift+Enter is a new line, as in every chat box.
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent?.isComposing) {
+      e.preventDefault();
+      send();
+    }
+  };
+
+  if (chat.loadStatus === statuses.loading || chat.loadStatus === statuses.idle) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+        <CircularProgress size={24} aria-label="טוען את השיחה" />
+      </Box>
+    );
+  }
+
+  if (chat.loadStatus === statuses.failed) {
+    return (
+      <Alert
+        severity="error"
+        action={<Button color="inherit" size="small" onClick={chat.retryLoad}>נסה שוב</Button>}
+      >
+        {hebrewForError(chat.loadError, "טעינת השיחה נכשלה.")}
+      </Alert>
+    );
+  }
+
+  const empty = chat.messages.length === 0;
+  // Two forms, because Hebrew merges the preposition with the article:
+  // "ב" + "השיעור" is "בשיעור", never "בהשיעור".
+  const source = isText ? "הספר" : "השיעור";
+  const inSource = isText ? "בספר" : "בשיעור";
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 1 }}>
+      {!empty && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            size="small"
+            startIcon={<AddCommentIcon />}
+            onClick={chat.startNew}
+            disabled={chat.asking}
+          >
+            שיחה חדשה
+          </Button>
+        </Box>
+      )}
+
+      <Box
+        role="log"
+        aria-live="polite"
+        aria-label="השיחה"
+        sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, py: 0.5 }}
+      >
+        {empty && (
+          <Box data-testid="chat-empty">
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+              אפשר לשאול כל שאלה על {source}. התשובה תתבסס רק על מה שנאמר בו, עם הפניה למקום המדויק.
+            </Typography>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+              {SUGGESTIONS.map((s) => (
+                <Chip key={s} label={s} variant="outlined" onClick={() => send(s)} disabled={chat.asking} />
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {chat.messages.map((m) => <Bubble key={m.id} message={m} onOpen={onOpen} />)}
+
+        {chat.asking && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }} data-testid="chat-thinking">
+            <CircularProgress size={16} />
+            <Typography variant="body2">מעיין {inSource}…</Typography>
+          </Box>
+        )}
+        <div ref={endRef} />
+      </Box>
+
+      {chat.askError && (
+        <Alert severity="error" onClose={chat.dismissAskError}>
+          {hebrewForError(chat.askError, "לא התקבלה תשובה. נסה לשאול שוב.")}
+        </Alert>
+      )}
+
+      <Box
+        component="form"
+        onSubmit={(e) => { e.preventDefault(); send(); }}
+        sx={{
+          display: "flex",
+          alignItems: "flex-end",
+          gap: 1,
+          // On a phone the panel is not height-capped and the whole page
+          // scrolls; sticky keeps the box reachable under a long thread.
+          position: "sticky",
+          bottom: 0,
+          bgcolor: "background.paper",
+          pt: 0.5,
+        }}
+      >
+        <TextField
+          fullWidth
+          multiline
+          maxRows={4}
+          size="small"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value.slice(0, MAX_QUESTION_CHARS))}
+          onKeyDown={onKeyDown}
+          placeholder={`שאל שאלה על ${source}…`}
+          inputProps={{ "aria-label": "שאלה", maxLength: MAX_QUESTION_CHARS }}
+        />
+        <IconButton
+          type="submit"
+          color="primary"
+          disabled={!draft.trim() || chat.asking}
+          aria-label="שלח"
+          // The icon points right; in a right-to-left page "send" points left.
+          sx={{ "& svg": { transform: "scaleX(-1)" } }}
+        >
+          <SendIcon />
+        </IconButton>
+      </Box>
+
+      <Typography variant="caption" color="text.disabled" sx={{ textAlign: "center" }}>
+        התשובות נוצרות על ידי AI ועלולות לטעות — לחצו על מקור כדי לבדוק.
+      </Typography>
+    </Box>
+  );
+};
+
+export default ChatPane;

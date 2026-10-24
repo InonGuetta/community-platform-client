@@ -6,6 +6,7 @@ import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import TextQualityNotice from "./TextQualityNotice";
 
 // The panel used to render `null` whenever there was no summary — which was
 // tolerable when a summary arrived a minute after a lecture was transcribed, and
@@ -95,6 +96,10 @@ const AISummaryPanel = ({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Typography variant="subtitle1" fontWeight={600}>סיכום AI</Typography>
+
+      {/* A book only: a recording's transcript is never OCR. canGenerate is
+          exactly "may re-process this document", so it is also who can fix it. */}
+      {isText && <TextQualityNotice quality={transcript?.text_quality} canFix={canGenerate} />}
 
       {running && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, color: "text.secondary" }}>

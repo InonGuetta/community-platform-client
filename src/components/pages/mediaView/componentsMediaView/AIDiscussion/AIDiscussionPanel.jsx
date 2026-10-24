@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import useAIDiscussionController, { DISCUSSION_MODES } from "../../useAIDiscussionController";
 import SmartSearchPane from "./SmartSearchPane";
 import ChatPane from "./ChatPane";
+import TextQualityNotice from "../TextQualityNotice";
 
 // The "דיון עם AI" tab: a switch between two ways of asking about THIS lesson.
 //
@@ -63,6 +64,9 @@ const AIDiscussionPanel = ({ mediaId, transcript, isText = false, onSeek, onOpen
         </Alert>
       ) : (
         <>
+          {/* The search and the chat know only what reads — said where they
+              are used, not only on the summary tab. */}
+          {isText && <TextQualityNotice quality={transcript?.text_quality} />}
           <Typography variant="caption" color="text.secondary">
             {mode === DISCUSSION_MODES.search
               ? `חיפוש לפי משמעות בתוך ${isText ? "הספר" : "השיעור"} הזה בלבד`

@@ -22,14 +22,15 @@ export const discussionApi = {
 
   // A question, answered as it is written. Resolves to
   // { conversation, messages: [question, answer] } — the stored exchange —
-  // after calling onDelta(text) with each piece the server lets through.
+  // after calling onDelta(text) with each piece the server lets through, and
+  // onStage(stage) as it moves from finding the passages to writing.
   //
   // fetch rather than axiosInstance: axios in a browser cannot read a body
   // while it is still arriving. What axiosInstance would have done for this
   // request is done here by hand — the same /api base, the session cookie, an
   // expired session reported to the same handler — and a refusal is thrown in
   // axios's error shape, so the thunk's rejectionOf reads it unchanged.
-  askStream: async (mediaId, question, { onDelta, signal } = {}) => {
+  askStream: async (mediaId, question, { onDelta, onStage, signal } = {}) => {
     const res = await fetch(`/api/discussion/${mediaId}/messages/stream`, {
       method: "POST",
       credentials: "include",
@@ -42,6 +43,6 @@ export const discussionApi = {
       const data = await res.json().catch(() => ({}));
       throw { response: { status: res.status, data } };
     }
-    return readEventStream(res.body, onDelta);
+    return readEventStream(res.body, onDelta, onStage);
   },
 };

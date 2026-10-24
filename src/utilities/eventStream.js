@@ -8,6 +8,7 @@
 // with `stream: true` — so whatever follows the last blank line is kept for
 // the next chunk.
 //
+//   stage  { stage }                     → onStage(stage) — "searching", "writing"
 //   delta  { text }                      → onDelta(text)
 //   done   { conversation, messages }    → the resolved value
 //   error  { code, message }             → thrown, in axios's error shape
@@ -35,7 +36,7 @@ const unfinished = () => ({
   response: { status: 502, data: { code: "AI_ANSWER_FAILED", message: "The answer stream ended early" } },
 });
 
-export const readEventStream = async (body, onDelta) => {
+export const readEventStream = async (body, onDelta, onStage) => {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -50,6 +51,7 @@ export const readEventStream = async (body, onDelta) => {
       buffer = buffer.slice(cut + 2);
       if (!event) continue;
       if (event.name === "delta" && typeof event.data?.text === "string") onDelta?.(event.data.text);
+      else if (event.name === "stage" && typeof event.data?.stage === "string") onStage?.(event.data.stage);
       else if (event.name === "done") return event.data;
       else if (event.name === "error") throw { response: { status: 502, data: event.data } };
     }

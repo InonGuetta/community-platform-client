@@ -19,12 +19,17 @@ export const startConversation = createAsyncThunk(
 // `requestId` ties the piece to the question it answers.
 export const answerDelta = createAction("discussion/answerDelta");
 
+// Which step the answer is at — "searching" (finding the passages, the slow
+// part of a long lesson) or "writing". Declared here for the same reason.
+export const answerStage = createAction("discussion/answerStage");
+
 export const askQuestion = createAsyncThunk(
   "discussion/ask",
   async ({ mediaId, question }, { dispatch, requestId, signal, rejectWithValue }) => {
     try {
       return await discussionApi.askStream(mediaId, question, {
         signal,
+        onStage: (stage) => dispatch(answerStage({ mediaId, requestId, stage })),
         onDelta: (text) => dispatch(answerDelta({ mediaId, requestId, text })),
       });
     } catch (err) {

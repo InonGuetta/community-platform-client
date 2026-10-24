@@ -44,6 +44,18 @@ describe("reading the answer as it arrives", () => {
     expect(onDelta).toHaveBeenCalledWith("שלום");
   });
 
+  test("stages go to onStage, in order, and are not text", async () => {
+    const onDelta = vi.fn();
+    const onStage = vi.fn();
+    await readEventStream(
+      streamOf([event("stage", { stage: "searching" }), event("stage", { stage: "writing" }), event("delta", { text: "א" }), event("done", DONE)]),
+      onDelta,
+      onStage
+    );
+    expect(onStage.mock.calls.map((c) => c[0])).toEqual(["searching", "writing"]);
+    expect(onDelta.mock.calls.map((c) => c[0])).toEqual(["א"]);
+  });
+
   test("CRLF line endings read the same", async () => {
     const crlf = (event("delta", { text: "א" }) + event("done", DONE)).replace(/\n/g, "\r\n");
     const onDelta = vi.fn();

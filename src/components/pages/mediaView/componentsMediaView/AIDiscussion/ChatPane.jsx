@@ -79,6 +79,15 @@ const AnswerText = ({ content, citations, onOpen }) => {
   });
 };
 
+// The "thinking" line, by the step the server says the answer is at. Before
+// it has said anything, the general line; finding the passages is the slow
+// part of a long lesson, so that one is named.
+const waitingLabel = (stage, inSource) => {
+  if (stage === "writing") return "כותב תשובה…";
+  if (stage === "searching") return `מחפש קטעים ${inSource}…`;
+  return `מעיין ${inSource}…`;
+};
+
 const Sources = ({ citations, onOpen }) => (
   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }} data-testid="answer-sources">
     {citations.map((c) => {
@@ -225,7 +234,7 @@ const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
         {chat.asking && !answerArriving && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }} data-testid="chat-thinking">
             <CircularProgress size={16} />
-            <Typography variant="body2">מעיין {inSource}…</Typography>
+            <Typography variant="body2">{waitingLabel(chat.askStage, inSource)}</Typography>
           </Box>
         )}
         <div ref={endRef} />

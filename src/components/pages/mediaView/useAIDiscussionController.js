@@ -96,6 +96,7 @@ const useAIDiscussionController = ({ mediaId, transcript }) => {
       loadStatus: lesson.loadStatus,
       loadError: lesson.loadError,
       asking: lesson.asking,
+      askStage: lesson.askStage,
       askError: lesson.askError,
       ask,
       startNew,

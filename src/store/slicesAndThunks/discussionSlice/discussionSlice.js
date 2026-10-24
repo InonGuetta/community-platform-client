@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchConversation, searchInLesson } from "./discussionGet";
-import { startConversation, askQuestion, answerDelta } from "./discussionPost";
+import { startConversation, askQuestion, answerDelta, answerStage } from "./discussionPost";
 import { statuses } from "../../../utilities/constant";
 
 // The "דיון עם AI" tab, kept PER LESSON. Moving from one lesson to another and
@@ -17,6 +17,9 @@ export const emptyLesson = () => ({
   loadStatus: statuses.idle,
   loadError: null,
   asking: false,
+  // What the question in flight is waiting on: null before the server has
+  // said, then "searching", then "writing".
+  askStage: null,
   askError: null,
   search: { query: "", results: [], status: statuses.idle, error: null },
 });
@@ -81,6 +84,7 @@ const discussionSlice = createSlice({
         const { mediaId, question } = action.meta.arg;
         const lesson = lessonOf(state, mediaId);
         lesson.asking = true;
+        lesson.askStage = null;
         lesson.askError = null;
         lesson.messages.push({
           id: pendingId(action.meta.requestId),
@@ -89,6 +93,12 @@ const discussionSlice = createSlice({
           citations: [],
           pending: true,
         });
+      })
+      .addCase(answerStage, (state, action) => {
+        const { mediaId, requestId, stage } = action.payload;
+        const lesson = lessonOf(state, mediaId);
+        // Only for the question still waiting — not one already answered.
+        if (lesson.messages.some((m) => m.id === pendingId(requestId))) lesson.askStage = stage;
       })
       .addCase(answerDelta, (state, action) => {
         const { mediaId, requestId, text } = action.payload;
@@ -103,6 +113,7 @@ const discussionSlice = createSlice({
       .addCase(askQuestion.fulfilled, (state, action) => {
         const lesson = lessonOf(state, action.meta.arg.mediaId);
         lesson.asking = false;
+        lesson.askStage = null;
         lesson.conversation = action.payload.conversation;
         // The stored pair replaces both the pending question and the draft:
         // what stays on screen is what is in the database.
@@ -115,6 +126,7 @@ const discussionSlice = createSlice({
         // too. The composer keeps the question for a retry.
         const lesson = lessonOf(state, action.meta.arg.mediaId);
         lesson.asking = false;
+        lesson.askStage = null;
         lesson.askError = action.payload ?? null;
         lesson.messages = withoutTemporary(lesson.messages, action.meta.requestId);
       })

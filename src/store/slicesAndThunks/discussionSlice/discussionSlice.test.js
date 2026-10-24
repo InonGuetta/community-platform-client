@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import reducer, { clearSearch, clearAskError } from "./discussionSlice";
 import { fetchConversation, searchInLesson } from "./discussionGet";
-import { startConversation, askQuestion, answerDelta } from "./discussionPost";
+import { startConversation, askQuestion, answerDelta, answerStage } from "./discussionPost";
 
 // The "דיון עם AI" state, per lesson. Driven through the reducer with the
 // thunks' own action creators, so the action shapes are the real ones.
@@ -151,5 +151,32 @@ describe("an answer as it is written", () => {
   test("a piece for a question no longer on screen is dropped", () => {
     const state = reducer(initial(), answerDelta({ mediaId: 7, requestId: "gone", text: "x" }));
     expect(state.byMediaId[7].messages).toEqual([]);
+  });
+});
+
+describe("which step the answer is at", () => {
+  const arg = { mediaId: 7, question: "מה העיקר?" };
+
+  test("a question starts with no step, and follows the server's", () => {
+    let state = reducer(initial(), askQuestion.pending("r1", arg));
+    expect(state.byMediaId[7].askStage).toBe(null);
+    state = reducer(state, answerStage({ mediaId: 7, requestId: "r1", stage: "searching" }));
+    expect(state.byMediaId[7].askStage).toBe("searching");
+    state = reducer(state, answerStage({ mediaId: 7, requestId: "r1", stage: "writing" }));
+    expect(state.byMediaId[7].askStage).toBe("writing");
+  });
+
+  test("the step is cleared when the answer arrives, and when it fails", () => {
+    let state = reducer(initial(), askQuestion.pending("r1", arg));
+    state = reducer(state, answerStage({ mediaId: 7, requestId: "r1", stage: "writing" }));
+    const done = reducer(state, askQuestion.fulfilled({ conversation: { id: 1 }, messages: [] }, "r1", arg));
+    expect(done.byMediaId[7].askStage).toBe(null);
+    const failed = reducer(state, askQuestion.rejected(null, "r1", arg, { code: "AI_ANSWER_FAILED" }));
+    expect(failed.byMediaId[7].askStage).toBe(null);
+  });
+
+  test("a step for a question already answered is ignored", () => {
+    const state = reducer(initial(), answerStage({ mediaId: 7, requestId: "old", stage: "writing" }));
+    expect(state.byMediaId[7].askStage).toBe(null);
   });
 });

@@ -185,3 +185,23 @@ describe("an answer as it is written", () => {
     expect(screen.getByTestId("chat-thinking")).toBeInTheDocument();
   });
 });
+
+describe("the waiting line names the step", () => {
+  const waiting = (askStage, isText = false) =>
+    render(<ChatPane chat={chat({ asking: true, askStage, messages: [{ ...question, pending: true }] })} isText={isText} />);
+
+  test("before the server has said anything", () => {
+    waiting(null);
+    expect(screen.getByTestId("chat-thinking")).toHaveTextContent("מעיין בשיעור…");
+  });
+
+  test("while the passages are found — in a book's words for a book", () => {
+    waiting("searching", true);
+    expect(screen.getByTestId("chat-thinking")).toHaveTextContent("מחפש קטעים בספר…");
+  });
+
+  test("while the answer is written", () => {
+    waiting("writing");
+    expect(screen.getByTestId("chat-thinking")).toHaveTextContent("כותב תשובה…");
+  });
+});

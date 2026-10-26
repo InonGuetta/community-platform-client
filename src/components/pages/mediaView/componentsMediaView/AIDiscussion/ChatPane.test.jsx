@@ -205,3 +205,14 @@ describe("the waiting line names the step", () => {
     expect(screen.getByTestId("chat-thinking")).toHaveTextContent("כותב תשובה…");
   });
 });
+
+// The daily quota (PRD ASK-5). "Try again" would send the reader into a loop
+// that cannot work until midnight; they are told when it will, and what works now.
+test("the daily quota says when the chat comes back, and points at the search", () => {
+  render(<ChatPane chat={chat({ askError: { code: "AI_DAILY_LIMIT", message: "Daily question limit reached" } })} />);
+  const alert = screen.getByRole("alert");
+  expect(alert).toHaveTextContent("הגעת למכסת השאלות היומית");
+  expect(alert).toHaveTextContent("אפשר להמשיך מחר");
+  expect(alert).toHaveTextContent("החיפוש החכם");
+  expect(alert).not.toHaveTextContent("נסה לשאול שוב");
+});

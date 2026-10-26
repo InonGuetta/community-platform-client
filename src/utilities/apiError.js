@@ -73,6 +73,7 @@ export const ERROR_CODES = {
   // The "דיון עם AI" chat.
   AI_NOT_READY: "AI_NOT_READY",
   AI_ANSWER_FAILED: "AI_ANSWER_FAILED",
+  AI_DAILY_LIMIT: "AI_DAILY_LIMIT",
 
   // ── Client-originated ──────────────────────────────────────────────────────
   // These never come from the server; axiosInstance stamps them on failures the
@@ -181,6 +182,9 @@ const ERROR_CODE_HE = {
   // send someone with an unprocessed lesson to retry a question that cannot work.
   [ERROR_CODES.AI_NOT_READY]: "השיעור עדיין בעיבוד — אפשר יהיה לשוחח עליו כשהעיבוד יסתיים",
   [ERROR_CODES.AI_ANSWER_FAILED]: "לא הצלחנו לקבל תשובה כרגע. נסה לשאול שוב.",
+  // Says when it will work again, and what still works now — "try again"
+  // would send the reader into a loop that cannot succeed until midnight.
+  [ERROR_CODES.AI_DAILY_LIMIT]: "הגעת למכסת השאלות היומית בצ'אט. אפשר להמשיך מחר — והחיפוש החכם זמין גם עכשיו.",
 
   [ERROR_CODES.DB_UNAVAILABLE]: "מסד הנתונים אינו זמין כרגע, נסה שוב",
   [ERROR_CODES.INTERNAL]: "שגיאת שרת פנימית",

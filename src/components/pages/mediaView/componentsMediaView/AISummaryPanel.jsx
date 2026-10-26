@@ -6,6 +6,7 @@ import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import TextQualityNotice from "./TextQualityNotice";
 
 // The panel used to render `null` whenever there was no summary — which was
 // tolerable when a summary arrived a minute after a lecture was transcribed, and
@@ -60,6 +61,10 @@ const AISummaryPanel = ({
   // wedged book job would spin here forever with no way to re-check.
   pollingStalled = false,
   onRetryPolling,
+  // The lesson's tags. Not part of the AI output — they are set by the person
+  // who uploaded it — but they answer the same question as the summary ("what
+  // is this about"), so they sit at the foot of the same tab.
+  tags = [],
 }) => {
   const status = transcript?.status;
   const summary = transcript?.ai_summary;
@@ -91,6 +96,10 @@ const AISummaryPanel = ({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Typography variant="subtitle1" fontWeight={600}>סיכום AI</Typography>
+
+      {/* A book only: a recording's transcript is never OCR. canGenerate is
+          exactly "may re-process this document", so it is also who can fix it. */}
+      {isText && <TextQualityNotice quality={transcript?.text_quality} canFix={canGenerate} />}
 
       {running && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, color: "text.secondary" }}>
@@ -134,6 +143,21 @@ const AISummaryPanel = ({
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
             {keyPoints.map((point, i) => (
               <Chip key={i} label={point} size="small" variant="outlined" color="primary" />
+            ))}
+          </Box>
+        </>
+      )}
+
+      {/* Shown whatever the state of the summary: tags are set by hand, so a
+          lesson with no summary yet — or one still being produced — has them
+          all the same. The same chips the archive card shows. */}
+      {tags.length > 0 && (
+        <>
+          <Divider />
+          <Typography variant="subtitle2" fontWeight={600}>תגיות</Typography>
+          <Box data-testid="summary-tags" sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {tags.map((tag) => (
+              <Chip key={tag} label={tag} size="small" variant="outlined" color="secondary" />
             ))}
           </Box>
         </>

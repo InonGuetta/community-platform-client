@@ -1,4 +1,6 @@
 import { createSelector } from "@reduxjs/toolkit";
+import { selectUser } from "./authSelectors";
+import { canManageCourse } from "../../utilities/permissions";
 
 const selectCoursesState = (state) => state.courses;
 
@@ -11,6 +13,12 @@ export const selectCoursesError = createSelector(selectCoursesState, (c) => c.er
 // should offer. An archived course keeps its lessons but stops being a choice.
 export const selectActiveCourses = createSelector(selectAllCourses, (items) =>
   items.filter((c) => c.is_active)
+);
+
+// The active courses the signed-in user may file a lesson into — the same rule
+// the server applies to an upload's courseId (canManageCourse).
+export const selectAssignableCourses = createSelector(selectActiveCourses, selectUser, (items, user) =>
+  items.filter((c) => canManageCourse(user, c))
 );
 
 // A factory, not a selector: the roster is per course, so the caller supplies

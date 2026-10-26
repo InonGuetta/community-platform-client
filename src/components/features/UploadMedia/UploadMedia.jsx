@@ -17,7 +17,7 @@ import { closeUpload } from "../../../store/slicesAndThunks/uiSlice";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
 import { mediaApi } from "../../../api/mediaApi";
-import { selectActiveCourses } from "../../../store/selectors/coursesSelectors";
+import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
 
 // creatorName starts empty on purpose rather than pre-filled with "כללי": the
 // placeholder says what blank will become, and pre-filling would make the
@@ -27,7 +27,8 @@ const EMPTY_FIELDS = { title: "", description: "", mediaType: "video", courseId:
 const UploadMedia = ({ open }) => {
   const dispatch = useDispatch();
   const progress = useSelector((state) => state.ui.uploadProgress);
-  const courses = useSelector(selectActiveCourses);
+  // Only the courses this user may file into — the server refuses the others.
+  const courses = useSelector(selectAssignableCourses);
   // Derived from media already in the store — no request, and no new endpoint.
   // From the creators endpoint, not from the media in the store: the archive
   // filters server-side now, so the rows it holds are a filtered subset and the

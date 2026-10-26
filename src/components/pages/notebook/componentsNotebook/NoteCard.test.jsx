@@ -120,3 +120,19 @@ describe("what the card no longer has", () => {
     expect(card).not.toHaveAttribute("draggable", "true");
   });
 });
+
+// A note ticked in the list down the side is framed in the column too, so the
+// notes a bulk delete or an export is about to act on can be seen where they are.
+describe("a ticked note", () => {
+  const ring = (card) => getComputedStyle(card).boxShadow;
+
+  test("is framed", () => {
+    const { card } = setup({ isSelected: true });
+    expect(ring(card)).toMatch(/2px/);
+  });
+
+  test("an unticked one is not", () => {
+    const { card } = setup({ isSelected: false });
+    expect(ring(card)).not.toMatch(/2px/);
+  });
+});

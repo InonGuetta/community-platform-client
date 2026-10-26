@@ -1,17 +1,13 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
-import { fetchMyCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
-import { statuses } from "../../../utilities/constant";
 import { countLabel } from "../../../utilities/countLabel";
+import { useMyCoursesPageController } from "./useMyCoursesPageController";
 
 // What a student is enrolled in.
 //
@@ -26,15 +22,15 @@ import { countLabel } from "../../../utilities/countLabel";
 // an Accordion holding a roster. A student's answer to "what am I in" is a short
 // list, and building it out of a management screen would mean every future change
 // there having to remember a mode it was not designed for.
+
 const MyCoursesPage = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const courses = useSelector((state) => state.courses.myCourses);
-  const status = useSelector((state) => state.courses.myCoursesStatus);
+  const {
+    courses,
+    navigate,
+    loadingFirstTime,
+  } = useMyCoursesPageController();
 
-  useEffect(() => { dispatch(fetchMyCourses()); }, [dispatch]);
-
-  if (status === statuses.loading && courses.length === 0) {
+  if (loadingFirstTime) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress />

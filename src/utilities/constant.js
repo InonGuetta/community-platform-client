@@ -82,3 +82,9 @@ export const MAX_TAGS = 8;
 
 export const roleLabels = { student: "תלמיד", lecturer: "מרצה", admin: "מנהל" };
 export const sessionTypeLabels = { "1on1": "אחד על אחד", group: "קבוצה", webinar: "וובינר" };
+
+// Below this share (percent) of readable text, a book's page says that the
+// search and the "דיון עם AI" chat cover only part of it. The server measures
+// the share when it extracts the text (lib/textQuality.js, migration 033) and
+// holds the same number; test/textQuality.test.js keeps the two equal.
+export const LOW_TEXT_QUALITY = 80;

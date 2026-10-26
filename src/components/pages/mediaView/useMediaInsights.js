@@ -40,6 +40,17 @@ const useMediaInsights = (mediaId, media) => {
   const selectTranscript = useMemo(() => selectTranscriptByMediaId(mediaId), [mediaId]);
   const transcript = useSelector(selectTranscript);
 
+  // A book is loaded WITHOUT its chunks' text. A sefer's text is megabytes, and
+  // reading it on every visit ran past the server's query timeout as a 503 —
+  // so the summary and the discussion tab of the book never loaded. Nothing on
+  // this page reads a book's chunk text: what it needs is that the chunks
+  // exist, and their pages. The download menu fetches the text on its click.
+  const bookPage = media?.media_type === mediaTypes.text;
+  const transcriptRequest = useCallback(
+    (id) => (bookPage ? { mediaId: id, content: false } : id),
+    [bookPage]
+  );
+
   // Text media is included now that books get summarised too. A document with
   // no summary yet simply has no transcripts row, so this 404s and the thunk
   // rejects — which is the correct "nothing here yet" and is already handled.
@@ -49,9 +60,9 @@ const useMediaInsights = (mediaId, media) => {
   // render or two after the route changes.
   useEffect(() => {
     if (media?.id && String(media.id) === String(mediaId)) {
-      dispatch(fetchTranscript(mediaId)).catch(() => {});
+      dispatch(fetchTranscript(transcriptRequest(mediaId))).catch(() => {});
     }
-  }, [dispatch, mediaId, media?.id]);
+  }, [dispatch, mediaId, media?.id, transcriptRequest]);
 
   // True once polling has given up — see pollingSchedule.js for why that can
   // happen while the row still says 'processing'.
@@ -95,7 +106,7 @@ const useMediaInsights = (mediaId, media) => {
     const tick = async () => {
       timer = null;
       if (cancelled) return;
-      await dispatch(fetchTranscript(mediaId));
+      await dispatch(fetchTranscript(transcriptRequest(mediaId)));
       schedule();
     };
 
@@ -119,7 +130,7 @@ const useMediaInsights = (mediaId, media) => {
     // the ceiling clock each time, and defeating the point of both. Only a
     // change of status should restart it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, mediaId, transcript?.status, pollAttemptEpoch]);
+  }, [dispatch, mediaId, transcript?.status, pollAttemptEpoch, transcriptRequest]);
 
   // ── The two on-demand AI actions ───────────────────────────────────────────
 
@@ -142,10 +153,10 @@ const useMediaInsights = (mediaId, media) => {
     setGeneratingSummary(true);
     const result = await dispatch(triggerTranscriptPipeline(media.id));
     if (result.meta.requestStatus === "fulfilled") {
-      await dispatch(fetchTranscript(media.id));
+      await dispatch(fetchTranscript(transcriptRequest(media.id)));
     }
     setGeneratingSummary(false);
-  }, [dispatch, media?.id]);
+  }, [dispatch, media?.id, transcriptRequest]);
 
   // ── Derived ────────────────────────────────────────────────────────────────
 

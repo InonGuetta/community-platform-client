@@ -1,17 +1,12 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MediaGrid from "../archive/componentsArchive/MediaGrid";
-import { fetchPlaylist } from "../../../store/slicesAndThunks/savesSlice/savesGet";
-import { selectUser } from "../../../store/selectors/authSelectors";
-import { statuses } from "../../../utilities/constant";
 import { countLabel } from "../../../utilities/countLabel";
 import { SAVED_SHELF } from "./personalShelves";
+import { usePlaylistPageController } from "./usePlaylistPageController";
 
 // One saved list, opened from the cards on the saved-content page.
 //
@@ -24,17 +19,16 @@ import { SAVED_SHELF } from "./personalShelves";
 // The grid is the archive's, like every other shelf: these are the same
 // lectures, and one a user filed should look and behave exactly as it does where
 // they found it.
+
 const PlaylistPage = () => {
-  const { playlistId } = useParams();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const { playlist, items, status } = useSelector((state) => state.saves.openList);
-  const user = useSelector(selectUser);
-
-  useEffect(() => { dispatch(fetchPlaylist(Number(playlistId))); }, [dispatch, playlistId]);
-
-  const failed = status === statuses.failed;
+  const {
+    failed,
+    items,
+    navigate,
+    playlist,
+    status,
+    user,
+  } = usePlaylistPageController();
 
   return (
     <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>

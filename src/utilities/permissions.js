@@ -24,3 +24,14 @@ export const canManageMedia = (user, item) => {
   const caller = Number(user?.id);
   return Number.isInteger(owner) && Number.isInteger(caller) && owner === caller;
 };
+
+// May manage THIS course — and, the case that brought it here, file a lesson
+// into it. The server's canManageCourse: an admin any course, a lecturer only
+// the ones they teach. Without this mirror the upload dialog offered every
+// course, and choosing another lecturer's answered 403 after the upload.
+export const canManageCourse = (user, course) => {
+  if (user?.role === roles.admin) return true;
+  const owner = Number(course?.lecturer_id);
+  const caller = Number(user?.id);
+  return Number.isInteger(owner) && Number.isInteger(caller) && owner === caller;
+};

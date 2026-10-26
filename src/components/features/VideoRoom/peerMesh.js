@@ -21,16 +21,31 @@ export const createPeerMesh = ({ createConnection, emit, onStream, onPeerLost, l
   // socketId -> { pc, pending: RTCIceCandidate[], remoteReady: boolean }
   const peers = new Map();
   let localStream = null;
+  // The video actually being SENT, when it differs from the stream's own camera
+  // track — a shared screen, or null for "sending nothing". undefined means "the
+  // camera, as the stream has it". Kept here so a peer that arrives in the middle
+  // of a share is given the screen, not the presenter's face.
+  let outgoingVideo;
 
   const setLocalStream = (stream) => {
     localStream = stream;
+    outgoingVideo = undefined;
   };
 
   const attachLocalMedia = (pc) => {
     if (localStream) {
       const tracks = localStream.getTracks();
-      tracks.forEach((track) => pc.addTrack(track, localStream));
-      log(`attached ${tracks.length} local track(s)`);
+      for (const track of tracks) {
+        if (track.kind === "video" && outgoingVideo !== undefined) {
+          // A sender with no track still needs a SENDING transceiver, or a later
+          // replaceTrack has nothing to put the camera back on.
+          if (outgoingVideo) pc.addTrack(outgoingVideo, localStream);
+          else pc.addTransceiver("video", { direction: "sendrecv", streams: [localStream] });
+          continue;
+        }
+        pc.addTrack(track, localStream);
+      }
+      log(`attached ${tracks.length} local track(s)${outgoingVideo !== undefined ? " (video overridden)" : ""}`);
       return;
     }
     log("no local stream — adding receive-only transceivers");
@@ -124,6 +139,21 @@ export const createPeerMesh = ({ createConnection, emit, onStream, onPeerLost, l
     await flushPending(peerId, entry);
   };
 
+  // The sender that carries our video to one peer.
+  //
+  // Found through the transceiver rather than by `sender.track.kind`: after a
+  // replaceTrack(null) the sender's track IS null, so that lookup stopped finding
+  // it and the camera could never be put back. The transceiver's receiver keeps
+  // a track of the right kind whatever is being sent. Receive-only transceivers
+  // (we joined with no camera) send nothing, so they are not candidates.
+  const findVideoSender = (pc) => {
+    const transceiver = pc.getTransceivers?.().find((t) =>
+      t.direction !== "recvonly" && t.direction !== "inactive" &&
+      (t.sender?.track?.kind === "video" || t.receiver?.track?.kind === "video"));
+    if (transceiver) return transceiver.sender;
+    return pc.getSenders?.().find((s) => s.track?.kind === "video") ?? null;
+  };
+
   // Swap the video every peer is receiving, without renegotiating.
   //
   // RTCRtpSender.replaceTrack is what makes screen sharing a button rather than a
@@ -133,21 +163,13 @@ export const createPeerMesh = ({ createConnection, emit, onStream, onPeerLost, l
   // handshake, every time somebody shared a screen or stopped.
   //
   // Returns the count so the caller can tell "nobody is connected yet" (in which
-  // case the new track still becomes the local stream and will be attached to the
-  // next peer that arrives) from "this did nothing".
-  // TODO(CR): the comment above promises the new track "becomes the local stream
-  // and will be attached to the next peer that arrives", but nothing here
-  // touches `localStream`. attachLocalMedia() keeps adding the CAMERA track, so
-  // anyone who joins while a screen is being shared sees the presenter's face,
-  // not the screen. Keep the current outgoing video track in this closure and
-  // have attachLocalMedia use it in place of the stream's own video track.
-  // Related: after replaceTrack(null) the sender's track is null, so the
-  // `s.track?.kind === "video"` lookup below no longer finds it — find the video
-  // sender through getTransceivers() / receiver.track.kind instead.
+  // case the new track is remembered in outgoingVideo and attached to the next
+  // peer that arrives) from "this did nothing".
   const replaceVideoTrack = async (track) => {
+    outgoingVideo = track;
     let replaced = 0;
     for (const [peerId, entry] of peers) {
-      const sender = entry.pc.getSenders().find((s) => s.track?.kind === "video");
+      const sender = findVideoSender(entry.pc);
       // A peer with no video sender is one we joined with no camera at all — its
       // transceiver is recvonly, and there is nothing to replace.
       if (!sender) continue;

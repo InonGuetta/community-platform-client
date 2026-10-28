@@ -5,14 +5,22 @@ import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChatIcon from "@mui/icons-material/ChatOutlined";
+import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import { statuses } from "../../../../../utilities/constant";
 import { hebrewForError } from "../../../../../utilities/apiError";
 import { formatHebrewDate } from "../../../../../utilities/formatDate";
-import { MessageBubble, placeOpener } from "./ChatPane";
+import { MessageBubble, placeOpener, answerSaver } from "./ChatPane";
 
 // The reader's earlier conversations on THIS lesson. Presentation only:
 // `history` is what useAIDiscussionController hands it.
@@ -21,15 +29,21 @@ import { MessageBubble, placeOpener } from "./ChatPane";
 // its date and how many questions it holds; the current one is marked. And one
 // conversation, read exactly as the chat shows it — sources clickable — with
 // "המשך את השיחה הזו" to make it the current conversation again and go back
-// to asking in it.
+// to asking in it. Each row can be deleted, after a confirmation — what was
+// written in it is erased on the server and cannot be brought back.
 
 const questionsLabel = (n) => (n === 1 ? "שאלה אחת" : `${n} שאלות`);
 
-const ConversationRow = ({ item, current, onOpen }) => (
-  <Paper variant="outlined" data-testid="history-item" sx={{ overflow: "hidden" }}>
+const ConversationRow = ({ item, current, onOpen, onDelete, deleting }) => (
+  <Paper
+    variant="outlined"
+    data-testid="history-item"
+    sx={{ overflow: "hidden", display: "flex", alignItems: "center", opacity: deleting ? 0.5 : 1 }}
+  >
     <ButtonBase
       onClick={() => onOpen(item.id)}
-      sx={{ width: "100%", display: "block", textAlign: "start", p: 1.5, "&:hover": { bgcolor: "action.hover" } }}
+      disabled={deleting}
+      sx={{ flex: 1, minWidth: 0, display: "block", textAlign: "start", p: 1.5, "&:hover": { bgcolor: "action.hover" } }}
     >
       <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
         {item.first_question || "שיחה"}
@@ -41,14 +55,48 @@ const ConversationRow = ({ item, current, onOpen }) => (
         {current && <Chip size="small" color="primary" variant="outlined" label="השיחה הנוכחית" />}
       </Box>
     </ButtonBase>
+    {/* Beside the row, not inside it: a button within a button is neither
+        valid markup nor one click target. */}
+    <Tooltip title="מחק שיחה">
+      <span>
+        <IconButton
+          size="small"
+          onClick={() => onDelete(item)}
+          disabled={deleting}
+          aria-label={`מחק את השיחה "${item.first_question || "שיחה"}"`}
+          sx={{ mx: 0.5 }}
+        >
+          {deleting ? <CircularProgress size={18} /> : <DeleteIcon fontSize="small" />}
+        </IconButton>
+      </span>
+    </Tooltip>
   </Paper>
 );
 
-const ConversationView = ({ history, onSeek, onOpenPage }) => {
+// Asked before anything is deleted: the words are erased on the server, and
+// there is no undo to offer instead.
+const ConfirmDelete = ({ item, onCancel, onConfirm }) => (
+  <Dialog open={Boolean(item)} onClose={onCancel} aria-labelledby="delete-conversation-title">
+    <DialogTitle id="delete-conversation-title">למחוק את השיחה?</DialogTitle>
+    <DialogContent>
+      <DialogContentText>
+        {item?.first_question ? `"${item.first_question}" — ` : ""}
+        השאלות והתשובות בשיחה יימחקו ולא יהיה אפשר לשחזר אותן. תשובות ששמרת במחברת יישארו בה.
+      </DialogContentText>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={onCancel}>ביטול</Button>
+      <Button color="error" variant="contained" onClick={onConfirm}>מחק</Button>
+    </DialogActions>
+  </Dialog>
+);
+
+const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
   const { viewing } = history;
   const [continuing, setContinuing] = useState(false);
   const isCurrent = viewing.conversationId === history.currentId;
   const onOpen = placeOpener({ onSeek, onOpenPage });
+  const saverFor = answerSaver(notebook, viewing.messages);
 
   const continueHere = async () => {
     setContinuing(true);
@@ -96,17 +144,26 @@ const ConversationView = ({ history, onSeek, onOpenPage }) => {
           aria-label="שיחה קודמת"
           sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, py: 0.5 }}
         >
-          {viewing.messages.map((m) => <MessageBubble key={m.id} message={m} onOpen={onOpen} />)}
+          {viewing.messages.map((m) => <MessageBubble key={m.id} message={m} onOpen={onOpen} save={saverFor(m)} />)}
         </Box>
       )}
     </Box>
   );
 };
 
-const HistoryPane = ({ history, isText = false, onSeek, onOpenPage }) => {
+const HistoryPane = ({ history, notebook = null, isText = false, onSeek, onOpenPage }) => {
+  // The row whose deletion is being confirmed.
+  const [confirming, setConfirming] = useState(null);
+
   if (history.viewing.conversationId !== null) {
-    return <ConversationView history={history} onSeek={onSeek} onOpenPage={onOpenPage} />;
+    return <ConversationView history={history} notebook={notebook} onSeek={onSeek} onOpenPage={onOpenPage} />;
   }
+
+  const confirmDelete = () => {
+    const { id } = confirming;
+    setConfirming(null);
+    history.remove(id);
+  };
 
   if (history.status === statuses.loading || history.status === statuses.idle) {
     return (
@@ -134,9 +191,20 @@ const HistoryPane = ({ history, isText = false, onSeek, onOpenPage }) => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      {history.deleteError && (
+        <Alert severity="error">{hebrewForError(history.deleteError, "מחיקת השיחה נכשלה. נסה שוב.")}</Alert>
+      )}
       {history.items.map((item) => (
-        <ConversationRow key={item.id} item={item} current={item.id === history.currentId} onOpen={history.open} />
+        <ConversationRow
+          key={item.id}
+          item={item}
+          current={item.id === history.currentId}
+          onOpen={history.open}
+          onDelete={setConfirming}
+          deleting={history.deletingId === item.id}
+        />
       ))}
+      <ConfirmDelete item={confirming} onCancel={() => setConfirming(null)} onConfirm={confirmDelete} />
     </Box>
   );
 };

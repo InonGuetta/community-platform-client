@@ -2,6 +2,7 @@ import { describe, test, expect } from "vitest";
 import reducer, { clearSearch, clearAskError, closeHistoryConversation } from "./discussionSlice";
 import { fetchConversation, searchInLesson, fetchHistory, openHistoryConversation } from "./discussionGet";
 import { startConversation, askQuestion, answerDelta, answerStage, resumeConversation } from "./discussionPost";
+import { deleteConversation } from "./discussionDelete";
 
 // The "דיון עם AI" state, per lesson. Driven through the reducer with the
 // thunks' own action creators, so the action shapes are the real ones.
@@ -236,4 +237,74 @@ test("a failed resume keeps the conversation open, with the reason", () => {
   expect(state.byMediaId[7].viewing.resumeError).toEqual({ code: "DB_UNAVAILABLE" });
   state = reducer(state, resumeConversation.pending("r2", arg));
   expect(state.byMediaId[7].viewing.resumeError).toBe(null);
+});
+
+describe("deleting a conversation from the history", () => {
+  const arg = { mediaId: 7, conversationId: 3 };
+  const withHistory = () => {
+    const state = reducer(initial(), fetchConversation.fulfilled({ conversation: { id: 9 }, messages: [{ id: 1 }] }, "f", 7));
+    return reducer(state, fetchHistory.fulfilled([{ id: 9 }, { id: 3 }], "h", 7));
+  };
+
+  test("the row goes once the server has deleted it, not before", () => {
+    let state = reducer(withHistory(), deleteConversation.pending("d", arg));
+    expect(state.byMediaId[7].deletingId).toBe(3);
+    expect(state.byMediaId[7].history.items.map((c) => c.id)).toEqual([9, 3]);
+    state = reducer(state, deleteConversation.fulfilled({ deleted: true, id: 3 }, "d", arg));
+    expect(state.byMediaId[7].deletingId).toBe(null);
+    expect(state.byMediaId[7].history.items.map((c) => c.id)).toEqual([9]);
+    // Another conversation deleted: the chat on screen is untouched.
+    expect(state.byMediaId[7].conversation).toEqual({ id: 9 });
+  });
+
+  test("deleting the current conversation sends the chat back to the server for the next", () => {
+    const current = { mediaId: 7, conversationId: 9 };
+    const state = reducer(withHistory(), deleteConversation.fulfilled({ deleted: true, id: 9 }, "d", current));
+    const lesson = state.byMediaId[7];
+    expect(lesson.conversation).toBe(null);
+    expect(lesson.messages).toEqual([]);
+    expect(lesson.loadStatus).toBe("idle");
+  });
+
+  test("a failed deletion keeps the row, with the reason", () => {
+    let state = reducer(withHistory(), deleteConversation.pending("d", arg));
+    state = reducer(state, deleteConversation.rejected(null, "d", arg, { code: "NOT_FOUND" }));
+    expect(state.byMediaId[7].history.items).toHaveLength(2);
+    expect(state.byMediaId[7].deleteError).toEqual({ code: "NOT_FOUND" });
+    expect(reducer(state, deleteConversation.pending("d2", arg)).byMediaId[7].deleteError).toBe(null);
+  });
+});
+
+describe("today's question quota", () => {
+  const loadWith = (quota) => reducer(initial(), fetchConversation.fulfilled({ conversation: null, messages: [], quota }, "f", 7));
+
+  test("comes with the conversation, and is the reader's - not the lesson's", () => {
+    const state = loadWith({ limit: 50, remaining: 42 });
+    expect(state.quota).toEqual({ limit: 50, remaining: 42 });
+    expect(state.byMediaId[7].quota).toBeUndefined();
+  });
+
+  test("an answered question is one used, and never below none", () => {
+    const { arg, requestId } = ask(7, "ש");
+    let state = reducer(loadWith({ limit: 50, remaining: 1 }), askQuestion.pending(requestId, arg));
+    state = reducer(state, askQuestion.fulfilled({ conversation: { id: 1 }, messages: [] }, requestId, arg));
+    expect(state.quota.remaining).toBe(0);
+    state = reducer(state, askQuestion.fulfilled({ conversation: { id: 1 }, messages: [] }, "r2", arg));
+    expect(state.quota.remaining).toBe(0);
+  });
+
+  test("the server's 429 is the last word, whatever was counted here", () => {
+    const { arg, requestId } = ask(7, "ש");
+    let state = reducer(loadWith({ limit: 50, remaining: 30 }), askQuestion.pending(requestId, arg));
+    state = reducer(state, askQuestion.rejected(null, requestId, arg, { code: "AI_DAILY_LIMIT" }));
+    expect(state.quota.remaining).toBe(0);
+  });
+
+  test("a failed answer uses nothing; and a role the quota does not bind has none", () => {
+    const { arg, requestId } = ask(7, "ש");
+    let state = reducer(loadWith({ limit: 50, remaining: 30 }), askQuestion.pending(requestId, arg));
+    state = reducer(state, askQuestion.rejected(null, requestId, arg, { code: "AI_ANSWER_FAILED" }));
+    expect(state.quota.remaining).toBe(30);
+    expect(loadWith(null).quota).toBe(null);
+  });
 });

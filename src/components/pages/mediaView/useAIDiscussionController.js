@@ -2,9 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchConversation, searchInLesson, fetchHistory, openHistoryConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionGet";
 import { startConversation, askQuestion, resumeConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionPost";
+import { deleteConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionDelete";
 import { clearSearch, clearAskError, closeHistoryConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionSlice";
-import { selectDiscussionByMediaId } from "../../../store/selectors/discussionSelectors";
+import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost";
+import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { selectDiscussionByMediaId, selectDiscussionQuota } from "../../../store/selectors/discussionSelectors";
 import { statuses } from "../../../utilities/constant";
+import { answerNote, questionBefore } from "../../../utilities/discussionNote";
 
 // The "דיון עם AI" tab's logic: every dispatch and selector it needs, so the
 // panel and its two panes stay presentation only.
@@ -41,10 +45,19 @@ export const discussionReadiness = (transcript) => {
   return "empty";
 };
 
-const useAIDiscussionController = ({ mediaId, transcript }) => {
+// What saving one answer to the notebook is at, by the answer's id.
+export const SAVE_STATES = { saving: "saving", saved: "saved", failed: "failed" };
+
+const useAIDiscussionController = ({ mediaId, transcript, media }) => {
   const dispatch = useDispatch();
   const selectLesson = useMemo(() => selectDiscussionByMediaId(mediaId), [mediaId]);
   const lesson = useSelector(selectLesson);
+  const quota = useSelector(selectDiscussionQuota);
+
+  // Answers saved to the notebook in this visit. Only to say so on the answer —
+  // the note itself is in the notebook; a second visit offers saving again, and
+  // a second save is a second note, which is what pressing it again means.
+  const [savedAnswers, setSavedAnswers] = useState({});
 
   const [mode, setMode] = useState(DISCUSSION_MODES.chat);
   const readiness = discussionReadiness(transcript);
@@ -87,6 +100,36 @@ const useAIDiscussionController = ({ mediaId, transcript }) => {
     return true;
   }, [dispatch, mediaId, lesson.conversation?.id]);
 
+  // Deleted from the history. Resolves to whether it was.
+  const removeConversation = useCallback(async (conversationId) => {
+    const action = await dispatch(deleteConversation({ mediaId, conversationId }));
+    return deleteConversation.fulfilled.match(action);
+  }, [dispatch, mediaId]);
+
+  // One answer, saved as a note in this lesson's notebook (PRD ASK-4).
+  // `messages` is the conversation it is in — the chat's, or one open in the
+  // history — so the question it answers can be found before it.
+  const saveAnswer = useCallback(async (messages, answerId) => {
+    const answer = messages.find((m) => m.id === answerId);
+    const question = questionBefore(messages, answerId);
+    if (!answer || question === null) return false;
+    setSavedAnswers((prev) => ({ ...prev, [answerId]: SAVE_STATES.saving }));
+    const action = await dispatch(createNote(answerNote({
+      question,
+      answer: answer.content,
+      citations: answer.citations,
+      mediaId,
+      mediaTitle: media?.title,
+      mediaType: media?.media_type,
+    })));
+    const saved = createNote.fulfilled.match(action);
+    setSavedAnswers((prev) => ({ ...prev, [answerId]: saved ? SAVE_STATES.saved : SAVE_STATES.failed }));
+    // Said out loud as well as on the answer: the notebook is further down
+    // the page, out of sight of the chat.
+    if (saved) dispatch(notify({ message: "התשובה נשמרה במחברת של השיעור", severity: "success" }));
+    return saved;
+  }, [dispatch, mediaId, media?.title, media?.media_type]);
+
   const runSearch = useCallback((text) => {
     const query = String(text ?? "").trim();
     if (!query) return;
@@ -126,7 +169,11 @@ const useAIDiscussionController = ({ mediaId, transcript }) => {
       close: closeConversation,
       continueConversation,
       retry: retryHistory,
+      remove: removeConversation,
+      deletingId: lesson.deletingId,
+      deleteError: lesson.deleteError,
     },
+    notebook: { saved: savedAnswers, save: saveAnswer },
     chat: {
       conversation: lesson.conversation,
       messages: lesson.messages,
@@ -135,6 +182,7 @@ const useAIDiscussionController = ({ mediaId, transcript }) => {
       asking: lesson.asking,
       askStage: lesson.askStage,
       askError: lesson.askError,
+      quota,
       ask,
       startNew,
       dismissAskError,

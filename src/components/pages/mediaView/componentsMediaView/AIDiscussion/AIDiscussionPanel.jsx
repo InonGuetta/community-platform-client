@@ -16,7 +16,10 @@ import TextQualityNotice from "../TextQualityNotice";
 //   דיון עם בינה מלאכותית   a conversation, answered only from the lesson's
 //                           own text, every claim citing the passage it rests on
 //   היסטוריה                the reader's earlier conversations on the lesson —
-//                           read again, or continued
+//                           read again, continued, or deleted
+//
+// Any cited answer, in the chat or in the history, can be saved as a note in
+// the lesson's notebook, its sources as chips (utilities/discussionNote.js).
 //
 // Owns its dispatches through useAIDiscussionController, the same arrangement
 // as LessonNotebook: the media page only has to place it.
@@ -38,8 +41,8 @@ const caption = (mode, isText) => {
   return `התשובות מבוססות על ${source} הזה בלבד, עם הפניה למקור`;
 };
 
-const AIDiscussionPanel = ({ mediaId, transcript, isText = false, onSeek, onOpenPage }) => {
-  const { mode, setMode, readiness, search, chat, history } = useAIDiscussionController({ mediaId, transcript });
+const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek, onOpenPage }) => {
+  const { mode, setMode, readiness, search, chat, history, notebook } = useAIDiscussionController({ mediaId, transcript, media });
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, height: "100%" }}>
@@ -89,10 +92,10 @@ const AIDiscussionPanel = ({ mediaId, transcript, isText = false, onSeek, onOpen
             <SmartSearchPane search={search} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
           )}
           {mode === DISCUSSION_MODES.chat && (
-            <ChatPane chat={chat} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
+            <ChatPane chat={chat} notebook={notebook} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
           )}
           {mode === DISCUSSION_MODES.history && (
-            <HistoryPane history={history} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
+            <HistoryPane history={history} notebook={notebook} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
           )}
         </>
       )}

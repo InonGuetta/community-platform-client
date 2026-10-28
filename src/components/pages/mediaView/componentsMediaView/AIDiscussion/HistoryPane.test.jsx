@@ -19,6 +19,9 @@ const history = (over = {}) => ({
   close: vi.fn(),
   continueConversation: vi.fn(async () => true),
   retry: vi.fn(),
+  remove: vi.fn(async () => true),
+  deletingId: null,
+  deleteError: null,
   ...over,
 });
 
@@ -122,4 +125,53 @@ test("a resume that failed says so, and the conversation stays open", () => {
   expect(screen.getByRole("alert")).toBeInTheDocument();
   expect(screen.getByTestId("message-user")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "המשך את השיחה הזו" })).toBeEnabled();
+});
+
+describe("deleting a conversation", () => {
+  const deleteButton = () => screen.getByRole("button", { name: 'מחק את השיחה "מה כתוב על תפילין?"' });
+
+  test("asks first, and deletes only on yes", async () => {
+    const h = history({ items: [older] });
+    render(<HistoryPane history={h} />);
+    await userEvent.click(deleteButton());
+    expect(screen.getByRole("dialog")).toHaveTextContent("לא יהיה אפשר לשחזר");
+    await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "ביטול" }));
+    expect(h.remove).not.toHaveBeenCalled();
+    // While the dialog fades out, the page behind it is still aria-hidden.
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
+    await userEvent.click(deleteButton());
+    await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "מחק" }));
+    expect(h.remove).toHaveBeenCalledWith(3);
+  });
+
+  // The delete button sits beside the row: clicking it must not also open it.
+  test("deleting does not open the conversation", async () => {
+    const h = history({ items: [older] });
+    render(<HistoryPane history={h} />);
+    await userEvent.click(deleteButton());
+    expect(h.open).not.toHaveBeenCalled();
+  });
+
+  test("the row being deleted cannot be deleted again", () => {
+    render(<HistoryPane history={history({ items: [older, current], deletingId: 3 })} />);
+    expect(deleteButton()).toBeDisabled();
+  });
+
+  test("a failed deletion is said, in Hebrew", () => {
+    render(<HistoryPane history={history({ items: [older], deleteError: { code: "SOMETHING" } })} />);
+    expect(screen.getByRole("alert")).toHaveTextContent("מחיקת השיחה נכשלה");
+  });
+});
+
+test("an answer in an earlier conversation can be saved to the notebook too", async () => {
+  const notebook = { saved: {}, save: vi.fn(async () => true) };
+  const messages = [
+    { id: 1, role: "user", content: "מה כתוב על תפילין?", citations: [] },
+    { id: 2, role: "assistant", content: "של יד תחילה [1].", citations: [{ n: 1, start_time: null, page_number: 66, chunk_index: 5 }] },
+  ];
+  const viewing = { conversationId: 3, conversation: { id: 3 }, status: "succeeded", error: null, messages };
+  render(<HistoryPane history={history({ viewing })} notebook={notebook} />);
+  await userEvent.click(screen.getByRole("button", { name: "שמור למחברת" }));
+  expect(notebook.save).toHaveBeenCalledWith(messages, 2);
 });

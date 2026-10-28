@@ -12,7 +12,8 @@ export const discussionApi = {
   search: async (mediaId, q) =>
     (await axiosInstance.get(`/discussion/${mediaId}/search`, { params: { q } })).data,
 
-  // { conversation | null, messages }
+  // { conversation | null, messages, quota } — quota is { limit, remaining }
+  // of today's questions, or null for a role it does not apply to.
   getConversation: async (mediaId) =>
     (await axiosInstance.get(`/discussion/${mediaId}/conversation`)).data,
 
@@ -29,6 +30,11 @@ export const discussionApi = {
   // "המשך את השיחה הזו" — the next question goes into it. { conversation, messages }
   resumeConversation: async (mediaId, conversationId) =>
     (await axiosInstance.post(`/discussion/${mediaId}/conversations/${conversationId}/resume`)).data,
+
+  // Deleted from the history — the conversation and what was written in it.
+  // The server finds it only together with the signed-in user. { deleted, id }
+  deleteConversation: async (mediaId, conversationId) =>
+    (await axiosInstance.delete(`/discussion/${mediaId}/conversations/${conversationId}`)).data,
 
   // "שיחה חדשה". { conversation, messages: [] }
   startConversation: async (mediaId) =>

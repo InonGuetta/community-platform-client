@@ -1,7 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchConversation, searchInLesson, fetchHistory, openHistoryConversation } from "./discussionGet";
 import { startConversation, askQuestion, answerDelta, answerStage, resumeConversation } from "./discussionPost";
+import { deleteConversation } from "./discussionDelete";
 import { statuses } from "../../../utilities/constant";
+import { ERROR_CODES } from "../../../utilities/apiError";
 
 // The "דיון עם AI" tab, kept PER LESSON. Moving from one lesson to another and
 // back must not show the first lesson's answers under the second's title, and
@@ -10,6 +12,10 @@ import { statuses } from "../../../utilities/constant";
 //
 // Signing out empties this slice with every other (store.js resets the root),
 // so the next person on the same tab never sees these questions.
+//
+// `quota` is the one thing NOT per lesson: today's question quota is counted
+// across every lesson, so it is the reader's, not the lesson's. null until a
+// conversation has been loaded, and stays null for a role it does not bind.
 
 export const emptyLesson = () => ({
   conversation: null,
@@ -30,6 +36,10 @@ export const emptyLesson = () => ({
   // `resumeError` — "המשך את השיחה הזו" failed; the conversation stays open,
   // and the reader is told, rather than a click that seems to do nothing.
   viewing: { conversationId: null, conversation: null, messages: [], status: statuses.idle, error: null, resumeError: null },
+  // The id of the conversation whose deletion is in flight, and a deletion
+  // that failed — said in the history, where it was asked for.
+  deletingId: null,
+  deleteError: null,
 });
 
 const closedView = () => emptyLesson().viewing;
@@ -54,7 +64,7 @@ const withoutTemporary = (messages, requestId) =>
 
 const discussionSlice = createSlice({
   name: "discussion",
-  initialState: { byMediaId: {} },
+  initialState: { byMediaId: {}, quota: null },
   reducers: {
     clearSearch(state, action) {
       lessonOf(state, action.payload).search = emptyLesson().search;
@@ -78,6 +88,9 @@ const discussionSlice = createSlice({
         lesson.loadStatus = statuses.succeeded;
         lesson.conversation = action.payload.conversation;
         lesson.messages = action.payload.messages;
+        // Fresh from the server on every load — which is also what puts a new
+        // day's full quota back after midnight.
+        if (action.payload.quota !== undefined) state.quota = action.payload.quota;
       })
       .addCase(fetchConversation.rejected, (state, action) => {
         const lesson = lessonOf(state, action.meta.arg);
@@ -182,6 +195,9 @@ const discussionSlice = createSlice({
         lesson.messages = withoutTemporary(lesson.messages, action.meta.requestId)
           .concat(action.payload.messages);
         lesson.history.status = statuses.idle;
+        // One question answered is one question used — counted here rather
+        // than asked for again, the same arithmetic the server does.
+        if (state.quota) state.quota.remaining = Math.max(0, state.quota.remaining - 1);
       })
       .addCase(askQuestion.rejected, (state, action) => {
         // The server stores nothing for a failed answer, so the question — and
@@ -192,6 +208,35 @@ const discussionSlice = createSlice({
         lesson.askStage = null;
         lesson.askError = action.payload ?? null;
         lesson.messages = withoutTemporary(lesson.messages, action.meta.requestId);
+        // The server's word that today's quota is spent, whatever the count here
+        // said — another tab may have used the rest.
+        if (state.quota && action.payload?.code === ERROR_CODES.AI_DAILY_LIMIT) state.quota.remaining = 0;
+      })
+
+      .addCase(deleteConversation.pending, (state, action) => {
+        const lesson = lessonOf(state, action.meta.arg.mediaId);
+        lesson.deletingId = action.meta.arg.conversationId;
+        lesson.deleteError = null;
+      })
+      .addCase(deleteConversation.rejected, (state, action) => {
+        const lesson = lessonOf(state, action.meta.arg.mediaId);
+        lesson.deletingId = null;
+        lesson.deleteError = action.payload ?? { code: null };
+      })
+      .addCase(deleteConversation.fulfilled, (state, action) => {
+        const { mediaId, conversationId } = action.meta.arg;
+        const lesson = lessonOf(state, mediaId);
+        lesson.deletingId = null;
+        lesson.history.items = lesson.history.items.filter((c) => c.id !== conversationId);
+        if (lesson.viewing.conversationId === conversationId) lesson.viewing = closedView();
+        // The current conversation deleted: the chat is now whichever the
+        // server finds latest — the one before it, or none — so it is loaded
+        // again rather than guessed at here.
+        if (lesson.conversation?.id === conversationId) {
+          lesson.conversation = null;
+          lesson.messages = [];
+          lesson.loadStatus = statuses.idle;
+        }
       })
 
       .addCase(searchInLesson.pending, (state, action) => {

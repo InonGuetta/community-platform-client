@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
-import reducer, { clearSearch, clearAskError } from "./discussionSlice";
-import { fetchConversation, searchInLesson } from "./discussionGet";
-import { startConversation, askQuestion, answerDelta, answerStage } from "./discussionPost";
+import reducer, { clearSearch, clearAskError, closeHistoryConversation } from "./discussionSlice";
+import { fetchConversation, searchInLesson, fetchHistory, openHistoryConversation } from "./discussionGet";
+import { startConversation, askQuestion, answerDelta, answerStage, resumeConversation } from "./discussionPost";
 
 // The "דיון עם AI" state, per lesson. Driven through the reducer with the
 // thunks' own action creators, so the action shapes are the real ones.
@@ -179,4 +179,61 @@ describe("which step the answer is at", () => {
     const state = reducer(initial(), answerStage({ mediaId: 7, requestId: "old", stage: "writing" }));
     expect(state.byMediaId[7].askStage).toBe(null);
   });
+});
+
+describe("the history", () => {
+  test("is loaded into its lesson", () => {
+    let state = reducer(initial(), fetchHistory.pending("r", 7));
+    expect(state.byMediaId[7].history.status).toBe("loading");
+    state = reducer(state, fetchHistory.fulfilled([{ id: 3 }], "r", 7));
+    expect(state.byMediaId[7].history).toMatchObject({ items: [{ id: 3 }], status: "succeeded" });
+  });
+
+  // So it is fetched again next time — never shown stale.
+  test("goes stale when a question is answered, or a conversation started", () => {
+    const loaded = reducer(initial(), fetchHistory.fulfilled([{ id: 3 }], "r", 7));
+    const asked = reducer(
+      reducer(loaded, askQuestion.pending("q", { mediaId: 7, question: "x" })),
+      askQuestion.fulfilled({ conversation: { id: 3 }, messages: [] }, "q", { mediaId: 7, question: "x" })
+    );
+    expect(asked.byMediaId[7].history.status).toBe("idle");
+    const started = reducer(loaded, startConversation.fulfilled({ conversation: { id: 4 }, messages: [] }, "s", 7));
+    expect(started.byMediaId[7].history.status).toBe("idle");
+  });
+
+  test("opening a conversation shows it; a quick second click wins", () => {
+    let state = reducer(initial(), openHistoryConversation.pending("a", { mediaId: 7, conversationId: 3 }));
+    state = reducer(state, openHistoryConversation.pending("b", { mediaId: 7, conversationId: 4 }));
+    state = reducer(state, openHistoryConversation.fulfilled({ conversation: { id: 3 }, messages: [{ id: 1 }] }, "a", { mediaId: 7, conversationId: 3 }));
+    expect(state.byMediaId[7].viewing.conversationId).toBe(4);
+    expect(state.byMediaId[7].viewing.status).toBe("loading");
+  });
+
+  test("resuming makes it the current conversation and closes the view", () => {
+    let state = reducer(initial(), openHistoryConversation.fulfilled({ conversation: { id: 3 }, messages: [] }, "a", { mediaId: 7, conversationId: 3 }));
+    state = reducer(state, resumeConversation.fulfilled({ conversation: { id: 3 }, messages: [{ id: 1 }, { id: 2 }] }, "r", { mediaId: 7, conversationId: 3 }));
+    const lesson = state.byMediaId[7];
+    expect(lesson.conversation).toEqual({ id: 3 });
+    expect(lesson.messages).toHaveLength(2);
+    expect(lesson.viewing.conversationId).toBe(null);
+    expect(lesson.history.status).toBe("idle");
+  });
+
+  test("closing the view returns to the list", () => {
+    let state = reducer(initial(), openHistoryConversation.pending("a", { mediaId: 7, conversationId: 3 }));
+    state = reducer(state, closeHistoryConversation(7));
+    expect(state.byMediaId[7].viewing.conversationId).toBe(null);
+  });
+});
+
+test("a failed resume keeps the conversation open, with the reason", () => {
+  const arg = { mediaId: 7, conversationId: 3 };
+  let state = reducer(initial(), openHistoryConversation.pending("a", arg));
+  state = reducer(state, openHistoryConversation.fulfilled({ conversation: { id: 3 }, messages: [{ id: 1 }] }, "a", arg));
+  state = reducer(state, resumeConversation.pending("r", arg));
+  state = reducer(state, resumeConversation.rejected(null, "r", arg, { code: "DB_UNAVAILABLE" }));
+  expect(state.byMediaId[7].viewing.conversationId).toBe(3);
+  expect(state.byMediaId[7].viewing.resumeError).toEqual({ code: "DB_UNAVAILABLE" });
+  state = reducer(state, resumeConversation.pending("r2", arg));
+  expect(state.byMediaId[7].viewing.resumeError).toBe(null);
 });

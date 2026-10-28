@@ -6,14 +6,17 @@ import Typography from "@mui/material/Typography";
 import useAIDiscussionController, { DISCUSSION_MODES } from "../../useAIDiscussionController";
 import SmartSearchPane from "./SmartSearchPane";
 import ChatPane from "./ChatPane";
+import HistoryPane from "./HistoryPane";
 import TextQualityNotice from "../TextQualityNotice";
 
-// The "דיון עם AI" tab: a switch between two ways of asking about THIS lesson.
+// The "דיון עם AI" tab: three ways into THIS lesson, side by side.
 //
-//   חיפוש חכם      passages from the lesson, nothing generated — cheap, fast,
-//                  and cannot put words in the lecturer's mouth
-//   שיחה עם AI     a conversation, answered only from the lesson's own text,
-//                  every claim citing the passage it rests on
+//   חיפוש חכם               passages from the lesson, nothing generated — cheap,
+//                           fast, and cannot put words in the lecturer's mouth
+//   דיון עם בינה מלאכותית   a conversation, answered only from the lesson's
+//                           own text, every claim citing the passage it rests on
+//   היסטוריה                the reader's earlier conversations on the lesson —
+//                           read again, or continued
 //
 // Owns its dispatches through useAIDiscussionController, the same arrangement
 // as LessonNotebook: the media page only has to place it.
@@ -27,8 +30,16 @@ const NOT_READY = {
   unavailable: { severity: "warning", text: "לא הצלחנו לטעון את טקסט השיעור. נסה לרענן את העמוד." },
 };
 
+// The line under the switch: what the chosen mode covers.
+const caption = (mode, isText) => {
+  const source = isText ? "הספר" : "השיעור";
+  if (mode === DISCUSSION_MODES.search) return `חיפוש לפי משמעות בתוך ${source} הזה בלבד`;
+  if (mode === DISCUSSION_MODES.history) return `השיחות הקודמות שלך על ${source} הזה`;
+  return `התשובות מבוססות על ${source} הזה בלבד, עם הפניה למקור`;
+};
+
 const AIDiscussionPanel = ({ mediaId, transcript, isText = false, onSeek, onOpenPage }) => {
-  const { mode, setMode, readiness, search, chat } = useAIDiscussionController({ mediaId, transcript });
+  const { mode, setMode, readiness, search, chat, history } = useAIDiscussionController({ mediaId, transcript });
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, height: "100%" }}>
@@ -52,10 +63,16 @@ const AIDiscussionPanel = ({ mediaId, transcript, isText = false, onSeek, onOpen
             marginLeft: 0,
             marginInlineStart: "-1px",
           },
+          // Three labels share a third of the page; let a long one wrap
+          // rather than push the group wider than the panel.
+          "& .MuiToggleButton-root": { lineHeight: 1.3, px: 1 },
         }}
       >
+        {/* In this order in the DOM, and so right to left on the screen: the
+            history sits to the LEFT of the discussion, where it was asked. */}
         <ToggleButton value={DISCUSSION_MODES.search}>חיפוש חכם</ToggleButton>
-        <ToggleButton value={DISCUSSION_MODES.chat}>שיחה עם AI</ToggleButton>
+        <ToggleButton value={DISCUSSION_MODES.chat}>דיון עם בינה מלאכותית</ToggleButton>
+        <ToggleButton value={DISCUSSION_MODES.history}>היסטוריה</ToggleButton>
       </ToggleButtonGroup>
 
       {readiness !== "ready" ? (
@@ -67,15 +84,15 @@ const AIDiscussionPanel = ({ mediaId, transcript, isText = false, onSeek, onOpen
           {/* The search and the chat know only what reads — said where they
               are used, not only on the summary tab. */}
           {isText && <TextQualityNotice quality={transcript?.text_quality} />}
-          <Typography variant="caption" color="text.secondary">
-            {mode === DISCUSSION_MODES.search
-              ? `חיפוש לפי משמעות בתוך ${isText ? "הספר" : "השיעור"} הזה בלבד`
-              : `התשובות מבוססות על ${isText ? "הספר" : "השיעור"} הזה בלבד, עם הפניה למקור`}
-          </Typography>
-          {mode === DISCUSSION_MODES.search ? (
+          <Typography variant="caption" color="text.secondary">{caption(mode, isText)}</Typography>
+          {mode === DISCUSSION_MODES.search && (
             <SmartSearchPane search={search} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
-          ) : (
+          )}
+          {mode === DISCUSSION_MODES.chat && (
             <ChatPane chat={chat} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
+          )}
+          {mode === DISCUSSION_MODES.history && (
+            <HistoryPane history={history} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
           )}
         </>
       )}

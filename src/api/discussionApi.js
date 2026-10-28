@@ -16,6 +16,20 @@ export const discussionApi = {
   getConversation: async (mediaId) =>
     (await axiosInstance.get(`/discussion/${mediaId}/conversation`)).data,
 
+  // History: the caller's earlier conversations on the lesson, newest first —
+  // [{ id, created_at, updated_at, questions, first_question }].
+  listConversations: async (mediaId) =>
+    (await axiosInstance.get(`/discussion/${mediaId}/conversations`)).data,
+
+  // One of them, to read. { conversation, messages }. The server looks the id
+  // up together with the signed-in user, so only the caller's own is found.
+  getConversationById: async (mediaId, conversationId) =>
+    (await axiosInstance.get(`/discussion/${mediaId}/conversations/${conversationId}`)).data,
+
+  // "המשך את השיחה הזו" — the next question goes into it. { conversation, messages }
+  resumeConversation: async (mediaId, conversationId) =>
+    (await axiosInstance.post(`/discussion/${mediaId}/conversations/${conversationId}/resume`)).data,
+
   // "שיחה חדשה". { conversation, messages: [] }
   startConversation: async (mediaId) =>
     (await axiosInstance.post(`/discussion/${mediaId}/conversation`)).data,

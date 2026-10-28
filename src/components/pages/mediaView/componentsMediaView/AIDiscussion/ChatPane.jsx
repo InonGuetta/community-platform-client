@@ -108,7 +108,9 @@ const Sources = ({ citations, onOpen }) => (
   </Box>
 );
 
-const Bubble = ({ message, onOpen }) => {
+// Exported for the history mode, which shows an earlier conversation exactly
+// as the chat does — the same bubbles, the same clickable sources.
+export const MessageBubble = ({ message, onOpen }) => {
   const mine = message.role === "user";
   return (
     <Box
@@ -135,13 +137,17 @@ const Bubble = ({ message, onOpen }) => {
   );
 };
 
+// Whether a cited place can be opened here, and opening it — what a bubble's
+// sources are handed. Shared with the history mode.
+export const placeOpener = ({ onSeek, onOpenPage }) => ({
+  can: (place) => canOpenPlace(place, { onSeek, onOpenPage }),
+  go: (place) => openPlace(place, { onSeek, onOpenPage }),
+});
+
 const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);
-  const onOpen = {
-    can: (place) => canOpenPlace(place, { onSeek, onOpenPage }),
-    go: (place) => openPlace(place, { onSeek, onOpenPage }),
-  };
+  const onOpen = placeOpener({ onSeek, onOpenPage });
 
   // Keep the newest message in view: the question as it is sent, the
   // "thinking" line, then the answer.
@@ -229,7 +235,7 @@ const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
           </Box>
         )}
 
-        {chat.messages.map((m) => <Bubble key={m.id} message={m} onOpen={onOpen} />)}
+        {chat.messages.map((m) => <MessageBubble key={m.id} message={m} onOpen={onOpen} />)}
 
         {chat.asking && !answerArriving && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }} data-testid="chat-thinking">

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchConversation, searchInLesson } from "../../../store/slicesAndThunks/discussionSlice/discussionGet";
-import { startConversation, askQuestion } from "../../../store/slicesAndThunks/discussionSlice/discussionPost";
-import { clearSearch, clearAskError } from "../../../store/slicesAndThunks/discussionSlice/discussionSlice";
+import { fetchConversation, searchInLesson, fetchHistory, openHistoryConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionGet";
+import { startConversation, askQuestion, resumeConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionPost";
+import { clearSearch, clearAskError, closeHistoryConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionSlice";
 import { selectDiscussionByMediaId } from "../../../store/selectors/discussionSelectors";
 import { statuses } from "../../../utilities/constant";
 
@@ -10,7 +10,7 @@ import { statuses } from "../../../utilities/constant";
 // panel and its two panes stay presentation only.
 
 // The two things the tab does, and the switch between them.
-export const DISCUSSION_MODES = { search: "search", chat: "chat" };
+export const DISCUSSION_MODES = { search: "search", chat: "chat", history: "history" };
 
 // Whether the lesson has text to discuss yet, from the transcript the page
 // already polls — no request of its own.
@@ -59,6 +59,34 @@ const useAIDiscussionController = ({ mediaId, transcript }) => {
     dispatch(fetchConversation(mediaId));
   }, [dispatch, mediaId, ready, mode, lesson.loadStatus]);
 
+  // The history is fetched when it is shown, and again after anything that
+  // changed it (the slice sets its status back to idle).
+  useEffect(() => {
+    if (!mediaId || !ready || mode !== DISCUSSION_MODES.history) return;
+    if (lesson.history.status !== statuses.idle) return;
+    dispatch(fetchHistory(mediaId));
+  }, [dispatch, mediaId, ready, mode, lesson.history.status]);
+
+  const openConversation = useCallback(
+    (conversationId) => dispatch(openHistoryConversation({ mediaId, conversationId })),
+    [dispatch, mediaId]
+  );
+  const closeConversation = useCallback(() => dispatch(closeHistoryConversation(mediaId)), [dispatch, mediaId]);
+  const retryHistory = useCallback(() => dispatch(fetchHistory(mediaId)), [dispatch, mediaId]);
+
+  // Back to the chat with this conversation as the current one. If it already
+  // IS the current one, there is nothing to resume — just go back to it.
+  const continueConversation = useCallback(async (conversationId) => {
+    if (conversationId !== lesson.conversation?.id) {
+      const action = await dispatch(resumeConversation({ mediaId, conversationId }));
+      if (!resumeConversation.fulfilled.match(action)) return false;
+    } else {
+      dispatch(closeHistoryConversation(mediaId));
+    }
+    setMode(DISCUSSION_MODES.chat);
+    return true;
+  }, [dispatch, mediaId, lesson.conversation?.id]);
+
   const runSearch = useCallback((text) => {
     const query = String(text ?? "").trim();
     if (!query) return;
@@ -89,6 +117,15 @@ const useAIDiscussionController = ({ mediaId, transcript }) => {
       ...lesson.search,
       run: runSearch,
       reset: resetSearch,
+    },
+    history: {
+      ...lesson.history,
+      viewing: lesson.viewing,
+      currentId: lesson.conversation?.id ?? null,
+      open: openConversation,
+      close: closeConversation,
+      continueConversation,
+      retry: retryHistory,
     },
     chat: {
       conversation: lesson.conversation,

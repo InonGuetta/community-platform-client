@@ -64,7 +64,7 @@ describe("searching", () => {
 describe("what comes back", () => {
   test("no results says so, and points at the chat", () => {
     render(<SmartSearchPane search={search({ query: "x", status: "succeeded", results: [] })} />);
-    expect(screen.getByTestId("search-empty")).toHaveTextContent("שיחה עם AI");
+    expect(screen.getByTestId("search-empty")).toHaveTextContent("דיון עם בינה מלאכותית");
   });
 
   test("a failure is shown in Hebrew, never the server's English", () => {

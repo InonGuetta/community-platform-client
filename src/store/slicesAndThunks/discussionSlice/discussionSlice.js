@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchConversation, searchInLesson } from "./discussionGet";
-import { startConversation, askQuestion, answerDelta, answerStage } from "./discussionPost";
+import { fetchConversation, searchInLesson, fetchHistory, openHistoryConversation } from "./discussionGet";
+import { startConversation, askQuestion, answerDelta, answerStage, resumeConversation } from "./discussionPost";
 import { statuses } from "../../../utilities/constant";
 
 // The "דיון עם AI" tab, kept PER LESSON. Moving from one lesson to another and
@@ -22,7 +22,17 @@ export const emptyLesson = () => ({
   askStage: null,
   askError: null,
   search: { query: "", results: [], status: statuses.idle, error: null },
+  // The history mode: the list of earlier conversations, and the one open in it.
+  // `history.status` goes back to idle whenever the list may have changed — a
+  // question answered, a conversation started or resumed — so it is fetched
+  // again the next time the history is shown, never served stale.
+  history: { items: [], status: statuses.idle, error: null },
+  // `resumeError` — "המשך את השיחה הזו" failed; the conversation stays open,
+  // and the reader is told, rather than a click that seems to do nothing.
+  viewing: { conversationId: null, conversation: null, messages: [], status: statuses.idle, error: null, resumeError: null },
 });
+
+const closedView = () => emptyLesson().viewing;
 
 const lessonOf = (state, mediaId) => {
   if (!state.byMediaId[mediaId]) state.byMediaId[mediaId] = emptyLesson();
@@ -52,6 +62,9 @@ const discussionSlice = createSlice({
     clearAskError(state, action) {
       lessonOf(state, action.payload).askError = null;
     },
+    closeHistoryConversation(state, action) {
+      lessonOf(state, action.payload).viewing = closedView();
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -78,6 +91,55 @@ const discussionSlice = createSlice({
         lesson.messages = action.payload.messages;
         lesson.askError = null;
         lesson.loadStatus = statuses.succeeded;
+        lesson.history.status = statuses.idle;
+      })
+
+      .addCase(fetchHistory.pending, (state, action) => {
+        const lesson = lessonOf(state, action.meta.arg);
+        lesson.history.status = statuses.loading;
+        lesson.history.error = null;
+      })
+      .addCase(fetchHistory.fulfilled, (state, action) => {
+        lessonOf(state, action.meta.arg).history = { items: action.payload, status: statuses.succeeded, error: null };
+      })
+      .addCase(fetchHistory.rejected, (state, action) => {
+        const lesson = lessonOf(state, action.meta.arg);
+        lesson.history.status = statuses.failed;
+        lesson.history.error = action.payload ?? null;
+      })
+
+      .addCase(openHistoryConversation.pending, (state, action) => {
+        const { mediaId, conversationId } = action.meta.arg;
+        lessonOf(state, mediaId).viewing = { ...closedView(), conversationId, status: statuses.loading };
+      })
+      .addCase(openHistoryConversation.fulfilled, (state, action) => {
+        const { mediaId, conversationId } = action.meta.arg;
+        const lesson = lessonOf(state, mediaId);
+        // Only if it is still the one being opened — a quick second click wins.
+        if (lesson.viewing.conversationId !== conversationId) return;
+        lesson.viewing = { conversationId, ...action.payload, status: statuses.succeeded, error: null };
+      })
+      .addCase(openHistoryConversation.rejected, (state, action) => {
+        const { mediaId, conversationId } = action.meta.arg;
+        const lesson = lessonOf(state, mediaId);
+        if (lesson.viewing.conversationId !== conversationId) return;
+        lesson.viewing = { ...lesson.viewing, status: statuses.failed, error: action.payload ?? null };
+      })
+
+      .addCase(resumeConversation.pending, (state, action) => {
+        lessonOf(state, action.meta.arg.mediaId).viewing.resumeError = null;
+      })
+      .addCase(resumeConversation.rejected, (state, action) => {
+        lessonOf(state, action.meta.arg.mediaId).viewing.resumeError = action.payload ?? { code: null };
+      })
+      .addCase(resumeConversation.fulfilled, (state, action) => {
+        const lesson = lessonOf(state, action.meta.arg.mediaId);
+        lesson.conversation = action.payload.conversation;
+        lesson.messages = action.payload.messages;
+        lesson.askError = null;
+        lesson.loadStatus = statuses.succeeded;
+        lesson.viewing = closedView();
+        lesson.history.status = statuses.idle;
       })
 
       .addCase(askQuestion.pending, (state, action) => {
@@ -119,6 +181,7 @@ const discussionSlice = createSlice({
         // what stays on screen is what is in the database.
         lesson.messages = withoutTemporary(lesson.messages, action.meta.requestId)
           .concat(action.payload.messages);
+        lesson.history.status = statuses.idle;
       })
       .addCase(askQuestion.rejected, (state, action) => {
         // The server stores nothing for a failed answer, so the question — and
@@ -152,5 +215,5 @@ const discussionSlice = createSlice({
   },
 });
 
-export const { clearSearch, clearAskError } = discussionSlice.actions;
+export const { clearSearch, clearAskError, closeHistoryConversation } = discussionSlice.actions;
 export default discussionSlice.reducer;

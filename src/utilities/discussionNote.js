@@ -1,4 +1,5 @@
 import { sourceChipHtml, referencesBlockHtml } from "./noteSource";
+import { placeOf } from "./discussionPlace";
 
 // An answer from the "דיון עם בינה מלאכותית" chat, saved as a note in the
 // lesson's notebook (PRD ASK-4).
@@ -90,3 +91,35 @@ export const canSaveAnswer = (message) =>
   Number.isInteger(message.id) &&
   !message.streaming &&
   (message.citations?.length ?? 0) > 0;
+
+/**
+ * The whole conversation as plain text, for the "העתק שיחה" button: each
+ * question, its answer with its [n] markers, and under the answer the place
+ * each marker points to — the same labels the chips under it show — so the
+ * copy can still be checked against the lesson wherever it is pasted.
+ *
+ * Headed by the lesson's title, because pasted elsewhere "עמ' 66" means
+ * nothing without the book it is a page of. Messages still in flight (the
+ * pending question, the draft answer) are left out: they are not the
+ * conversation yet.
+ */
+export const conversationText = (messages, { mediaTitle } = {}) => {
+  const lines = [];
+  // Trimmed: seen in the browser, a title stored with a trailing space.
+  const title = String(mediaTitle ?? "").trim();
+  if (title) lines.push(`דיון עם בינה מלאכותית — ${title}`, "");
+  for (const m of messages) {
+    if (m.pending || m.streaming) continue;
+    if (m.role === "user") {
+      lines.push(`שאלה: ${String(m.content).trim()}`);
+      continue;
+    }
+    lines.push(`תשובה: ${String(m.content).trim()}`);
+    const sources = [...(m.citations ?? [])]
+      .sort((a, b) => Number(a.n) - Number(b.n))
+      .map((c) => `[${c.n}] ${placeOf(c).label}`);
+    if (sources.length) lines.push(`מקורות: ${sources.join(" · ")}`);
+    lines.push("");
+  }
+  return lines.join("\n").trim();
+};

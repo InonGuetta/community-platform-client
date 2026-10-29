@@ -8,7 +8,7 @@ import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost"
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { selectDiscussionByMediaId, selectDiscussionQuota } from "../../../store/selectors/discussionSelectors";
 import { statuses } from "../../../utilities/constant";
-import { answerNote, questionBefore } from "../../../utilities/discussionNote";
+import { answerNote, questionBefore, conversationText } from "../../../utilities/discussionNote";
 
 // The "דיון עם AI" tab's logic: every dispatch and selector it needs, so the
 // panel and its two panes stay presentation only.
@@ -130,6 +130,21 @@ const useAIDiscussionController = ({ mediaId, transcript, media }) => {
     return saved;
   }, [dispatch, mediaId, media?.title, media?.media_type]);
 
+  // "העתק שיחה": the whole conversation on screen — the chat's, or one open
+  // in the history — as plain text with its sources (conversationText).
+  // navigator.clipboard is missing on an insecure origin and can be refused by
+  // the browser; either way the reader is told rather than left guessing.
+  const copyConversation = useCallback(async (messages) => {
+    try {
+      await navigator.clipboard.writeText(conversationText(messages, { mediaTitle: media?.title }));
+      dispatch(notify({ message: "השיחה הועתקה", severity: "success" }));
+      return true;
+    } catch {
+      dispatch(notify({ message: "לא ניתן להעתיק את השיחה בדפדפן הזה", severity: "warning" }));
+      return false;
+    }
+  }, [dispatch, media?.title]);
+
   const runSearch = useCallback((text) => {
     const query = String(text ?? "").trim();
     if (!query) return;
@@ -170,6 +185,7 @@ const useAIDiscussionController = ({ mediaId, transcript, media }) => {
       continueConversation,
       retry: retryHistory,
       remove: removeConversation,
+      copy: copyConversation,
       deletingId: lesson.deletingId,
       deleteError: lesson.deleteError,
     },
@@ -183,6 +199,7 @@ const useAIDiscussionController = ({ mediaId, transcript, media }) => {
       askStage: lesson.askStage,
       askError: lesson.askError,
       quota,
+      copy: copyConversation,
       ask,
       startNew,
       dismissAskError,

@@ -14,6 +14,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import NoteAddIcon from "@mui/icons-material/NoteAddOutlined";
 import CheckIcon from "@mui/icons-material/Check";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { statuses } from "../../../../../utilities/constant";
 import { hebrewForError } from "../../../../../utilities/apiError";
 import { placeOf, canOpenPlace, openPlace } from "../../../../../utilities/discussionPlace";
@@ -140,6 +141,17 @@ export const answerSaver = (notebook, messages) => (message) =>
     ? { state: notebook.saved[message.id], onSave: () => notebook.save(messages, message.id) }
     : null;
 
+// "העתק שיחה": ONE button for the whole conversation, beside "שיחה חדשה" —
+// not one under every answer, which would double the buttons in a thread
+// that already has a save button and sources under each. Shared with the
+// history mode, where it copies the conversation open there.
+export const CopyConversationButton = ({ onCopy, disabled = false }) =>
+  onCopy ? (
+    <Button size="small" startIcon={<ContentCopyIcon />} onClick={onCopy} disabled={disabled}>
+      העתק שיחה
+    </Button>
+  ) : null;
+
 // Exported for the history mode, which shows an earlier conversation exactly
 // as the chat does — the same bubbles, the same clickable sources.
 export const MessageBubble = ({ message, onOpen, save = null }) => {
@@ -249,7 +261,12 @@ const ChatPane = ({ chat, notebook = null, isText = false, onSeek, onOpenPage })
   return (
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 1 }}>
       {!empty && (
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+          <CopyConversationButton
+            onCopy={chat.copy && (() => chat.copy(chat.messages))}
+            // Mid-answer the copy would hold half an answer, or none.
+            disabled={chat.asking}
+          />
           <Button
             size="small"
             startIcon={<AddCommentIcon />}

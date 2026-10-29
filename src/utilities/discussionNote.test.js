@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, test, expect } from "vitest";
-import { answerNote, questionBefore, canSaveAnswer } from "./discussionNote";
+import { answerNote, questionBefore, canSaveAnswer, conversationText } from "./discussionNote";
 import { sanitizeNoteHtml } from "./noteHtml";
 import { isNoteAboutMedia, sourceFromChip, SOURCE_CHIP_SELECTOR } from "./noteSource";
 
@@ -99,5 +99,41 @@ describe("which answer, and whether it can be saved", () => {
     expect(canSaveAnswer(messages[0])).toBe(false);
     expect(canSaveAnswer({ id: "draft-x", role: "assistant", citations: [{ n: 1 }], streaming: true })).toBe(false);
     expect(canSaveAnswer({ id: 5, role: "assistant", content: "לא נדון", citations: [] })).toBe(false);
+  });
+});
+
+describe("the whole conversation as text", () => {
+  const messages = [
+    { id: 1, role: "user", content: " מה כתוב על תפילין? " },
+    { id: 2, role: "assistant", content: "של יד תחילה [2], ואחר כך של ראש [1].", citations: [{ n: 2, page_number: 70 }, { n: 1, page_number: 66 }] },
+    { id: 3, role: "user", content: "ומה עוד?" },
+    { id: 4, role: "assistant", content: "לא נדון בספר.", citations: [] },
+  ];
+
+  test("each question, its answer, and where each [n] points", () => {
+    expect(conversationText(messages, { mediaTitle: "ספר התודעה " })).toBe([
+      "דיון עם בינה מלאכותית — ספר התודעה",
+      "",
+      "שאלה: מה כתוב על תפילין?",
+      "תשובה: של יד תחילה [2], ואחר כך של ראש [1].",
+      "מקורות: [1] עמ' 66 · [2] עמ' 70",
+      "",
+      "שאלה: ומה עוד?",
+      "תשובה: לא נדון בספר.",
+    ].join("\n"));
+  });
+
+  test("a moment in a recording is its minute, as on the chip", () => {
+    const text = conversationText([{ id: 2, role: "assistant", content: "א [1]", citations: [{ n: 1, start_time: 754 }] }]);
+    expect(text).toContain("[1] 12:34");
+  });
+
+  test("what is still on its way is not copied", () => {
+    const text = conversationText([
+      { id: 1, role: "user", content: "ראשונה" },
+      { id: "pending-r", role: "user", content: "בדרך", pending: true },
+      { id: "draft-r", role: "assistant", content: "חצי", streaming: true },
+    ]);
+    expect(text).toBe("שאלה: ראשונה");
   });
 });

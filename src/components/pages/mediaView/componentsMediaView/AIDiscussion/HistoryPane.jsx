@@ -20,7 +20,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import { statuses } from "../../../../../utilities/constant";
 import { hebrewForError } from "../../../../../utilities/apiError";
 import { formatHebrewDate } from "../../../../../utilities/formatDate";
-import { MessageBubble, placeOpener, answerSaver } from "./ChatPane";
+import { MessageBubble, placeOpener, answerSaver, CopyConversationButton } from "./ChatPane";
 
 // The reader's earlier conversations on THIS lesson. Presentation only:
 // `history` is what useAIDiscussionController hands it.
@@ -112,15 +112,18 @@ const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
           חזרה לרשימה
         </Button>
         {viewing.status === statuses.succeeded && (
-          <Button
-            size="small"
-            variant="contained"
-            startIcon={<ChatIcon />}
-            onClick={continueHere}
-            disabled={continuing}
-          >
-            {isCurrent ? "חזרה לשיחה" : "המשך את השיחה הזו"}
-          </Button>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <CopyConversationButton onCopy={history.copy && (() => history.copy(viewing.messages))} />
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={<ChatIcon />}
+              onClick={continueHere}
+              disabled={continuing}
+            >
+              {isCurrent ? "חזרה לשיחה" : "המשך את השיחה הזו"}
+            </Button>
+          </Box>
         )}
       </Box>
 

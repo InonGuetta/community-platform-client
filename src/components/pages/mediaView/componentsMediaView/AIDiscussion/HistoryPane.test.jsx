@@ -175,3 +175,12 @@ test("an answer in an earlier conversation can be saved to the notebook too", as
   await userEvent.click(screen.getByRole("button", { name: "שמור למחברת" }));
   expect(notebook.save).toHaveBeenCalledWith(messages, 2);
 });
+
+test("an earlier conversation can be copied whole", async () => {
+  const copy = vi.fn();
+  const messages = [{ id: 1, role: "user", content: "שאלה", citations: [] }];
+  const viewing = { conversationId: 3, conversation: { id: 3 }, status: "succeeded", error: null, messages };
+  render(<HistoryPane history={history({ viewing, copy })} />);
+  await userEvent.click(screen.getByRole("button", { name: "העתק שיחה" }));
+  expect(copy).toHaveBeenCalledWith(messages);
+});

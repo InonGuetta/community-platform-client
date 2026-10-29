@@ -226,6 +226,9 @@ const MediaViewPage = () => {
               discussionPanel={
                 <AIDiscussionPanel
                   mediaId={media.id}
+                  // Its title and type name the source chips of an answer
+                  // saved to the notebook.
+                  media={media}
                   transcript={transcript}
                   isText={isText}
                   // A hit in a recording seeks the player; one in a book turns

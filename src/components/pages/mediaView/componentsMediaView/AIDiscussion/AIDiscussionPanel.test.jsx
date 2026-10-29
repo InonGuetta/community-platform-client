@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { discussionReadiness, DISCUSSION_MODES } from "../../useAIDiscussionController";
 
@@ -31,6 +31,11 @@ const useFakeController = (readiness) => {
       conversation: null, messages: [], loadStatus: "succeeded", loadError: null,
       asking: false, askError: null,
       ask: async () => true, startNew: () => {}, dismissAskError: () => {}, retryLoad: () => {},
+    },
+    history: {
+      items: [], status: "succeeded", error: null, currentId: null,
+      viewing: { conversationId: null, conversation: null, messages: [], status: "idle", error: null },
+      open: () => {}, close: () => {}, continueConversation: async () => true, retry: () => {},
     },
   });
 };
@@ -77,14 +82,14 @@ describe("the panel", () => {
     const { rerender } = render(ui());
 
     expect(screen.getByTestId("chat-empty")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "שיחה עם AI" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "דיון עם בינה מלאכותית" })).toHaveAttribute("aria-pressed", "true");
 
     await userEvent.click(screen.getByRole("button", { name: "חיפוש חכם" }));
     rerender(ui());
     expect(screen.getByRole("search")).toBeInTheDocument();
     expect(screen.queryByTestId("chat-empty")).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "שיחה עם AI" }));
+    await userEvent.click(screen.getByRole("button", { name: "דיון עם בינה מלאכותית" }));
     rerender(ui());
     expect(screen.getByTestId("chat-empty")).toBeInTheDocument();
   });
@@ -93,7 +98,7 @@ describe("the panel", () => {
     controller.mockImplementation(useFakeController("ready"));
     const ui = () => <AIDiscussionPanel mediaId={7} transcript={null} />;
     const { rerender } = render(ui());
-    await userEvent.click(screen.getByRole("button", { name: "שיחה עם AI" }));
+    await userEvent.click(screen.getByRole("button", { name: "דיון עם בינה מלאכותית" }));
     rerender(ui());
     expect(currentMode).toBe(DISCUSSION_MODES.chat);
     expect(screen.getByTestId("chat-empty")).toBeInTheDocument();
@@ -110,6 +115,26 @@ describe("the panel", () => {
     expect(screen.getByTestId("discussion-not-ready")).toHaveTextContent(text);
     expect(screen.queryByTestId("chat-empty")).not.toBeInTheDocument();
     expect(screen.queryByRole("search")).not.toBeInTheDocument();
+  });
+
+  // Right to left on the screen: the search, the discussion, and the history
+  // to the LEFT of the discussion — where it was asked to be.
+  test("three modes, in this order, the history last", () => {
+    controller.mockImplementation(useFakeController("ready"));
+    render(<AIDiscussionPanel mediaId={7} transcript={null} />);
+    const group = screen.getByRole("group", { name: "סוג הדיון" });
+    expect(within(group).getAllByRole("button").map((b) => b.textContent))
+      .toEqual(["חיפוש חכם", "דיון עם בינה מלאכותית", "היסטוריה"]);
+  });
+
+  test("the history mode shows the history", async () => {
+    controller.mockImplementation(useFakeController("ready"));
+    const ui = () => <AIDiscussionPanel mediaId={7} transcript={null} />;
+    const { rerender } = render(ui());
+    await userEvent.click(screen.getByRole("button", { name: "היסטוריה" }));
+    rerender(ui());
+    expect(screen.getByTestId("history-empty")).toBeInTheDocument();
+    expect(screen.getByText(/השיחות הקודמות שלך על השיעור הזה/)).toBeInTheDocument();
   });
 
   test("says it answers from the book, for a book", () => {

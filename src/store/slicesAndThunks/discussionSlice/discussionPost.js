@@ -13,6 +13,18 @@ export const startConversation = createAsyncThunk(
   }
 );
 
+// "המשך את השיחה הזו": an earlier conversation becomes the current one.
+export const resumeConversation = createAsyncThunk(
+  "discussion/resumeConversation",
+  async ({ mediaId, conversationId }, { rejectWithValue }) => {
+    try {
+      return await discussionApi.resumeConversation(mediaId, conversationId);
+    } catch (err) {
+      return rejectWithValue(rejectionOf(err, "Failed to resume the conversation"));
+    }
+  }
+);
+
 // A piece of the answer as it is written. Declared here rather than in the
 // slice because the thunk below dispatches it, and the slice imports the
 // thunk — defining it there would make the two files import each other.

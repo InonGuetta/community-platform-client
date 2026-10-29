@@ -216,3 +216,75 @@ test("the daily quota says when the chat comes back, and points at the search", 
   expect(alert).toHaveTextContent("החיפוש החכם");
   expect(alert).not.toHaveTextContent("נסה לשאול שוב");
 });
+
+describe("saving an answer to the notebook", () => {
+  const notebook = (saved = {}) => ({ saved, save: vi.fn(async () => true) });
+
+  test("a cited answer can be saved, with the conversation it is in", async () => {
+    const n = notebook();
+    const messages = [question, answer];
+    render(<ChatPane chat={chat({ messages })} notebook={n} />);
+    await userEvent.click(screen.getByRole("button", { name: "שמור למחברת" }));
+    expect(n.save).toHaveBeenCalledWith(messages, 2);
+  });
+
+  test("a question, an answer still being written, and an uncited answer cannot", () => {
+    const messages = [
+      question,
+      { id: 5, role: "assistant", content: "לא נדון בשיעור.", citations: [] },
+      { id: "draft-r", role: "assistant", content: "כותב [1]", citations: [], streaming: true },
+    ];
+    render(<ChatPane chat={chat({ messages, asking: true })} notebook={notebook()} />);
+    expect(screen.queryByRole("button", { name: "שמור למחברת" })).not.toBeInTheDocument();
+  });
+
+  test("once saved it says so, and cannot be pressed again by accident", () => {
+    render(<ChatPane chat={chat({ messages: [question, answer] })} notebook={notebook({ 2: "saved" })} />);
+    expect(screen.getByRole("button", { name: "נשמר במחברת" })).toBeDisabled();
+  });
+
+  test("a failed save says so and can be tried again", async () => {
+    const n = notebook({ 2: "failed" });
+    render(<ChatPane chat={chat({ messages: [question, answer] })} notebook={n} />);
+    await userEvent.click(screen.getByRole("button", { name: "השמירה נכשלה — נסה שוב" }));
+    expect(n.save).toHaveBeenCalled();
+  });
+});
+
+describe("today's questions left", () => {
+  test("shown to a reader the quota binds", () => {
+    render(<ChatPane chat={chat({ quota: { limit: 50, remaining: 42 } })} />);
+    expect(screen.getByTestId("chat-quota")).toHaveTextContent("נשארו לך היום 42 שאלות מתוך 50");
+  });
+
+  test("one, and none, are said in words", () => {
+    const { rerender } = render(<ChatPane chat={chat({ quota: { limit: 50, remaining: 1 } })} />);
+    expect(screen.getByTestId("chat-quota")).toHaveTextContent("נשארה לך היום שאלה אחת");
+    rerender(<ChatPane chat={chat({ quota: { limit: 50, remaining: 0 } })} />);
+    expect(screen.getByTestId("chat-quota")).toHaveTextContent("אפשר להמשיך מחר");
+  });
+
+  test("not shown to a lecturer or an admin, who have no quota", () => {
+    render(<ChatPane chat={chat({ quota: null })} />);
+    expect(screen.queryByTestId("chat-quota")).not.toBeInTheDocument();
+  });
+});
+
+describe("copying the conversation", () => {
+  test("one button for the whole conversation, not one per answer", async () => {
+    const copy = vi.fn();
+    const messages = [question, answer, { ...question, id: 4 }, { ...bookAnswer, id: 5 }];
+    render(<ChatPane chat={chat({ messages, copy })} />);
+    const buttons = screen.getAllByRole("button", { name: "העתק שיחה" });
+    expect(buttons).toHaveLength(1);
+    await userEvent.click(buttons[0]);
+    expect(copy).toHaveBeenCalledWith(messages);
+  });
+
+  test("not offered on an empty conversation, nor pressed mid-answer", () => {
+    const { rerender } = render(<ChatPane chat={chat({ copy: vi.fn() })} />);
+    expect(screen.queryByRole("button", { name: "העתק שיחה" })).not.toBeInTheDocument();
+    rerender(<ChatPane chat={chat({ messages: [question, answer], asking: true, copy: vi.fn() })} />);
+    expect(screen.getByRole("button", { name: "העתק שיחה" })).toBeDisabled();
+  });
+});

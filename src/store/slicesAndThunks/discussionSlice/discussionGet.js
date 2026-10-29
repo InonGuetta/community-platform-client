@@ -25,3 +25,27 @@ export const searchInLesson = createAsyncThunk(
     }
   }
 );
+
+// The caller's earlier conversations on the lesson, for the history mode.
+export const fetchHistory = createAsyncThunk(
+  "discussion/fetchHistory",
+  async (mediaId, { rejectWithValue }) => {
+    try {
+      return await discussionApi.listConversations(mediaId);
+    } catch (err) {
+      return rejectWithValue(rejectionOf(err, "Failed to load the history"));
+    }
+  }
+);
+
+// One earlier conversation, to read in the history.
+export const openHistoryConversation = createAsyncThunk(
+  "discussion/openHistoryConversation",
+  async ({ mediaId, conversationId }, { rejectWithValue }) => {
+    try {
+      return await discussionApi.getConversationById(mediaId, conversationId);
+    } catch (err) {
+      return rejectWithValue(rejectionOf(err, "Failed to open the conversation"));
+    }
+  }
+);

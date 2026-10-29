@@ -148,7 +148,7 @@ const SmartSearchPane = ({ search, isText = false, onSeek, onOpenPage }) => {
 
       {search.status === statuses.succeeded && search.results.length === 0 && (
         <Typography variant="body2" color="text.secondary" data-testid="search-empty">
-          לא נמצאו קטעים מתאימים. אפשר לנסות לנסח אחרת, או לשאול במצב &quot;שיחה עם AI&quot;.
+          לא נמצאו קטעים מתאימים. אפשר לנסות לנסח אחרת, או לשאול במצב &quot;דיון עם בינה מלאכותית&quot;.
         </Typography>
       )}
 

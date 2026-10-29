@@ -12,9 +12,14 @@ import SendIcon from "@mui/icons-material/Send";
 import AddCommentIcon from "@mui/icons-material/AddCommentOutlined";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import NoteAddIcon from "@mui/icons-material/NoteAddOutlined";
+import CheckIcon from "@mui/icons-material/Check";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { statuses } from "../../../../../utilities/constant";
 import { hebrewForError } from "../../../../../utilities/apiError";
 import { placeOf, canOpenPlace, openPlace } from "../../../../../utilities/discussionPlace";
+import { canSaveAnswer } from "../../../../../utilities/discussionNote";
+import { SAVE_STATES } from "../../useAIDiscussionController";
 
 // The conversation with the AI about ONE lesson. Presentation only: `chat` is
 // what useAIDiscussionController hands it.
@@ -108,7 +113,48 @@ const Sources = ({ citations, onOpen }) => (
   </Box>
 );
 
-const Bubble = ({ message, onOpen }) => {
+// "שמור למחברת" under an answer. Saved once, it says so and stays pressed for
+// this visit; a failure says so and can be pressed again.
+const SAVE_LABELS = {
+  [SAVE_STATES.saving]: "שומר…",
+  [SAVE_STATES.saved]: "נשמר במחברת",
+  [SAVE_STATES.failed]: "השמירה נכשלה — נסה שוב",
+};
+
+const SaveAnswerButton = ({ state, onSave }) => (
+  <Button
+    size="small"
+    onClick={onSave}
+    disabled={state === SAVE_STATES.saving || state === SAVE_STATES.saved}
+    color={state === SAVE_STATES.failed ? "error" : "primary"}
+    startIcon={state === SAVE_STATES.saved ? <CheckIcon /> : <NoteAddIcon />}
+    sx={{ mt: 0.5, px: 0.5, minWidth: 0 }}
+  >
+    {SAVE_LABELS[state] ?? "שמור למחברת"}
+  </Button>
+);
+
+// The save button for each answer in `messages` that can be saved — what a
+// pane hands MessageBubble. Shared with the history mode.
+export const answerSaver = (notebook, messages) => (message) =>
+  notebook && canSaveAnswer(message)
+    ? { state: notebook.saved[message.id], onSave: () => notebook.save(messages, message.id) }
+    : null;
+
+// "העתק שיחה": ONE button for the whole conversation, beside "שיחה חדשה" —
+// not one under every answer, which would double the buttons in a thread
+// that already has a save button and sources under each. Shared with the
+// history mode, where it copies the conversation open there.
+export const CopyConversationButton = ({ onCopy, disabled = false }) =>
+  onCopy ? (
+    <Button size="small" startIcon={<ContentCopyIcon />} onClick={onCopy} disabled={disabled}>
+      העתק שיחה
+    </Button>
+  ) : null;
+
+// Exported for the history mode, which shows an earlier conversation exactly
+// as the chat does — the same bubbles, the same clickable sources.
+export const MessageBubble = ({ message, onOpen, save = null }) => {
   const mine = message.role === "user";
   return (
     <Box
@@ -131,17 +177,34 @@ const Bubble = ({ message, onOpen }) => {
         {mine ? message.content : <AnswerText content={message.content} citations={message.citations} onOpen={onOpen} />}
       </Typography>
       {!mine && message.citations?.length > 0 && <Sources citations={message.citations} onOpen={onOpen} />}
+      {save && <SaveAnswerButton state={save.state} onSave={save.onSave} />}
     </Box>
   );
 };
 
-const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
+// Whether a cited place can be opened here, and opening it — what a bubble's
+// sources are handed. Shared with the history mode.
+export const placeOpener = ({ onSeek, onOpenPage }) => ({
+  can: (place) => canOpenPlace(place, { onSeek, onOpenPage }),
+  go: (place) => openPlace(place, { onSeek, onOpenPage }),
+});
+
+// The line under the question box: today's questions left. Only for a reader
+// the quota binds (quota is null otherwise); said in amber when few are left,
+// so the limit is seen coming rather than met as a refusal.
+const FEW_LEFT = 5;
+
+export const quotaLabel = ({ limit, remaining }) => {
+  if (remaining <= 0) return `ניצלת היום את כל ${limit} השאלות. אפשר להמשיך מחר — והחיפוש החכם זמין גם עכשיו.`;
+  if (remaining === 1) return `נשארה לך היום שאלה אחת מתוך ${limit}`;
+  return `נשארו לך היום ${remaining} שאלות מתוך ${limit}`;
+};
+
+const ChatPane = ({ chat, notebook = null, isText = false, onSeek, onOpenPage }) => {
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);
-  const onOpen = {
-    can: (place) => canOpenPlace(place, { onSeek, onOpenPage }),
-    go: (place) => openPlace(place, { onSeek, onOpenPage }),
-  };
+  const onOpen = placeOpener({ onSeek, onOpenPage });
+  const saverFor = answerSaver(notebook, chat.messages);
 
   // Keep the newest message in view: the question as it is sent, the
   // "thinking" line, then the answer.
@@ -198,7 +261,12 @@ const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 1 }}>
       {!empty && (
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+          <CopyConversationButton
+            onCopy={chat.copy && (() => chat.copy(chat.messages))}
+            // Mid-answer the copy would hold half an answer, or none.
+            disabled={chat.asking}
+          />
           <Button
             size="small"
             startIcon={<AddCommentIcon />}
@@ -229,7 +297,7 @@ const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
           </Box>
         )}
 
-        {chat.messages.map((m) => <Bubble key={m.id} message={m} onOpen={onOpen} />)}
+        {chat.messages.map((m) => <MessageBubble key={m.id} message={m} onOpen={onOpen} save={saverFor(m)} />)}
 
         {chat.asking && !answerArriving && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }} data-testid="chat-thinking">
@@ -283,6 +351,17 @@ const ChatPane = ({ chat, isText = false, onSeek, onOpenPage }) => {
           <SendIcon />
         </IconButton>
       </Box>
+
+      {chat.quota && (
+        <Typography
+          variant="caption"
+          data-testid="chat-quota"
+          color={chat.quota.remaining <= FEW_LEFT ? "warning.main" : "text.secondary"}
+          sx={{ textAlign: "center" }}
+        >
+          {quotaLabel(chat.quota)}
+        </Typography>
+      )}
 
       <Typography variant="caption" color="text.disabled" sx={{ textAlign: "center" }}>
         התשובות נוצרות על ידי AI ועלולות לטעות — לחצו על מקור כדי לבדוק.

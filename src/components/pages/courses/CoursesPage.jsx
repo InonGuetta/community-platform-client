@@ -8,6 +8,8 @@ import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tooltip from "@mui/material/Tooltip";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -22,15 +24,18 @@ import { statuses } from "../../../utilities/constant";
 
 const CoursesPage = () => {
   const {
-    courses, status, lecturers, isAdmin, canManage, myStudents,
+    courses, totalCourses, status, lecturers, isAdmin, canManage, myStudents,
+    isLecturer, scope, setScope,
     createOpen, setCreateOpen,
     editCourse, setEditCourse,
     deleteTarget, setDeleteTarget,
     rosterCourseId, setRosterCourseId,
-    handleCreate, handleUpdate, handleDeleteConfirm, handleEnroll, handleUnenroll,
+    handleCreate, handleUpdate, handleDeleteConfirm, handleEnroll,
+    unenrollTarget, handleUnenrollRequest, handleUnenrollCancel, handleUnenrollConfirm,
+    handleExportRoster,
   } = useCoursesPageController();
 
-  if (status === statuses.loading && courses.length === 0) {
+  if (status === statuses.loading && totalCourses === 0) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress />
@@ -56,9 +61,33 @@ const CoursesPage = () => {
         <MyStudents students={myStudents} />
       </Box>
 
-      {courses.length === 0 ? (
+      {/* ROST-7. Other lecturers' courses are visible, read-only, one click
+          away — a lecturer planning a course wants to see what already exists —
+          but not mixed into the list they manage. */}
+      {isLecturer && totalCourses > 0 && (
+        <ToggleButtonGroup
+          value={scope}
+          exclusive
+          size="small"
+          onChange={(_, next) => next && setScope(next)}
+          sx={{ mb: 2 }}
+        >
+          <ToggleButton value="mine">הקורסים שלי</ToggleButton>
+          <ToggleButton value="all">כל הקורסים</ToggleButton>
+        </ToggleButtonGroup>
+      )}
+
+      {totalCourses === 0 ? (
         <NoDataDialog
           message="עדיין לא הוגדרו קורסים"
+          actionLabel="קורס חדש"
+          onAction={() => setCreateOpen(true)}
+        />
+      ) : courses.length === 0 ? (
+        // Courses exist, none of them this lecturer's. Saying "no courses"
+        // here would contradict the switch right above it.
+        <NoDataDialog
+          message="עדיין אין לך קורסים משלך. הקורסים של מרצים אחרים נמצאים תחת ״כל הקורסים״."
           actionLabel="קורס חדש"
           onAction={() => setCreateOpen(true)}
         />
@@ -77,6 +106,7 @@ const CoursesPage = () => {
                 <Chip label={course.lecturer_name || "ללא מרצה"} size="small" variant="outlined" />
                 <Chip label={`${course.student_count} תלמידים`} size="small" color="info" variant="outlined" />
                 <Chip label={`${course.media_count} שיעורים`} size="small" color="success" variant="outlined" />
+                {!canManage(course) && <Chip label="צפייה בלבד" size="small" />}
               </Box>
 
               {canManage(course) && (
@@ -103,15 +133,25 @@ const CoursesPage = () => {
                   {course.description}
                 </Typography>
               )}
-              <CourseRoster
-                courseId={course.id}
-                // Ownership, not role. The server gates enrolment on managing
-                // THIS course, so an admin sees the picker everywhere and a
-                // lecturer only on the courses they teach.
-                canEnroll={canManage(course)}
-                onEnroll={handleEnroll}
-                onUnenroll={handleUnenroll}
-              />
+              {canManage(course) ? (
+                <CourseRoster
+                  courseId={course.id}
+                  // Ownership, not role. The server gates enrolment on managing
+                  // THIS course, so an admin sees the picker everywhere and a
+                  // lecturer only on the courses they teach.
+                  canEnroll
+                  onEnroll={handleEnroll}
+                  onUnenroll={handleUnenrollRequest}
+                  onExport={(students) => handleExportRoster(course, students)}
+                />
+              ) : (
+                // Not the roster: who studies in a colleague's course is names
+                // and emails, and the server refuses it. The count in the header
+                // is the part that is anybody's business.
+                <Typography variant="body2" color="text.secondary">
+                  רשימת התלמידים גלויה רק למרצה של הקורס.
+                </Typography>
+              )}
             </AccordionDetails>
           </Accordion>
         ))
@@ -134,6 +174,23 @@ const CoursesPage = () => {
           initial={editCourse}
         />
       )}
+
+      {/* ROST-8 — removal is immediate and takes the course's lessons with it. */}
+      <ConfirmingDeletionDialog
+        open={Boolean(unenrollTarget)}
+        onClose={handleUnenrollCancel}
+        onConfirm={handleUnenrollConfirm}
+        title="הסרה מהקורס"
+        confirmLabel="הסרה"
+        message={
+          unenrollTarget && (
+            <>
+              להסיר את <strong>{unenrollTarget.student.display_name || unenrollTarget.student.email}</strong> מהקורס{" "}
+              <strong>{unenrollTarget.course?.title}</strong>? הגישה לשיעורי הקורס תיחסם מיד. אפשר לרשום שוב בכל עת.
+            </>
+          )
+        }
+      />
 
       <ConfirmingDeletionDialog
         open={Boolean(deleteTarget)}

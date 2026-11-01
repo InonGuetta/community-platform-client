@@ -7,6 +7,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { selectCourseStudents } from "../../../../store/selectors/coursesSelectors";
 import { coursesApi } from "../../../../api/coursesApi";
 
@@ -34,7 +35,10 @@ const MIN_SEARCH_LENGTH = 2;
 // address book to everyone approved as a lecturer. It is to ask a question the
 // server can answer safely — a search, minimum two characters, capped, scoped to
 // this course and to people not already in it.
-const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll }) => {
+//
+// `onUnenroll` receives the whole student, not an id: the page asks before
+// removing anybody (ROST-8), and the question names the person.
+const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll, onExport }) => {
   const selectRoster = useMemo(() => selectCourseStudents(courseId), [courseId]);
   const enrolled = useSelector(selectRoster);
   const [picked, setPicked] = useState(null);
@@ -121,6 +125,14 @@ const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll }) => {
         </Box>
       )}
 
+      {canEnroll && onExport && enrolled.length > 0 && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+          <Button size="small" startIcon={<FileDownloadIcon />} onClick={() => onExport(enrolled)}>
+            ייצוא ל‑CSV
+          </Button>
+        </Box>
+      )}
+
       {enrolled.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           אין תלמידים רשומים לקורס זה.
@@ -133,7 +145,7 @@ const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll }) => {
               label={s.display_name || s.email}
               // onDelete is what renders the X, so a lecturer viewing the roster
               // sees names without a remove affordance they cannot use.
-              onDelete={canEnroll ? () => onUnenroll(courseId, s.id) : undefined}
+              onDelete={canEnroll ? () => onUnenroll(courseId, s) : undefined}
               variant="outlined"
             />
           ))}

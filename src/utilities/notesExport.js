@@ -1,4 +1,5 @@
 import { noteBodyToHtml } from "./noteHtml";
+import { saveBlob } from "./saveBlob";
 import {
   createSourceRegistry,
   noteTextWithSources,
@@ -90,24 +91,6 @@ export const downloadNotesPdf = async (notes, { title: named, sources = SOURCE_S
     footnotes: sources === SOURCE_STYLES.footnotes ? registry.labels() : {},
     filename: `${safeFileBaseName(base, "המחברת שלי")}.pdf`,
   });
-};
-
-// Hand a blob to the browser as a download. The anchor has to be IN the document
-// for the click to count in Firefox, and the object URL has to outlive the
-// download STARTING, not just the click. A 0ms revoke was the next tick, while
-// Firefox and Safari can still be reading the blob — a large export then saved
-// as a failed or empty file. A few seconds is the usual margin; the URL costs
-// nothing in the meantime.
-const REVOKE_AFTER_MS = 10_000;
-const saveBlob = (blob, filename) => {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  setTimeout(() => URL.revokeObjectURL(url), REVOKE_AFTER_MS);
 };
 
 /**

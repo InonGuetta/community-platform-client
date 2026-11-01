@@ -30,6 +30,8 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import { PERSONAL_SHELVES } from "../../pages/personal/personalShelves";
 import { roles, roleLabels } from "../../../utilities/constant";
+import NotificationBell from "./NotificationBell";
+import useNotificationBell from "./useNotificationBell";
 
 // Every entry here must map to a real route in App.jsx. A link to a path with
 // no route silently falls through to the "*" catch-all (=> /archive), which
@@ -211,6 +213,38 @@ const Navbar = () => {
   const [personalAnchor, setPersonalAnchor] = useState(null);
   const personalActive = PERSONAL_SHELVES.some((shelf) => shelf.path === pathname);
   const { mode, toggle: toggleColorMode } = useContext(ColorModeContext);
+  const bell = useNotificationBell();
+
+  // REG-11: the admin's "משתמשים" link carries how many role requests are
+  // waiting behind it, from the same poll as the bell. Only that link, only when
+  // the number is known (the server sends it to admins alone) and above zero.
+  //
+  // An inline pill after the word rather than a Badge over it: a Badge is
+  // positioned against the corner of what it wraps, and on a text link in this
+  // bar it landed across the label itself.
+  const linkLabel = (link) =>
+    link.to === "/users" && bell.pendingRoleRequests > 0 ? (
+      <Box
+        component="span"
+        aria-label={`${link.label}, ${bell.pendingRoleRequests} בקשות ממתינות`}
+        sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}
+      >
+        {link.label}
+        <Box
+          component="span"
+          aria-hidden
+          sx={{
+            minWidth: 18, height: 18, px: 0.5, borderRadius: 9,
+            bgcolor: "error.main", color: "error.contrastText",
+            fontSize: 11, fontWeight: 700, lineHeight: "18px", textAlign: "center",
+          }}
+        >
+          {bell.pendingRoleRequests}
+        </Box>
+      </Box>
+    ) : (
+      link.label
+    );
 
   const handleLogout = async () => {
     setDrawerOpen(false);
@@ -280,7 +314,7 @@ const Navbar = () => {
               size="small"
               sx={navButtonSx(pathname === link.to)}
             >
-              {link.label}
+              {linkLabel(link)}
             </Button>
           ))}
         </Box>
@@ -340,6 +374,18 @@ const Navbar = () => {
             </MenuItem>
           ))}
         </Menu>
+
+        {/* The bell — always visible, at every width. */}
+        <NotificationBell
+          items={bell.items}
+          unread={bell.unread}
+          anchor={bell.anchor}
+          open={bell.open}
+          onOpen={bell.handleOpen}
+          onClose={bell.handleClose}
+          onSelect={bell.handleSelect}
+          onMarkAllRead={bell.handleMarkAllRead}
+        />
 
         {/* Light/dark toggle — always visible. */}
         <Tooltip title={mode === "dark" ? "מצב בהיר" : "מצב כהה"}>
@@ -505,7 +551,7 @@ const Navbar = () => {
                   to={link.to}
                   selected={pathname === link.to}
                 >
-                  <ListItemText primary={link.label} primaryTypographyProps={{ fontWeight: 700, color: "primary.main" }} />
+                  <ListItemText primary={linkLabel(link)} primaryTypographyProps={{ fontWeight: 700, color: "primary.main" }} />
                 </ListItemButton>
               </ListItem>
             ))}

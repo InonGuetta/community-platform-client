@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { test, expect, describe } from "vitest";
+import { test, expect, describe, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
@@ -10,6 +10,12 @@ import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
 import { buildTheme } from "../../../theme/theme";
 import { PERSONAL_SHELVES } from "../../pages/personal/personalShelves";
 import Navbar from "./Navbar";
+
+// The bell polls on mount; NotificationBell.test.jsx is where it is tested.
+// Here it only must not reach the network.
+vi.mock("../../../api/notificationsApi", () => ({
+  notificationsApi: { list: vi.fn().mockResolvedValue({ items: [], unread: 0 }), markRead: vi.fn(), markAllRead: vi.fn() },
+}));
 
 // What the navigation offers is decided by the signed-in user's role, and the
 // three link sets are built by extending one another — student ⊂ lecturer ⊂

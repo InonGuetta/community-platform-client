@@ -18,6 +18,8 @@ import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
 import { mediaApi } from "../../../api/mediaApi";
 import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
+import { selectUser } from "../../../store/selectors/authSelectors";
+import { lecturerIdFor } from "./lessonFields";
 
 // creatorName starts empty on purpose rather than pre-filled with "כללי": the
 // placeholder says what blank will become, and pre-filling would make the
@@ -29,6 +31,7 @@ const UploadMedia = ({ open }) => {
   const progress = useSelector((state) => state.ui.uploadProgress);
   // Only the courses this user may file into — the server refuses the others.
   const courses = useSelector(selectAssignableCourses);
+  const user = useSelector(selectUser);
   // Derived from media already in the store — no request, and no new endpoint.
   // From the creators endpoint, not from the media in the store: the archive
   // filters server-side now, so the rows it holds are a filtered subset and the
@@ -109,6 +112,10 @@ const UploadMedia = ({ open }) => {
     // Omitted entirely when no course is chosen: FormData stringifies, so an
     // empty selection would arrive as the string "" and fail optionalId.
     if (fields.courseId) formData.append("courseId", fields.courseId);
+    // The account the lesson credits — see lecturerIdFor. Omitted, like the
+    // course, when there is nobody to name.
+    const lecturerId = lecturerIdFor(user, courses.find((c) => String(c.id) === String(fields.courseId)));
+    if (lecturerId !== undefined) formData.append("lecturerId", lecturerId);
     // Sent only when the uploader typed something. Omitting the key is what lets
     // the server apply its own default, so blank here and absent here cannot
     // produce different rows.

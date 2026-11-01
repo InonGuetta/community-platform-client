@@ -14,6 +14,7 @@ import { searchTranscripts } from "../../../store/slicesAndThunks/transcriptSlic
 import { clearSearchResults } from "../../../store/slicesAndThunks/transcriptSlice/transcriptSlice";
 import { selectSearchResults } from "../../../store/selectors/transcriptSelectors";
 import { formatTime } from "../../../utilities/formatTime";
+import { creatorPrefixes } from "../../../utilities/constant";
 
 // ts_headline returns the snippet with <b>…</b> around matches; render as plain
 // text to avoid injecting transcript-derived HTML into the DOM.
@@ -123,9 +124,20 @@ const SmartSearch = ({ onOpenResult }) => {
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5, gap: 1 }}>
-                <Typography variant="subtitle1" fontWeight={700} color={TITLE_COLOR[tier]} noWrap>
-                  {r.media_title}
-                </Typography>
+                {/* minWidth 0, or the flex item refuses to shrink and noWrap
+                    pushes the chips off the row instead of truncating. */}
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="subtitle1" fontWeight={700} color={TITLE_COLOR[tier]} noWrap>
+                    {r.media_title}
+                  </Typography>
+                  {/* Who said it, labelled the way the archive card labels it — two
+                      shiurim with the same title are otherwise one line twice. */}
+                  {r.creator_name && (
+                    <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                      {`${creatorPrefixes[r.media_type] || creatorPrefixes.video}: ${r.creator_name}`}
+                    </Typography>
+                  )}
+                </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
                   {/* TEMP (calibration): the rerank relevance score, shown so we
                       can verify the colour thresholds against real values. Decide

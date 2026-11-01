@@ -8,6 +8,7 @@ import Tabs from "@mui/material/Tabs";
 import UploadIcon from "@mui/icons-material/Upload";
 import FilterBar from "./componentsArchive/FilterBar";
 import EditTagsDialog from "./componentsArchive/EditTagsDialog";
+import EditMediaDialog from "./componentsArchive/EditMediaDialog";
 import MediaGrid from "./componentsArchive/MediaGrid";
 import UploadMedia from "../../features/UploadMedia/UploadMedia";
 import SmartSearch from "../../features/SmartSearch/SmartSearch";
@@ -27,6 +28,7 @@ const ArchivePage = () => {
     durationRange, handleDurationFilter, lengthOffered,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
     tagTargetItem, handleEditTags, handleEditTagsCancel, handleEditTagsSave,
+    editTargetItem, assignableCourses, handleEditDetails, handleEditDetailsCancel, handleEditDetailsSave,
     handleTogglePublish,
   } = useArchivePageController();
   const { isUploadOpen } = useSelector((state) => state.ui);
@@ -96,6 +98,7 @@ const ArchivePage = () => {
               onDelete={handleDeleteRequest}
               onTogglePublish={handleTogglePublish}
               onEditTags={handleEditTags}
+              onEditDetails={handleEditDetails}
               emptyActionLabel={canUpload ? "העלאת מדיה" : undefined}
               onEmptyAction={handleOpenUpload}
               filtered={hasActiveFilter}
@@ -137,6 +140,18 @@ const ArchivePage = () => {
         onClose={handleEditTagsCancel}
         onSave={handleEditTagsSave}
       />
+
+      {/* Keyed by the item, so each lesson opens a fresh form seeded from it. */}
+      {editTargetItem && (
+        <EditMediaDialog
+          key={editTargetItem.id}
+          item={editTargetItem}
+          courses={assignableCourses}
+          knownCreators={knownCreators}
+          onClose={handleEditDetailsCancel}
+          onSave={handleEditDetailsSave}
+        />
+      )}
 
       <ConfirmingDeletionDialog
         open={!!deleteTargetId}

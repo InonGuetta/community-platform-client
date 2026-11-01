@@ -5,6 +5,10 @@ import { fetchAllMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGe
 import { deleteMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaDelete";
 import { updateMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaPut";
 import { selectAllMedia, selectMediaStatus } from "../../../store/selectors/mediaSelectors";
+import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
+import { selectUser } from "../../../store/selectors/authSelectors";
+import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
+import { editChanges } from "../../features/UploadMedia/lessonFields";
 import { useDebounced } from "../../../utilities/useDebounced";
 import { openUpload } from "../../../store/slicesAndThunks/uiSlice";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
@@ -27,6 +31,10 @@ const useArchivePageController = () => {
   const navigate = useNavigate();
   const allMedia = useSelector(selectAllMedia);
   const status = useSelector(selectMediaStatus);
+  const user = useSelector(selectUser);
+  // The courses the edit dialog may file a lesson into — the same list, and the
+  // same rule, as the upload dialog's.
+  const assignableCourses = useSelector(selectAssignableCourses);
   const [searchParams, setSearchParams] = useSearchParams();
 
   // ── The filter is in the address ────────────────────────────────────────
@@ -83,6 +91,8 @@ const useArchivePageController = () => {
   // seeds itself from tag_ids and titles itself from the title, and looking both
   // up again from a list that the next fetch may have replaced is a race.
   const [tagTargetItem, setTagTargetItem] = useState(null);
+  // The item whose details are being edited — the whole row, for the same reason.
+  const [editTargetItem, setEditTargetItem] = useState(null);
 
   useEffect(() => {
     mediaApi
@@ -318,6 +328,44 @@ const useArchivePageController = () => {
     mediaApi.tags().then(setTagTree).catch(() => {});
   };
 
+  // Editing a lesson's title, description, credited name and course. Only what
+  // changed is sent — editChanges says why that is a rule and not a saving.
+  const handleEditDetails = (item) => {
+    setEditTargetItem(item);
+    // When the dialog opens, like the upload dialog: the archive itself has no
+    // use for the course list.
+    dispatch(fetchAllCourses());
+  };
+  const handleEditDetailsCancel = () => setEditTargetItem(null);
+
+  const handleEditDetailsSave = async (item, fields) => {
+    const changes = editChanges(item, fields, user, assignableCourses);
+    if (Object.keys(changes).length === 0) {
+      setEditTargetItem(null);
+      return;
+    }
+    const result = await dispatch(updateMedia({ id: item.id, ...changes }));
+    const ok = result.meta.requestStatus === "fulfilled";
+    dispatch(
+      notify(
+        ok
+          ? { message: "פרטי השיעור עודכנו", severity: "success" }
+          : { message: result.payload || "עדכון הפרטים נכשל", severity: "error" }
+      )
+    );
+    if (!ok) return;
+    setEditTargetItem(null);
+    // A corrected name has to reach the creator filter and the autocomplete, or
+    // the misspelling it replaced is still offered as a choice — the one thing
+    // this dialog exists to fix.
+    if ("creatorName" in changes) {
+      mediaApi
+        .creators()
+        .then((rows) => setKnownCreators(rows.map((r) => r.name)))
+        .catch(() => {});
+    }
+  };
+
   // Publishing is what makes an item visible to students, so it is worth
   // confirming out loud in both directions rather than leaving the user to infer
   // it from an icon that changed colour.
@@ -363,6 +411,7 @@ const useArchivePageController = () => {
     handleToggleType, handlePressAllTypes, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
     tagTargetItem, handleEditTags, handleEditTagsCancel, handleEditTagsSave,
+    editTargetItem, assignableCourses, handleEditDetails, handleEditDetailsCancel, handleEditDetailsSave,
     handleTogglePublish,
   };
 };

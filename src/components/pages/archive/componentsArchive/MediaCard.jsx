@@ -18,6 +18,7 @@ import { mediaApi } from "../../../../api/mediaApi";
 import DownloadMenu from "../../../features/DownloadMenu/DownloadMenu";
 import { mediaTypeLabels, mediaTypeAccents, creatorPrefixes } from "../../../../utilities/constant";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import EditIcon from "@mui/icons-material/Edit";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { lengthLabel } from "./durationOptions";
 import { canManageMedia } from "../../../../utilities/permissions";
@@ -79,7 +80,7 @@ const CornerBracket = ({ accent, placement }) => {
   );
 };
 
-const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags }) => {
+const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails }) => {
   // Recordings only: a book's duration is always null, and lengthLabel says so.
   const length = item.media_type === "text" ? null : lengthLabel(item.duration_seconds);
   const isVideo = item.media_type === "video";
@@ -249,6 +250,18 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags }
                 {isPublished ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
               </IconButton>
             </span>
+          </Tooltip>
+        )}
+        {canManage && onEditDetails && (
+          <Tooltip title="עריכת פרטים">
+            <IconButton
+              size="small"
+              aria-label={`עריכת הפרטים של ${item.title}`}
+              onClick={(e) => { e.stopPropagation(); onEditDetails(item); }}
+              sx={actionButtonSx}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
           </Tooltip>
         )}
         {canManage && onEditTags && (

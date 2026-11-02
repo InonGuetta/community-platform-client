@@ -41,6 +41,11 @@ describe("describeNotification", () => {
     expect(describeNotification({ type: "session_starting", payload }).title).toBe("המפגש התחיל");
   });
 
+  it("names the course a session is held for", () => {
+    const n = describeNotification({ type: "session_starting", payload: { title: "ערב", hostName: "הרב", courseTitle: "גמרא" } });
+    expect(n.body).toBe('"ערב" עם הרב · גמרא');
+  });
+
   it("links a new lesson to its page and names the course", () => {
     const n = describeNotification({ type: "new_lesson", payload: { mediaId: 3, title: "דף ב", courseTitle: "גמרא" } });
     expect(n).toEqual({ title: "שיעור חדש בקורס", body: '"דף ב" · גמרא', href: "/media/3" });

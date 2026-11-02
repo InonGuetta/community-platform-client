@@ -8,6 +8,8 @@ import { selectAllRooms, selectSessionsStatus } from "../../../store/selectors/s
 import { hebrewForError } from "../../../utilities/apiError";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { isPrivileged } from "../../../utilities/permissions";
+import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
+import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
 
 const useSessionsPageController = () => {
   const dispatch = useDispatch();
@@ -16,6 +18,15 @@ const useSessionsPageController = () => {
   const upcoming = useSelector((state) => state.sessions.upcoming);
   const status = useSelector(selectSessionsStatus);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  // The courses a session may be held for (PRD D8) — the same list, and the
+  // same rule, as filing a lesson: the server refuses any other.
+  const courses = useSelector(selectAssignableCourses);
+
+  // Only when the dialog opens, like the upload dialog: the sessions list
+  // itself has no use for the courses.
+  useEffect(() => {
+    if (createDialogOpen) dispatch(fetchAllCourses());
+  }, [createDialogOpen, dispatch]);
 
   useEffect(() => {
     dispatch(fetchActiveSessions());
@@ -41,8 +52,10 @@ const useSessionsPageController = () => {
     }));
   };
 
-  const handleCreateSession = async (data) => {
-    const result = await dispatch(createSession(data));
+  // courseId is left out rather than sent empty when no course is chosen: a
+  // general session, whose notices go to the host's students.
+  const handleCreateSession = async ({ courseId, ...data }) => {
+    const result = await dispatch(createSession(courseId ? { ...data, courseId: Number(courseId) } : data));
     if (result.meta.requestStatus !== "fulfilled") return;
 
     setCreateDialogOpen(false);
@@ -68,6 +81,7 @@ const useSessionsPageController = () => {
     status,
     canCreate,
     isHost,
+    courses,
     createDialogOpen,
     setCreateDialogOpen,
     handleJoinRoom,

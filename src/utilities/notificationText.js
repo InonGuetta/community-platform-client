@@ -13,7 +13,10 @@ import { formatHebrewDate } from "./formatDate";
 
 const ROLE_NAMES = { lecturer: "מרצה", admin: "מנהל" };
 
-const byHost = (payload) => (payload.hostName ? ` עם ${payload.hostName}` : "");
+// "עם הרב לוי · גמרא" — the host, and the course when the session is held for
+// one (PRD D8), so a student in two courses knows which class it is.
+const byHost = (payload) =>
+  `${payload.hostName ? ` עם ${payload.hostName}` : ""}${payload.courseTitle ? ` · ${payload.courseTitle}` : ""}`;
 
 // "יום ג׳, 3 בנובמבר, 19:30" — in Israel's zone, named, like every time the
 // platform shows (see formatDate.js).

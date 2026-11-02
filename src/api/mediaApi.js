@@ -14,8 +14,11 @@ const API_ROOT = "/api";
 // is what the server exposes today; it is inconsistent with notes/bookmarks and
 // is collected here so changing it later is a one-file job.
 export const mediaApi = {
-  getAll: async (filters = {}) =>
-    (await axiosInstance.get("/media/get-all", { params: filters })).data,
+  // One PAGE of the archive (PRD ARCH-1): { items, nextCursor, total? }.
+  // `cursor` is whatever the previous page handed back — opaque, never built
+  // here — and `total` comes with the first page only.
+  getAll: async (filters = {}, { cursor } = {}) =>
+    (await axiosInstance.get("/media/get-all", { params: { ...filters, ...(cursor && { cursor }) } })).data,
 
   getOne: async (id) => (await axiosInstance.get(`/media/${id}`)).data,
 

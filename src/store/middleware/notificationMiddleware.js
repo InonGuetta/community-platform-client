@@ -43,6 +43,9 @@ const ERROR_MESSAGES = {
   "media/update": "עדכון המדיה נכשל",
   "media/delete": "מחיקת המדיה נכשלה",
   "media/fetchAll": "טעינת המדיה נכשלה",
+  // The next page of the archive. Said out loud: otherwise the grid simply
+  // stops growing, which reads as "that was everything".
+  "media/fetchMore": "טעינת המשך הרשימה נכשלה",
   "users/create": "יצירת המשתמש נכשלה",
   "users/update": "עדכון המשתמש נכשל",
   "users/delete": "מחיקת המשתמש נכשלה",

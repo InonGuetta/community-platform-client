@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fetchAllMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
+import { fetchAllMedia, fetchMoreMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
 import { deleteMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaDelete";
 import { updateMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaPut";
-import { selectAllMedia, selectMediaStatus } from "../../../store/selectors/mediaSelectors";
+import {
+  selectAllMedia, selectMediaStatus, selectMediaHasMore, selectMediaLoadingMore, selectMediaTotal,
+} from "../../../store/selectors/mediaSelectors";
 import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
@@ -31,6 +33,9 @@ const useArchivePageController = () => {
   const navigate = useNavigate();
   const allMedia = useSelector(selectAllMedia);
   const status = useSelector(selectMediaStatus);
+  const hasMore = useSelector(selectMediaHasMore);
+  const loadingMore = useSelector(selectMediaLoadingMore);
+  const total = useSelector(selectMediaTotal);
   const user = useSelector(selectUser);
   // The courses the edit dialog may file a lesson into — the same list, and the
   // same rule, as the upload dialog's.
@@ -233,6 +238,11 @@ const useArchivePageController = () => {
     );
   }, [dispatch, selectedTypes, debouncedSearch, creatorFilter, tagIds, excludedTagIds, dates, sortOrder, length]);
 
+  // The next page of the list on screen (ARCH-1). The thunk reads the filter and
+  // the cursor from the store and does nothing at the end of the list or while
+  // a page is already coming, so the grid may call this as often as it likes.
+  const handleLoadMore = () => dispatch(fetchMoreMedia());
+
   // An order, not a filter: none of the clears below touch it.
   const handleSortChange = (value) => setSortOrder(readSort(value));
 
@@ -403,6 +413,7 @@ const useArchivePageController = () => {
 
   return {
     filteredMedia, status, selectedTypes, hasActiveFilter,
+    hasMore, loadingMore, total, handleLoadMore,
     sortOrder, handleSortChange,
     durationRange, handleDurationFilter, lengthOffered,
     creatorFilter, knownCreators, handleCreatorFilter,

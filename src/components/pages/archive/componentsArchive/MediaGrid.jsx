@@ -1,6 +1,8 @@
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import Button from "@mui/material/Button";
+import useLoadMoreTrigger from "./useLoadMoreTrigger";
 import MediaCard from "./MediaCard";
 import NoDataDialog from "../../../features/NoDataDialog/NoDataDialog";
 import { statuses } from "../../../../utilities/constant";
@@ -26,7 +28,17 @@ const MediaCardSkeleton = () => (
 // `emptyMessage` defaults to the archive's wording, which is what every existing
 // caller relies on; the likes page overrides it because "no media found" reads
 // as a fault there rather than as an empty personal list.
-const MediaGrid = ({ items, status, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails, emptyActionLabel, onEmptyAction, filtered = false, emptyMessage = "לא נמצאה מדיה" }) => {
+// Paging (PRD ARCH-1) is optional: `hasMore`, `loadingMore` and `onLoadMore`
+// come from the archive, which loads 24 at a time. The likes page passes none
+// of them and gets the whole list it already had.
+const MediaGrid = ({
+  items, status, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails,
+  emptyActionLabel, onEmptyAction, filtered = false, emptyMessage = "לא נמצאה מדיה",
+  hasMore = false, loadingMore = false, onLoadMore,
+}) => {
+  // Before the early returns: a hook must run on every render.
+  const loadMoreRef = useLoadMoreTrigger(onLoadMore, { enabled: Boolean(onLoadMore && hasMore) });
+
   // Skeletons only on the first load (no items yet). `media.status` is shared with
   // mutations like upload (uploadMedia.pending → loading), so gating on an empty
   // list keeps the existing grid visible during an upload instead of flashing
@@ -55,13 +67,34 @@ const MediaGrid = ({ items, status, onView, user, onDelete, onTogglePublish, onE
   }
 
   return (
-    <Grid container spacing={3}>
-      {items.map((item) => (
-        <Grid item xs={12} sm={6} md={4} key={item.id}>
-          <MediaCard item={item} onView={onView} user={user} onDelete={onDelete} onTogglePublish={onTogglePublish} onEditTags={onEditTags} onEditDetails={onEditDetails} />
-        </Grid>
-      ))}
-    </Grid>
+    <>
+      <Grid container spacing={3}>
+        {items.map((item) => (
+          <Grid item xs={12} sm={6} md={4} key={item.id}>
+            <MediaCard item={item} onView={onView} user={user} onDelete={onDelete} onTogglePublish={onTogglePublish} onEditTags={onEditTags} onEditDetails={onEditDetails} />
+          </Grid>
+        ))}
+        {/* The next page on its way: placeholder cards where it will land, so
+            the grid grows rather than the page jumping when it arrives. */}
+        {loadingMore &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <Grid item xs={12} sm={6} md={4} key={`more-${i}`}>
+              <MediaCardSkeleton />
+            </Grid>
+          ))}
+      </Grid>
+
+      {onLoadMore && hasMore && (
+        // The sentinel the scroll watches, and the same thing as a button:
+        // for a browser without IntersectionObserver, and for anybody moving
+        // through the page with a keyboard rather than a wheel.
+        <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+          <Button variant="outlined" onClick={onLoadMore} disabled={loadingMore}>
+            {loadingMore ? "טוען..." : "טעינת עוד"}
+          </Button>
+        </Box>
+      )}
+    </>
   );
 };
 

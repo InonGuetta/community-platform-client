@@ -20,6 +20,7 @@ import { isPrivileged } from "../../../utilities/permissions";
 const ArchivePage = () => {
   const {
     filteredMedia, status, selectedTypes, hasActiveFilter,
+    hasMore, loadingMore, total, handleLoadMore,
     creatorFilter, knownCreators, handleCreatorFilter,
     tagIds, excludedTagIds, tagTree, handleCycleTag, handleRemoveTag, handleClearTags,
     dates, handleDateFilter, handleClearFilters,
@@ -90,6 +91,16 @@ const ArchivePage = () => {
                 onClearAll={handleClearFilters}
               />
             </Box>
+            {/* How many the filter matches in all — the grid shows them 24 at a
+                time, so the cards on screen are no longer the answer to "how
+                many". Hidden until there is a number, and for an empty result,
+                which the grid's own empty state already says. */}
+            {total > 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }} aria-live="polite">
+                {total === 1 ? "תוצאה אחת" : `${total.toLocaleString("he-IL")} תוצאות`}
+                {filteredMedia.length < total && ` · מוצגות ${filteredMedia.length}`}
+              </Typography>
+            )}
             <MediaGrid
               items={filteredMedia}
               status={status}
@@ -102,6 +113,9 @@ const ArchivePage = () => {
               emptyActionLabel={canUpload ? "העלאת מדיה" : undefined}
               onEmptyAction={handleOpenUpload}
               filtered={hasActiveFilter}
+              hasMore={hasMore}
+              loadingMore={loadingMore}
+              onLoadMore={handleLoadMore}
             />
           </>
         )}

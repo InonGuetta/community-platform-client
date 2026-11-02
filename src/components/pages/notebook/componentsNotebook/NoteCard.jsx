@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -34,6 +35,54 @@ import { iconForMediaType } from "../../../../utilities/mediaIcons";
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" }) : "";
 
+// A note whose body has not arrived yet (PRD NOTE-17: the notebook's list is
+// light, and a body is fetched as its card comes near the screen). Its title
+// and the opening of its text, in a card the same shape as the real one, so the
+// column does not jump when the editor replaces it.
+//
+// It asks for its body once, when it comes within a screen's reach — or at
+// once, where IntersectionObserver does not exist. `cardRef` is attached here
+// too: jumping to a note from the list scrolls to this card, and arriving there
+// is what brings the body in.
+const NotePlaceholder = ({ note, cardRef, onNeedBody }) => {
+  const node = useRef(null);
+  useEffect(() => {
+    const element = node.current;
+    if (!element || !onNeedBody) return undefined;
+    if (typeof IntersectionObserver === "undefined") {
+      onNeedBody(note.id);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          onNeedBody(note.id);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [note.id, onNeedBody]);
+
+  return (
+    <Paper
+      ref={(element) => {
+        node.current = element;
+        if (typeof cardRef === "function") cardRef(element);
+      }}
+      elevation={0}
+      aria-busy="true"
+      sx={{ p: 3, borderRadius: 3, display: "flex", flexDirection: "column", gap: 2, border: "1px solid", borderColor: "divider", scrollMarginTop: { xs: 80, md: 8 } }}
+    >
+      <Typography sx={{ fontSize: "1.5rem", fontWeight: 700 }}>{note.title?.trim() || "(ללא כותרת)"}</Typography>
+      <Typography color="text.secondary" sx={{ overflowWrap: "anywhere" }}>{note.preview || ""}</Typography>
+      <Skeleton variant="rounded" height={120} />
+    </Paper>
+  );
+};
+
 const NoteCard = ({
   note, draft, isDirty, isActive,
   // Ticked in the list down the side, for a bulk delete or an export.
@@ -42,8 +91,14 @@ const NoteCard = ({
   onDraftChange, onFormatsChange, onFocus, onError,
   onSave, onDelete, onOpenSource, onDropSource, onRenameSource,
   editorMinHeight,
+  // Asked when the body is needed — see NotePlaceholder.
+  onNeedBody,
 }) => {
   const [sourceHovering, setSourceHovering] = useState(false);
+
+  // No draft means no body yet: the page passes null rather than an empty one
+  // (an empty draft, saved, would erase the note). Nothing below can run on it.
+  if (!draft) return <NotePlaceholder note={note} cardRef={cardRef} onNeedBody={onNeedBody} />;
 
   const handleDragOver = (event) => {
     if (!hasDragType(event.dataTransfer, BOOKMARK_DRAG_MIME)) return;

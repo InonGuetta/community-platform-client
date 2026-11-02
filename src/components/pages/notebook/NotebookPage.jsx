@@ -60,6 +60,7 @@ const NotebookPage = () => {
     confirmTitle,
     deleteTargets,
     draftFor,
+    onNeedBody,
     drag,
     editorApis,
     exportAnchor,
@@ -315,7 +316,8 @@ const NotebookPage = () => {
                         {/* The one line of preview is text, not markup — the row
                             is a single line and rendering the note's formatting
                             in it would only make the line taller. */}
-                        {noteHtmlToPlainText(n.body).trim() || "—"}
+                        {/* The server's preview (NOTE-17) — the list carries no bodies. */}
+                        {(n.preview ?? noteHtmlToPlainText(n.body)).trim() || "—"}
                       </Typography>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
                         <Typography variant="caption" sx={{ opacity: 0.7 }}>{formatDate(n.updated_at)}</Typography>
@@ -507,6 +509,7 @@ const NotebookPage = () => {
                 key={note.id}
                 note={note}
                 draft={draftFor(note.id)}
+                onNeedBody={onNeedBody}
                 isDirty={isDirty(note.id)}
                 isActive={note.id === activeNoteId}
                 isSelected={selectedIds.has(note.id)}

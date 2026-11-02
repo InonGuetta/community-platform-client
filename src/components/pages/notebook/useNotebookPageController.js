@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useDragReorder } from "./componentsNotebook/useDragReorder";
-import { fetchNotes } from "../../../store/slicesAndThunks/notesSlice/notesGet";
+import { fetchNotes, fetchNoteBodies } from "../../../store/slicesAndThunks/notesSlice/notesGet";
+import { notesApi } from "../../../api/notesApi";
+import { useDebounced } from "../../../utilities/useDebounced";
 import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost";
 import { updateNote, reorderNotes } from "../../../store/slicesAndThunks/notesSlice/notesPut";
 import { deleteNote } from "../../../store/slicesAndThunks/notesSlice/notesDelete";
@@ -139,15 +141,44 @@ export const useNotebookPageController = () => {
   // everywhere. See syncChipNames.
   const names = useMemo(() => bookmarkNames(bookmarks), [bookmarks]);
 
+  // Only for notes whose body has arrived (PRD NOTE-17): the list is light, and
+  // a body is loaded as its card comes into view — see requestBodies.
   const baselines = useMemo(() => {
     const map = new Map();
     for (const note of items) {
+      if (typeof note.body !== "string") continue;
       map.set(note.id, { title: note.title || "", body: syncChipNames(noteBodyToHtml(note.body), names) });
     }
     return map;
   }, [items, names]);
 
-  const draftFor = (id) => drafts[id] ?? baselines.get(id) ?? { title: "", body: "" };
+  // null for a note whose body has not arrived — never an empty draft. The card
+  // shows the note's preview and asks for the body, rather than opening an
+  // empty editor over a note that has text; and handleSave refuses a null
+  // draft, so an empty one can never be written over the real body.
+  const draftFor = (id) => drafts[id] ?? baselines.get(id) ?? null;
+
+  // ── Loading bodies (NOTE-17) ──────────────────────────────────────────────
+  //
+  // Cards ask for their body as they come near the screen; asks that arrive
+  // together are sent as one request. The thunk skips bodies already held, so
+  // asking twice costs nothing.
+  const bodyQueue = useRef(new Set());
+  const bodyTimer = useRef(null);
+  // Stable (refs and dispatch only), because each card's observer is keyed on
+  // the callback it was given.
+  const requestBodies = useCallback((ids) => {
+    for (const id of ids) bodyQueue.current.add(id);
+    if (bodyTimer.current) return;
+    bodyTimer.current = setTimeout(() => {
+      const batch = [...bodyQueue.current];
+      bodyQueue.current.clear();
+      bodyTimer.current = null;
+      if (batch.length) dispatch(fetchNoteBodies(batch));
+    }, 30);
+  }, [dispatch]);
+  const onNeedBody = useCallback((id) => requestBodies([id]), [requestBodies]);
+  useEffect(() => () => clearTimeout(bodyTimer.current), []);
 
   const isDirty = (id) => {
     const draft = drafts[id];
@@ -156,16 +187,41 @@ export const useNotebookPageController = () => {
     return draft.title !== baseline.title || draft.body !== baseline.body;
   };
 
-  // Searched on the WORDS, not on the stored body: a body is now markup, and
+  // Searched on the WORDS, not on the stored body: a body is markup, and
   // matching it raw would find notes by their tag names ("mark", "li") and miss
   // a phrase that happens to have a bold word in the middle of it.
+  //
+  // On the SERVER (NOTE-17): this page no longer holds every body, and the
+  // server holds every note's words (body_text, migration 038). Its answer is a
+  // set of ids. Matched here as well, against what is on screen: a title or a
+  // draft typed but not saved is not on the server yet, and a note must not
+  // vanish from its own search the moment its user types the word.
+  const debouncedSearch = useDebounced(search.trim(), 300);
+  const [serverMatches, setServerMatches] = useState(null);
+  useEffect(() => {
+    if (!debouncedSearch) {
+      setServerMatches(null);
+      return undefined;
+    }
+    let live = true;
+    notesApi
+      .list({ q: debouncedSearch })
+      .then((rows) => { if (live) setServerMatches(new Set(rows.map((n) => n.id))); })
+      // A failed search falls back to what is on screen rather than to nothing.
+      .catch(() => { if (live) setServerMatches(new Set()); });
+    return () => { live = false; };
+  }, [debouncedSearch]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return items;
-    return items.filter((n) =>
-      `${n.title || ""} ${noteHtmlToPlainText(n.body)} ${n.media_title || ""}`.toLowerCase().includes(q)
-    );
-  }, [items, search]);
+    return items.filter((n) => {
+      if (serverMatches?.has(n.id)) return true;
+      const draft = drafts[n.id];
+      const words = draft ? noteHtmlToPlainText(draft.body) : n.preview ?? noteHtmlToPlainText(n.body);
+      return `${draft?.title ?? n.title ?? ""} ${words} ${n.media_title || ""}`.toLowerCase().includes(q);
+    });
+  }, [items, search, serverMatches, drafts]);
 
   // Every bookmark the user has left anywhere on the platform, grouped under
   // the lecture it belongs to. The API returns them ordered by lecture title
@@ -225,6 +281,8 @@ export const useNotebookPageController = () => {
   const goToNote = (id) => {
     setActiveNoteId(id);
     setPendingScrollId(id);
+    // The card is about to be on screen; its body should be on its way already.
+    requestBodies([id]);
   };
 
   const handleCreate = async () => {
@@ -241,6 +299,8 @@ export const useNotebookPageController = () => {
   // not treated as the truth until it agrees.
   const handleSave = async (note, { announce = false, title } = {}) => {
     const draft = draftFor(note.id);
+    // Nothing to save until the body has arrived — see draftFor.
+    if (!draft) return;
     const res = await dispatch(updateNote({
       id: note.id,
       // The name given in the untitled-note dialog, when there was one.
@@ -264,7 +324,13 @@ export const useNotebookPageController = () => {
   const [titlePrompt, setTitlePrompt] = useState(null);
 
   const requestSave = (note, options = {}) => {
-    if (!draftFor(note.id).title.trim()) {
+    const draft = draftFor(note.id);
+    if (!draft) {
+      dispatch(notify({ message: "ההערה עוד נטענת. נסה שוב בעוד רגע.", severity: "info" }));
+      requestBodies([note.id]);
+      return;
+    }
+    if (!draft.title.trim()) {
       setTitlePrompt({ note, options });
       return;
     }
@@ -416,15 +482,32 @@ export const useNotebookPageController = () => {
     () => filtered.filter((note) => selectedIds.has(note.id)),
     [filtered, selectedIds]
   );
-  // With the bookmarks' current names in their chips: an export is read away
-  // from this page, where a name saved before a rename would be the only one.
+  // Which notes — not yet their bodies. The list is light (NOTE-17), so the
+  // bodies are filled in when the export actually runs; see withBodies.
   const notesToExport = useMemo(
-    () => (selectedNotes.length > 0 ? selectedNotes : filtered).map((note) => {
-      const body = syncChipNames(note.body, names);
-      return body === note.body ? note : { ...note, body };
-    }),
-    [selectedNotes, filtered, names]
+    () => (selectedNotes.length > 0 ? selectedNotes : filtered),
+    [selectedNotes, filtered]
   );
+
+  // The notes an export writes, whole. Bodies not yet loaded are fetched in one
+  // request first; a note whose body cannot be had stops the export rather
+  // than writing an empty page where it should be. And with the bookmarks'
+  // current names in their chips: an export is read away from this page, where
+  // a name saved before a rename would be the only one.
+  const withBodies = async (notes) => {
+    const missing = notes.filter((n) => typeof n.body !== "string").map((n) => n.id);
+    const fetched = new Map();
+    if (missing.length > 0) {
+      const result = await dispatch(fetchNoteBodies(missing));
+      if (result.meta.requestStatus !== "fulfilled") throw new Error("bodies");
+      for (const n of result.payload) fetched.set(n.id, n.body);
+    }
+    return notes.map((note) => {
+      const raw = typeof note.body === "string" ? note.body : fetched.get(note.id);
+      if (typeof raw !== "string") throw new Error(`no body for note ${note.id}`);
+      return { ...note, body: syncChipNames(raw, names) };
+    });
+  };
 
   // An export the user has asked for, held while the one remaining question is
   // put to them. `{ format }` is the whole notebook to one file; a `books` list
@@ -460,12 +543,15 @@ export const useNotebookPageController = () => {
       const write = format === "pdf" ? downloadNotesPdf : downloadNotesWord;
 
       if (books) {
-        const written = await downloadNotebooks(books, (bookNotes, options) =>
+        // Every book's notes, whole, in one request rather than one per book.
+        const whole = new Map((await withBodies(books.flatMap((book) => book.notes))).map((n) => [n.id, n]));
+        const ready = books.map((book) => ({ ...book, notes: book.notes.map((n) => whole.get(n.id)) }));
+        const written = await downloadNotebooks(ready, (bookNotes, options) =>
           write(bookNotes, { ...options, sources }));
         setSplitOpen(false);
         dispatch(notify({ message: `נוצרו ${written} קבצים`, severity: "success" }));
       } else {
-        await write(notesToExport, { sources });
+        await write(await withBodies(notesToExport), { sources });
       }
       setPendingExport(null);
     } catch {
@@ -494,6 +580,7 @@ export const useNotebookPageController = () => {
     confirmTitle,
     deleteTargets,
     draftFor,
+    onNeedBody,
     drag,
     editorApis,
     exportAnchor,

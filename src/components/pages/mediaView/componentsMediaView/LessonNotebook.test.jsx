@@ -31,7 +31,11 @@ vi.mock("../../../../api/bookmarksApi", () => ({
 
 vi.mock("../../../../api/notesApi", () => ({
   notesApi: {
-    list: (...args) => listNotes(...args),
+    // The lesson page asks for ITS notes (PRD NOTE-17); the server decides
+    // which. The fixture below still includes other lessons' notes, so the
+    // page's own isNoteAboutMedia filter is exercised too.
+    aboutMedia: (...args) => listNotes(...args),
+    list: vi.fn(),
     create: (...args) => createNote(...args),
     update: (...args) => updateNote(...args),
     remove: vi.fn(),
@@ -93,6 +97,8 @@ beforeEach(() => {
 describe("which notes the lesson shows", () => {
   test("the ones taken on it and the ones quoting it — no others", async () => {
     await renderNotebook();
+    // Asked of the server by THIS lesson's id, not "every note".
+    expect(listNotes).toHaveBeenCalledWith(LESSON.id);
     await waitFor(() => expect(titles()).toEqual(["נלקחה בשיעור", "מצטטת את השיעור"]));
   });
 

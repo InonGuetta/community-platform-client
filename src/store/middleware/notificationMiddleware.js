@@ -75,6 +75,10 @@ const ERROR_MESSAGES = {
   // happen looks identical to one that did until the page is reloaded, and a
   // reorder is applied optimistically and then quietly re-fetched away.
   "notes/update": "שמירת ההערה נכשלה",
+  // A note's body, loaded as its card comes into view (NOTE-17). Without this
+  // the card would sit on its preview with nothing to say why.
+  "notes/fetchBodies": "טעינת ההערה נכשלה",
+  "notes/fetchAboutMedia": "טעינת ההערות של השיעור נכשלה",
   "notes/delete": "מחיקת ההערה נכשלה",
   "notes/reorder": "שינוי סדר ההערות נכשל",
 };

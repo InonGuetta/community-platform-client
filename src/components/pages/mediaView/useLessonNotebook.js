@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchNotes } from "../../../store/slicesAndThunks/notesSlice/notesGet";
+import { fetchNotesAboutMedia } from "../../../store/slicesAndThunks/notesSlice/notesGet";
 import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost";
 import { updateNote } from "../../../store/slicesAndThunks/notesSlice/notesPut";
 import { deleteNote } from "../../../store/slicesAndThunks/notesSlice/notesDelete";
@@ -60,11 +60,15 @@ const useLessonNotebook = ({
   const { items, status } = useSelector((state) => state.notes);
   const mediaId = media?.id;
 
+  // Every visit, not once: a note written in /notebook since this slice was
+  // last filled would otherwise be missing here until a full reload.
+  //
+  // Only THIS lesson's notes, whole (PRD NOTE-17). The server decides which
+  // notes are about it — attached, or quoting it with a chip — so the page no
+  // longer has to load every body in the notebook to find out.
   useEffect(() => {
-    // Every visit, not once: a note written in /notebook since this slice was
-    // last filled would otherwise be missing here until a full reload.
-    dispatch(fetchNotes());
-  }, [dispatch]);
+    if (mediaId) dispatch(fetchNotesAboutMedia(mediaId));
+  }, [dispatch, mediaId]);
 
   // A note created here comes back from the server without the joined
   // media_title and media_type (the INSERT returns the bare row), so its card

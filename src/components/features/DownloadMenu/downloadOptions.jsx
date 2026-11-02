@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import MenuItem from "@mui/material/MenuItem";
@@ -11,6 +11,7 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import DownloadForOfflineOutlinedIcon from "@mui/icons-material/DownloadForOfflineOutlined";
 import OfflinePinOutlinedIcon from "@mui/icons-material/OfflinePinOutlined";
+import ClosedCaptionOutlinedIcon from "@mui/icons-material/ClosedCaptionOutlined";
 import { mediaApi } from "../../../api/mediaApi";
 import { transcriptsApi } from "../../../api/transcriptsApi";
 import { transcriptToText } from "../../../utilities/transcriptText";
@@ -20,6 +21,8 @@ import { saveForOffline } from "../../../store/slicesAndThunks/offlineSlice/offl
 import { selectIsOffline, selectOfflineProgressFor } from "../../../store/selectors/offlineSelectors";
 import { offlineSupported, percentOf } from "../../../utilities/offlineStore";
 import { DOWNLOADS_SHELF } from "../../pages/personal/personalShelves";
+import { transcriptCues, toVtt } from "../../../utilities/transcriptTiming";
+import { saveBlob } from "../../../utilities/saveBlob";
 
 // WHAT CAN BE DOWNLOADED FROM A LECTURE — stated once, for every menu that
 // offers it.
@@ -75,6 +78,10 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
   const isVideo = media.media_type === mediaTypes.video;
 
   const loadedText = transcriptToText(transcript);
+  const captions = useMemo(
+    () => (media.media_type === mediaTypes.text ? null : transcriptCues(transcript)),
+    [media.media_type, transcript]
+  );
   const offerTranscript = Boolean(loadedText) || Boolean(hasTranscript);
 
   // Building the PDF pulls in jsPDF, the bidi tables and the Hebrew font, and may
@@ -169,6 +176,27 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
         </MenuItem>
       );
     }
+  }
+
+  // The captions as a WebVTT file (PRD MOB-5) — for a video player, an editor,
+  // or a copy of the lesson put up elsewhere. Only where the transcript is
+  // already loaded (the lesson page): the cues are built from it, and an archive
+  // card has none.
+  if (captions) {
+    items.push(
+      <MenuItem
+        key="captions"
+        onClick={() => {
+          const name = (media.title || "כתוביות").replace(/[\\/:*?"<>|]+/g, " ").trim() || "כתוביות";
+          saveBlob(new Blob([toVtt(captions.cues, { precise: captions.precise })], { type: "text/vtt" }), `${name}.vtt`);
+          onClose?.();
+        }}
+        sx={itemSx}
+      >
+        <ListItemIcon><ClosedCaptionOutlinedIcon fontSize="small" /></ListItemIcon>
+        <ListItemText primary="הורדת כתוביות (VTT)" />
+      </MenuItem>
+    );
   }
 
   // Offered only when there is a transcript with actual content. A transcript

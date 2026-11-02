@@ -20,6 +20,8 @@ import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import SettingsIcon from "@mui/icons-material/Settings";
 import CheckIcon from "@mui/icons-material/Check";
 import SpeedIcon from "@mui/icons-material/Speed";
+import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
+import ClosedCaptionOffOutlinedIcon from "@mui/icons-material/ClosedCaptionOffOutlined";
 import { alpha } from "@mui/material/styles";
 import { useDownloadItems } from "../DownloadMenu/downloadOptions";
 import { mediaTypeAccents } from "../../../utilities/constant";
@@ -91,6 +93,8 @@ const PlayerControls = ({
   media, transcript,
   overPicture = true,
   onBusyChange,
+  // PRD MOB-5. The button is there only when the lesson has captions to show.
+  captionsAvailable = false, captionsOn = false, onToggleCaptions,
 }) => {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [volumeAnchor, setVolumeAnchor] = useState(null);
@@ -274,6 +278,20 @@ const PlayerControls = ({
           </Popper>
         </Box>
       </ThemeProvider>
+
+      {captionsAvailable && (
+        <Tooltip title={captionsOn ? "הסתרת הכתוביות" : "הצגת כתוביות"}>
+          <IconButton
+            onClick={onToggleCaptions}
+            size="small"
+            aria-label="כתוביות"
+            aria-pressed={captionsOn}
+            sx={{ color: BAR_INK, flexShrink: 0 }}
+          >
+            {captionsOn ? <ClosedCaptionIcon /> : <ClosedCaptionOffOutlinedIcon />}
+          </IconButton>
+        </Tooltip>
+      )}
 
       <Tooltip title="הגדרות">
         <IconButton

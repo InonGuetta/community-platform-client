@@ -37,6 +37,7 @@ const MediaViewPage = () => {
     isLiked, toggleLike,
     isSaved, toggleSave,
     isText,
+    captions,
   } = controller;
 
   // Stays here rather than in the controller: a ref has to be created in the
@@ -162,6 +163,9 @@ const MediaViewPage = () => {
                 // Only so the player's settings menu can offer the transcript
                 // PDF without fetching one it already has.
                 transcript={transcript}
+                // Captions over the stage (PRD MOB-5): the same cues the
+                // transcript tab follows the lesson with.
+                captions={captions}
                 onProgress={handlePlayerProgress}
                 seekOnReady={seekOnReady}
               />
@@ -206,6 +210,9 @@ const MediaViewPage = () => {
               tags={media.tags}
               insights={controller}
               onSeek={seekPlayer}
+              // The transcript tab follows the lesson as it plays (PRD MOB-6).
+              captions={captions}
+              currentTime={currentTime}
               notesPanel={
                 <NotesPanel
                   bookmarks={bookmarks}

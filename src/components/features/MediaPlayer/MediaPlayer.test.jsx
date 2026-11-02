@@ -231,3 +231,46 @@ describe("a video lecture", () => {
     expect(stage.alignItems).toBe("flex-end");
   });
 });
+
+// Captions over the stage (PRD MOB-5): a button in the bar when the lesson has
+// any, and the line being said drawn over the picture — or over a recording's
+// empty stage, since an <audio> shows no captions of its own.
+describe("captions", () => {
+  const captions = {
+    precise: true,
+    cues: [
+      { text: "שלום לכולם", start: 0, end: 4 },
+      { text: "היום נלמד דף", start: 4, end: 8 },
+    ],
+  };
+
+  test("offers no button when the lesson has nothing to caption", () => {
+    renderPlayer("video");
+    expect(screen.queryByRole("button", { name: "כתוביות" })).not.toBeInTheDocument();
+  });
+
+  test.each(["video", "audio"])("a %s shows the line being said once captions are turned on", (type) => {
+    localStorage.removeItem("captionsOn");
+    renderPlayer(type, { captions });
+    const button = screen.getByRole("button", { name: "כתוביות" });
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByTestId("player-caption")).not.toBeInTheDocument();
+
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("player-caption")).toHaveTextContent("שלום לכולם");
+    // Remembered for the next lesson.
+    expect(localStorage.getItem("captionsOn")).toBe("1");
+    fireEvent.click(button);
+    expect(screen.queryByTestId("player-caption")).not.toBeInTheDocument();
+  });
+
+  test("the settings menu offers the captions as a file", () => {
+    renderPlayer("video", {
+      captions,
+      transcript: { chunks: [{ content: "שלום לכולם היום נלמד דף", start_time: 0, end_time: 8 }], timing: null },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "הגדרות נגן" }));
+    expect(screen.getByText("הורדת כתוביות (VTT)")).toBeInTheDocument();
+  });
+});

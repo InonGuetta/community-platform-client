@@ -12,6 +12,7 @@ import { mediaApi } from "../../../api/mediaApi";
 import useMediaInsights from "./useMediaInsights";
 import useMediaLike from "./useMediaLike";
 import useMediaSave from "./useMediaSave";
+import { transcriptCues } from "../../../utilities/transcriptTiming";
 
 // Everything on this page that dispatches, selects or derives from the server's
 // data. The page component keeps only what is genuinely presentational — which
@@ -175,6 +176,16 @@ const useMediaViewPageController = () => {
 
   const { isSaved, toggleSave } = useMediaSave(media?.id);
 
+  // ── Captions and the scrolling transcript (PRD MOB-5, MOB-6) ───────────────
+  //
+  // { cues, precise } or null — one derivation for the player's captions, the
+  // transcript tab and the captions download, so the three cannot disagree
+  // about when a sentence is said. Rebuilt only when the transcript changes
+  // (an edit, a Hebrew fix), not on every tick of the player.
+  const transcript = insights.transcript;
+  const isText = insights.isText;
+  const captions = useMemo(() => (isText ? null : transcriptCues(transcript)), [isText, transcript]);
+
   return {
     media, bookmarks,
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
@@ -183,6 +194,7 @@ const useMediaViewPageController = () => {
     handleCreateBookmark,
     isLiked, toggleLike,
     isSaved, toggleSave,
+    captions,
     // Spread rather than nested, so the page keeps reading `isText` and the
     // rest straight off the controller as it always has.
     ...insights,

@@ -5,11 +5,22 @@ import Box from "@mui/material/Box";
 import PlayerControls from "./PlayerControls";
 import { mediaTypes } from "../../../utilities/constant";
 import { STAGE_ASPECT } from "./stageGeometry";
+import { captionAt } from "../../../utilities/transcriptTiming";
 
 // How long the control bar stays up over a playing video after the last pointer
 // movement. Long enough to reach it without chasing, short enough that it is out
 // of the picture for the rest of the lecture.
 const CONTROLS_HIDE_AFTER_MS = 2500;
+
+// Whether captions are on is a reader's habit, not a lesson's property, so it is
+// remembered across lessons — in a try, because localStorage can throw.
+const CAPTIONS_KEY = "captionsOn";
+const readCaptionsOn = () => {
+  try { return localStorage.getItem(CAPTIONS_KEY) === "1"; } catch { return false; }
+};
+const saveCaptionsOn = (on) => {
+  try { localStorage.setItem(CAPTIONS_KEY, on ? "1" : "0"); } catch { /* not remembered */ }
+};
 
 // forwardRef so callers can drive the player from a sibling — the chapters list
 // seeks it, and so does the notebook's source preview.
@@ -18,8 +29,10 @@ const CONTROLS_HIDE_AFTER_MS = 2500;
 // settings menu offers the same downloads as the page's download pill (see
 // downloadOptions.jsx), and those need the title and the media type as well.
 // `transcript` is optional and only decides whether a PDF is offered.
+// `captions` is { cues, precise } from utilities/transcriptTiming (PRD MOB-5),
+// or null when the lesson has nothing to caption.
 const MediaPlayer = forwardRef((
-  { url, media, transcript, onProgress, seekOnReady = 0 },
+  { url, media, transcript, captions = null, onProgress, seekOnReady = 0 },
   ref
 ) => {
   const mediaType = media?.media_type;
@@ -156,6 +169,19 @@ const MediaPlayer = forwardRef((
 
   const controlsVisible = !isVideo || !playing || controlsBusy || pointerAwake;
 
+  // ── Captions (PRD MOB-5) ────────────────────────────────────────────────────
+  //
+  // Drawn by the page rather than as a <track> on the media element: an audio
+  // lesson plays in an <audio>, which shows no captions at all, and this way the
+  // same line appears over a picture and over the empty stage of a recording,
+  // in the same right-to-left type as the rest of the page.
+  const [captionsOn, setCaptionsOn] = useState(readCaptionsOn);
+  const toggleCaptions = useCallback(() => {
+    setCaptionsOn((on) => { saveCaptionsOn(!on); return !on; });
+  }, []);
+  const hasCaptions = Boolean(captions?.cues?.length);
+  const caption = hasCaptions && captionsOn ? captionAt(captions.cues, played) : null;
+
   return (
     // The BLACK belongs to a picture; the space does not. A lecture with no
     // picture was being painted a black rectangle it had nothing to put in, so
@@ -246,6 +272,46 @@ const MediaPlayer = forwardRef((
           />
         </Box>
 
+        {caption && (
+          <Box
+            data-testid="player-caption"
+            dir="rtl"
+            sx={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              zIndex: 1,
+              display: "flex",
+              justifyContent: "center",
+              px: 2,
+              pointerEvents: "none",
+              // Over a picture, just above the bar — lower when the bar has
+              // faded away. On a recording's empty stage, above the bar in the
+              // middle of it.
+              ...(isVideo
+                ? { bottom: controlsVisible ? 76 : 20, transition: "bottom 220ms ease" }
+                : { bottom: "calc(50% + 34px)" }),
+            }}
+          >
+            <Box
+              component="span"
+              sx={{
+                maxWidth: 680,
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+                bgcolor: "rgba(0,0,0,0.72)",
+                color: "#fff",
+                textAlign: "center",
+                lineHeight: 1.5,
+                fontSize: { xs: "0.95rem", sm: "1.15rem" },
+              }}
+            >
+              {caption}
+            </Box>
+          </Box>
+        )}
+
         {/* visibility, not just opacity: a bar faded to nothing would still
             swallow the click meant for the picture underneath it. The transition
             lists visibility too, or it would snap away before the fade. */}
@@ -282,6 +348,9 @@ const MediaPlayer = forwardRef((
             overPicture={isVideo}
             // Keeps the bar up while its own menus are open — see PlayerControls.
             onBusyChange={setControlsBusy}
+            captionsAvailable={hasCaptions}
+            captionsOn={captionsOn}
+            onToggleCaptions={toggleCaptions}
           />
         </Box>
       </Box>

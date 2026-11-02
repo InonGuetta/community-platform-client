@@ -69,6 +69,8 @@ export const ERROR_CODES = {
   DOCUMENT_UNREADABLE: "DOCUMENT_UNREADABLE",
   ALREADY_QUEUED: "ALREADY_QUEUED",
   ALREADY_RUNNING: "ALREADY_RUNNING",
+  // The monthly AI budget (server lib/aiUsage.js).
+  AI_BUDGET_EXCEEDED: "AI_BUDGET_EXCEEDED",
 
   // The "דיון עם AI" chat.
   AI_NOT_READY: "AI_NOT_READY",
@@ -178,6 +180,9 @@ const ERROR_CODE_HE = {
     "לא ניתן לקרוא את הקובץ — ייתכן שהוא פגום או מוגן בסיסמה.",
   [ERROR_CODES.ALREADY_QUEUED]: "הפעולה כבר רצה עבור מדיה זו",
   [ERROR_CODES.ALREADY_RUNNING]: "הפעולה כבר רצה עבור מדיה זו",
+  // Not this lesson's fault, and not fixed by retrying — said plainly.
+  [ERROR_CODES.AI_BUDGET_EXCEEDED]:
+    "הגעתם לתקרת העלות החודשית של ה‑AI. עיבוד חדש יתאפשר בחודש הבא, או אחרי שמנהל יעלה את התקרה.",
   // Two different instructions: wait, or ask again. The generic failure would
   // send someone with an unprocessed lesson to retry a question that cannot work.
   [ERROR_CODES.AI_NOT_READY]: "השיעור עדיין בעיבוד — אפשר יהיה לשוחח עליו כשהעיבוד יסתיים",

@@ -11,6 +11,7 @@ import SystemHealth from "./componentsAdmin/SystemHealth";
 import PipelineTrouble from "./componentsAdmin/PipelineTrouble";
 import DonationsLedger from "./componentsAdmin/DonationsLedger";
 import TagProposals from "./componentsAdmin/TagProposals";
+import AiUsagePanel from "./componentsAdmin/AiUsagePanel";
 import { adminApi } from "../../../api/adminApi";
 
 const AdminDashboard = () => {
@@ -93,6 +94,14 @@ const AdminDashboard = () => {
         <Grid item xs={12} md={5}>
           <Paper sx={{ p: 3 }}>
             <SystemHealth health={health} />
+          </Paper>
+        </Grid>
+
+        {/* What OpenAI has cost this month, against the cap (ADM-1, NFR-3). Its
+            own load, outside the 30s refresh — see useAiUsage. */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3 }}>
+            <AiUsagePanel />
           </Paper>
         </Grid>
 

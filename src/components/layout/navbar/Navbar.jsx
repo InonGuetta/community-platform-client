@@ -32,6 +32,9 @@ import { PERSONAL_SHELVES } from "../../pages/personal/personalShelves";
 import { roles, roleLabels } from "../../../utilities/constant";
 import NotificationBell from "./NotificationBell";
 import useNotificationBell from "./useNotificationBell";
+import useInstallPrompt from "./useInstallPrompt";
+import InstallHelpDialog from "./InstallHelpDialog";
+import InstallMobileIcon from "@mui/icons-material/InstallMobile";
 
 // Every entry here must map to a real route in App.jsx. A link to a path with
 // no route silently falls through to the "*" catch-all (=> /archive), which
@@ -214,6 +217,7 @@ const Navbar = () => {
   const personalActive = PERSONAL_SHELVES.some((shelf) => shelf.path === pathname);
   const { mode, toggle: toggleColorMode } = useContext(ColorModeContext);
   const bell = useNotificationBell();
+  const installer = useInstallPrompt();
 
   // REG-11: the admin's "משתמשים" link carries how many role requests are
   // waiting behind it, from the same poll as the bell. Only that link, only when
@@ -560,6 +564,16 @@ const Navbar = () => {
           <Divider />
 
           <List>
+            {/* PRD MOB-1 — offered only where installing is possible and the
+                app is not already running installed. See useInstallPrompt. */}
+            {installer.offer && (
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => { setDrawerOpen(false); installer.install(); }}>
+                  <ListItemIcon sx={{ minWidth: 36, color: "primary.main" }}><InstallMobileIcon /></ListItemIcon>
+                  <ListItemText primary="התקנת האפליקציה" primaryTypographyProps={{ fontWeight: 700, color: "primary.main" }} />
+                </ListItemButton>
+              </ListItem>
+            )}
             <ListItem disablePadding>
               <ListItemButton onClick={handleLogout}>
                 <ListItemText primary="התנתקות" primaryTypographyProps={{ fontWeight: 700, color: "error.main" }} />
@@ -568,6 +582,7 @@ const Navbar = () => {
           </List>
         </Box>
       </Drawer>
+      <InstallHelpDialog open={installer.iosHelpOpen} onClose={installer.closeIosHelp} />
     </AppBar>
   );
 };

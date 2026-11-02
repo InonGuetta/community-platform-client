@@ -1,4 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState, useCallback, useEffect } from "react";
+import useMediaSession from "./useMediaSession";
 import ReactPlayer from "react-player";
 import Box from "@mui/material/Box";
 import PlayerControls from "./PlayerControls";
@@ -111,6 +112,19 @@ const MediaPlayer = forwardRef((
 
   const isVideo = mediaType === mediaTypes.video;
 
+  // The lock screen, the notification shade and the media keys (PRD MOB-3) —
+  // driving the same state as the bar below. See useMediaSession.
+  useMediaSession({
+    media,
+    active: isReady,
+    playing,
+    position: played,
+    duration: effectiveDuration,
+    playbackRate,
+    onPlayingChange: setPlaying,
+    onSeek: seekTo,
+  });
+
   // ── The bar getting out of the way ─────────────────────────────────────────
   //
   // Over a picture the control bar is an overlay, and an overlay that never
@@ -181,10 +195,10 @@ const MediaPlayer = forwardRef((
           p: 2,
         }}
       >
-        {/* The media element stays rendered and playing in BOTH cases, and it is
-            a <video> in both: the stream URL carries no file extension, so
-            ReactPlayer builds one even for a lecture with no picture. What
-            changes is its box. For video it fills the frame behind the bar; for
+        {/* The media element stays rendered and playing in BOTH cases — a
+            <video> for a picture, an <audio> for a lecture without one (see
+            forceAudio below; it was a <video> for both until background play
+            needed otherwise). What changes is its box. For video it fills the frame behind the bar; for
             audio it is kept to an invisible 1×1 — still laid out, still playing,
             but with no surface left to paint the black rectangle this change is
             here to remove. Not `display: none`, which would take its box away
@@ -223,6 +237,12 @@ const MediaPlayer = forwardRef((
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
             onEnded={() => setPlaying(false)}
+            // An audio lesson as an <audio> element (PRD MOB-3). The stream URL
+            // has no extension, so ReactPlayer would otherwise build a <video>
+            // for it too — and a phone pauses a VIDEO when the screen locks or
+            // the browser goes to the background, which made a shiur stop the
+            // moment the phone went into a pocket. Audio is allowed to play on.
+            config={{ file: { forceAudio: !isVideo } }}
           />
         </Box>
 

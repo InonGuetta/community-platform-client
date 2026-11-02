@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -10,6 +10,7 @@ import Alert from "@mui/material/Alert";
 import { updateTranscript, triggerTranscriptPipeline, fixHebrewTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptPut";
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
 import { transcriptToText } from "../../../utilities/transcriptText";
+import { isAiActionBusy, aiActionOutcome } from "../../../utilities/aiActionState";
 
 const STATUS_COLOR = { pending: "default", processing: "warning", analyzing: "info", done: "success", error: "error" };
 const STATUS_LABEL_HE = {
@@ -27,7 +28,10 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
   const [editedText, setEditedText] = useState(initialText);
   const [saving, setSaving] = useState(false);
   const [triggering, setTriggering] = useState(false);
-  const [fixing, setFixing] = useState(false);
+  // Only the moment between the press and the server's 202. After that the
+  // ROW says whether the correction is still running (PRD PIPE-5) — it runs on
+  // the server's queue, and keeps running across a reload.
+  const [requestingFix, setRequestingFix] = useState(false);
   // null = no save attempt yet; "saved" / error string after the last attempt.
   const [saveFeedback, setSaveFeedback] = useState(null);
 
@@ -39,6 +43,22 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
   }, [initialText]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const status = transcript?.status;
+  const fixStatus = transcript?.hebrew_fix_status;
+  const fixing = requestingFix || isAiActionBusy(fixStatus);
+
+  // When the correction finishes, the textarea takes the corrected text — the
+  // sync above deliberately leaves alone a textarea the user has typed in, and
+  // this is the one time replacing it is what they asked for. (It is read-only
+  // while the correction runs, so there is no typing to lose.)
+  const previousFixStatus = useRef(fixStatus);
+  useEffect(() => {
+    const before = previousFixStatus.current;
+    previousFixStatus.current = fixStatus;
+    if (aiActionOutcome(before, fixStatus) === "done" && transcript?.edited_text != null) {
+      setEditedText(transcript.edited_text);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fixStatus]);
   const isProcessing = IN_FLIGHT.has(status);
   const hasContent = (transcript?.chunks?.length ?? 0) > 0 || !!transcript?.edited_text;
 
@@ -68,13 +88,11 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
     }
   };
 
+  // Queues the correction; the result arrives through polling — see above.
   const handleFixHebrew = async () => {
-    setFixing(true);
-    const result = await dispatch(fixHebrewTranscript(mediaId));
-    if (result.meta.requestStatus === "fulfilled" && result.payload?.edited_text != null) {
-      setEditedText(result.payload.edited_text);
-    }
-    setFixing(false);
+    setRequestingFix(true);
+    await dispatch(fixHebrewTranscript(mediaId));
+    setRequestingFix(false);
   };
 
   const statusLabel = STATUS_LABEL_HE[status] || "אין תמלול";
@@ -164,7 +182,10 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
         onChange={(e) => { setEditedText(e.target.value); setSaveFeedback(null); }}
         placeholder={placeholder}
         variant="outlined"
-        InputProps={{ readOnly: !canEdit }}
+        // Read-only while the Hebrew correction runs: it will replace this text
+        // when it finishes, and typing in the meantime would be thrown away.
+        InputProps={{ readOnly: !canEdit || isAiActionBusy(fixStatus) }}
+        helperText={isAiActionBusy(fixStatus) ? "העברית מתוקנת ברקע. הטקסט יתעדכן כשהתיקון יסתיים." : undefined}
       />
 
       {canEdit && (

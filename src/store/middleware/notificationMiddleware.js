@@ -25,8 +25,10 @@ const SUCCESS_MESSAGES = {
   "bookmarks/delete": "הסימנייה נמחקה",
   "sessions/create": "המפגש נוצר",
   "transcript/trigger": "התמלול הופעל",
-  "transcript/fixHebrew": "העברית תוקנה",
-  "transcript/keyPointHeadings": "כותרות המשנה נוצרו",
+  // Queued, not finished (PRD PIPE-5): the work runs on the server's queue and
+  // the page announces the result when the row says so (useMediaInsights).
+  "transcript/fixHebrew": "תיקון העברית התחיל. זה עשוי לקחת כמה דקות",
+  "transcript/keyPointHeadings": "יצירת כותרות המשנה התחילה",
   // The save toggle itself stays silent — the button lights up, which is the
   // feedback. Making and discarding a LIST is not visible outside the menu it
   // happens in, so those two do get a toast.

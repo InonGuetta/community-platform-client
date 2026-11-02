@@ -4,6 +4,7 @@ import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import HistoryIcon from "@mui/icons-material/History";
+import DownloadForOfflineIcon from "@mui/icons-material/DownloadForOffline";
 import { fetchLikedMedia } from "../../../store/slicesAndThunks/likesSlice/likesGet";
 import { fetchSavedMedia } from "../../../store/slicesAndThunks/savesSlice/savesGet";
 import { fetchContinueWatching } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
@@ -114,10 +115,19 @@ export const CONTINUE_SHELF = {
   },
 };
 
+// Lessons kept on this device for listening with no network (PRD MOB-2). Like
+// the notebook it has no `collection`: its list comes from the device, not
+// from a thunk that asks the server — which is the whole point of it.
+export const DOWNLOADS_SHELF = {
+  path: "/downloads",
+  label: "הורדות להאזנה",
+  Icon: DownloadForOfflineIcon,
+};
+
 // Order matters: it is the order of the dropdown and of the drawer's section.
 // Continue watching leads, because it is the one a returning user wants first —
 // the others are things they have to have decided to keep.
-export const PERSONAL_SHELVES = [CONTINUE_SHELF, NOTEBOOK_SHELF, LIKES_SHELF, SAVED_SHELF];
+export const PERSONAL_SHELVES = [CONTINUE_SHELF, NOTEBOOK_SHELF, LIKES_SHELF, SAVED_SHELF, DOWNLOADS_SHELF];
 
 // The shelves that CollectionPage can render, which is also what App.jsx builds
 // routes from — so a shelf added above arrives with its page already wired.

@@ -136,6 +136,19 @@ describe("shouldRetry", () => {
     expect(shouldRetry(err(status), 0)).toBe(false);
   });
 
+  // PRD MOB-2: with no network the app should reach the saved lessons at once,
+  // not after eleven seconds of retries that cannot succeed.
+  test("no response is not retried when the device says it is offline", () => {
+    vi.stubGlobal("navigator", { onLine: false });
+    try {
+      expect(shouldRetry(err(null), 0)).toBe(false);
+      // A gateway's answer is still an answer: the network is there.
+      expect(shouldRetry(err(503), 0)).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   test("stops once the schedule is spent", () => {
     expect(shouldRetry(unreachable(), RETRY_DELAYS_MS.length - 1)).toBe(true);
     expect(shouldRetry(unreachable(), RETRY_DELAYS_MS.length)).toBe(false);

@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
-import { selectUser, selectAuthInitialized } from "../../../store/selectors/authSelectors";
+import { selectUser, selectAuthInitialized, selectAuthUnreachable } from "../../../store/selectors/authSelectors";
+import { DOWNLOADS_SHELF } from "../personal/personalShelves";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 
 // Rendered instead of the page while fetchMe is still in flight. It used to be
@@ -27,13 +28,24 @@ const RoleDenied = () => {
   return <Navigate to="/archive" replace />;
 };
 
-const ProtectedRoute = ({ children, allowedRoles }) => {
+// `offlineOk` is for the one page that works with no server at all: the lessons
+// saved on this device (PRD MOB-2).
+const ProtectedRoute = ({ children, allowedRoles, offlineOk = false }) => {
   const user = useSelector(selectUser);
   const initialized = useSelector(selectAuthInitialized);
+  const unreachable = useSelector(selectAuthUnreachable);
 
   // Auth check still in progress: don't decide routing yet, or we may
   // bounce a valid (admin) user before their role has loaded.
   if (!initialized) return <AuthPending />;
+
+  // The server could not be asked who this is — no network, most likely. The
+  // sign-in form could not reach it either, so the reader goes to what works
+  // without it: the lessons they saved on this device. Those were deleted on
+  // sign-out and belong to whoever signed in here last (offlineStore.js).
+  if (!user && unreachable) {
+    return offlineOk ? children : <Navigate to={DOWNLOADS_SHELF.path} replace />;
+  }
 
   if (!user) return <Navigate to="/sign-in" replace />;
 

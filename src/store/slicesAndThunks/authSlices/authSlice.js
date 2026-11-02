@@ -3,6 +3,13 @@ import { login, register, logout, resetPassword, requestRole } from "./authPost"
 import { updateProfile } from "./authPut";
 import { fetchMe } from "./authGet";
 import { statuses } from "../../../utilities/constant";
+import { ERROR_CODES } from "../../../utilities/apiError";
+
+// "Who am I" failed because nothing answered — no network, or the API is down —
+// rather than because the server said no. The app cannot tell whether this
+// person is signed in, so it sends them to the lessons saved on the device
+// instead of to a sign-in form that cannot work either (PRD MOB-2).
+const UNREACHABLE_CODES = new Set([ERROR_CODES.NETWORK_UNREACHABLE, ERROR_CODES.API_UNAVAILABLE]);
 
 const initialState = {
   user: null,
@@ -15,6 +22,8 @@ const initialState = {
   // credentials" on screen in a right-to-left Hebrew application.
   error: null,
   initialized: false,
+  // True when the last "who am I" could not reach the server. See above.
+  unreachable: false,
   // Tracks the in-flight fetchMe request id; cleared whenever a login/register/logout
   // happens so a stale fetchMe response can't overwrite the freshly-set user.
   activeFetchMeRequestId: null,
@@ -115,6 +124,7 @@ const authSlice = createSlice({
         state.status = statuses.succeeded;
         state.user = action.payload;
         state.initialized = true;
+        state.unreachable = false;
         state.activeFetchMeRequestId = null;
       })
       .addCase(fetchMe.rejected, (state, action) => {
@@ -126,6 +136,7 @@ const authSlice = createSlice({
         state.status = statuses.failed;
         state.user = null;
         state.initialized = true;
+        state.unreachable = UNREACHABLE_CODES.has(action.payload?.code);
         state.activeFetchMeRequestId = null;
       })
 

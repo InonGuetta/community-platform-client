@@ -81,4 +81,44 @@ export const mediaApi = {
   // bytes are produced rather than after a wait.
   downloadAudioUrl: (id) => `${API_ROOT}/media/${id}/download/audio`,
 
+  // The bytes of a lesson, to keep on the device for listening with no network
+  // (PRD MOB-2). An audio lesson is its own file; a video is saved as its audio
+  // only — for listening that is all of it, at a fraction of the size.
+  //
+  // fetch rather than axios: this has to report progress as the bytes arrive and
+  // be cancellable mid-file, and the retries in axiosInstance would replay a
+  // half-finished download of a long lecture from the start. Same-origin, so the
+  // session cookie goes with it like with every other media URL here.
+  //
+  // `onProgress(received, total)` — `total` is null for a video, whose audio is
+  // transcoded while it is sent and has no length up front.
+  fetchForListening: async (media, { onProgress, signal } = {}) => {
+    const isVideo = media.media_type === "video";
+    const url = isVideo ? mediaApi.downloadAudioUrl(media.id) : mediaApi.downloadUrl(media.id);
+    const response = await fetch(url, { credentials: "same-origin", signal });
+    if (!response.ok) {
+      const err = new Error(`Download failed with status ${response.status}`);
+      err.status = response.status;
+      throw err;
+    }
+    const total = Number(response.headers.get("Content-Length")) || null;
+    const type = response.headers.get("Content-Type") || (isVideo ? "audio/mpeg" : "");
+
+    if (!response.body?.getReader) {
+      const blob = await response.blob();
+      onProgress?.(blob.size, total);
+      return blob;
+    }
+    const reader = response.body.getReader();
+    const parts = [];
+    let received = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      parts.push(value);
+      received += value.byteLength;
+      onProgress?.(received, total);
+    }
+    return new Blob(parts, { type });
+  },
 };

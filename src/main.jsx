@@ -8,10 +8,14 @@ import { BrowserRouter } from "react-router-dom";
 import { store } from "./store/store";
 import ErrorBoundary from "./components/features/ErrorBoundary/ErrorBoundary";
 import App from "./App";
+import { registerServiceWorker } from "./utilities/serviceWorker";
 
 // ErrorBoundary sits outermost — above the providers — so a crash anywhere in
 // the tree (including in the theme or the router) shows a recovery screen
 // instead of an empty white page.
+// Keeps the app itself on the device so it opens with no network (PRD MOB-2).
+registerServiceWorker();
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <ErrorBoundary>
     <Provider store={store}>

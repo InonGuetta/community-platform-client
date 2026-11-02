@@ -4,7 +4,9 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import { ThemeProvider } from "@mui/material/styles";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
+import { MemoryRouter } from "react-router-dom";
 import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import offlineReducer from "../../../store/slicesAndThunks/offlineSlice/offlineSlice";
 import { buildTheme } from "../../../theme/theme";
 import { mediaTypeAccents } from "../../../utilities/constant";
 
@@ -41,19 +43,23 @@ vi.mock("react-player", async () => {
 // The bar's settings menu offers the same downloads as the page's download pill
 // — one shared hook, which reports a failed PDF through the store. Nothing here
 // opens that menu, but the hook is called on every render, so the tree needs a
-// store to mount at all.
-const store = configureStore({ reducer: { notification: notificationReducer } });
+// store to mount at all — and, since it offers saving the lesson for offline
+// listening (PRD MOB-2) with a link to the downloads, the offline slice and a
+// router too.
+const store = configureStore({ reducer: { notification: notificationReducer, offline: offlineReducer } });
 
 const renderPlayer = (mediaType, props = {}) =>
   render(
     <Provider store={store}>
-      <ThemeProvider theme={buildTheme("light")}>
-        <MediaPlayer
-          url="/stream/1"
-          media={{ id: 1, media_type: mediaType, title: "שיעור", duration_seconds: 100 }}
-          {...props}
-        />
-      </ThemeProvider>
+      <MemoryRouter>
+        <ThemeProvider theme={buildTheme("light")}>
+          <MediaPlayer
+            url="/stream/1"
+            media={{ id: 1, media_type: mediaType, title: "שיעור", duration_seconds: 100 }}
+            {...props}
+          />
+        </ThemeProvider>
+      </MemoryRouter>
     </Provider>
   );
 

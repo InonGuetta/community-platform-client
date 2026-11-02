@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
@@ -8,11 +9,17 @@ import AudiotrackOutlinedIcon from "@mui/icons-material/AudiotrackOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
+import DownloadForOfflineOutlinedIcon from "@mui/icons-material/DownloadForOfflineOutlined";
+import OfflinePinOutlinedIcon from "@mui/icons-material/OfflinePinOutlined";
 import { mediaApi } from "../../../api/mediaApi";
 import { transcriptsApi } from "../../../api/transcriptsApi";
 import { transcriptToText } from "../../../utilities/transcriptText";
 import { mediaTypes } from "../../../utilities/constant";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { saveForOffline } from "../../../store/slicesAndThunks/offlineSlice/offlineGet";
+import { selectIsOffline, selectOfflineProgressFor } from "../../../store/selectors/offlineSelectors";
+import { offlineSupported, percentOf } from "../../../utilities/offlineStore";
+import { DOWNLOADS_SHELF } from "../../pages/personal/personalShelves";
 
 // WHAT CAN BE DOWNLOADED FROM A LECTURE — stated once, for every menu that
 // offers it.
@@ -59,7 +66,10 @@ const itemSx = { textAlign: "start" };
  */
 export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+  const savedOffline = useSelector(selectIsOffline(media.id));
+  const saving = useSelector(selectOfflineProgressFor(media.id));
 
   const { label: fileLabel, Icon: FileIcon } = FILE_OPTION[media.media_type] || FILE_OPTION[mediaTypes.text];
   const isVideo = media.media_type === mediaTypes.video;
@@ -129,6 +139,36 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
         <ListItemText primary="הורדת שמע בלבד" />
       </MenuItem>
     );
+  }
+
+  // Keeping the lesson on the device for listening with no network (PRD MOB-2).
+  // A recording only — a document has nothing to listen to — and a video is
+  // kept as its audio. Three states, one entry: offered, running (with how far),
+  // and done, which leads to the downloads page where it is played.
+  if (media.media_type !== mediaTypes.text && offlineSupported()) {
+    if (savedOffline) {
+      items.push(
+        <MenuItem key="offline" onClick={() => { onClose?.(); navigate(DOWNLOADS_SHELF.path); }} sx={itemSx}>
+          <ListItemIcon><OfflinePinOutlinedIcon fontSize="small" color="success" /></ListItemIcon>
+          <ListItemText primary="זמין בלי רשת" secondary="להורדות להאזנה" />
+        </MenuItem>
+      );
+    } else if (saving) {
+      const percent = percentOf(saving.received, saving.total);
+      items.push(
+        <MenuItem key="offline" disabled sx={itemSx}>
+          <ListItemIcon><CircularProgress size={18} /></ListItemIcon>
+          <ListItemText primary={percent === null ? "שומר להאזנה…" : `שומר להאזנה… ${percent}%`} />
+        </MenuItem>
+      );
+    } else {
+      items.push(
+        <MenuItem key="offline" onClick={() => { onClose?.(); dispatch(saveForOffline(media)); }} sx={itemSx}>
+          <ListItemIcon><DownloadForOfflineOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText primary="שמירה להאזנה בלי רשת" />
+        </MenuItem>
+      );
+    }
   }
 
   // Offered only when there is a transcript with actual content. A transcript

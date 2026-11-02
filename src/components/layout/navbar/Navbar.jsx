@@ -35,6 +35,7 @@ import useNotificationBell from "./useNotificationBell";
 import useInstallPrompt from "./useInstallPrompt";
 import InstallHelpDialog from "./InstallHelpDialog";
 import InstallMobileIcon from "@mui/icons-material/InstallMobile";
+import { clearOfflineLessons } from "../../../store/slicesAndThunks/offlineSlice/offlineDelete";
 
 // Every entry here must map to a real route in App.jsx. A link to a path with
 // no route silently falls through to the "*" catch-all (=> /archive), which
@@ -252,6 +253,9 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     setDrawerOpen(false);
+    // Lessons saved for listening offline go with the person who saved them —
+    // the next one to use this device must not find them (PRD MOB-2).
+    await dispatch(clearOfflineLessons());
     await dispatch(logout());
     navigate("/sign-in");
   };

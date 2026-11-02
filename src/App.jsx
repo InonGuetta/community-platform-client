@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { buildTheme } from "./theme/theme";
 import { ColorModeContext } from "./theme/colorMode";
@@ -28,8 +28,11 @@ import DonatePage from "./components/pages/donate/DonatePage";
 import NotebookPage from "./components/pages/notebook/NotebookPage";
 import CollectionPage from "./components/pages/personal/CollectionPage";
 import PlaylistPage from "./components/pages/personal/PlaylistPage";
-import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE } from "./components/pages/personal/personalShelves";
+import DownloadsPage from "./components/pages/downloads/DownloadsPage";
+import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE, DOWNLOADS_SHELF } from "./components/pages/personal/personalShelves";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
+import { claimOfflineLessons } from "./store/slicesAndThunks/offlineSlice/offlineGet";
+import { selectUser } from "./store/selectors/authSelectors";
 
 // Pages that render WITHOUT the navigation bar: they are reached by someone who
 // is not signed in, and the recovery three by someone who by definition cannot
@@ -119,6 +122,13 @@ const App = () => {
     dispatch(fetchMe());
   }, [dispatch]);
 
+  // The lessons saved on this device for listening offline belong to whoever is
+  // signed in — or are deleted, when someone else saved them (PRD MOB-2).
+  const userId = useSelector(selectUser)?.id;
+  useEffect(() => {
+    if (userId != null) dispatch(claimOfflineLessons(userId));
+  }, [dispatch, userId]);
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
@@ -180,6 +190,9 @@ const App = () => {
           {/* One saved list, opened from the cards on the saved shelf. Its path
               is built from that shelf's own, in personalShelves.js. */}
           <Route path={SAVED_LIST_ROUTE} element={<ProtectedRoute><PlaylistPage /></ProtectedRoute>} />
+          {/* The one page that opens with no server: where the app goes when it
+              cannot reach one (PRD MOB-2). */}
+          <Route path={DOWNLOADS_SHELF.path} element={<ProtectedRoute offlineOk><DownloadsPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/archive" replace />} />
         </Routes>
         </PageTransition>

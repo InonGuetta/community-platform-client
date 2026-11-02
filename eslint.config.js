@@ -90,6 +90,20 @@ export default [
     languageOptions: { globals: { ...globals.node } },
   },
   {
+    // Build-time scripts run under node, not in the page (generate-icons.mjs
+    // draws the app's icons, PRD MOB-1), and report to the terminal.
+    files: ["scripts/**/*.{js,mjs}"],
+    languageOptions: { ecmaVersion: 2023, sourceType: "module", globals: { ...globals.node } },
+    rules: { "no-console": "off" },
+  },
+  {
+    // The service worker (PRD MOB-2): a plain script in the worker's own scope,
+    // where `self`, `caches` and `clients` are the globals and there is no
+    // window.
+    files: ["public/sw.js"],
+    languageOptions: { ecmaVersion: 2023, sourceType: "script", globals: { ...globals.serviceworker } },
+  },
+  {
     // logger.js is where console.* is the implementation. ErrorBoundary is the
     // deliberate exception documented in its own componentDidCatch: it is the
     // last line of defence, it must report even if the logger module is part of

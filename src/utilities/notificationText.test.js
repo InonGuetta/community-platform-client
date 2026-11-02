@@ -29,6 +29,23 @@ describe("describeNotification", () => {
       .toContain("אפשר לנסות שוב");
   });
 
+  it("words the three session notices and links them to the sessions page", () => {
+    const payload = { sessionId: 4, title: "שיעור ערב", hostName: "הרב לוי", startsAt: "2026-11-03T17:30:00Z" };
+    const scheduled = describeNotification({ type: "session_scheduled", payload });
+    expect(scheduled.title).toBe("נקבע מפגש");
+    expect(scheduled.body).toContain('"שיעור ערב" עם הרב לוי');
+    // 17:30Z is 19:30 in Israel, whatever zone the browser is in.
+    expect(scheduled.body).toContain("19:30");
+    expect(scheduled.href).toBe("/sessions");
+    expect(describeNotification({ type: "session_reminder", payload }).title).toBe("המפגש מתחיל בעוד כרבע שעה");
+    expect(describeNotification({ type: "session_starting", payload }).title).toBe("המפגש התחיל");
+  });
+
+  it("links a new lesson to its page and names the course", () => {
+    const n = describeNotification({ type: "new_lesson", payload: { mediaId: 3, title: "דף ב", courseTitle: "גמרא" } });
+    expect(n).toEqual({ title: "שיעור חדש בקורס", body: '"דף ב" · גמרא', href: "/media/3" });
+  });
+
   // A server deployed ahead of this client must not produce a count over an
   // empty list.
   it("renders an unknown type generically instead of dropping it", () => {

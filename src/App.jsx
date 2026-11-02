@@ -14,6 +14,7 @@ import GoogleCallback from "./components/pages/auth/GoogleCallback";
 import ForgotPassword from "./components/pages/auth/ForgotPassword";
 import ResetPassword from "./components/pages/auth/ResetPassword";
 import VerifyEmail from "./components/pages/auth/VerifyEmail";
+import Unsubscribe from "./components/pages/auth/Unsubscribe";
 import ProfilePage from "./components/pages/profile/ProfilePage";
 import ArchivePage from "./components/pages/archive/ArchivePage";
 import MediaViewPage from "./components/pages/mediaView/MediaViewPage";
@@ -41,6 +42,9 @@ const AUTH_PATHS = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  // From a notification mail, often signed out — the navbar would also start
+  // polling the bell for a session that is not there.
+  "/unsubscribe",
 ];
 
 // Mac-style page transition: each time the route changes, the new page slides
@@ -138,6 +142,8 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          {/* Public, like /verify-email: followed from a notification mail. */}
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/archive" replace />} />
           <Route path="/archive" element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />

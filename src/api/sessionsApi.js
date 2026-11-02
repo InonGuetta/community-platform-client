@@ -27,4 +27,9 @@ export const sessionsApi = {
   // Opening a scheduled room. Host-only; the server enforces it in the WHERE
   // clause of the update.
   start: async (id) => (await axiosInstance.post(`/sessions/${id}/start`)).data,
+
+  // NOTIF-3. A plain URL rather than a request, like mediaApi.downloadUrl: the
+  // browser downloads it itself (the cookie goes along, same origin), and hands
+  // the .ics to whatever calendar the reader uses.
+  calendarUrl: (id) => `/api/sessions/${id}/calendar.ics`,
 };

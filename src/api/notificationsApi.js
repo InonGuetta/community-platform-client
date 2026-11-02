@@ -13,4 +13,16 @@ export const notificationsApi = {
   markAllRead: async () => {
     await axiosInstance.post("/notifications/read-all");
   },
+
+  // NOTIF-6. Which mail this user can get, and which of it is switched off.
+  preferences: async () => (await axiosInstance.get("/notifications/preferences")).data,
+
+  setPreference: async (category, email) => {
+    await axiosInstance.put("/notifications/preferences", { category, email });
+  },
+
+  // From the link in a mail — no session needed; the token is the credential.
+  // `all` turns off every category rather than the one the link names.
+  unsubscribe: async (token, { all = false } = {}) =>
+    (await axiosInstance.post("/notifications/unsubscribe", { token, all })).data,
 };

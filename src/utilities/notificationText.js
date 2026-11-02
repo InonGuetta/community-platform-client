@@ -13,6 +13,19 @@ import { formatHebrewDate } from "./formatDate";
 
 const ROLE_NAMES = { lecturer: "מרצה", admin: "מנהל" };
 
+const byHost = (payload) => (payload.hostName ? ` עם ${payload.hostName}` : "");
+
+// "יום ג׳, 3 בנובמבר, 19:30" — in Israel's zone, named, like every time the
+// platform shows (see formatDate.js).
+const sessionWhen = (iso) => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("he-IL", {
+    weekday: "short", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
+    timeZone: "Asia/Jerusalem",
+  });
+};
+
 export const describeNotification = (notification) => {
   const payload = notification?.payload ?? {};
   switch (notification?.type) {
@@ -37,6 +50,30 @@ export const describeNotification = (notification) => {
         body: payload.reason
           ? `"${payload.title || "השיעור"}": ${payload.reason}`
           : `"${payload.title || "השיעור"}". אפשר לנסות שוב מעמוד השיעור`,
+        href: payload.mediaId ? `/media/${payload.mediaId}` : null,
+      };
+    case "session_scheduled":
+      return {
+        title: "נקבע מפגש",
+        body: `"${payload.title || "מפגש חי"}"${byHost(payload)}${payload.startsAt ? `, ${sessionWhen(payload.startsAt)}` : ""}`,
+        href: "/sessions",
+      };
+    case "session_reminder":
+      return {
+        title: "המפגש מתחיל בעוד כרבע שעה",
+        body: `"${payload.title || "מפגש חי"}"${byHost(payload)}`,
+        href: "/sessions",
+      };
+    case "session_starting":
+      return {
+        title: "המפגש התחיל",
+        body: `"${payload.title || "מפגש חי"}"${byHost(payload)}`,
+        href: "/sessions",
+      };
+    case "new_lesson":
+      return {
+        title: "שיעור חדש בקורס",
+        body: `"${payload.title || "שיעור"}"${payload.courseTitle ? ` · ${payload.courseTitle}` : ""}`,
         href: payload.mediaId ? `/media/${payload.mediaId}` : null,
       };
     default:

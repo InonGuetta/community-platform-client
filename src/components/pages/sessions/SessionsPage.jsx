@@ -2,6 +2,8 @@ import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import { sessionsApi } from "../../../api/sessionsApi";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -121,6 +123,21 @@ const SessionsPage = () => {
                       <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>
                         המפגש ייפתח על ידי המארח
                       </Typography>
+                    )}
+                    {/* NOTIF-3 — for everyone, host included: the session goes
+                        into whatever calendar the reader uses. Only a session
+                        with a time has anything to put there. */}
+                    {room.scheduled_at && (
+                      <Button
+                        component="a"
+                        href={sessionsApi.calendarUrl(room.id)}
+                        download
+                        startIcon={<EventAvailableIcon />}
+                        size="small"
+                        sx={{ flexShrink: 0 }}
+                      >
+                        הוספה ליומן
+                      </Button>
                     )}
                   </CardActions>
                 </Card>

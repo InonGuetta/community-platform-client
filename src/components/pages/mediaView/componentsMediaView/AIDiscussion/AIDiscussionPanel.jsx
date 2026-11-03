@@ -92,7 +92,15 @@ const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek,
             <SmartSearchPane search={search} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
           )}
           {mode === DISCUSSION_MODES.chat && (
-            <ChatPane chat={chat} notebook={notebook} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
+            <ChatPane
+              chat={chat}
+              notebook={notebook}
+              isText={isText}
+              onSeek={onSeek}
+              onOpenPage={onOpenPage}
+              // This lesson's own starting questions (PRD ASK-7).
+              suggestedQuestions={transcript?.suggested_questions}
+            />
           )}
           {mode === DISCUSSION_MODES.history && (
             <HistoryPane history={history} notebook={notebook} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />

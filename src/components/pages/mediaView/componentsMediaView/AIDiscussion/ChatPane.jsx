@@ -34,7 +34,10 @@ import { SAVE_STATES } from "../../useAIDiscussionController";
 const MAX_QUESTION_CHARS = 1000;
 
 // Offered on an empty conversation, so the first question costs no thought.
-const SUGGESTIONS = [
+// These fixed three are the fallback: a lesson's own questions, written from
+// its summary after processing (PRD ASK-7, migration 045), come first — they
+// are about THIS lesson rather than the same three on every lesson.
+export const FIXED_SUGGESTIONS = [
   "מה הנקודה המרכזית?",
   "סכם בשלוש נקודות",
   "אילו מקורות הוזכרו?",
@@ -200,7 +203,11 @@ export const quotaLabel = ({ limit, remaining }) => {
   return `נשארו לך היום ${remaining} שאלות מתוך ${limit}`;
 };
 
-const ChatPane = ({ chat, notebook = null, isText = false, onSeek, onOpenPage }) => {
+// The lesson's questions when it has any, the fixed ones otherwise.
+export const suggestionsFor = (questions) =>
+  Array.isArray(questions) && questions.length > 0 ? questions : FIXED_SUGGESTIONS;
+
+const ChatPane = ({ chat, notebook = null, isText = false, onSeek, onOpenPage, suggestedQuestions = null }) => {
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);
   const onOpen = placeOpener({ onSeek, onOpenPage });
@@ -290,7 +297,7 @@ const ChatPane = ({ chat, notebook = null, isText = false, onSeek, onOpenPage })
               אפשר לשאול כל שאלה על {source}. התשובה תתבסס רק על מה שנאמר בו, עם הפניה למקום המדויק.
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {SUGGESTIONS.map((s) => (
+              {suggestionsFor(suggestedQuestions).map((s) => (
                 <Chip key={s} label={s} variant="outlined" onClick={() => send(s)} disabled={chat.asking} />
               ))}
             </Box>

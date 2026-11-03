@@ -13,6 +13,7 @@ export const PURPOSE_LABELS = {
   hebrew_fix: "תיקון עברית",
   headings: "כותרות משנה",
   tagging: "הצעות תגיות",
+  suggested_questions: "שאלות מוצעות בצ'אט",
 };
 
 export const purposeLabel = (purpose) => PURPOSE_LABELS[purpose] ?? purpose;

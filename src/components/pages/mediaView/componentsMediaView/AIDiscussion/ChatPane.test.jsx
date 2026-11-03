@@ -2,7 +2,7 @@
 import { test, expect, describe, vi } from "vitest";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ChatPane from "./ChatPane";
+import ChatPane, { suggestionsFor, FIXED_SUGGESTIONS } from "./ChatPane";
 
 // The chat is presentation only: `chat` is what useAIDiscussionController
 // hands it, so every state is a different object here.
@@ -286,5 +286,22 @@ describe("copying the conversation", () => {
     expect(screen.queryByRole("button", { name: "העתק שיחה" })).not.toBeInTheDocument();
     rerender(<ChatPane chat={chat({ messages: [question, answer], asking: true, copy: vi.fn() })} />);
     expect(screen.getByRole("button", { name: "העתק שיחה" })).toBeDisabled();
+  });
+});
+
+// PRD ASK-7: a lesson's own starting questions, written from its summary.
+describe("starting questions", () => {
+  test("offers the lesson's own questions, and asks one when pressed", async () => {
+    const c = chat();
+    render(<ChatPane chat={c} suggestedQuestions={["למה משה שבר את הלוחות?", "מה עושים אם שוכחים את יום השבת?"]} />);
+    expect(screen.queryByRole("button", { name: "מה הנקודה המרכזית?" })).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "למה משה שבר את הלוחות?" }));
+    expect(c.ask).toHaveBeenCalledWith("למה משה שבר את הלוחות?");
+  });
+
+  test("falls back to the fixed three for a lesson that has none yet", () => {
+    expect(suggestionsFor(null)).toEqual(FIXED_SUGGESTIONS);
+    expect(suggestionsFor([])).toEqual(FIXED_SUGGESTIONS);
+    expect(suggestionsFor(["א?"])).toEqual(["א?"]);
   });
 });

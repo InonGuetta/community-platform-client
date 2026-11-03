@@ -299,3 +299,43 @@ describe("the length filter", () => {
     expect(api.durationRange).toBe("");
   });
 });
+
+// A lecturer's page (PRD ATTR-10): the same controller with the lecturer fixed
+// by the page. It filters the request, but it is not the reader's filter — not
+// in the address, not counted, not clearable, and not a way back to itself.
+describe("with the lecturer fixed by the page", () => {
+  let fixedApi;
+  const FixedProbe = () => {
+    fixedApi = useArchivePageController({ fixedCreator: "הרב כהן" });
+    const { search } = useLocation();
+    return <span data-testid="url">{search}</span>;
+  };
+  const openFixed = async (at = "/creators/x") => {
+    render(
+      <MemoryRouter initialEntries={[at]}>
+        <Routes>
+          <Route path="/creators/:name" element={<FixedProbe />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    await waitFor(() => expect(fixedApi.tagTree.length).toBe(TREE.length));
+  };
+  const lastListing = () =>
+    dispatch.mock.calls.map(([action]) => action).filter((a) => a?.type === "media/fetchAll").at(-1).meta.arg;
+
+  it("asks only for that lecturer, and keeps them out of the address", async () => {
+    await openFixed();
+    expect(lastListing().creator).toBe("הרב כהן");
+    expect(url()).not.toContain("creator");
+    expect(fixedApi.hasActiveFilter).toBe(false);
+    expect(fixedApi.handleOpenCreator).toBeUndefined();
+  });
+
+  it("is not cleared with the reader's filters, and ignores one in the address", async () => {
+    await openFixed("/creators/x?creator=מישהו אחר&type=audio");
+    expect(fixedApi.creatorFilter).toBe("הרב כהן");
+    act(() => fixedApi.handleClearFilters());
+    await waitFor(() => expect(lastListing().type).toBeUndefined());
+    expect(lastListing().creator).toBe("הרב כהן");
+  });
+});

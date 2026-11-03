@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { test, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
 // Reaches for the store; what it does is not what this file is about.
 vi.mock("../../../features/DownloadMenu/DownloadMenu", () => ({
@@ -28,4 +28,23 @@ test("a recording whose length was never measured shows no length", () => {
 test("a book shows no length", () => {
   render(<MediaCard item={{ ...base, media_type: "text", duration_seconds: 500 }} onView={vi.fn()} />);
   expect(screen.queryByLabelText(/^אורך:/)).not.toBeInTheDocument();
+});
+
+// The lecturer's name leads to their page (PRD ATTR-10) — without also opening
+// the lesson, since the whole card is a button that does that.
+test("the lecturer's name opens their page, and only that", () => {
+  const onView = vi.fn();
+  const onOpenCreator = vi.fn();
+  render(<MediaCard item={{ ...base, media_type: "audio", creator_name: "הרב כהן" }} onView={onView} onOpenCreator={onOpenCreator} />);
+  fireEvent.click(screen.getByRole("button", { name: "לכל השיעורים של הרב כהן" }));
+  expect(onOpenCreator).toHaveBeenCalledWith("הרב כהן");
+  expect(onView).not.toHaveBeenCalled();
+});
+
+test("an unattributed lesson's name leads nowhere, and neither does one on the lecturer's own page", () => {
+  const { unmount } = render(<MediaCard item={{ ...base, media_type: "audio", creator_name: "כללי" }} onView={vi.fn()} onOpenCreator={vi.fn()} />);
+  expect(screen.queryByRole("button", { name: /לכל השיעורים של/ })).toBeNull();
+  unmount();
+  render(<MediaCard item={{ ...base, media_type: "audio", creator_name: "הרב כהן" }} onView={vi.fn()} />);
+  expect(screen.queryByRole("button", { name: /לכל השיעורים של/ })).toBeNull();
 });

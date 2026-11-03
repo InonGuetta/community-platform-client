@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { buildTheme } from "./theme/theme";
@@ -29,6 +29,8 @@ import NotebookPage from "./components/pages/notebook/NotebookPage";
 import CollectionPage from "./components/pages/personal/CollectionPage";
 import PlaylistPage from "./components/pages/personal/PlaylistPage";
 import DownloadsPage from "./components/pages/downloads/DownloadsPage";
+import CreatorPage from "./components/pages/creators/CreatorPage";
+import { CREATOR_ROUTE } from "./utilities/creatorPage";
 import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE, DOWNLOADS_SHELF } from "./components/pages/personal/personalShelves";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
 import { claimOfflineLessons } from "./store/slicesAndThunks/offlineSlice/offlineGet";
@@ -90,6 +92,8 @@ const saveColorMode = (mode) => {
     // Not saved — the mode still applies for this visit.
   }
 };
+
+const CreatorPageByName = () => <CreatorPage key={useParams().name} />;
 
 const App = () => {
   const dispatch = useDispatch();
@@ -158,6 +162,9 @@ const App = () => {
           <Route path="/" element={<Navigate to="/archive" replace />} />
           <Route path="/archive" element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
           <Route path="/media/:id" element={<ProtectedRoute><MediaViewPage /></ProtectedRoute>} />
+          {/* A lecturer's page (PRD ATTR-10). Keyed by the name, so going from
+              one lecturer to another starts the page — and its filters — afresh. */}
+          <Route path={CREATOR_ROUTE} element={<ProtectedRoute><CreatorPageByName /></ProtectedRoute>} />
           <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
           {/* By id, not by room token. The token is a credential the server
               hands out only to a caller it has decided may enter — putting it in

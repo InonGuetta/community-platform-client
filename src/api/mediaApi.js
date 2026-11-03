@@ -38,6 +38,11 @@ export const mediaApi = {
   // leave it holding only whatever was already chosen.
   creators: async () => (await axiosInstance.get("/media/creators")).data,
 
+  // One lecturer's page (PRD ATTR-10): their totals and courses, counted over
+  // what the caller may see. Encoded: names are Hebrew and may hold anything.
+  creatorProfile: async (name) =>
+    (await axiosInstance.get(`/media/creators/${encodeURIComponent(name)}`)).data,
+
   // What an item looks like it is about, from its title. Offered right after an
   // upload so the archive does not fill up with untagged items — which is how it
   // reached nineteen items and no tagged rows at all.

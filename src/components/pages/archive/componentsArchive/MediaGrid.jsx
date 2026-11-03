@@ -32,7 +32,7 @@ const MediaCardSkeleton = () => (
 // come from the archive, which loads 24 at a time. The likes page passes none
 // of them and gets the whole list it already had.
 const MediaGrid = ({
-  items, status, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails,
+  items, status, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails, onOpenCreator,
   emptyActionLabel, onEmptyAction, filtered = false, emptyMessage = "לא נמצאה מדיה",
   hasMore = false, loadingMore = false, onLoadMore,
 }) => {
@@ -71,7 +71,7 @@ const MediaGrid = ({
       <Grid container spacing={3}>
         {items.map((item) => (
           <Grid item xs={12} sm={6} md={4} key={item.id}>
-            <MediaCard item={item} onView={onView} user={user} onDelete={onDelete} onTogglePublish={onTogglePublish} onEditTags={onEditTags} onEditDetails={onEditDetails} />
+            <MediaCard item={item} onView={onView} user={user} onDelete={onDelete} onTogglePublish={onTogglePublish} onEditTags={onEditTags} onEditDetails={onEditDetails} onOpenCreator={onOpenCreator} />
           </Grid>
         ))}
         {/* The next page on its way: placeholder cards where it will land, so

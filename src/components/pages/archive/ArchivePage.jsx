@@ -6,38 +6,22 @@ import Button from "@mui/material/Button";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import UploadIcon from "@mui/icons-material/Upload";
-import FilterBar from "./componentsArchive/FilterBar";
-import EditTagsDialog from "./componentsArchive/EditTagsDialog";
-import EditMediaDialog from "./componentsArchive/EditMediaDialog";
-import MediaGrid from "./componentsArchive/MediaGrid";
+import ArchiveBrowser from "./componentsArchive/ArchiveBrowser";
 import UploadMedia from "../../features/UploadMedia/UploadMedia";
 import SmartSearch from "../../features/SmartSearch/SmartSearch";
-import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useArchivePageController from "./useArchivePageController";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { isPrivileged } from "../../../utilities/permissions";
 
+// The filters, the cards and their dialogs are ArchiveBrowser, shared with a
+// lecturer's page (PRD ATTR-10). What is only the archive's is here: the
+// upload button, the smart-search tab and the picture beside them.
 const ArchivePage = () => {
-  const {
-    filteredMedia, status, selectedTypes, hasActiveFilter,
-    hasMore, loadingMore, total, handleLoadMore,
-    creatorFilter, knownCreators, handleCreatorFilter,
-    tagIds, excludedTagIds, tagTree, handleCycleTag, handleRemoveTag, handleClearTags,
-    dates, handleDateFilter, handleClearFilters,
-    handleToggleType, handlePressAllTypes, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
-    sortOrder, handleSortChange,
-    durationRange, handleDurationFilter, lengthOffered,
-    deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
-    tagTargetItem, handleEditTags, handleEditTagsCancel, handleEditTagsSave,
-    editTargetItem, assignableCourses, handleEditDetails, handleEditDetailsCancel, handleEditDetailsSave,
-    handleTogglePublish,
-  } = useArchivePageController();
+  const archive = useArchivePageController();
   const { isUploadOpen } = useSelector((state) => state.ui);
   const user = useSelector(selectUser);
   const canUpload = isPrivileged(user);
   const [tab, setTab] = useState(0);
-
-  const deleteTarget = filteredMedia.find((i) => i.id === deleteTargetId);
 
   return (
     <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
@@ -46,7 +30,7 @@ const ArchivePage = () => {
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Typography variant="h4" fontWeight={800} color="primary">ארכיון מדיה</Typography>
           {canUpload && (
-            <Button variant="contained" startIcon={<UploadIcon />} onClick={handleOpenUpload}
+            <Button variant="contained" startIcon={<UploadIcon />} onClick={archive.handleOpenUpload}
               sx={{
                 background: "linear-gradient(135deg, #29b6d8 0%, #1597bb 100%)",
                 "&:hover": { background: "linear-gradient(135deg, #1ea7ca 0%, #128aab 100%)" },
@@ -64,63 +48,10 @@ const ArchivePage = () => {
         </Tabs>
 
         {tab === 0 && (
-          <>
-            <Box sx={{ mb: 3 }}>
-              <FilterBar
-                selectedTypes={selectedTypes}
-                onToggleType={handleToggleType}
-                onPressAllTypes={handlePressAllTypes}
-                sortOrder={sortOrder}
-                onSortChange={handleSortChange}
-                durationRange={durationRange}
-                onDurationFilter={handleDurationFilter}
-                lengthOffered={lengthOffered}
-                onSearch={handleSearch}
-                creatorFilter={creatorFilter}
-                knownCreators={knownCreators}
-                onCreatorFilter={handleCreatorFilter}
-                tagIds={tagIds}
-                excludedTagIds={excludedTagIds}
-                tagTree={tagTree}
-                onCycleTag={handleCycleTag}
-                onRemoveTag={handleRemoveTag}
-                onClearTags={handleClearTags}
-                uploadedAfter={dates.uploadedAfter}
-                uploadedBefore={dates.uploadedBefore}
-                onDateFilter={handleDateFilter}
-                onClearAll={handleClearFilters}
-              />
-            </Box>
-            {/* How many the filter matches in all — the grid shows them 24 at a
-                time, so the cards on screen are no longer the answer to "how
-                many". Hidden until there is a number, and for an empty result,
-                which the grid's own empty state already says. */}
-            {total > 0 && (
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }} aria-live="polite">
-                {total === 1 ? "תוצאה אחת" : `${total.toLocaleString("he-IL")} תוצאות`}
-                {filteredMedia.length < total && ` · מוצגות ${filteredMedia.length}`}
-              </Typography>
-            )}
-            <MediaGrid
-              items={filteredMedia}
-              status={status}
-              onView={handleOpenMedia}
-              user={user}
-              onDelete={handleDeleteRequest}
-              onTogglePublish={handleTogglePublish}
-              onEditTags={handleEditTags}
-              onEditDetails={handleEditDetails}
-              emptyActionLabel={canUpload ? "העלאת מדיה" : undefined}
-              onEmptyAction={handleOpenUpload}
-              filtered={hasActiveFilter}
-              hasMore={hasMore}
-              loadingMore={loadingMore}
-              onLoadMore={handleLoadMore}
-            />
-          </>
+          <ArchiveBrowser archive={archive} user={user} canUpload={canUpload} onOpenUpload={archive.handleOpenUpload} />
         )}
 
-        {tab === 1 && <SmartSearch onOpenResult={handleOpenResult} />}
+        {tab === 1 && <SmartSearch onOpenResult={archive.handleOpenResult} />}
       </Box>
 
       {/* Left side image (rendered last so it sits on the left under RTL) */}
@@ -143,37 +74,6 @@ const ArchivePage = () => {
       />
 
       <UploadMedia open={isUploadOpen} />
-
-      {/* Tagging an item that already exists — the only way to tag anything that
-          was uploaded before the taxonomy, and the reason the filter had nothing
-          to filter. */}
-      <EditTagsDialog
-        open={Boolean(tagTargetItem)}
-        item={tagTargetItem}
-        tagTree={tagTree}
-        onClose={handleEditTagsCancel}
-        onSave={handleEditTagsSave}
-      />
-
-      {/* Keyed by the item, so each lesson opens a fresh form seeded from it. */}
-      {editTargetItem && (
-        <EditMediaDialog
-          key={editTargetItem.id}
-          item={editTargetItem}
-          courses={assignableCourses}
-          knownCreators={knownCreators}
-          onClose={handleEditDetailsCancel}
-          onSave={handleEditDetailsSave}
-        />
-      )}
-
-      <ConfirmingDeletionDialog
-        open={!!deleteTargetId}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        itemName={deleteTarget?.title}
-        type="media"
-      />
     </Box>
   );
 };

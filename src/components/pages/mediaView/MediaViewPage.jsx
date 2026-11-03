@@ -16,6 +16,9 @@ import LessonNotebook from "./componentsMediaView/LessonNotebook";
 import AIDiscussionPanel from "./componentsMediaView/AIDiscussion/AIDiscussionPanel";
 import useMediaViewPageController from "./useMediaViewPageController";
 import { creatorPrefixes } from "../../../utilities/constant";
+import { creatorPath, hasCreatorPage } from "../../../utilities/creatorPage";
+import Link from "@mui/material/Link";
+import { Link as RouterLink } from "react-router-dom";
 import { formatHebrewDate } from "../../../utilities/formatDate";
 
 // Presentation only. Everything that dispatches, selects or derives from server
@@ -128,7 +131,15 @@ const MediaViewPage = () => {
             accident rather than on purpose. */}
         {media.creator_name && (
           <Typography variant="body2" color="text.secondary">
-            {creatorPrefixes[media.media_type] || creatorPrefixes.video}: {media.creator_name}
+            {creatorPrefixes[media.media_type] || creatorPrefixes.video}:{" "}
+            {/* Their other lessons are one click away (PRD ATTR-10). */}
+            {hasCreatorPage(media.creator_name) ? (
+              <Link component={RouterLink} to={creatorPath(media.creator_name)} color="inherit" underline="hover" fontWeight={600}>
+                {media.creator_name}
+              </Link>
+            ) : (
+              media.creator_name
+            )}
           </Typography>
         )}
       </Box>

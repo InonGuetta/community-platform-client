@@ -17,6 +17,7 @@ import { alpha, lighten } from "@mui/material/styles";
 import { mediaApi } from "../../../../api/mediaApi";
 import DownloadMenu from "../../../features/DownloadMenu/DownloadMenu";
 import { mediaTypeLabels, mediaTypeAccents, creatorPrefixes } from "../../../../utilities/constant";
+import { hasCreatorPage } from "../../../../utilities/creatorPage";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import EditIcon from "@mui/icons-material/Edit";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -80,7 +81,9 @@ const CornerBracket = ({ accent, placement }) => {
   );
 };
 
-const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails }) => {
+// `onOpenCreator` makes the lecturer's name a way to their page (PRD ATTR-10).
+// Absent on that page itself, where the name would lead back to where you are.
+const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails, onOpenCreator }) => {
   // Recordings only: a book's duration is always null, and lengthLabel says so.
   const length = item.media_type === "text" ? null : lengthLabel(item.duration_seconds);
   const isVideo = item.media_type === "video";
@@ -328,6 +331,13 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
               label={`${creatorPrefixes[item.media_type] || creatorPrefixes.video}: ${item.creator_name}`}
               size="small"
               variant="outlined"
+              // Clickable only where there is a page: "כללי" is nobody.
+              {...(onOpenCreator && hasCreatorPage(item.creator_name) && {
+                clickable: true,
+                "aria-label": `לכל השיעורים של ${item.creator_name}`,
+                // The card is itself a button that opens the lesson.
+                onClick: (e) => { e.stopPropagation(); onOpenCreator(item.creator_name); },
+              })}
             />
           )}
           {/* How long the recording runs — what the length filter in the panel

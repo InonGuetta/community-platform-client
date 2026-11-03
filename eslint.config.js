@@ -97,6 +97,13 @@ export default [
     rules: { "no-console": "off" },
   },
   {
+    // The end-to-end test and its config (PRD NFR-9) run under node and drive a
+    // browser from the outside; they report to the terminal.
+    files: ["e2e/**/*.js", "playwright.config.js"],
+    languageOptions: { ecmaVersion: 2023, sourceType: "module", globals: { ...globals.node } },
+    rules: { "no-console": "off" },
+  },
+  {
     // The service worker (PRD MOB-2): a plain script in the worker's own scope,
     // where `self`, `caches` and `clients` are the globals and there is no
     // window.

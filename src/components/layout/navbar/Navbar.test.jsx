@@ -240,3 +240,23 @@ test("the privileged entries are strictly additive, never a different set", () =
     expect(admin, `admin lost the student entry ${href}`).toContain(href);
   }
 });
+
+// PRD MOB-7 review: the drawer was 20.4vw wide at every size — 77px on a 375px
+// phone, where it holds every link. Below md it now takes most of the screen.
+describe("the drawer on a phone", () => {
+  test("is wide enough to read, not a fifth of the screen", async () => {
+    renderNavbar("student");
+    await userEvent.setup().click(screen.getByRole("button", { name: "פתיחת תפריט אישי" }));
+    const paper = document.querySelector(".MuiDrawer-paper");
+    // jsdom cannot evaluate min() or media queries, so the rule emotion wrote
+    // for the paper's class is read instead: the phone's width as the base, and
+    // the desktop's 20.4vw only inside a media query.
+    // jsdom cannot evaluate min() or media queries, so the rules emotion
+    // inserted for the paper's class are read from the stylesheets instead: a
+    // phone's width from the smallest breakpoint up, 20.4vw only from md.
+    const cls = [...paper.classList].find((c) => /^css-.*MuiDrawer-paper$/.test(c));
+    const rules = [...document.styleSheets].flatMap((sheet) => [...sheet.cssRules].map((r) => r.cssText));
+    expect(rules).toContain(`@media (min-width:0px) {.${cls} {width: min(85vw, 320px);}}`);
+    expect(rules).toContain(`@media (min-width:900px) {.${cls} {width: 20.4vw;}}`);
+  });
+});

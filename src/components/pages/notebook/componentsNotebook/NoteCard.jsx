@@ -171,6 +171,8 @@ const NoteCard = ({
           placeholder="כותרת ההערה"
           variant="standard"
           fullWidth
+          // The placeholder is gone once a title is typed; this name stays.
+          inputProps={{ "aria-label": "כותרת ההערה" }}
           InputProps={{ disableUnderline: true, sx: { fontSize: "1.5rem", fontWeight: 700 } }}
         />
       </Box>

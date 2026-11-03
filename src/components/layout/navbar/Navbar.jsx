@@ -203,7 +203,11 @@ const avatarInitial = (user) => user?.display_name?.[0]?.toUpperCase() || "U";
 // the image only. These match the archive left-image geometry (ArchivePage):
 // the image is 24vw wide, sits below the 64px navbar, and fills the rest.
 const DRAWER_TOP = BAR_HEIGHT; // start below the sticky navbar
-const DRAWER_WIDTH = "20.4vw"; // 85% of the image width (24vw * 0.85)
+// 85% of the image column (24vw * 0.85) from md up, where that column exists.
+// Below md there is no image column, and 20.4vw of a 375px phone is 77px — the
+// menu holding every link on a phone was a strip too narrow to read (found in
+// the PRD MOB-7 review). There it takes most of the screen instead.
+const DRAWER_WIDTH = { xs: "min(85vw, 320px)", md: "20.4vw" };
 
 const Navbar = () => {
   const dispatch = useDispatch();

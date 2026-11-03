@@ -77,6 +77,8 @@ const SmartSearch = ({ onOpenResult }) => {
         onKeyDown={handleKeyDown}
         placeholder="חיפוש עומק חכם"
         fullWidth
+        // A placeholder is not a name, and is gone once something is typed.
+        inputProps={{ "aria-label": "חיפוש עומק חכם" }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">

@@ -39,7 +39,9 @@ const UsersTableContent = ({ users, onEdit, onDelete, onToggleActive, canToggleA
           <Chip label={user.is_active ? "פעיל" : "לא פעיל"} color={user.is_active ? "success" : "default"} size="small" />
         </TableCell>
         <TableCell>
-          <IconButton size="small" onClick={() => onEdit(user)}><EditIcon fontSize="small" /></IconButton>
+          {/* Named after the person: a row of bare icons reads "button, button,
+              button" to a screen reader (PRD MOB-7 review). */}
+          <IconButton size="small" onClick={() => onEdit(user)} aria-label={`עריכת ${user.display_name || user.email}`}><EditIcon fontSize="small" /></IconButton>
           {/* Admin-only active toggle. Disabled on your own row so an admin can't
               lock themselves out by deactivating their own account. */}
           {canToggleActive && (
@@ -50,13 +52,14 @@ const UsersTableContent = ({ users, onEdit, onDelete, onToggleActive, canToggleA
                   color={user.is_active ? "success" : "default"}
                   disabled={user.id === currentUserId}
                   onClick={() => onToggleActive(user)}
+                  aria-label={`${user.is_active ? "השבתת" : "הפעלת"} ${user.display_name || user.email}`}
                 >
                   {user.is_active ? <ToggleOnIcon fontSize="small" /> : <ToggleOffIcon fontSize="small" />}
                 </IconButton>
               </span>
             </Tooltip>
           )}
-          <IconButton size="small" color="error" onClick={() => onDelete(user)}><DeleteIcon fontSize="small" /></IconButton>
+          <IconButton size="small" color="error" onClick={() => onDelete(user)} aria-label={`מחיקת ${user.display_name || user.email}`}><DeleteIcon fontSize="small" /></IconButton>
         </TableCell>
       </TableRow>
     )))}

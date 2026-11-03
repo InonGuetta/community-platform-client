@@ -1,4 +1,3 @@
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button";
@@ -8,6 +7,21 @@ import NoDataDialog from "../../../features/NoDataDialog/NoDataDialog";
 import { statuses } from "../../../../utilities/constant";
 
 const SKELETON_COUNT = 6;
+
+// The cards' grid: one column on a phone, two on a tablet, three from md up.
+//
+// A CSS grid with `gap`, not MUI's Grid. MUI's Grid spaces its items with a
+// negative margin on the container and a width of 100% plus the spacing, and
+// in this right-to-left app — which runs without the stylis flip plugin — that
+// margin lands on the wrong side: the grid stuck 24px out past the page's left
+// edge, and on a 375px phone the whole archive scrolled sideways (found in the
+// PRD MOB-7 review). A gap has no side to get wrong. minmax(0, 1fr) so a long
+// unbroken title cannot widen its column past the screen either.
+const gridSx = {
+  display: "grid",
+  gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
+  gap: 3,
+};
 
 // A placeholder that mirrors MediaCard's shape (image area + two text lines) so
 // the grid keeps its layout while loading instead of collapsing to a spinner.
@@ -45,13 +59,11 @@ const MediaGrid = ({
   // skeletons over it.
   if (status === statuses.loading && !items.length) {
     return (
-      <Grid container spacing={3}>
+      <Box sx={gridSx}>
         {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-          <Grid item xs={12} sm={6} md={4} key={i}>
-            <MediaCardSkeleton />
-          </Grid>
+          <MediaCardSkeleton key={i} />
         ))}
-      </Grid>
+      </Box>
     );
   }
 
@@ -68,21 +80,19 @@ const MediaGrid = ({
 
   return (
     <>
-      <Grid container spacing={3}>
+      <Box sx={gridSx}>
         {items.map((item) => (
-          <Grid item xs={12} sm={6} md={4} key={item.id}>
+          <Box key={item.id} sx={{ minWidth: 0 }}>
             <MediaCard item={item} onView={onView} user={user} onDelete={onDelete} onTogglePublish={onTogglePublish} onEditTags={onEditTags} onEditDetails={onEditDetails} onOpenCreator={onOpenCreator} />
-          </Grid>
+          </Box>
         ))}
         {/* The next page on its way: placeholder cards where it will land, so
             the grid grows rather than the page jumping when it arrives. */}
         {loadingMore &&
           Array.from({ length: 3 }).map((_, i) => (
-            <Grid item xs={12} sm={6} md={4} key={`more-${i}`}>
-              <MediaCardSkeleton />
-            </Grid>
+            <MediaCardSkeleton key={`more-${i}`} />
           ))}
-      </Grid>
+      </Box>
 
       {onLoadMore && hasMore && (
         // The sentinel the scroll watches, and the same thing as a button:

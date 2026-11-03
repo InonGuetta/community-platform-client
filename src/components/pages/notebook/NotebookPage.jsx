@@ -217,6 +217,7 @@ const NotebookPage = () => {
             size="small"
             fullWidth
             placeholder="חיפוש במחברת..."
+            inputProps={{ "aria-label": "חיפוש במחברת" }}
             InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>) }}
           />
 

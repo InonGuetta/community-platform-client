@@ -19,7 +19,9 @@ const FORMULA_START = /^[=+\-@\t\r]/;
 
 // RFC 4180: a field holding a comma, a quote or a line break is quoted, and a
 // quote inside it is doubled.
-const cell = (value) => {
+// Exported for the course report (PRD CRS-4), which writes the same kind of
+// file and has the same names in it.
+export const csvCell = (value) => {
   let text = value === null || value === undefined ? "" : String(value);
   if (FORMULA_START.test(text)) text = `'${text}`;
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
@@ -28,7 +30,7 @@ const cell = (value) => {
 // 2026-11-01 rather than "1 בנובמבר 2026": a spreadsheet sorts and filters an
 // ISO date as a date, and a Hebrew month name as text. In Israel's zone, like
 // every other date the platform shows (see formatDate.js).
-const isoDate = (value) => {
+export const isoDate = (value) => {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
@@ -50,5 +52,5 @@ export const rosterCsv = (students) =>
     HEADERS,
     ...students.map((s) => [s.display_name, s.email, isoDate(s.enrolled_at), s.is_active === false ? "לא" : "כן"]),
   ]
-    .map((row) => row.map(cell).join(","))
+    .map((row) => row.map(csvCell).join(","))
     .join("\r\n");

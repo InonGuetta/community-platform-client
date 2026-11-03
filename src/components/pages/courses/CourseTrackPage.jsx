@@ -14,6 +14,7 @@ import TimelapseIcon from "@mui/icons-material/Timelapse";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useCourseTrackPageController } from "./useCourseTrackPageController";
+import CourseReport from "./componentsCourses/CourseReport";
 import { useDragReorder, dropIndicatorSx } from "../notebook/componentsNotebook/useDragReorder";
 import { lessonStatus, progressText, progressPercent } from "../../../utilities/courseTrack";
 import { formatTime } from "../../../utilities/formatTime";
@@ -142,6 +143,9 @@ const CourseTrackPage = () => {
                 ))}
               </Box>
             )}
+
+            {/* PRD CRS-4 — for whoever arranges the course, who is its lecturer. */}
+            {c.canArrange && <CourseReport courseId={c.course.id} courseTitle={c.course.title} />}
           </>
         )}
       </Box>

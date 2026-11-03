@@ -14,7 +14,7 @@ import { lessonStatus, progressText, placeInTrack, nextAfter, trackPath } from "
 // replaced.
 
 vi.mock("../../../api/coursesApi", () => ({
-  coursesApi: { getLessons: vi.fn(), reorderLessons: vi.fn() },
+  coursesApi: { getLessons: vi.fn(), reorderLessons: vi.fn(), getReport: vi.fn() },
 }));
 
 const LESSONS = [
@@ -46,7 +46,20 @@ const renderTrack = () =>
     </Provider>
   );
 
-beforeEach(() => vi.clearAllMocks());
+const REPORT = {
+  lessons: [{ id: 1, title: "פתיחה", completedBy: 1 }, { id: 2, title: "המשנה", completedBy: 0 }],
+  students: [
+    { id: 13, display_name: "דנה", email: "d@example.com", completed: 1, started: 1, lastActivity: "2026-11-02T09:00:00Z",
+      cells: { 1: { status: "done", position: 600 }, 2: { status: "started", position: 125 } } },
+    { id: 14, display_name: "יוסי", email: "y@example.com", completed: 0, started: 0, lastActivity: null,
+      cells: { 1: { status: "none", position: 0 }, 2: { status: "none", position: 0 } } },
+  ],
+};
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  coursesApi.getReport.mockResolvedValue(REPORT);
+});
 
 describe("the words and the arithmetic", () => {
   it("names each lesson's state for this reader", () => {
@@ -102,12 +115,27 @@ describe("the course page", () => {
     await waitFor(() => expect(screen.getByLabelText(/^4\. הגמרא/)).toBeInTheDocument());
   });
 
+  // PRD CRS-4.
+  it("shows its lecturer who heard what, both ways", async () => {
+    coursesApi.getLessons.mockResolvedValue(TRACK({ canArrange: true }));
+    renderTrack();
+    expect(await screen.findByText("מי שמע מה")).toBeInTheDocument();
+    expect(await screen.findByTestId("report-total-13")).toHaveTextContent("1/2");
+    expect(screen.getByTestId("report-total-14")).toHaveTextContent("0/2");
+    expect(screen.getByText("עוד לא האזין")).toBeInTheDocument();
+    expect(screen.getByLabelText("התחיל, הגיע ל-2:05")).toBeInTheDocument();
+    expect(coursesApi.getReport).toHaveBeenCalledWith(4);
+  });
+
   it("offers a student no way to rearrange", async () => {
     coursesApi.getLessons.mockResolvedValue(TRACK());
     renderTrack();
     await screen.findByTestId("track-progress");
     expect(screen.queryByLabelText(/אפשר לגרור/)).toBeNull();
     expect(screen.getByText("הגמרא").closest("[draggable]")).toBeNull();
+    // Nor the report: it is not asked for at all.
+    expect(screen.queryByText("מי שמע מה")).toBeNull();
+    expect(coursesApi.getReport).not.toHaveBeenCalled();
   });
 });
 

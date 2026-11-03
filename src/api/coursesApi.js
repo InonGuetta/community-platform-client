@@ -56,6 +56,10 @@ export const coursesApi = {
   // Every lesson of the course, in the new order.
   reorderLessons: async (courseId, mediaIds) =>
     (await axiosInstance.put(`/courses/${courseId}/lessons/order`, { mediaIds })).data,
+  // Who of the course's students heard what (PRD CRS-4) — its lecturer's only.
+  // { lessons: [{ id, title, completedBy }], students: [{ …, completed,
+  //   started, lastActivity, cells: { [lessonId]: { status, position } } }] }
+  getReport: async (courseId) => (await axiosInstance.get(`/courses/${courseId}/report`)).data,
 
   // ── joining by code (PRD ROST-9) ─────────────────────────────────────────
   // The lecturer's side: the code (a new one replaces the old at once) and the

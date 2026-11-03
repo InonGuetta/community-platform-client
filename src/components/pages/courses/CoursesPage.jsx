@@ -153,7 +153,7 @@ const CoursesPage = () => {
                 variant="outlined"
                 sx={{ mb: 2 }}
               >
-                {canManage(course) ? "דף הקורס וסדר השיעורים" : "דף הקורס"}
+                {canManage(course) ? "דף הקורס: סדר השיעורים ומי שמע מה" : "דף הקורס"}
               </Button>
               {/* Mounted only for the open course: it reads that course's queue
                   of names and addresses, which no other course needs. */}

@@ -32,6 +32,9 @@ import FollowAlongTranscript from "./FollowAlongTranscript";
 const MediaInsightsTabs = ({
   mediaId, insights, notesPanel = null, discussionPanel = null, onSeek, tags = [],
   captions = null, currentTime = 0,
+  // Tags the LLM proposed (PRD ARCH-4), at the foot of the summary — a slot,
+  // like the notes, because only the page knows whether the reader may tag.
+  tagSuggestionsPanel = null,
 }) => {
   const {
     transcript, isText, keyPointHeadings,
@@ -95,6 +98,7 @@ const MediaInsightsTabs = ({
             tags={tags}
           />
         )}
+        {activeKey === "summary" && tagSuggestionsPanel}
         {activeKey === "chapters" && (
           <ChaptersPanel
             keyPointHeadings={keyPointHeadings}

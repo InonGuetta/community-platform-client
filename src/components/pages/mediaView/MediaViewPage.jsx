@@ -15,6 +15,7 @@ import MediaActionsBar from "./componentsMediaView/MediaActionsBar";
 import LessonNotebook from "./componentsMediaView/LessonNotebook";
 import AIDiscussionPanel from "./componentsMediaView/AIDiscussion/AIDiscussionPanel";
 import CourseTrackBar from "./componentsMediaView/CourseTrackBar";
+import AiTagSuggestions from "./componentsMediaView/AiTagSuggestions";
 import useMediaViewPageController from "./useMediaViewPageController";
 import { creatorPrefixes } from "../../../utilities/constant";
 import { creatorPath, hasCreatorPage } from "../../../utilities/creatorPage";
@@ -42,7 +43,8 @@ const MediaViewPage = () => {
     isSaved, toggleSave,
     isText,
     captions,
-    handlePlayerEnded, courseTrack,
+    handlePlayerEnded, courseTrack, refreshMedia,
+    canEditTranscript,
   } = controller;
 
   // Stays here rather than in the controller: a ref has to be created in the
@@ -230,6 +232,13 @@ const MediaViewPage = () => {
               // The transcript tab follows the lesson as it plays (PRD MOB-6).
               captions={captions}
               currentTime={currentTime}
+              // Proposed tags (PRD ARCH-4): for whoever may tag this lesson,
+              // once it has a summary to propose them from.
+              tagSuggestionsPanel={
+                canEditTranscript && transcript?.ai_summary ? (
+                  <AiTagSuggestions mediaId={media.id} onTagged={refreshMedia} />
+                ) : null
+              }
               notesPanel={
                 <NotesPanel
                   bookmarks={bookmarks}

@@ -48,6 +48,17 @@ export const mediaApi = {
   // reached nineteen items and no tagged rows at all.
   tagSuggestions: async (id) => (await axiosInstance.get(`/media/${id}/tag-suggestions`)).data,
 
+  // Tags the LLM proposed after reading the lesson's summary (PRD ARCH-4) —
+  // proposals only, each { id, name, path, reason }, for whoever may tag it.
+  // Every call answers with the proposals still open.
+  aiTagSuggestions: async (id) => (await axiosInstance.get(`/media/${id}/ai-tag-suggestions`)).data,
+  requestAiTagSuggestions: async (id) => (await axiosInstance.post(`/media/${id}/ai-tag-suggestions`)).data,
+  approveAiTagSuggestions: async (id, tagIds) =>
+    (await axiosInstance.post(`/media/${id}/ai-tag-suggestions/approve`, { tagIds })).data,
+  // Some, or — with no list — all of them.
+  dismissAiTagSuggestions: async (id, tagIds = null) =>
+    (await axiosInstance.delete(`/media/${id}/ai-tag-suggestions`, tagIds ? { params: { tagId: tagIds } } : undefined)).data,
+
   // A tag that does not exist yet, proposed from an item's tagging dialog with
   // the place in the tree it belongs. A lecturer's waits for an admin and is
   // attached to the item on approval; an admin's is created and attached at once

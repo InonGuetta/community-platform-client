@@ -12,6 +12,7 @@ export const PURPOSE_LABELS = {
   chat: "דיון עם AI",
   hebrew_fix: "תיקון עברית",
   headings: "כותרות משנה",
+  tagging: "הצעות תגיות",
 };
 
 export const purposeLabel = (purpose) => PURPOSE_LABELS[purpose] ?? purpose;

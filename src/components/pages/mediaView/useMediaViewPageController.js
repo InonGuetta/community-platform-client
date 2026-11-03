@@ -176,6 +176,10 @@ const useMediaViewPageController = () => {
   const courseTrack = useCourseTrackForLesson(media);
   const currentTimeRef = useRef(0);
   useEffect(() => { currentTimeRef.current = currentTime; }, [currentTime]);
+  // The lesson's tags changed from its page (accepting a proposed tag, PRD
+  // ARCH-4) — read it again so the tags under the summary are the new ones.
+  const refreshMedia = useCallback(() => dispatch(fetchOneMedia(id)), [dispatch, id]);
+
   const handlePlayerEnded = useCallback(() => {
     const end = Math.max(currentTimeRef.current, Number(media?.duration_seconds) || 0);
     if (end > 0) mediaApi.saveProgress(id, Math.round(end)).catch(() => {});
@@ -207,7 +211,7 @@ const useMediaViewPageController = () => {
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
     readerPage, handleReaderPageChange: setReaderPage,
     seekOnReady, currentTime, handlePlayerProgress,
-    handlePlayerEnded, courseTrack,
+    handlePlayerEnded, courseTrack, refreshMedia,
     handleCreateBookmark,
     isLiked, toggleLike,
     isSaved, toggleSave,

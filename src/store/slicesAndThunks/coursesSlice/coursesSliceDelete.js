@@ -22,3 +22,23 @@ export const unenrollStudent = createAsyncThunk(
     }
   }
 );
+
+// ── Joining by code (PRD ROST-9) ────────────────────────────────────────────
+
+export const removeJoinCode = createAsyncThunk("courses/removeJoinCode", async (courseId, { rejectWithValue }) => {
+  try {
+    await coursesApi.removeJoinCode(courseId);
+    return { courseId };
+  } catch (err) {
+    return rejectWithValue(rejectionOf(err, "Failed to turn the join code off"));
+  }
+});
+
+export const cancelJoinRequest = createAsyncThunk("courses/cancelJoinRequest", async (requestId, { rejectWithValue }) => {
+  try {
+    await coursesApi.cancelJoinRequest(requestId);
+    return { requestId };
+  } catch (err) {
+    return rejectWithValue(rejectionOf(err, "Failed to cancel the join request"));
+  }
+});

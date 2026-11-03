@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import { selectUser, selectAuthInitialized, selectAuthUnreachable } from "../../../store/selectors/authSelectors";
 import { DOWNLOADS_SHELF } from "../personal/personalShelves";
+import { rememberReturnTo } from "../../../utilities/returnTo";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 
 // Rendered instead of the page while fetchMe is still in flight. It used to be
@@ -34,6 +35,7 @@ const ProtectedRoute = ({ children, allowedRoles, offlineOk = false }) => {
   const user = useSelector(selectUser);
   const initialized = useSelector(selectAuthInitialized);
   const unreachable = useSelector(selectAuthUnreachable);
+  const location = useLocation();
 
   // Auth check still in progress: don't decide routing yet, or we may
   // bounce a valid (admin) user before their role has loaded.
@@ -47,7 +49,13 @@ const ProtectedRoute = ({ children, allowedRoles, offlineOk = false }) => {
     return offlineOk ? children : <Navigate to={DOWNLOADS_SHELF.path} replace />;
   }
 
-  if (!user) return <Navigate to="/sign-in" replace />;
+  if (!user) {
+    // Back here after signing in — a shared lesson or a course's join link
+    // (PRD ROST-9) would otherwise be lost on the way. Idempotent, so writing
+    // it during render is harmless.
+    rememberReturnTo(`${location.pathname}${location.search}`);
+    return <Navigate to="/sign-in" replace />;
+  }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     return <RoleDenied />;

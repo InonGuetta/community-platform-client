@@ -17,6 +17,7 @@ import { hebrewForError } from "../../../utilities/apiError";
 import { statuses } from "../../../utilities/constant";
 import AuthLayout from "./AuthLayout";
 import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
+import { takeReturnTo } from "../../../utilities/returnTo";
 
 // Shown when the failure carries no code we have specific Hebrew for. It must
 // never fall back to the server's own `message`: that text is English prose
@@ -39,7 +40,7 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(login(form));
-    if (result.meta.requestStatus === "fulfilled") navigate("/archive");
+    if (result.meta.requestStatus === "fulfilled") navigate(takeReturnTo());
   };
 
   const isSubmitting = loginStatus === statuses.loading;

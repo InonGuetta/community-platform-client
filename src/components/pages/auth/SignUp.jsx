@@ -20,6 +20,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { statuses, roles, roleLabels } from "../../../utilities/constant";
 import AuthLayout from "./AuthLayout";
 import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
+import { takeReturnTo } from "../../../utilities/returnTo";
 
 // See SignIn: never fall back to the server's English message.
 const FALLBACK = "ההרשמה נכשלה. נסה שוב.";
@@ -57,7 +58,7 @@ const SignUp = () => {
     setEmailTouched(true);
     if (emailProblem(form.email)) return;
     const result = await dispatch(register(form));
-    if (result.meta.requestStatus === "fulfilled") navigate("/archive");
+    if (result.meta.requestStatus === "fulfilled") navigate(takeReturnTo());
   };
 
   const isSubmitting = loginStatus === statuses.loading;

@@ -73,6 +73,25 @@ export const describeNotification = (notification) => {
         body: `"${payload.title || "מפגש חי"}"${byHost(payload)}`,
         href: "/sessions",
       };
+    // Joining a course by its code (PRD ROST-9).
+    case "course_join_request":
+      return {
+        title: "בקשת הצטרפות לקורס",
+        body: `${payload.requesterName || "משתמש"} מבקש להצטרף ל"${payload.courseTitle || "קורס"}"`,
+        href: "/courses",
+      };
+    case "course_join_approved":
+      return {
+        title: "התקבלת לקורס",
+        body: `"${payload.courseTitle || "הקורס"}": השיעורים פתוחים לך עכשיו`,
+        href: "/my-courses",
+      };
+    case "course_join_rejected":
+      return {
+        title: "הבקשה להצטרף לא אושרה",
+        body: `"${payload.courseTitle || "הקורס"}"`,
+        href: "/my-courses",
+      };
     case "new_lesson":
       return {
         title: "שיעור חדש בקורס",

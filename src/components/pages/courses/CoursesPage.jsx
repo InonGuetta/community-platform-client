@@ -17,6 +17,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CourseFormDialog from "./componentsCourses/CourseFormDialog";
 import CourseRoster from "./componentsCourses/CourseRoster";
 import MyStudents from "./componentsCourses/MyStudents";
+import JoinCodePanel from "./componentsCourses/JoinCodePanel";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useCoursesPageController from "./useCoursesPageController";
@@ -107,6 +108,14 @@ const CoursesPage = () => {
                 <Chip label={`${course.student_count} תלמידים`} size="small" color="info" variant="outlined" />
                 <Chip label={`${course.media_count} שיעורים`} size="small" color="success" variant="outlined" />
                 {!canManage(course) && <Chip label="צפייה בלבד" size="small" />}
+                {/* PRD ROST-9 — only the course's manager is sent the count. */}
+                {course.pending_join_count > 0 && (
+                  <Chip
+                    label={course.pending_join_count === 1 ? "בקשת הצטרפות אחת" : `${course.pending_join_count} בקשות הצטרפות`}
+                    size="small"
+                    color="warning"
+                  />
+                )}
               </Box>
 
               {canManage(course) && (
@@ -133,6 +142,9 @@ const CoursesPage = () => {
                   {course.description}
                 </Typography>
               )}
+              {/* Mounted only for the open course: it reads that course's queue
+                  of names and addresses, which no other course needs. */}
+              {canManage(course) && rosterCourseId === course.id && <JoinCodePanel course={course} />}
               {canManage(course) ? (
                 <CourseRoster
                   courseId={course.id}

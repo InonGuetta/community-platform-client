@@ -76,6 +76,11 @@ export const ERROR_CODES = {
   AI_NOT_READY: "AI_NOT_READY",
   AI_ANSWER_FAILED: "AI_ANSWER_FAILED",
   AI_DAILY_LIMIT: "AI_DAILY_LIMIT",
+  // Joining a course by its code (PRD ROST-9).
+  JOIN_CODE_NOT_FOUND: "JOIN_CODE_NOT_FOUND",
+  ALREADY_ENROLLED: "ALREADY_ENROLLED",
+  COURSE_IS_YOURS: "COURSE_IS_YOURS",
+  JOIN_REQUEST_DECIDED: "JOIN_REQUEST_DECIDED",
 
   // ── Client-originated ──────────────────────────────────────────────────────
   // These never come from the server; axiosInstance stamps them on failures the
@@ -189,6 +194,10 @@ const ERROR_CODE_HE = {
   [ERROR_CODES.AI_ANSWER_FAILED]: "לא הצלחנו לקבל תשובה כרגע. נסה לשאול שוב.",
   // Says when it will work again, and what still works now — "try again"
   // would send the reader into a loop that cannot succeed until midnight.
+  [ERROR_CODES.JOIN_CODE_NOT_FOUND]: "אין קורס פתוח עם הקוד הזה. בדקו את הקוד מול המרצה.",
+  [ERROR_CODES.ALREADY_ENROLLED]: "אתם כבר רשומים לקורס הזה. הוא מופיע ברשימת הקורסים שלכם.",
+  [ERROR_CODES.COURSE_IS_YOURS]: "זה קורס שאתם מלמדים, אין צורך להצטרף אליו.",
+  [ERROR_CODES.JOIN_REQUEST_DECIDED]: "כבר הוחלט על הבקשה הזאת. הרשימה רועננה.",
   [ERROR_CODES.AI_DAILY_LIMIT]: "הגעת למכסת השאלות היומית בצ'אט. אפשר להמשיך מחר — והחיפוש החכם זמין גם עכשיו.",
 
   [ERROR_CODES.DB_UNAVAILABLE]: "מסד הנתונים אינו זמין כרגע, נסה שוב",

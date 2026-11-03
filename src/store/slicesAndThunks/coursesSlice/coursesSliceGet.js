@@ -48,3 +48,24 @@ export const fetchMyStudents = createAsyncThunk(
   }
 );
 
+
+// Joining by code (PRD ROST-9): one course's queue, for its lecturer; and the
+// caller's own waiting requests.
+export const fetchJoinRequests = createAsyncThunk(
+  "courses/fetchJoinRequests",
+  async (courseId, { rejectWithValue }) => {
+    try {
+      return { courseId, requests: await coursesApi.getJoinRequests(courseId) };
+    } catch (err) {
+      return rejectWithValue(rejectionOf(err, "Failed to fetch join requests"));
+    }
+  }
+);
+
+export const fetchMyJoinRequests = createAsyncThunk("courses/fetchMyJoinRequests", async (_, { rejectWithValue }) => {
+  try {
+    return await coursesApi.getMyJoinRequests();
+  } catch (err) {
+    return rejectWithValue(rejectionOf(err, "Failed to fetch your join requests"));
+  }
+});

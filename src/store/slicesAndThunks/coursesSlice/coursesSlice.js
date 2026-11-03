@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchAllCourses, fetchMyCourses, fetchCourseStudents, fetchMyStudents } from "./coursesSliceGet";
-import { createCourse, enrollStudent } from "./coursesSlicePost";
+import { fetchAllCourses, fetchMyCourses, fetchCourseStudents, fetchMyStudents, fetchJoinRequests, fetchMyJoinRequests } from "./coursesSliceGet";
+import { createCourse, enrollStudent, createJoinCode, decideJoinRequest } from "./coursesSlicePost";
 import { updateCourse } from "./coursesSlicePut";
-import { deleteCourse, unenrollStudent } from "./coursesSliceDelete";
+import { deleteCourse, unenrollStudent, removeJoinCode, cancelJoinRequest } from "./coursesSliceDelete";
 import { statuses } from "../../../utilities/constant";
 
 // `studentsByCourse` is a map rather than a list on the selected course: the
@@ -21,6 +21,10 @@ const coursesSlice = createSlice({
     // Flat, not keyed by course: this is "everyone who learns with me", which is
     // a different question from studentsByCourse's "who is in course N".
     myStudents: [],
+    // Joining by code (PRD ROST-9). The lecturer's queues, by course like the
+    // rosters; and the caller's own requests still waiting.
+    joinRequestsByCourse: {},
+    myJoinRequests: [],
     status: statuses.idle,
     error: null,
   },
@@ -88,7 +92,42 @@ const coursesSlice = createSlice({
       // this course", this answers "who learns with me at all". One is keyed by
       // course, the other is not keyed at all.
       .addCase(fetchMyStudents.fulfilled, (state, action) => { state.myStudents = action.payload; })
-      .addCase(fetchMyStudents.rejected, (state, action) => { state.error = action.payload?.message; });
+      .addCase(fetchMyStudents.rejected, (state, action) => { state.error = action.payload?.message; })
+
+      // ── Joining by code (PRD ROST-9) ──
+      // The course row carries the code and the waiting count (the header's
+      // chip), so both are patched here rather than refetching the catalogue.
+      .addCase(createJoinCode.fulfilled, (state, action) => {
+        const course = state.items.find((c) => c.id === Number(action.payload.courseId));
+        if (course) course.join_code = action.payload.joinCode;
+      })
+      .addCase(removeJoinCode.fulfilled, (state, action) => {
+        const course = state.items.find((c) => c.id === Number(action.payload.courseId));
+        if (course) course.join_code = null;
+      })
+      .addCase(fetchJoinRequests.fulfilled, (state, action) => {
+        const { courseId, requests } = action.payload;
+        state.joinRequestsByCourse[courseId] = requests;
+        const course = state.items.find((c) => c.id === Number(courseId));
+        if (course) course.pending_join_count = requests.length;
+      })
+      .addCase(decideJoinRequest.fulfilled, (state, action) => {
+        const { courseId, requestId, approve, students } = action.payload;
+        const queue = state.joinRequestsByCourse[courseId] ?? [];
+        state.joinRequestsByCourse[courseId] = queue.filter((r) => r.id !== Number(requestId));
+        const course = state.items.find((c) => c.id === Number(courseId));
+        if (course) course.pending_join_count = state.joinRequestsByCourse[courseId].length;
+        if (approve && students) {
+          state.studentsByCourse[courseId] = students;
+          if (course) course.student_count = students.length;
+        }
+      })
+      // A code typed in (joinCourseByCode) changes nothing here: the page reads
+      // this list again, since only the server knows the new request's id.
+      .addCase(fetchMyJoinRequests.fulfilled, (state, action) => { state.myJoinRequests = action.payload; })
+      .addCase(cancelJoinRequest.fulfilled, (state, action) => {
+        state.myJoinRequests = state.myJoinRequests.filter((r) => r.id !== Number(action.payload.requestId));
+      });
   },
 });
 

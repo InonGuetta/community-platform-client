@@ -35,6 +35,11 @@ const SUCCESS_MESSAGES = {
   "saves/createPlaylist": "הרשימה נוצרה",
   "saves/renamePlaylist": "שם הרשימה עודכן",
   "saves/deletePlaylist": "הרשימה נמחקה",
+  // Joining by code (PRD ROST-9): what changes is not visible from the list
+  // alone — the student gone from the queue could be either answer.
+  "courses/createJoinCode": "נוצר קוד הצטרפות חדש. הקוד הקודם כבר לא עובד",
+  "courses/removeJoinCode": "ההצטרפות בקוד בוטלה",
+  "courses/cancelJoinRequest": "הבקשה בוטלה",
 };
 
 // Error toasts: surfaces failures that were previously silent. Uses curated
@@ -83,6 +88,12 @@ const ERROR_MESSAGES = {
   "notes/fetchAboutMedia": "טעינת ההערות של השיעור נכשלה",
   "notes/delete": "מחיקת ההערה נכשלה",
   "notes/reorder": "שינוי סדר ההערות נכשל",
+  // Joining by code (PRD ROST-9). Typing a code ("courses/join") is not here:
+  // the dialog it is typed in says what went wrong, next to the code.
+  "courses/createJoinCode": "יצירת קוד ההצטרפות נכשלה",
+  "courses/removeJoinCode": "ביטול קוד ההצטרפות נכשל",
+  "courses/decideJoinRequest": "הטיפול בבקשת ההצטרפות נכשל",
+  "courses/cancelJoinRequest": "ביטול הבקשה נכשל",
 };
 
 // The Hebrew for a specific reason — a duplicate email, an expired session —

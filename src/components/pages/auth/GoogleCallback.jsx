@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { fetchMe } from "../../../store/slicesAndThunks/authSlices/authGet";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import { takeReturnTo } from "../../../utilities/returnTo";
 
 const GoogleCallback = () => {
   const [searchParams] = useSearchParams();
@@ -18,7 +19,7 @@ const GoogleCallback = () => {
     }
     // Cookie has been set server-side via the redirect; hydrate the user.
     dispatch(fetchMe()).then((result) => {
-      if (result.meta.requestStatus === "fulfilled") navigate("/archive");
+      if (result.meta.requestStatus === "fulfilled") navigate(takeReturnTo());
       else navigate("/sign-in?error=google_failed");
     });
     // Runs exactly once, on arrival back from Google. Adding the dependencies

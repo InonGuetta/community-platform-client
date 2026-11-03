@@ -78,3 +78,21 @@ describe("notificationAge", () => {
     expect(notificationAge("nonsense", now)).toBe("");
   });
 });
+
+// Joining a course by its code (PRD ROST-9).
+describe("course join notifications", () => {
+  it("tells the lecturer who asked, and sends them to manage the course", () => {
+    const n = describeNotification({ type: "course_join_request", payload: { requesterName: "דנה", courseTitle: "גמרא" } });
+    expect(n.body).toContain("דנה");
+    expect(n.body).toContain("גמרא");
+    expect(n.href).toBe("/courses");
+  });
+
+  it("tells the student the answer, either way, and sends them to their courses", () => {
+    const yes = describeNotification({ type: "course_join_approved", payload: { courseTitle: "גמרא" } });
+    const no = describeNotification({ type: "course_join_rejected", payload: { courseTitle: "גמרא" } });
+    expect(yes.title).toBe("התקבלת לקורס");
+    expect(no.title).toBe("הבקשה להצטרף לא אושרה");
+    expect([yes.href, no.href]).toEqual(["/my-courses", "/my-courses"]);
+  });
+});

@@ -21,6 +21,9 @@ vi.mock("../../../api/coursesApi", () => ({
     getMyStudents: vi.fn(),
     unenroll: vi.fn(),
     searchEnrollable: vi.fn(),
+    // An open course of one's own shows its join-code panel (ROST-9), which
+    // reads the course's queue.
+    getJoinRequests: vi.fn(),
   },
 }));
 
@@ -38,6 +41,7 @@ beforeEach(() => {
   coursesApi.getAll.mockResolvedValue(COURSES);
   coursesApi.getMyStudents.mockResolvedValue([]);
   coursesApi.getStudents.mockResolvedValue([STUDENT]);
+  coursesApi.getJoinRequests.mockResolvedValue([]);
   coursesApi.unenroll.mockResolvedValue(undefined);
 });
 

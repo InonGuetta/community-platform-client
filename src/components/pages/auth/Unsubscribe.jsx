@@ -26,6 +26,8 @@ const CATEGORY_NAMES = {
   new_lessons: "שיעורים חדשים",
   processing: "עיבוד השיעורים שהעלית",
   role_requests: "בקשות הרשאה",
+  join_requests: "בקשות הצטרפות לקורסים שלך",
+  enrolments: "תשובות לבקשות הצטרפות",
 };
 
 // The category the link names, read from the token's payload so the question

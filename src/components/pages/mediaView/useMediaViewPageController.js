@@ -12,6 +12,7 @@ import { mediaApi } from "../../../api/mediaApi";
 import useMediaInsights from "./useMediaInsights";
 import useMediaLike from "./useMediaLike";
 import useMediaSave from "./useMediaSave";
+import useCourseTrackForLesson from "./useCourseTrackForLesson";
 import { transcriptCues } from "../../../utilities/transcriptTiming";
 
 // Everything on this page that dispatches, selects or derives from the server's
@@ -166,6 +167,21 @@ const useMediaViewPageController = () => {
     mediaApi.saveProgress(id, seconds).catch(() => {});
   }, [id]);
 
+  // ── The course's track (PRD CRS-1, CRS-3) ──────────────────────────────────
+  //
+  // When a recording ends, its last position is saved at once rather than at
+  // the next ten-second mark that will never come — that save is what marks
+  // the lesson finished (completed_at, migration 043) — and the page moves on
+  // to the course's next lesson after a countdown.
+  const courseTrack = useCourseTrackForLesson(media);
+  const currentTimeRef = useRef(0);
+  useEffect(() => { currentTimeRef.current = currentTime; }, [currentTime]);
+  const handlePlayerEnded = useCallback(() => {
+    const end = Math.max(currentTimeRef.current, Number(media?.duration_seconds) || 0);
+    if (end > 0) mediaApi.saveProgress(id, Math.round(end)).catch(() => {});
+    courseTrack.handleEnded();
+  }, [id, media?.duration_seconds, courseTrack]);
+
   // ── Likes ──────────────────────────────────────────────────────────────────
 
   // Each in a hook of its own because the actions bar they feed is also rendered
@@ -191,6 +207,7 @@ const useMediaViewPageController = () => {
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
     readerPage, handleReaderPageChange: setReaderPage,
     seekOnReady, currentTime, handlePlayerProgress,
+    handlePlayerEnded, courseTrack,
     handleCreateBookmark,
     isLiked, toggleLike,
     isSaved, toggleSave,

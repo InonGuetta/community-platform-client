@@ -11,6 +11,7 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import JoinCourseDialog from "./componentsCourses/JoinCourseDialog";
+import { trackPath } from "../../../utilities/courseTrack";
 import { countLabel } from "../../../utilities/countLabel";
 import { useMyCoursesPageController } from "./useMyCoursesPageController";
 
@@ -92,7 +93,7 @@ const MyCoursesPage = () => {
         <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "1fr 1fr 1fr" } }}>
           {courses.map((course) => (
             <Card key={course.id} sx={{ borderRadius: 2 }}>
-              <CardActionArea onClick={() => navigate("/archive")} sx={{ p: 2, textAlign: "start", height: "100%" }}>
+              <CardActionArea onClick={() => navigate(trackPath(course.id))} sx={{ p: 2, textAlign: "start", height: "100%" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                   <SchoolOutlinedIcon color="primary" fontSize="small" />
                   <Typography variant="subtitle1" fontWeight={800} color="primary">

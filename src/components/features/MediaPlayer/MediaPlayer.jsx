@@ -32,7 +32,7 @@ const saveCaptionsOn = (on) => {
 // `captions` is { cues, precise } from utilities/transcriptTiming (PRD MOB-5),
 // or null when the lesson has nothing to caption.
 const MediaPlayer = forwardRef((
-  { url, media, transcript, captions = null, onProgress, seekOnReady = 0 },
+  { url, media, transcript, captions = null, onProgress, onEnded, seekOnReady = 0 },
   ref
 ) => {
   const mediaType = media?.media_type;
@@ -262,7 +262,8 @@ const MediaPlayer = forwardRef((
             onReady={handleReady}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
-            onEnded={() => setPlaying(false)}
+            // The page moves on to the course's next lesson (PRD CRS-3).
+            onEnded={() => { setPlaying(false); onEnded?.(); }}
             // An audio lesson as an <audio> element (PRD MOB-3). The stream URL
             // has no extension, so ReactPlayer would otherwise build a <video>
             // for it too — and a phone pauses a VIDEO when the screen locks or

@@ -91,8 +91,11 @@ export const dropIndicatorSx = (place) => (place ? {
  * @param disabled  when the arrangement is not the user's to change — a
  *                  filtered list is not the notebook, and dropping inside one
  *                  would mean guessing where the notes nobody can see belong.
+ * @param mime      the payload type. Notes by default; a course's lessons
+ *                  (PRD CRS-1) pass their own, so a lesson dropped on a note —
+ *                  or the reverse — is a drop nothing accepts.
  */
-export const useDragReorder = ({ ids, onReorder, disabled = false }) => {
+export const useDragReorder = ({ ids, onReorder, disabled = false, mime = NOTE_DRAG_MIME }) => {
   const [dragId, setDragId] = useState(null);
   const [marker, setMarker] = useState(null);
 
@@ -107,13 +110,13 @@ export const useDragReorder = ({ ids, onReorder, disabled = false }) => {
     onDragStart: (event) => {
       if (disabled) return;
       // Firefox starts no drag at all unless the payload is set here.
-      event.dataTransfer.setData(NOTE_DRAG_MIME, String(id));
+      event.dataTransfer.setData(mime, String(id));
       event.dataTransfer.effectAllowed = "move";
       setDragId(id);
     },
 
     onDragOver: (event) => {
-      if (disabled || !hasDragType(event.dataTransfer, NOTE_DRAG_MIME)) return;
+      if (disabled || !hasDragType(event.dataTransfer, mime)) return;
       // Without this the drop is refused and the drag ends in the "flies back
       // to where it came from" animation.
       event.preventDefault();
@@ -124,13 +127,13 @@ export const useDragReorder = ({ ids, onReorder, disabled = false }) => {
     },
 
     onDrop: (event) => {
-      if (disabled || !hasDragType(event.dataTransfer, NOTE_DRAG_MIME)) return;
+      if (disabled || !hasDragType(event.dataTransfer, mime)) return;
       event.preventDefault();
       event.stopPropagation();
 
       // Read from the payload rather than from state: the state belongs to this
       // window, and the payload is what actually crossed the drag.
-      const dropped = Number(event.dataTransfer.getData(NOTE_DRAG_MIME)) || dragId;
+      const dropped = Number(event.dataTransfer.getData(mime)) || dragId;
       // The place is recomputed from the event that landed rather than read out
       // of the marker, which is a render behind by exactly the distance the
       // pointer moved between the last dragover and letting go.

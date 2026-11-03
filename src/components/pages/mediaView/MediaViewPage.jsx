@@ -14,6 +14,7 @@ import NotesPanel from "./componentsMediaView/NotesPanel";
 import MediaActionsBar from "./componentsMediaView/MediaActionsBar";
 import LessonNotebook from "./componentsMediaView/LessonNotebook";
 import AIDiscussionPanel from "./componentsMediaView/AIDiscussion/AIDiscussionPanel";
+import CourseTrackBar from "./componentsMediaView/CourseTrackBar";
 import useMediaViewPageController from "./useMediaViewPageController";
 import { creatorPrefixes } from "../../../utilities/constant";
 import { creatorPath, hasCreatorPage } from "../../../utilities/creatorPage";
@@ -41,6 +42,7 @@ const MediaViewPage = () => {
     isSaved, toggleSave,
     isText,
     captions,
+    handlePlayerEnded, courseTrack,
   } = controller;
 
   // Stays here rather than in the controller: a ref has to be created in the
@@ -178,6 +180,7 @@ const MediaViewPage = () => {
                 // transcript tab follows the lesson with.
                 captions={captions}
                 onProgress={handlePlayerProgress}
+                onEnded={handlePlayerEnded}
                 seekOnReady={seekOnReady}
               />
             )}
@@ -203,6 +206,9 @@ const MediaViewPage = () => {
               {formatHebrewDate(media.created_at)}
             </Typography>
           )}
+          {/* Its place in its course, and the way on (PRD CRS-1, CRS-3). Also
+              outside the measured box, for the same reason as the date. */}
+          {!isText && <CourseTrackBar track={courseTrack} />}
         </Grid>
 
         <Grid item xs={12} md={4}>

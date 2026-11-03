@@ -30,6 +30,7 @@ import CollectionPage from "./components/pages/personal/CollectionPage";
 import PlaylistPage from "./components/pages/personal/PlaylistPage";
 import DownloadsPage from "./components/pages/downloads/DownloadsPage";
 import CreatorPage from "./components/pages/creators/CreatorPage";
+import CourseTrackPage from "./components/pages/courses/CourseTrackPage";
 import { CREATOR_ROUTE } from "./utilities/creatorPage";
 import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE, DOWNLOADS_SHELF } from "./components/pages/personal/personalShelves";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
@@ -180,6 +181,9 @@ const App = () => {
               answers "what am I in". Open to everyone — a lecturer may also be
               enrolled in someone else's course. */}
           <Route path="/my-courses" element={<ProtectedRoute><MyCoursesPage /></ProtectedRoute>} />
+          {/* One course as a track (PRD CRS-1, CRS-2): its lessons in order with
+              the reader's progress. The lecturer arranges the order here too. */}
+          <Route path="/my-courses/:id" element={<ProtectedRoute><CourseTrackPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
           <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
           {/* The personal shelves take their paths from personalShelves.js, the

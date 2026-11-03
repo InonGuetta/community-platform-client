@@ -3,6 +3,7 @@ import { it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
+import { MemoryRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
 import coursesReducer from "../../../store/slicesAndThunks/coursesSlice/coursesSlice";
@@ -50,7 +51,10 @@ const renderPage = (user = ME) => {
   store.dispatch({ type: "auth/login/fulfilled", payload: { user } });
   render(
     <Provider store={store}>
-      <CoursesPage />
+      {/* Each course links to its own page (PRD CRS-1). */}
+      <MemoryRouter>
+        <CoursesPage />
+      </MemoryRouter>
     </Provider>
   );
 };

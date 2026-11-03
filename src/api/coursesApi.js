@@ -49,6 +49,14 @@ export const coursesApi = {
   getStudentCourses: async (studentId) =>
     (await axiosInstance.get(`/courses/students/${studentId}/enrollments`)).data,
 
+  // ── the course as a track (PRD CRS-1..3) ─────────────────────────────────
+  // { course, lessons (in order, each with the caller's progress), summary,
+  //   canArrange }. 403 for a student not enrolled in the course.
+  getLessons: async (courseId) => (await axiosInstance.get(`/courses/${courseId}/lessons`)).data,
+  // Every lesson of the course, in the new order.
+  reorderLessons: async (courseId, mediaIds) =>
+    (await axiosInstance.put(`/courses/${courseId}/lessons/order`, { mediaIds })).data,
+
   // ── joining by code (PRD ROST-9) ─────────────────────────────────────────
   // The lecturer's side: the code (a new one replaces the old at once) and the
   // queue of people waiting.

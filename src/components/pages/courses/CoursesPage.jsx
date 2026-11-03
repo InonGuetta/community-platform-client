@@ -18,6 +18,8 @@ import CourseFormDialog from "./componentsCourses/CourseFormDialog";
 import CourseRoster from "./componentsCourses/CourseRoster";
 import MyStudents from "./componentsCourses/MyStudents";
 import JoinCodePanel from "./componentsCourses/JoinCodePanel";
+import { Link as RouterLink } from "react-router-dom";
+import { trackPath } from "../../../utilities/courseTrack";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useCoursesPageController from "./useCoursesPageController";
@@ -142,6 +144,17 @@ const CoursesPage = () => {
                   {course.description}
                 </Typography>
               )}
+              {/* The course as students follow it, where its lecturer also sets
+                  the order of its lessons (PRD CRS-1). */}
+              <Button
+                component={RouterLink}
+                to={trackPath(course.id)}
+                size="small"
+                variant="outlined"
+                sx={{ mb: 2 }}
+              >
+                {canManage(course) ? "דף הקורס וסדר השיעורים" : "דף הקורס"}
+              </Button>
               {/* Mounted only for the open course: it reads that course's queue
                   of names and addresses, which no other course needs. */}
               {canManage(course) && rosterCourseId === course.id && <JoinCodePanel course={course} />}

@@ -53,8 +53,10 @@ import { clearOfflineLessons } from "../../../store/slicesAndThunks/offlineSlice
 // collection the user built — it is what they have been enrolled in, and it now
 // decides which lessons the archive shows them. That makes it a place to browse,
 // which is what this row is for.
+// "שאל את הארכיון" sits beside the archive it asks (PRD ASK-2).
 const studentLinks = [
   { label: "ארכיון", to: "/archive" },
+  { label: "שאל את הארכיון", to: "/ask" },
   { label: "הקורסים שלי", to: "/my-courses" },
   { label: "מפגשים", to: "/sessions" },
   { label: "תרומה", to: "/donate" },

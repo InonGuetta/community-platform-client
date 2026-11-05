@@ -25,6 +25,7 @@ import CoursesPage from "./components/pages/courses/CoursesPage";
 import MyCoursesPage from "./components/pages/courses/MyCoursesPage";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import DonatePage from "./components/pages/donate/DonatePage";
+import AskArchivePage from "./components/pages/askArchive/AskArchivePage";
 import DonateResultPage from "./components/pages/donate/DonateResultPage";
 import NotebookPage from "./components/pages/notebook/NotebookPage";
 import CollectionPage from "./components/pages/personal/CollectionPage";
@@ -173,6 +174,7 @@ const App = () => {
           <Route path="/" element={<Navigate to="/archive" replace />} />
           <Route path="/archive" element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
           <Route path="/media/:id" element={<ProtectedRoute><MediaViewPage /></ProtectedRoute>} />
+          <Route path="/ask" element={<ProtectedRoute><AskArchivePage /></ProtectedRoute>} />
           {/* A lecturer's page (PRD ATTR-10). Keyed by the name, so going from
               one lecturer to another starts the page — and its filters — afresh. */}
           <Route path={CREATOR_ROUTE} element={<ProtectedRoute><CreatorPageByName /></ProtectedRoute>} />

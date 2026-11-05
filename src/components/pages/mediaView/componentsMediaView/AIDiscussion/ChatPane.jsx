@@ -207,10 +207,26 @@ export const quotaLabel = ({ limit, remaining }) => {
 export const suggestionsFor = (questions) =>
   Array.isArray(questions) && questions.length > 0 ? questions : FIXED_SUGGESTIONS;
 
-const ChatPane = ({ chat, notebook = null, isText = false, onSeek, onOpenPage, suggestedQuestions = null }) => {
+// What the pane calls what it is discussing. Two forms, because Hebrew merges
+// the preposition with the article: "ב" + "השיעור" is "בשיעור", never
+// "בהשיעור". The archive page passes its own (AskArchivePage).
+export const lessonWords = (isText) => {
+  const source = isText ? "הספר" : "השיעור";
+  return {
+    source,
+    inSource: isText ? "בספר" : "בשיעור",
+    intro: `אפשר לשאול כל שאלה על ${source}. התשובה תתבסס רק על מה שנאמר בו, עם הפניה למקום המדויק.`,
+  };
+};
+
+const ChatPane = ({
+  chat, notebook = null, isText = false, onSeek, onOpenPage, suggestedQuestions = null,
+  // The archive page opens a citation in its own lesson, and says "הארכיון".
+  opener = null, words = null,
+}) => {
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);
-  const onOpen = placeOpener({ onSeek, onOpenPage });
+  const onOpen = opener ?? placeOpener({ onSeek, onOpenPage });
   const saverFor = answerSaver(notebook, chat.messages);
 
   // Keep the newest message in view: the question as it is sent, the
@@ -260,10 +276,7 @@ const ChatPane = ({ chat, notebook = null, isText = false, onSeek, onOpenPage, s
   // Once the first piece of the answer is on screen it is its own progress
   // indicator; the "thinking" line is only for the wait before it.
   const answerArriving = chat.messages.some((m) => m.streaming && m.content);
-  // Two forms, because Hebrew merges the preposition with the article:
-  // "ב" + "השיעור" is "בשיעור", never "בהשיעור".
-  const source = isText ? "הספר" : "השיעור";
-  const inSource = isText ? "בספר" : "בשיעור";
+  const { source, inSource, intro } = words ?? lessonWords(isText);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 1 }}>
@@ -294,7 +307,7 @@ const ChatPane = ({ chat, notebook = null, isText = false, onSeek, onOpenPage, s
         {empty && (
           <Box data-testid="chat-empty">
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-              אפשר לשאול כל שאלה על {source}. התשובה תתבסס רק על מה שנאמר בו, עם הפניה למקום המדויק.
+              {intro}
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               {suggestionsFor(suggestedQuestions).map((s) => (

@@ -7,6 +7,11 @@ import { readEventStream } from "../utilities/eventStream";
 // There is no conversation id anywhere in here, deliberately: the server always
 // uses the signed-in user's latest conversation on the lesson, so there is
 // nothing for the client to pass that could point at someone else's.
+// The whole archive (PRD ASK-2) answers at the same paths with this in place
+// of a lesson id — /discussion/archive/conversation, …/archive/messages/stream —
+// so the same calls, thunks and slice serve it, keyed by this.
+export const ARCHIVE_DISCUSSION = "archive";
+
 export const discussionApi = {
   // Smart search inside the lesson — passages only, no generated answer.
   search: async (mediaId, q) =>

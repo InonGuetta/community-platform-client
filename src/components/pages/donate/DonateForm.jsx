@@ -7,50 +7,29 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Tooltip from "@mui/material/Tooltip";
-import { donationsApi } from "../../../api/donationsApi";
 
 const PRESET_AMOUNTS = [50, 100, 250, 500];
+// The server's floor is ₪1; the form asks for at least ₪10, the smallest gift
+// worth Stripe's fixed fee.
+const MIN_AMOUNT = 10;
 
-const DonateForm = () => {
+// The first step of a donation (PRD PAY-1): how much. The card comes next, in
+// Stripe's own fields — see PaymentStep. `onContinue({ amountCents, type })`.
+const DonateForm = ({ onContinue, starting = false, error = null }) => {
   const [amount, setAmount] = useState(100);
   const [customAmount, setCustomAmount] = useState("");
   const [type, setType] = useState("one_time");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
 
   const finalAmount = customAmount ? Number(customAmount) : amount;
-
-  const handleSubmit = async () => {
-    if (!finalAmount || finalAmount < 10) return;
-    setLoading(true);
-    setMessage(null);
-    try {
-      // The returned clientSecret is a payment credential — it is meant to be
-      // handed to Stripe.js, never rendered. Confirming the charge still needs
-      // a Stripe Elements form; until that exists this only records the intent.
-      await donationsApi.createIntent({
-        amountCents: finalAmount * 100,
-        currency: "ILS",
-        type,
-      });
-      setMessage({ type: "success", text: "כוונת התשלום נוצרה בהצלחה." });
-    } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.message || "התשלום נכשל" });
-    }
-    setLoading(false);
-  };
+  const valid = Number.isFinite(finalAmount) && finalAmount >= MIN_AMOUNT;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box>
         <Typography variant="subtitle2" mb={1}>סוג תרומה</Typography>
-        {/* "חודשי" is disabled rather than removed, and the server refuses it
-            too. It was selectable and produced a ONE-OFF charge labelled
-            monthly — a donor would have set up what they believed was a standing
-            order and been billed once. Harmless today only because no card is
-            ever collected; a trap the moment payments go live. Making it real
-            needs a Stripe Subscription, which needs a saved payment method,
-            which needs the Elements form this page does not have yet. */}
+        {/* "חודשי" stays disabled, and the server refuses it too: a standing
+            order needs a Stripe Subscription (PRD PAY-4), and until then
+            choosing it would charge once under a monthly label. */}
         <ToggleButtonGroup value={type} exclusive onChange={(_, v) => v && setType(v)} size="small">
           <ToggleButton value="one_time">חד פעמי</ToggleButton>
           <Tooltip title="תרומה חודשית תתאפשר בקרוב">
@@ -81,19 +60,26 @@ const DonateForm = () => {
           value={customAmount}
           onChange={(e) => { setCustomAmount(e.target.value); setAmount(0); }}
           size="small"
-          inputProps={{ min: 10 }}
-          sx={{ width: 160 }}
+          inputProps={{ min: MIN_AMOUNT }}
+          helperText={customAmount && !valid ? `הסכום המינימלי הוא ₪${MIN_AMOUNT}` : " "}
+          error={Boolean(customAmount) && !valid}
+          sx={{ width: 180 }}
         />
       </Box>
 
-      {message && <Alert severity={message.type}>{message.text}</Alert>}
+      {error && <Alert severity="error">{error}</Alert>}
 
-      <Button variant="contained" size="large" onClick={handleSubmit} disabled={loading || !finalAmount}>
-        {loading ? "מעבד..." : `תרומה ₪${finalAmount}`}
+      <Button
+        variant="contained"
+        size="large"
+        onClick={() => onContinue({ amountCents: Math.round(finalAmount * 100), type })}
+        disabled={starting || !valid}
+      >
+        {starting ? "מכין את התשלום..." : `המשך לתשלום ₪${valid ? finalAmount : ""}`}
       </Button>
 
       <Typography variant="caption" color="text.secondary">
-        תשלום מאובטח באמצעות Stripe. איננו שומרים את פרטי הכרטיס שלך.
+        תשלום מאובטח באמצעות Stripe. פרטי הכרטיס מוקלדים ישירות אצל Stripe ואינם עוברים דרכנו.
       </Typography>
     </Box>
   );

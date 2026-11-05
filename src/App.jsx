@@ -25,6 +25,7 @@ import CoursesPage from "./components/pages/courses/CoursesPage";
 import MyCoursesPage from "./components/pages/courses/MyCoursesPage";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import DonatePage from "./components/pages/donate/DonatePage";
+import DonateResultPage from "./components/pages/donate/DonateResultPage";
 import NotebookPage from "./components/pages/notebook/NotebookPage";
 import CollectionPage from "./components/pages/personal/CollectionPage";
 import PlaylistPage from "./components/pages/personal/PlaylistPage";
@@ -195,6 +196,8 @@ const App = () => {
           <Route path="/my-courses/:id" element={<ProtectedRoute><CourseTrackPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
           <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
+          {/* Where Stripe returns a donor after their bank's check (PRD PAY-1). */}
+          <Route path="/donate/result" element={<ProtectedRoute><DonateResultPage /></ProtectedRoute>} />
           {/* The personal shelves take their paths from personalShelves.js, the
               same file the navigation builds its links from — so a path can no
               longer be changed on one side only, which used to leave the link

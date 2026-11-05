@@ -44,6 +44,7 @@ export const ERROR_CODES = {
 
   // Donations.
   RECURRING_UNAVAILABLE: "RECURRING_UNAVAILABLE",
+  PAYMENTS_NOT_CONFIGURED: "PAYMENTS_NOT_CONFIGURED",
 
   // Resources.
   MEDIA_NOT_FOUND: "MEDIA_NOT_FOUND",
@@ -146,6 +147,7 @@ const ERROR_CODE_HE = {
   [ERROR_CODES.WEAK_PASSWORD]: "הסיסמה חייבת להכיל לפחות 8 תווים",
   [ERROR_CODES.NO_PASSWORD_SET]:
     "החשבון הזה מתחבר עם Google ואין לו סיסמה לשינוי",
+  [ERROR_CODES.PAYMENTS_NOT_CONFIGURED]: "התשלומים באתר עוד לא הוגדרו. אפשר לנסות שוב מאוחר יותר.",
   [ERROR_CODES.RECURRING_UNAVAILABLE]:
     "תרומה חודשית אינה זמינה עדיין. אפשר לתרום סכום חד-פעמי.",
 

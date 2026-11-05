@@ -225,6 +225,17 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           onClick={(e) => e.stopPropagation()}
         />
       )}
+      {/* Open to anyone with the link (PRD COM-3b) — said to whoever manages
+          it, so a lesson is never public without its owner seeing that it is. */}
+      {canManage && isPublished && item.is_public && (
+        <Chip
+          label="ציבורי"
+          size="small"
+          color="secondary"
+          sx={{ position: "absolute", top: 42, left: 8, fontWeight: 700 }}
+          onClick={(e) => e.stopPropagation()}
+        />
+      )}
 
       {/* Action icons — top right */}
       <Box sx={{ position: "absolute", top: 6, right: 6, display: "flex", gap: 0.5 }} onClick={(e) => e.stopPropagation()}>

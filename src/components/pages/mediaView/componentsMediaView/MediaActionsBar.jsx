@@ -11,6 +11,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ShareDialog from "./ShareDialog";
 import DownloadMenu from "../../../features/DownloadMenu/DownloadMenu";
 import SaveMenu from "./SaveMenu";
+import usePublicLink from "../usePublicLink";
 // The same icons the personal shelves are labelled with — a button and the shelf
 // it fills have to look like the same thing, and two independent imports stayed
 // matched only for as long as nobody changed one of them.
@@ -149,6 +150,8 @@ const MediaActionsBar = ({
   onToggleSave,
 }) => {
   const [shareOpen, setShareOpen] = useState(false);
+  // A lesson its manager made public is shared by its public link (PRD COM-3b).
+  const publicLink = usePublicLink(media);
   const [downloadAnchor, setDownloadAnchor] = useState(null);
   const [saveAnchor, setSaveAnchor] = useState(null);
 
@@ -255,6 +258,7 @@ const MediaActionsBar = ({
         path={`/media/${media.id}`}
         currentTime={currentTime}
         canShareTime={!isText}
+        publicLink={publicLink}
       />
     </>
   );

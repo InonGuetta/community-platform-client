@@ -138,4 +138,30 @@ test("a lecturer is approved, opens a course, enrols a student, and the student 
     await expect(asStudent).toHaveURL(/\/media\/\d+/);
     await expect(asStudent.getByRole("heading", { name: lessonTitle })).toBeVisible();
   });
+
+  // PRD COM-3b, COM-4: the lecturer opens the lesson to anyone with the link,
+  // and somebody with no account at all follows it.
+  await test.step("the lecturer makes the lesson public, and a guest opens the shared link", async () => {
+    const lessonId = asStudent.url().match(/\/media\/(\d+)/)[1];
+    await asLecturer.goto(`/media/${lessonId}`);
+    await asLecturer.getByRole("button", { name: "שיתוף", exact: true }).click();
+    await asLecturer.getByRole("checkbox", { name: /קישור ציבורי/ }).click();
+    await expect(asLecturer.getByText("השיעור פתוח עכשיו לכל מי שיש לו את הקישור")).toBeVisible();
+
+    const guestContext = await browser.newContext();
+    const shareUrl = `http://localhost:5173/api/public/share/${lessonId}`;
+    // What WhatsApp reads: tags in the HTML, no JavaScript.
+    const preview = await (await guestContext.request.get(shareUrl)).text();
+    expect(preview).toContain(`<meta property="og:title" content="${lessonTitle}`);
+
+    const guest = await guestContext.newPage();
+    await guest.goto(shareUrl);
+    await expect(guest).toHaveURL(new RegExp(`/l/${lessonId}$`));
+    await expect(guest.getByRole("heading", { name: lessonTitle })).toBeVisible();
+    await expect(guest.getByRole("link", { name: "הצטרפות לקהילה" })).toBeVisible();
+    // The recording itself plays for a guest: the browser reads its length.
+    await expect
+      .poll(() => guest.locator("audio").evaluate((a) => a.duration), { timeout: 15_000 })
+      .toBeGreaterThan(1);
+  });
 });

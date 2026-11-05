@@ -31,6 +31,7 @@ import PlaylistPage from "./components/pages/personal/PlaylistPage";
 import DownloadsPage from "./components/pages/downloads/DownloadsPage";
 import CreatorPage from "./components/pages/creators/CreatorPage";
 import CourseTrackPage from "./components/pages/courses/CourseTrackPage";
+import GuestLessonPage from "./components/pages/guest/GuestLessonPage";
 import { CREATOR_ROUTE } from "./utilities/creatorPage";
 import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE, DOWNLOADS_SHELF } from "./components/pages/personal/personalShelves";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
@@ -52,6 +53,11 @@ const AUTH_PATHS = [
   // polling the bell for a session that is not there.
   "/unsubscribe",
 ];
+
+// A lesson made public, opened by a guest (PRD COM-3b): its own header, with
+// no navigation bar whose every link would send a guest to sign in.
+const GUEST_LESSON_ROUTE = "/l/:id";
+const isGuestPath = (pathname) => pathname.startsWith("/l/");
 
 // Mac-style page transition: each time the route changes, the new page slides
 // in gradually from the side with a fade. Keying off the pathname remounts this
@@ -141,7 +147,7 @@ const App = () => {
         {/* Directly under the bar, on every signed-in page, and outside the
             page-transition wrapper so it does not slide in and out on every
             navigation — it is a standing state, not page content. */}
-        {!AUTH_PATHS.includes(pathname) && (
+        {!AUTH_PATHS.includes(pathname) && !isGuestPath(pathname) && (
           <>
             <Navbar />
             <PendingRoleBanner />
@@ -159,6 +165,9 @@ const App = () => {
           <Route path="/verify-email" element={<VerifyEmail />} />
           {/* Public, like /verify-email: followed from a notification mail. */}
           <Route path="/unsubscribe" element={<Unsubscribe />} />
+          {/* Public, like the two above: a lesson its lecturer opened to anyone
+              with the link (PRD COM-3b). The API decides what is public. */}
+          <Route path={GUEST_LESSON_ROUTE} element={<GuestLessonPage />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/archive" replace />} />
           <Route path="/archive" element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />

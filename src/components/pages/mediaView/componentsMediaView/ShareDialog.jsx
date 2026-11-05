@@ -7,6 +7,11 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
+import Switch from "@mui/material/Switch";
+import Alert from "@mui/material/Alert";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
+import PublicIcon from "@mui/icons-material/Public";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import ForwardToInboxOutlinedIcon from "@mui/icons-material/ForwardToInboxOutlined";
@@ -35,7 +40,13 @@ const buildShareUrl = (seconds, path) => {
 const rowSx = { borderRadius: 1, textAlign: "start" };
 
 // `canShareTime` is false for documents: a book has no playhead to point at.
-const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime = false }) => {
+//
+// `publicLink` (PRD COM-3b, see usePublicLink) — when the lesson is public,
+// every way of sharing below sends the PUBLIC link: it opens with no account,
+// and it is the one WhatsApp shows a preview of. Its manager also gets the
+// switch. Without it (or for a lesson that is not public) the link is the
+// lesson's own page, which asks a stranger to sign in.
+const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime = false, publicLink = null }) => {
   const dispatch = useDispatch();
   const [withTime, setWithTime] = useState(false);
 
@@ -43,8 +54,10 @@ const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime
   // never carries over from a previous share.
   useEffect(() => { if (!open) setWithTime(false); }, [open]);
 
-  const offerTime = canShareTime && currentTime >= 1;
-  const url = buildShareUrl(offerTime && withTime ? currentTime : 0, path);
+  const sharingPublic = Boolean(publicLink?.isPublic && publicLink?.isPublished);
+  // The guest page has no "from this moment": a stranger starts at the start.
+  const offerTime = canShareTime && currentTime >= 1 && !sharingPublic;
+  const url = sharingPublic ? publicLink.url : buildShareUrl(offerTime && withTime ? currentTime : 0, path);
   const text = `${title}\n${url}`;
 
   // Opened without an opener reference: a share target has no reason to keep a
@@ -114,6 +127,38 @@ const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime
             <ListItemText primary="העתקת קישור" />
           </ListItemButton>
         </List>
+
+        {publicLink?.canManage && (
+          <>
+            <Divider sx={{ my: 1.5 }} />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={publicLink.isPublic}
+                  onChange={publicLink.toggle}
+                  disabled={publicLink.busy}
+                />
+              }
+              label={
+                <span>
+                  <PublicIcon fontSize="small" sx={{ verticalAlign: "middle", ml: 0.5 }} />
+                  קישור ציבורי: פתוח גם בלי חשבון
+                </span>
+              }
+            />
+            <Typography variant="caption" color="text.secondary" component="p">
+              מי שמקבל את הקישור רואה את השיעור ואת הסיכום שלו, בלי המחברת ובלי הצ׳אט. שאר הארכיון נשאר סגור.
+            </Typography>
+            {publicLink.isPublic && !publicLink.isPublished && (
+              <Alert severity="warning" sx={{ mt: 1 }}>השיעור הוא טיוטה, ולכן הקישור הציבורי לא ייפתח עד שיפורסם.</Alert>
+            )}
+          </>
+        )}
+        {sharingPublic && !publicLink?.canManage && (
+          <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
+            השיעור הזה פתוח גם בלי חשבון, אז אפשר לשתף אותו עם כל אחד.
+          </Typography>
+        )}
 
         {offerTime && (
           <FormControlLabel

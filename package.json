@@ -15,6 +15,7 @@
     "@mui/icons-material": "^6.0.0",
     "@mui/material": "^6.0.0",
     "@reduxjs/toolkit": "^2.0.0",
+    "@sentry/react": "^11.11.0",
     "axios": "^1.0.0",
     "bidi-js": "^1.0.3",
     "jspdf": "^4.2.1",

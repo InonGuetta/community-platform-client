@@ -9,6 +9,11 @@ import { store } from "./store/store";
 import ErrorBoundary from "./components/features/ErrorBoundary/ErrorBoundary";
 import App from "./App";
 import { registerServiceWorker } from "./utilities/serviceWorker";
+import { initMonitoring } from "./utilities/monitoring";
+
+// External error reporting (PRD NFR-1) — only in a build with VITE_SENTRY_DSN,
+// and then loaded on the side, without holding up the first render.
+initMonitoring();
 
 // ErrorBoundary sits outermost — above the providers — so a crash anywhere in
 // the tree (including in the theme or the router) shows a recovery screen

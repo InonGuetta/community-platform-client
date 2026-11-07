@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { captureError } from "../../../utilities/monitoring";
 
 // React has no hook equivalent for error boundaries — this has to stay a class.
 //
@@ -82,8 +83,11 @@ class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     // Kept as console.error on purpose: this is the one place in the client that
-    // must report, and it is where a real error-reporting service would hook in.
+    // must report, whatever the log level.
     console.error("[ErrorBoundary] unhandled render error:", error, errorInfo?.componentStack);
+    // And reported outside (PRD NFR-1) — a no-op in a build without a DSN.
+    // The component stack names components, never data.
+    captureError(error, { tags: { kind: "render-crash" }, extra: { componentStack: errorInfo?.componentStack ?? null } });
   }
 
   handleReload() {

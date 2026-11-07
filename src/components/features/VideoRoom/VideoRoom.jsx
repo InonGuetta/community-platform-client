@@ -105,7 +105,19 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
 
       {mediaError && <Alert severity="warning" sx={{ m: 1 }}>{mediaError}</Alert>}
       {recordNotice && (
-        <Alert severity={recordNotice.severity} onClose={dismissRecordNotice} sx={{ m: 1 }}>{recordNotice.text}</Alert>
+        <Alert
+          severity={recordNotice.severity}
+          onClose={dismissRecordNotice}
+          sx={{ m: 1 }}
+          action={recordNotice.mediaId ? (
+            // A new tab: leaving this page would leave the session.
+            <Button color="inherit" size="small" href={`/media/${recordNotice.mediaId}`} target="_blank" rel="noopener">
+              לשיעור
+            </Button>
+          ) : undefined}
+        >
+          {recordNotice.text}
+        </Alert>
       )}
       <ConsentDialog recording={recording} mySocketId={mySocketId} onAnswer={answerRecording} />
 

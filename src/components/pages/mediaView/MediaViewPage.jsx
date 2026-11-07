@@ -16,6 +16,7 @@ import LessonNotebook from "./componentsMediaView/LessonNotebook";
 import AIDiscussionPanel from "./componentsMediaView/AIDiscussion/AIDiscussionPanel";
 import CourseTrackBar from "./componentsMediaView/CourseTrackBar";
 import AiTagSuggestions from "./componentsMediaView/AiTagSuggestions";
+import SessionChatPanel from "./componentsMediaView/SessionChatPanel";
 import useMediaViewPageController from "./useMediaViewPageController";
 import { creatorPrefixes } from "../../../utilities/constant";
 import { creatorPath, hasCreatorPage } from "../../../utilities/creatorPage";
@@ -234,6 +235,9 @@ const MediaViewPage = () => {
               currentTime={currentTime}
               // Proposed tags (PRD ARCH-4): for whoever may tag this lesson,
               // once it has a summary to propose them from.
+              // Recorded in a live session (PRD REC-3): its chat, in a tab of
+              // its own; a message's time plays the moment it was written.
+              sessionChatPanel={media.session_id ? <SessionChatPanel mediaId={media.id} onSeek={seekPlayer} /> : null}
               tagSuggestionsPanel={
                 canEditTranscript && transcript?.ai_summary ? (
                   <AiTagSuggestions mediaId={media.id} onTagged={refreshMedia} />

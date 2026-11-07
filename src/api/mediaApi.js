@@ -22,6 +22,11 @@ export const mediaApi = {
 
   getOne: async (id) => (await axiosInstance.get(`/media/${id}`)).data,
 
+  // A lesson recorded in a live session: the chat of that session, kept as an
+  // appendix (PRD REC-3). [{ name, text, at, offset }] — offset in seconds
+  // into the recording. [] when it has none.
+  sessionChat: async (id) => (await axiosInstance.get(`/media/${id}/session-chat`)).data,
+
   // onUploadProgress is passed through rather than handled here: reporting
   // progress means dispatching, and this layer deliberately knows nothing about
   // Redux. The caller supplies the callback.

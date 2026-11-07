@@ -414,10 +414,12 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
       await rec.recorder.stop();
       rec.mix.close();
       const { left } = await rec.uploader.drain();
-      await sessionsApi.finishRecording(rec.sessionId, rec.recordingId);
+      const done = await sessionsApi.finishRecording(rec.sessionId, rec.recordingId);
+      // The recording is now a draft lesson (PRD REC-2), being transcribed.
+      const lesson = done?.media_id ? " והפכה לשיעור (טיוטה) שעובר עכשיו תמלול וסיכום" : "";
       setRecordNotice(left > 0
-        ? { severity: "warning", text: `ההקלטה נשמרה, אבל ${left === 1 ? "החלק האחרון שלה לא הגיע" : `${left} החלקים האחרונים שלה לא הגיעו`} לשרת.` }
-        : { severity: "success", text: "ההקלטה נשמרה." });
+        ? { severity: "warning", text: `ההקלטה נשמרה${lesson}, אבל ${left === 1 ? "החלק האחרון שלה לא הגיע" : `${left} החלקים האחרונים שלה לא הגיעו`} לשרת.`, mediaId: done?.media_id ?? null }
+        : { severity: "success", text: `ההקלטה נשמרה${lesson}.`, mediaId: done?.media_id ?? null });
     } catch (err) {
       logger.error("[VideoRoom] could not finish recording:", err?.message);
       setRecordNotice({ severity: "error", text: "שמירת ההקלטה לא הושלמה. מה שכבר הגיע לשרת יישמר בסיום המפגש." });

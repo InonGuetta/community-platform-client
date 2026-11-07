@@ -35,6 +35,9 @@ const MediaInsightsTabs = ({
   // Tags the LLM proposed (PRD ARCH-4), at the foot of the summary — a slot,
   // like the notes, because only the page knows whether the reader may tag.
   tagSuggestionsPanel = null,
+  // A lesson recorded in a live session: that session's chat (PRD REC-3).
+  // No slot, no tab — every other lesson.
+  sessionChatPanel = null,
 }) => {
   const {
     transcript, isText, keyPointHeadings,
@@ -65,6 +68,7 @@ const MediaInsightsTabs = ({
     ...(isText ? [] : [{ key: "chapters", label: "פרקים" }]),
     ...(isText ? [] : [{ key: "transcript", label: "תמלול" }]),
     ...(notesPanel ? [{ key: "notes", label: "הערות אישיות" }] : []),
+    ...(sessionChatPanel ? [{ key: "sessionChat", label: "צ'אט המפגש" }] : []),
     // Last in the list, which in this right-to-left row is to the LEFT of
     // "הערות אישיות". Offered for books too: a book's text is in the same
     // chunks a recording's transcript is.
@@ -110,6 +114,7 @@ const MediaInsightsTabs = ({
           />
         )}
         {activeKey === "notes" && notesPanel}
+        {activeKey === "sessionChat" && sessionChatPanel}
         {activeKey === "discuss" && discussionPanel}
         {activeKey === "transcript" && captions && (
           <ToggleButtonGroup

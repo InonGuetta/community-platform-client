@@ -5,6 +5,9 @@ import { describeMediaError, mediaDevicesUnavailable } from "./mediaErrors";
 import { toggleTrackKind, hasTrackKind } from "./mediaToggles";
 import { SOCKET_EVENTS, SOCKET_LIFECYCLE } from "../../../utilities/socketEvents";
 import { logger } from "../../../utilities/logger";
+import { sessionsApi } from "../../../api/sessionsApi";
+import { hebrewForError } from "../../../utilities/apiError";
+import { createAudioMix, createPartUploader, createRecorder, pickRecordingType } from "./sessionRecorder";
 
 const DEFAULT_ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
 
@@ -24,7 +27,15 @@ const ICE_SERVERS = (() => {
   }
 })();
 
-export const useVideoRoom = ({ roomToken, onEnd }) => {
+// What the room is told when nothing is being recorded (the server's
+// recordingStatePayload(null)).
+export const NOT_RECORDING = { active: false, recordingId: null, hostSocketId: null, consented: [], declined: [] };
+
+// Answers that retrying a part cannot change: the recording is gone, closed,
+// or not this user's. The uploader stops on them rather than retrying forever.
+const isFinalUploadError = (err) => [403, 404, 409].includes(err?.response?.status);
+
+export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
   const [streams, setStreams] = useState([]);
   const [connected, setConnected] = useState(false);
   const [mediaError, setMediaError] = useState(null);
@@ -41,6 +52,15 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
   const [hasCamera, setHasCamera] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [messages, setMessages] = useState([]);
+  // Recording (PRD REC-1). `recording` is what the server says about the room
+  // — who is recorded, who declined; the rest is this browser's own recorder,
+  // which only the host has.
+  const [recording, setRecording] = useState(NOT_RECORDING);
+  const [mySocketId, setMySocketId] = useState(null);
+  const [recorderStatus, setRecorderStatus] = useState(null); // "starting" | "recording" | "saving" | null
+  const [pendingParts, setPendingParts] = useState(0);
+  const [recordNotice, setRecordNotice] = useState(null); // { severity, text }
+  const recorderRef = useRef(null); // { sessionId, recordingId, mix, uploader, recorder }
 
   const socketRef = useRef(null);
   const meshRef = useRef(null);
@@ -77,6 +97,7 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
     setHasCamera(false);
     setMediaError(null);
     setRoomError(null);
+    setRecording(NOT_RECORDING);
 
     let cancelled = false;
     const socket = io("/", { path: "/socket.io", autoConnect: false });
@@ -128,6 +149,7 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
     // while their screen still looked perfectly normal.
     socket.on(SOCKET_LIFECYCLE.CONNECT, () => {
       logger.info(`[socket] connected as ${socket.id}`);
+      setMySocketId(socket.id);
       setRoomError(null);
       setConnected(true);
       socket.emit(SOCKET_EVENTS.JOIN_ROOM, { roomToken });
@@ -170,6 +192,17 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
     // orders disagree.
     on(SOCKET_EVENTS.CHAT_MESSAGE, (message) => setMessages((prev) => [...prev, message]));
     on(SOCKET_EVENTS.CHAT_HISTORY, (history) => setMessages(Array.isArray(history) ? history : []));
+
+    // Who is being recorded. A host still recording that hears the room is NOT
+    // being recorded by it — its connection dropped and the server forgot —
+    // announces the recording again; the server restores everyone's answers.
+    on(SOCKET_EVENTS.RECORDING_STATE, (state) => {
+      setRecording(state?.active ? state : NOT_RECORDING);
+      const mine = recorderRef.current;
+      if (mine && (!state?.active || state.hostSocketId !== socket.id)) {
+        socket.emit(SOCKET_EVENTS.RECORDING_STARTED, { recordingId: mine.recordingId });
+      }
+    });
 
     on(SOCKET_EVENTS.SESSION_ENDED, () => onEndRef.current?.());
     on(SOCKET_EVENTS.JOIN_ERROR, ({ message }) => {
@@ -216,6 +249,18 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
 
     return () => {
       cancelled = true;
+      // Leaving while recording: what is recorded so far is still sent and
+      // the recording closed — best effort, since this page is going away.
+      // Anything that does not make it is joined by the server when the
+      // session ends, from the parts that arrived.
+      const rec = recorderRef.current;
+      recorderRef.current = null;
+      if (rec) {
+        rec.recorder.stop()
+          .then(() => { rec.mix.close(); return rec.uploader.drain(15_000); })
+          .then(() => sessionsApi.finishRecording(rec.sessionId, rec.recordingId))
+          .catch((err) => logger.warn("[VideoRoom] recording left unfinished:", err?.message));
+      }
       mesh.closeAll();
       localStreamRef.current?.getTracks().forEach((track) => track.stop());
       // Stopped separately: a screen capture is not part of localStream, and
@@ -308,13 +353,98 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
     socketRef.current?.emit(SOCKET_EVENTS.CHAT_MESSAGE, { text: body });
   }, []);
 
+  // ── Recording (PRD REC-1) ─────────────────────────────────────────────────
+
+  // The mix follows the room: the host's own microphone, and every peer the
+  // server lists as having said yes — nobody else, and nobody before they do.
+  useEffect(() => {
+    const rec = recorderRef.current;
+    if (!rec) return;
+    const peers = streams.filter((s) => s.id !== "local" && recording.consented.includes(s.id));
+    rec.mix.sync([{ id: "local", stream: localStreamRef.current }, ...peers.map((s) => ({ id: s.id, stream: s.stream }))]);
+  }, [streams, recording]);
+
+  // Closing the tab mid-recording loses whatever has not been sent yet, so the
+  // browser is asked to warn first.
+  useEffect(() => {
+    if (!recorderStatus) return undefined;
+    const warn = (event) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [recorderStatus]);
+
+  const startRecording = useCallback(async () => {
+    if (recorderRef.current || recorderStatus || !sessionId) return;
+    const mimeType = pickRecordingType();
+    if (!mimeType || typeof globalThis.AudioContext !== "function") {
+      setRecordNotice({ severity: "error", text: "הדפדפן הזה לא תומך בהקלטה. נסו Chrome, Edge או Firefox." });
+      return;
+    }
+    setRecordNotice(null);
+    setRecorderStatus("starting");
+    try {
+      const row = await sessionsApi.startRecording(sessionId, mimeType);
+      const mix = createAudioMix();
+      mix.sync([{ id: "local", stream: localStreamRef.current }]);
+      const uploader = createPartUploader({
+        upload: (n, blob) => sessionsApi.uploadRecordingPart(sessionId, row.id, n, blob),
+        onPending: setPendingParts,
+        isFinal: isFinalUploadError,
+      });
+      const recorder = createRecorder({ stream: mix.stream, mimeType, onPart: (blob) => uploader.push(blob) });
+      recorderRef.current = { sessionId, recordingId: row.id, mix, uploader, recorder };
+      setRecorderStatus("recording");
+      socketRef.current?.emit(SOCKET_EVENTS.RECORDING_STARTED, { recordingId: row.id });
+    } catch (err) {
+      logger.error("[VideoRoom] could not start recording:", err?.message);
+      setRecorderStatus(null);
+      setRecordNotice({ severity: "error", text: hebrewForError(err, "לא ניתן להתחיל הקלטה.") });
+    }
+  }, [sessionId, recorderStatus]);
+
+  // The room hears at once that it is no longer recorded; then the last part
+  // is sent and the recording closed.
+  const stopRecording = useCallback(async () => {
+    const rec = recorderRef.current;
+    if (!rec) return;
+    recorderRef.current = null;
+    socketRef.current?.emit(SOCKET_EVENTS.RECORDING_STOPPED);
+    setRecorderStatus("saving");
+    try {
+      await rec.recorder.stop();
+      rec.mix.close();
+      const { left } = await rec.uploader.drain();
+      await sessionsApi.finishRecording(rec.sessionId, rec.recordingId);
+      setRecordNotice(left > 0
+        ? { severity: "warning", text: `ההקלטה נשמרה, אבל ${left === 1 ? "החלק האחרון שלה לא הגיע" : `${left} החלקים האחרונים שלה לא הגיעו`} לשרת.` }
+        : { severity: "success", text: "ההקלטה נשמרה." });
+    } catch (err) {
+      logger.error("[VideoRoom] could not finish recording:", err?.message);
+      setRecordNotice({ severity: "error", text: "שמירת ההקלטה לא הושלמה. מה שכבר הגיע לשרת יישמר בסיום המפגש." });
+    } finally {
+      setRecorderStatus(null);
+      setPendingParts(0);
+    }
+  }, []);
+
+  // A participant's answer. They may change it at any moment; a "no" takes
+  // their audio out of the mix as soon as the room is told.
+  const answerRecording = useCallback((consent) => {
+    socketRef.current?.emit(SOCKET_EVENTS.RECORDING_CONSENT, { consent: consent === true });
+  }, []);
+
+  const dismissRecordNotice = useCallback(() => setRecordNotice(null), []);
+
   // Only asks; the room closes when the server confirms with "session-ended".
   // Leaving immediately would have navigated a non-host away even though the
   // server refused their request and the session carried on without them.
-  const endSession = useCallback(() => {
+  // A host still recording saves the recording first, so its last parts are
+  // not refused by a session that has already closed it.
+  const endSession = useCallback(async () => {
+    if (recorderRef.current) await stopRecording();
     logger.debug(`[socket] → ${SOCKET_EVENTS.END_SESSION}`);
     socketRef.current?.emit(SOCKET_EVENTS.END_SESSION, { roomToken });
-  }, [roomToken]);
+  }, [roomToken, stopRecording]);
 
   const leave = useCallback(() => onEndRef.current?.(), []);
 
@@ -322,5 +452,7 @@ export const useVideoRoom = ({ roomToken, onEnd }) => {
     streams, connected, mediaError, roomError, endSession, leave,
     micOn, cameraOn, hasMic, hasCamera, sharing, toggleMic, toggleCamera, shareScreen,
     messages, sendMessage,
+    recording, mySocketId, recorderStatus, pendingParts, recordNotice,
+    startRecording, stopRecording, answerRecording, dismissRecordNotice,
   };
 };

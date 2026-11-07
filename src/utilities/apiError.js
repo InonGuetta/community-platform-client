@@ -51,6 +51,8 @@ export const ERROR_CODES = {
   SESSION_NOT_FOUND: "SESSION_NOT_FOUND",
   SESSION_FORBIDDEN: "SESSION_FORBIDDEN",
   SESSION_NOT_STARTED: "SESSION_NOT_STARTED",
+  RECORDING_NOT_FOUND: "RECORDING_NOT_FOUND",
+  RECORDING_CLOSED: "RECORDING_CLOSED",
   BOOKMARK_NOT_FOUND: "BOOKMARK_NOT_FOUND",
   BOOKMARK_ANCHOR_INVALID: "BOOKMARK_ANCHOR_INVALID",
   NOTE_NOT_FOUND: "NOTE_NOT_FOUND",
@@ -155,6 +157,8 @@ const ERROR_CODE_HE = {
   [ERROR_CODES.SESSION_NOT_FOUND]: "המפגש לא נמצא",
   [ERROR_CODES.SESSION_FORBIDDEN]: "המפגש לא נמצא או שאין לך הרשאה",
   [ERROR_CODES.SESSION_NOT_STARTED]: "המפגש עדיין לא נפתח על ידי המארח",
+  [ERROR_CODES.RECORDING_NOT_FOUND]: "ההקלטה לא נמצאה",
+  [ERROR_CODES.RECORDING_CLOSED]: "ההקלטה כבר הסתיימה",
   [ERROR_CODES.BOOKMARK_NOT_FOUND]: "הסימנייה לא נמצאה",
   // The generic "שמירת הסימנייה נכשלה" would send the user to press the same
   // button again, which is the one thing that cannot work: the text on screen

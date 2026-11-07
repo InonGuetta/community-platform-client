@@ -32,4 +32,22 @@ export const sessionsApi = {
   // browser downloads it itself (the cookie goes along, same origin), and hands
   // the .ics to whatever calendar the reader uses.
   calendarUrl: (id) => `/api/sessions/${id}/calendar.ics`,
+
+  // ── Recording (PRD REC-1), host only ──
+  // The host's browser records and sends the recording in numbered parts while
+  // the session runs; see components/features/VideoRoom/sessionRecorder.js.
+  // { id, status, mime_type, … }
+  startRecording: async (id, mimeType) =>
+    (await axiosInstance.post(`/sessions/${id}/recordings`, { mimeType })).data,
+
+  // One part, as raw bytes. The same number sent again replaces it on the
+  // server, so the uploader may retry freely.
+  uploadRecordingPart: async (id, recordingId, part, blob) => {
+    await axiosInstance.put(`/sessions/${id}/recordings/${recordingId}/parts/${part}`, blob, {
+      headers: { "Content-Type": "application/octet-stream" },
+    });
+  },
+
+  finishRecording: async (id, recordingId) =>
+    (await axiosInstance.post(`/sessions/${id}/recordings/${recordingId}/finish`)).data,
 };

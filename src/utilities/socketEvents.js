@@ -17,6 +17,11 @@ export const SOCKET_EVENTS = {
   // see the server's copy for why.
   CHAT_MESSAGE: "chat-message",
 
+  // Recording (PRD REC-1) — see the server's copy.
+  RECORDING_STARTED: "recording-started",
+  RECORDING_STOPPED: "recording-stopped",
+  RECORDING_CONSENT: "recording-consent",
+
   // Server → client
   USER_JOINED: "user-joined",
   USER_LEFT: "user-left",
@@ -24,6 +29,7 @@ export const SOCKET_EVENTS = {
   JOIN_ERROR: "join-error",
   SESSION_ERROR: "session-error",
   CHAT_HISTORY: "chat-history",
+  RECORDING_STATE: "recording-state",
 
   // WebRTC signalling, relayed in both directions
   OFFER: "offer",

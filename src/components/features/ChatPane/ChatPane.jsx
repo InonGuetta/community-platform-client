@@ -15,14 +15,15 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import NoteAddIcon from "@mui/icons-material/NoteAddOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { statuses } from "../../../../../utilities/constant";
-import { hebrewForError } from "../../../../../utilities/apiError";
-import { placeOf, canOpenPlace, openPlace } from "../../../../../utilities/discussionPlace";
-import { canSaveAnswer } from "../../../../../utilities/discussionNote";
-import { SAVE_STATES } from "../../useAIDiscussionController";
+import { statuses } from "../../../utilities/constant";
+import { hebrewForError } from "../../../utilities/apiError";
+import { placeOf, canOpenPlace, openPlace } from "../../../utilities/discussionPlace";
+import { canSaveAnswer, SAVE_STATES } from "../../../utilities/discussionNote";
 
-// The conversation with the AI about ONE lesson. Presentation only: `chat` is
-// what useAIDiscussionController hands it.
+// The conversation with the AI — about one lesson, in the lesson page's
+// "דיון עם AI" tab, or about the whole archive, on /ask. Presentation only:
+// `chat` is what useAIDiscussionController or useAskArchivePageController
+// hands it, and `words` carries the wording that differs between the two.
 //
 // Every answer is grounded in the lesson's own passages and cites them as [n].
 // Those markers become small buttons inside the text, and the passages are

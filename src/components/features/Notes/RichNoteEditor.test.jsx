@@ -3,7 +3,7 @@ import { test, expect, describe, vi, beforeEach, afterEach } from "vitest";
 import { createRef } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import RichNoteEditor from "./RichNoteEditor";
-import { sourceChipHtml } from "../../../../utilities/noteSource";
+import { sourceChipHtml } from "../../../utilities/noteSource";
 
 // Two things in a note body that are not text, and both need a way to be
 // operated on that does not involve selecting them exactly with a mouse:

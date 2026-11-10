@@ -18,7 +18,7 @@ import { mediaTypeLabels } from "../../../../utilities/constant";
 import { decisionCount } from "../../../../utilities/tagStates";
 import { ALL_TYPES, isAllTypes, isTypePressed } from "./typeSelection";
 import { SORT_OPTIONS, DEFAULT_SORT } from "./sortOptions";
-import { DURATION_OPTIONS } from "./durationOptions";
+import { DURATION_OPTIONS } from "../../../../utilities/durationOptions";
 
 // The archive's filters.
 //
@@ -293,7 +293,7 @@ const FilterBar = ({
 
           {/* How long a recording runs. Not offered with only "קריאה" chosen —
               a book has no length — and choosing one leaves books out, which
-              the server decides; see componentsArchive/durationOptions.js. */}
+              the server decides; see utilities/durationOptions.js. */}
           {lengthOffered && (
             <TextField
               select

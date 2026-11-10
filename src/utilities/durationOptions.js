@@ -1,4 +1,4 @@
-import { mediaTypes } from "../../../../utilities/constant";
+import { mediaTypes } from "./constant";
 
 // The archive's length filter: four ranges, chosen one at a time.
 //

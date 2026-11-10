@@ -20,7 +20,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import { statuses } from "../../../../../utilities/constant";
 import { hebrewForError } from "../../../../../utilities/apiError";
 import { formatHebrewDate } from "../../../../../utilities/formatDate";
-import { MessageBubble, placeOpener, answerSaver, CopyConversationButton } from "./ChatPane";
+import { MessageBubble, placeOpener, answerSaver, CopyConversationButton } from "../../../../features/ChatPane/ChatPane";
 
 // The reader's earlier conversations on THIS lesson. Presentation only:
 // `history` is what useAIDiscussionController hands it.

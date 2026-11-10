@@ -8,7 +8,7 @@ import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost"
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { selectDiscussionByMediaId, selectDiscussionQuota } from "../../../store/selectors/discussionSelectors";
 import { statuses } from "../../../utilities/constant";
-import { answerNote, questionBefore, conversationText } from "../../../utilities/discussionNote";
+import { answerNote, questionBefore, conversationText, SAVE_STATES } from "../../../utilities/discussionNote";
 
 // The "דיון עם AI" tab's logic: every dispatch and selector it needs, so the
 // panel and its two panes stay presentation only.
@@ -44,9 +44,6 @@ export const discussionReadiness = (transcript) => {
   if (["pending", "processing", "analyzing"].includes(status)) return "processing";
   return "empty";
 };
-
-// What saving one answer to the notebook is at, by the answer's id.
-export const SAVE_STATES = { saving: "saving", saved: "saved", failed: "failed" };
 
 const useAIDiscussionController = ({ mediaId, transcript, media }) => {
   const dispatch = useDispatch();

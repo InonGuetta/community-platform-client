@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import MediaGrid from "../archive/componentsArchive/MediaGrid";
+import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import PlaylistsSection from "./PlaylistsSection";
 import { countLabel } from "../../../utilities/countLabel";
 import { useCollectionPageController } from "./useCollectionPageController";

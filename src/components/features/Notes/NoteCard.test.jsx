@@ -2,8 +2,8 @@
 import { test, expect, describe, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import NoteCard from "./NoteCard";
-import { NOTE_DRAG_MIME } from "../../../../utilities/useDragReorder";
-import { BOOKMARK_DRAG_MIME } from "../../../../utilities/noteSource";
+import { NOTE_DRAG_MIME } from "../../../utilities/useDragReorder";
+import { BOOKMARK_DRAG_MIME } from "../../../utilities/noteSource";
 
 // Two completely different things can be let go over a note card: another NOTE,
 // which reorders the notebook, and a BOOKMARK, which is written into this note's

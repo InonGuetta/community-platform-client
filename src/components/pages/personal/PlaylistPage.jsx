@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import MediaGrid from "../archive/componentsArchive/MediaGrid";
+import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import { countLabel } from "../../../utilities/countLabel";
 import { SAVED_SHELF } from "../../layout/personalShelves";
 import { usePlaylistPageController } from "./usePlaylistPageController";

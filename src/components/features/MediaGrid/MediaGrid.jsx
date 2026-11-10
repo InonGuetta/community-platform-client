@@ -3,8 +3,8 @@ import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button";
 import useLoadMoreTrigger from "./useLoadMoreTrigger";
 import MediaCard from "./MediaCard";
-import NoDataDialog from "../../../features/NoDataDialog/NoDataDialog";
-import { statuses } from "../../../../utilities/constant";
+import NoDataDialog from "../NoDataDialog/NoDataDialog";
+import { statuses } from "../../../utilities/constant";
 
 const SKELETON_COUNT = 6;
 

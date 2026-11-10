@@ -10,7 +10,7 @@ import Alert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
-import MediaGrid from "../archive/componentsArchive/MediaGrid";
+import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import { fetchPlaylists } from "../../../store/slicesAndThunks/savesSlice/savesGet";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { statuses } from "../../../utilities/constant";

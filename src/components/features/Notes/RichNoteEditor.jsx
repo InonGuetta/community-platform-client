@@ -11,12 +11,12 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import { sanitizeNoteHtml, isNoteHtmlEmpty } from "../../../../utilities/noteHtml";
-import { mediaTypeAccents } from "../../../../utilities/constant";
+import { sanitizeNoteHtml, isNoteHtmlEmpty } from "../../../utilities/noteHtml";
+import { mediaTypeAccents } from "../../../utilities/constant";
 import {
   sourceChipHtml, sourceFromChip, renameSourceChip, SOURCE_CHIP_SELECTOR, MAX_CHIP_NOTE,
   appendToReferences, hasWrittenText, REFERENCES_SELECTOR,
-} from "../../../../utilities/noteSource";
+} from "../../../utilities/noteSource";
 
 // The note body, as a contentEditable rather than a TextField — which is the
 // whole reason the toolbar can do anything. A textarea holds characters; bold is

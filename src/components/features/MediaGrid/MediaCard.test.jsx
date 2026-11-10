@@ -3,7 +3,7 @@ import { test, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 // Reaches for the store; what it does is not what this file is about.
-vi.mock("../../../features/DownloadMenu/DownloadMenu", () => ({
+vi.mock("../DownloadMenu/DownloadMenu", () => ({
   default: () => <div data-testid="download-menu" />,
 }));
 

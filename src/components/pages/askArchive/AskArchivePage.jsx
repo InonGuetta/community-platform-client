@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import ForumIcon from "@mui/icons-material/ForumOutlined";
-import ChatPane from "../mediaView/componentsMediaView/AIDiscussion/ChatPane";
+import ChatPane from "../../features/ChatPane/ChatPane";
 import useAskArchivePageController, { ARCHIVE_WORDS, ARCHIVE_SUGGESTIONS } from "./useAskArchivePageController";
 
 // "שאל את הארכיון" (PRD ASK-2): one question over every lesson the reader may

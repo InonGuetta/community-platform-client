@@ -5,7 +5,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import useAIDiscussionController, { DISCUSSION_MODES } from "../../useAIDiscussionController";
 import SmartSearchPane from "./SmartSearchPane";
-import ChatPane from "./ChatPane";
+import ChatPane from "../../../../features/ChatPane/ChatPane";
 import HistoryPane from "./HistoryPane";
 import TextQualityNotice from "../TextQualityNotice";
 

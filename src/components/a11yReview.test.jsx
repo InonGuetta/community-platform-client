@@ -5,8 +5,8 @@ import SearchBar from "./features/SearchBar/SearchBar";
 import DialogTitle from "./features/Dialogs/DialogTitle";
 import UsersTableContent from "./pages/users/componentsUsers/UsersTableContent";
 
-vi.mock("./pages/archive/componentsArchive/MediaCard", () => ({ default: ({ item }) => <div data-testid="card">{item.title}</div> }));
-const { default: MediaGrid } = await import("./pages/archive/componentsArchive/MediaGrid");
+vi.mock("./features/MediaGrid/MediaCard", () => ({ default: ({ item }) => <div data-testid="card">{item.title}</div> }));
+const { default: MediaGrid } = await import("./features/MediaGrid/MediaGrid");
 
 // What the desktop-and-375px review (PRD MOB-7) found and fixed, pinned so it
 // does not come back: controls with no name for a screen reader, and a grid

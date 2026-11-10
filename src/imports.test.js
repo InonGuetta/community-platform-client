@@ -147,3 +147,57 @@ test("utilities/ imports nothing from components/, store/ or api/", () => {
   // Guards against the rule passing because no utilities file was found.
   expect([...graph.keys()].filter((f) => rel(f).startsWith("utilities/")).length).toBeGreaterThan(20);
 });
+
+// ── Page folders ────────────────────────────────────────────────────────────
+//
+// components/pages/<page>/ holds what that page alone uses. A component two
+// screens share is in components/features/ (the note cards, the media grid,
+// the chat pane) and the app's shell is in components/layout/ — and neither of
+// those may reach back into a page, or changing one page silently changes
+// another. Tests are not part of the graph, so a page's test may still render
+// a neighbour.
+const pageOf = (relPath) => relPath.match(/^components\/pages\/([^/]+)\//)?.[1] ?? null;
+
+test("features/ and layout/ import nothing from pages/", () => {
+  const crossings = [...buildGraph().entries()]
+    .filter(([file]) => /^components\/(features|layout)\//.test(rel(file)))
+    .flatMap(([file, deps]) => deps.map(rel).filter((d) => pageOf(d)).map((d) => `${rel(file)} -> ${d}`));
+  expect(crossings).toEqual([]);
+});
+
+// The only places one page uses another's files, each on purpose. Adding to
+// this list is a decision: the alternative is nearly always to move the file
+// to features/ (a component) or utilities/ (a helper).
+const ALLOWED_PAGE_CROSSINGS = [
+  // A lesson opened in a floating window over the notebook is the lesson
+  // page's own player, reader, notes and actions — so it lives with them, and
+  // the notebook opens it.
+  ["notebook", "components/pages/mediaView/componentsMediaView/SourcePreviewDialog.jsx"],
+  // A lecturer's page is the archive with the creator fixed: the same cards,
+  // filters and paging (useArchivePageController({ fixedCreator })).
+  ["creators", "components/pages/archive/componentsArchive/ArchiveBrowser.jsx"],
+  ["creators", "components/pages/archive/useArchivePageController.js"],
+];
+
+test("a page imports another page's files only where that is allowed", () => {
+  const allowed = new Set(ALLOWED_PAGE_CROSSINGS.map(([page, target]) => `${page} -> ${target}`));
+  const graph = buildGraph();
+  const crossings = [...graph.entries()].flatMap(([file, deps]) => {
+    const from = pageOf(rel(file));
+    if (!from) return [];
+    return deps.map(rel)
+      .filter((d) => pageOf(d) && pageOf(d) !== from)
+      .map((d) => `${from} -> ${d}`)
+      .filter((edge) => !allowed.has(edge))
+      .map((edge) => `${rel(file)}: ${edge}`);
+  });
+  expect(crossings).toEqual([]);
+
+  // Every allowance is still used — an entry nothing needs any more is a
+  // permission waiting to be misused, so it goes.
+  const used = new Set([...graph.entries()].flatMap(([file, deps]) => {
+    const from = pageOf(rel(file));
+    return from ? deps.map((d) => `${from} -> ${rel(d)}`) : [];
+  }));
+  expect([...allowed].filter((edge) => !used.has(edge))).toEqual([]);
+});

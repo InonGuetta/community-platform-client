@@ -14,19 +14,19 @@ import MovieRoundedIcon from "@mui/icons-material/MovieRounded";
 import VolumeUpRoundedIcon from "@mui/icons-material/VolumeUpRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import { alpha, lighten } from "@mui/material/styles";
-import { mediaApi } from "../../../../api/mediaApi";
-import DownloadMenu from "../../../features/DownloadMenu/DownloadMenu";
-import { mediaTypeLabels, mediaTypeAccents, creatorPrefixes } from "../../../../utilities/constant";
-import { hasCreatorPage } from "../../../../utilities/creatorPage";
+import { mediaApi } from "../../../api/mediaApi";
+import DownloadMenu from "../DownloadMenu/DownloadMenu";
+import { mediaTypeLabels, mediaTypeAccents, creatorPrefixes } from "../../../utilities/constant";
+import { hasCreatorPage } from "../../../utilities/creatorPage";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import EditIcon from "@mui/icons-material/Edit";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { lengthLabel } from "./durationOptions";
-import { canManageMedia } from "../../../../utilities/permissions";
+import { lengthLabel } from "../../../utilities/durationOptions";
+import { canManageMedia } from "../../../utilities/permissions";
 // The same icon the like BUTTON uses, from the file that owns the pair. Its
 // header says why: a shelf and the control that fills it have to look like one
 // thing, and two independent imports stay matched only until one is changed.
-import { likeIcons } from "../../../layout/personalShelves";
+import { likeIcons } from "../../layout/personalShelves";
 
 const LikeIcon = likeIcons.on;
 

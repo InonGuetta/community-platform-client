@@ -92,6 +92,10 @@ export const canSaveAnswer = (message) =>
   !message.streaming &&
   (message.citations?.length ?? 0) > 0;
 
+// What saving one answer to the notebook is at, by the answer's id — set by the
+// page's controller, shown by the chat pane's save button.
+export const SAVE_STATES = { saving: "saving", saved: "saved", failed: "failed" };
+
 /**
  * The whole conversation as plain text, for the "העתק שיחה" button: each
  * question, its answer with its [n] markers, and under the answer the place

@@ -19,7 +19,7 @@ import { readFilters, writeFilters } from "./archiveFilterParams";
 import { creatorPath } from "../../../utilities/creatorPage";
 import { toggleType, pressAllTypes } from "./componentsArchive/typeSelection";
 import { readSort, DEFAULT_SORT } from "./componentsArchive/sortOptions";
-import { readDuration, durationParams, lengthApplies } from "./componentsArchive/durationOptions";
+import { readDuration, durationParams, lengthApplies } from "../../../utilities/durationOptions";
 import {
   buildTagRelations,
   normalizeSelection,
@@ -77,7 +77,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
   const [tagIds, setTagIds] = useState(initial.tagIds);
   const [excludedTagIds, setExcludedTagIds] = useState(initial.excludedTagIds);
   const [dates, setDates] = useState(initial.dates);
-  // One of the length ranges in componentsArchive/durationOptions.js, or "".
+  // One of the length ranges in utilities/durationOptions.js, or "".
   const [durationRange, setDurationRange] = useState(initial.durationRange);
 
   // With only "קריאה" chosen a length has nothing to apply to — a book has none —

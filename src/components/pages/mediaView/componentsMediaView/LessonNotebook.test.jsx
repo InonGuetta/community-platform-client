@@ -44,7 +44,7 @@ vi.mock("../../../../api/notesApi", () => ({
 }));
 
 // The window loads a whole second lesson; whether it opens is all that matters.
-vi.mock("../../notebook/componentsNotebook/SourcePreviewDialog", () => ({
+vi.mock("./SourcePreviewDialog", () => ({
   default: ({ mediaId }) => <div data-testid="source-preview" data-media-id={mediaId} />,
 }));
 

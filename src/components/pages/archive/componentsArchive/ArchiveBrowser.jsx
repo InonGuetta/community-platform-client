@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import FilterBar from "./FilterBar";
 import EditTagsDialog from "./EditTagsDialog";
 import EditMediaDialog from "./EditMediaDialog";
-import MediaGrid from "./MediaGrid";
+import MediaGrid from "../../../features/MediaGrid/MediaGrid";
 import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 
 // The archive's body — the filters, the count, the cards and the dialogs that

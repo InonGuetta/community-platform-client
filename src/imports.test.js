@@ -129,3 +129,21 @@ test("the store is the side that wires the two together", () => {
   expect(deps).toContain("utilities/axiosInstance.js");
   expect(deps.some((d) => d.endsWith("authSlice.js"))).toBe(true);
 });
+
+// utilities/ is the floor of the client: everything may import it, and it
+// imports nothing above it — no component, no slice or thunk, no api module.
+// That is what lets a helper move there from a page and be shared without
+// dragging a page's dependencies along. Something that needs the store (a
+// shelf's thunk, say) belongs higher up: components/layout/personalShelves.js
+// is the example.
+test("utilities/ imports nothing from components/, store/ or api/", () => {
+  const graph = buildGraph();
+  const above = /^(components|store|api)\//;
+  const crossings = [...graph.entries()]
+    .filter(([file]) => rel(file).startsWith("utilities/"))
+    .flatMap(([file, deps]) => deps.map(rel).filter((d) => above.test(d)).map((d) => `${rel(file)} -> ${d}`));
+  expect(crossings).toEqual([]);
+
+  // Guards against the rule passing because no utilities file was found.
+  expect([...graph.keys()].filter((f) => rel(f).startsWith("utilities/")).length).toBeGreaterThan(20);
+});

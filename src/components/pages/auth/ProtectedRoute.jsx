@@ -4,7 +4,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import { selectUser, selectAuthInitialized, selectAuthUnreachable } from "../../../store/selectors/authSelectors";
-import { DOWNLOADS_SHELF } from "../personal/personalShelves";
+import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
 import { rememberReturnTo } from "../../../utilities/returnTo";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 

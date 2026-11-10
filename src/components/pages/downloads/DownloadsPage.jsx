@@ -16,7 +16,7 @@ import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/Co
 import OfflinePlayer from "./OfflinePlayer";
 import { useDownloadsPageController } from "./useDownloadsPageController";
 import { lessonByline, lessonDetails, progressLabel, storageLine } from "./downloadsText";
-import { DOWNLOADS_SHELF } from "../personal/personalShelves";
+import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
 import { countLabel } from "../../../utilities/countLabel";
 import { percentOf } from "../../../utilities/offlineStore";
 

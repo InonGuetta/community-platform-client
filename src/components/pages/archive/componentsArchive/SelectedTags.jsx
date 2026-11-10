@@ -4,7 +4,7 @@ import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import BlockIcon from "@mui/icons-material/Block";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { buildTagRelations, countUnder } from "./tagStates";
+import { buildTagRelations, countUnder } from "../../../../utilities/tagStates";
 
 // The tags currently being filtered by, all of them, in one row.
 //

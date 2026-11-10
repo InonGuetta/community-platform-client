@@ -10,7 +10,7 @@ import Tooltip from "@mui/material/Tooltip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import RichNoteEditor from "./RichNoteEditor";
-import { hasDragType } from "./useDragReorder";
+import { hasDragType } from "../../../../utilities/useDragReorder";
 import { formatTime } from "../../../../utilities/formatTime";
 import { noteHtmlToPlainText } from "../../../../utilities/noteHtml";
 import { BOOKMARK_DRAG_MIME } from "../../../../utilities/noteSource";

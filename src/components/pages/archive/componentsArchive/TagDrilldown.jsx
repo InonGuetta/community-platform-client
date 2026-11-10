@@ -19,7 +19,7 @@ import {
   tagStateOf,
   isPartiallyIncluded,
   countUnder,
-} from "./tagStates";
+} from "../../../../utilities/tagStates";
 
 // Choosing a tag by walking down the taxonomy, one level at a time.
 //

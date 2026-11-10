@@ -34,7 +34,7 @@ import ExportSplitDialog from "./componentsNotebook/ExportSplitDialog";
 import ExportSourcesDialog from "./componentsNotebook/ExportSourcesDialog";
 import UntitledNoteDialog from "./componentsNotebook/UntitledNoteDialog";
 import { useNotebookPageController } from "./useNotebookPageController";
-import { dropIndicatorSx } from "./componentsNotebook/useDragReorder";
+import { dropIndicatorSx } from "../../../utilities/useDragReorder";
 import { statuses, mediaTypeLabels, mediaTypeAccents, listRowSx } from "../../../utilities/constant";
 import { noteHtmlToPlainText } from "../../../utilities/noteHtml";
 import { BOOKMARK_DRAG_MIME, bookmarkDragPayload } from "../../../utilities/noteSource";

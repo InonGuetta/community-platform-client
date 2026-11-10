@@ -13,7 +13,7 @@ import NoteToolbar from "../../notebook/componentsNotebook/NoteToolbar";
 import SourcePreviewDialog from "../../notebook/componentsNotebook/SourcePreviewDialog";
 import UntitledNoteDialog from "../../notebook/componentsNotebook/UntitledNoteDialog";
 import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
-import { NOTEBOOK_SHELF } from "../../personal/personalShelves";
+import { NOTEBOOK_SHELF } from "../../../layout/personalShelves";
 import useLessonNotebook from "../useLessonNotebook";
 
 // The notebook strip under a lesson: every note taken on it or quoting it, open

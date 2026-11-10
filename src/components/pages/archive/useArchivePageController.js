@@ -27,7 +27,7 @@ import {
   forgetTag,
   pruneUnknownTags,
   sameSelection,
-} from "./componentsArchive/tagStates";
+} from "../../../utilities/tagStates";
 
 // `fixedCreator` — the lecturer's page (PRD ATTR-10): the same archive, filters
 // and all, with the lecturer chosen by the page rather than by the reader. It is
@@ -73,7 +73,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
   // both: naming the four books to keep says something else entirely — choices
   // under one heading are alternatives, so it would also return an item that is
   // in only one of them and says nothing about שמות. The rule the two describe
-  // together lives in componentsArchive/tagStates.js.
+  // together lives in utilities/tagStates.js.
   const [tagIds, setTagIds] = useState(initial.tagIds);
   const [excludedTagIds, setExcludedTagIds] = useState(initial.excludedTagIds);
   const [dates, setDates] = useState(initial.dates);
@@ -270,7 +270,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
   // existed, clicking a child of a chosen branch could only ever ADD it, which
   // is why an inherited tag could not be un-chosen at all.
   //
-  // The rule itself is in componentsArchive/tagStates.js, with its test. What
+  // The rule itself is in utilities/tagStates.js, with its test. What
   // belongs here is only that a click changes page state, which is the line
   // between this file and the components.
   const applyTagDecision = (next) => {

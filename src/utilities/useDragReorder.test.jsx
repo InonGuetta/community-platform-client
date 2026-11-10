@@ -2,7 +2,7 @@
 import { test, expect, describe, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useDragReorder, reorderIds, NOTE_DRAG_MIME } from "./useDragReorder";
-import { BOOKMARK_DRAG_MIME } from "../../../../utilities/noteSource";
+import { BOOKMARK_DRAG_MIME } from "./noteSource";
 
 // Reordering the notebook by hand. The arithmetic below is the whole feature —
 // everything else is the browser's own drag machinery — and it is the part that

@@ -5,9 +5,9 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import HistoryIcon from "@mui/icons-material/History";
 import DownloadForOfflineIcon from "@mui/icons-material/DownloadForOffline";
-import { fetchLikedMedia } from "../../../store/slicesAndThunks/likesSlice/likesGet";
-import { fetchSavedMedia } from "../../../store/slicesAndThunks/savesSlice/savesGet";
-import { fetchContinueWatching } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
+import { fetchLikedMedia } from "../../store/slicesAndThunks/likesSlice/likesGet";
+import { fetchSavedMedia } from "../../store/slicesAndThunks/savesSlice/savesGet";
+import { fetchContinueWatching } from "../../store/slicesAndThunks/mediaSlice/mediaGet";
 
 // The one description of each personal shelf — the collections a user builds for
 // themselves, as opposed to the places everyone browses.

@@ -8,7 +8,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { ThemeProvider } from "@mui/material/styles";
 import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
 import { buildTheme } from "../../../theme/theme";
-import { PERSONAL_SHELVES } from "../../pages/personal/personalShelves";
+import { PERSONAL_SHELVES } from "../personalShelves";
 import Navbar from "./Navbar";
 
 // The bell polls on mount; NotificationBell.test.jsx is where it is tested.

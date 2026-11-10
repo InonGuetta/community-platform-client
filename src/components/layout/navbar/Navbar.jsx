@@ -28,7 +28,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import { PERSONAL_SHELVES } from "../../pages/personal/personalShelves";
+import { PERSONAL_SHELVES } from "../personalShelves";
 import { roles, roleLabels } from "../../../utilities/constant";
 import NotificationBell from "./NotificationBell";
 import useNotificationBell from "./useNotificationBell";

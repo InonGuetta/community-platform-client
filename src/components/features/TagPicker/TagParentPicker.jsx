@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import SearchIcon from "@mui/icons-material/Search";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import HomeIcon from "@mui/icons-material/Home";
-import { buildTagRelations } from "../../pages/archive/componentsArchive/tagStates";
+import { buildTagRelations } from "../../../utilities/tagStates";
 import { pathOf } from "./tagOptions";
 
 // Choosing where in the tree a new tag goes.

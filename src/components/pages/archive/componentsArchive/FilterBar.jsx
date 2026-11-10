@@ -15,7 +15,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import TuneIcon from "@mui/icons-material/Tune";
 import SearchBar from "../../../features/SearchBar/SearchBar";
 import { mediaTypeLabels } from "../../../../utilities/constant";
-import { decisionCount } from "./tagStates";
+import { decisionCount } from "../../../../utilities/tagStates";
 import { ALL_TYPES, isAllTypes, isTypePressed } from "./typeSelection";
 import { SORT_OPTIONS, DEFAULT_SORT } from "./sortOptions";
 import { DURATION_OPTIONS } from "./durationOptions";

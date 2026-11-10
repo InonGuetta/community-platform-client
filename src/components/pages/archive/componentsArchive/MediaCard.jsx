@@ -26,7 +26,7 @@ import { canManageMedia } from "../../../../utilities/permissions";
 // The same icon the like BUTTON uses, from the file that owns the pair. Its
 // header says why: a shelf and the control that fills it have to look like one
 // thing, and two independent imports stay matched only until one is changed.
-import { likeIcons } from "../../personal/personalShelves";
+import { likeIcons } from "../../../layout/personalShelves";
 
 const LikeIcon = likeIcons.on;
 

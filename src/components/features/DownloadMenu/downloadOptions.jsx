@@ -20,7 +20,7 @@ import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { saveForOffline } from "../../../store/slicesAndThunks/offlineSlice/offlineGet";
 import { selectIsOffline, selectOfflineProgressFor } from "../../../store/selectors/offlineSelectors";
 import { offlineSupported, percentOf } from "../../../utilities/offlineStore";
-import { DOWNLOADS_SHELF } from "../../pages/personal/personalShelves";
+import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
 import { transcriptCues, toVtt } from "../../../utilities/transcriptTiming";
 import { saveBlob } from "../../../utilities/saveBlob";
 

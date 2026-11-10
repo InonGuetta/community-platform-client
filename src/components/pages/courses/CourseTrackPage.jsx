@@ -15,7 +15,7 @@ import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useCourseTrackPageController } from "./useCourseTrackPageController";
 import CourseReport from "./componentsCourses/CourseReport";
-import { useDragReorder, dropIndicatorSx } from "../notebook/componentsNotebook/useDragReorder";
+import { useDragReorder, dropIndicatorSx } from "../../../utilities/useDragReorder";
 import { lessonStatus, progressText, progressPercent } from "../../../utilities/courseTrack";
 import { formatTime } from "../../../utilities/formatTime";
 

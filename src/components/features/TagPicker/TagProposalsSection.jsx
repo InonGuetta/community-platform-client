@@ -10,7 +10,7 @@ import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import ProposeTagDialog from "./ProposeTagDialog";
 import { pathOf } from "./tagOptions";
 import { useTagProposals } from "./useTagProposals";
-import { buildTagRelations } from "../../pages/archive/componentsArchive/tagStates";
+import { buildTagRelations } from "../../../utilities/tagStates";
 import { selectUserRole } from "../../../store/selectors/authSelectors";
 import { roles } from "../../../utilities/constant";
 

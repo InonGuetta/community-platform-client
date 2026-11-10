@@ -15,7 +15,7 @@ import { fetchPlaylists } from "../../../store/slicesAndThunks/savesSlice/savesG
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { statuses } from "../../../utilities/constant";
 import { countLabel } from "../../../utilities/countLabel";
-import { savedListPath } from "./personalShelves";
+import { savedListPath } from "../../layout/personalShelves";
 
 // How many more the arrow reveals each time.
 //

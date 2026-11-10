@@ -15,7 +15,7 @@ import usePublicLink from "../usePublicLink";
 // The same icons the personal shelves are labelled with — a button and the shelf
 // it fills have to look like the same thing, and two independent imports stayed
 // matched only for as long as nobody changed one of them.
-import { likeIcons, saveIcons, LIKE_COLOUR, SAVE_COLOUR } from "../../personal/personalShelves";
+import { likeIcons, saveIcons, LIKE_COLOUR, SAVE_COLOUR } from "../../../layout/personalShelves";
 
 // The like / save / download / share row, and the overlays behind it.
 //

@@ -15,7 +15,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import ProposeTagDialog from "../../../features/TagPicker/ProposeTagDialog";
 import { pathOf } from "../../../features/TagPicker/tagOptions";
-import { buildTagRelations } from "../../archive/componentsArchive/tagStates";
+import { buildTagRelations } from "../../../../utilities/tagStates";
 import { useTagProposalsAdmin } from "./useTagProposalsAdmin";
 
 // New tags lecturers asked for, waiting for an admin.

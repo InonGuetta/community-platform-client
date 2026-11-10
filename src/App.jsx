@@ -35,7 +35,7 @@ import CreatorPage from "./components/pages/creators/CreatorPage";
 import CourseTrackPage from "./components/pages/courses/CourseTrackPage";
 import GuestLessonPage from "./components/pages/guest/GuestLessonPage";
 import { CREATOR_ROUTE } from "./utilities/creatorPage";
-import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE, DOWNLOADS_SHELF } from "./components/pages/personal/personalShelves";
+import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE, DOWNLOADS_SHELF } from "./components/layout/personalShelves";
 import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
 import { claimOfflineLessons } from "./store/slicesAndThunks/offlineSlice/offlineGet";
 import { selectUser } from "./store/selectors/authSelectors";

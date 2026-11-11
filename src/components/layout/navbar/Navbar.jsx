@@ -1,5 +1,4 @@
 import { useState, useContext } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -19,8 +18,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
-import { logout } from "../../../store/slicesAndThunks/authSlices/authPost";
-import { selectUser, selectUserRole } from "../../../store/selectors/authSelectors";
 import { ColorModeContext } from "../../../theme/colorMode";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
@@ -35,7 +32,7 @@ import useNotificationBell from "./useNotificationBell";
 import useInstallPrompt from "./useInstallPrompt";
 import InstallHelpDialog from "./InstallHelpDialog";
 import InstallMobileIcon from "@mui/icons-material/InstallMobile";
-import { clearOfflineLessons } from "../../../store/slicesAndThunks/offlineSlice/offlineDelete";
+import { useAccount } from "./useAccount";
 
 // Every entry here must map to a real route in App.jsx. A link to a path with
 // no route silently falls through to the "*" catch-all (=> /archive), which
@@ -212,11 +209,9 @@ const DRAWER_TOP = BAR_HEIGHT; // start below the sticky navbar
 const DRAWER_WIDTH = { xs: "min(85vw, 320px)", md: "20.4vw" };
 
 const Navbar = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const user = useSelector(selectUser);
-  const role = useSelector(selectUserRole);
+  const { user, role, signOut } = useAccount();
 
   const links = getLinksByRole(role);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -259,10 +254,8 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     setDrawerOpen(false);
-    // Lessons saved for listening offline go with the person who saved them —
-    // the next one to use this device must not find them (PRD MOB-2).
-    await dispatch(clearOfflineLessons());
-    await dispatch(logout());
+    // The offline lessons go first, then the session — see useAccount.
+    await signOut();
     navigate("/sign-in");
   };
 

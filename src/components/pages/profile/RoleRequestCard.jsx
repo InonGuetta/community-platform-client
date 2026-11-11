@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
@@ -8,9 +6,8 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { requestRole } from "../../../store/slicesAndThunks/authSlices/authPost";
-import { selectUser } from "../../../store/selectors/authSelectors";
 import { roles, roleLabels } from "../../../utilities/constant";
+import { useRoleRequest } from "./useRoleRequest";
 
 // Asking to become a lecturer or an admin, from inside the account.
 //
@@ -28,10 +25,7 @@ import { roles, roleLabels } from "../../../utilities/constant";
 const REQUESTABLE = [roles.lecturer, roles.admin];
 
 const RoleRequestCard = () => {
-  const dispatch = useDispatch();
-  const user = useSelector(selectUser);
-  const [choice, setChoice] = useState(roles.lecturer);
-  const [submitting, setSubmitting] = useState(false);
+  const { user, choice, setChoice, submitting, submit } = useRoleRequest();
 
   // An admin has nothing to ask for. Asking for a LESSER role is a demotion and
   // the server refuses it here — role reduction is an admin action on the users
@@ -55,15 +49,6 @@ const RoleRequestCard = () => {
       </Card>
     );
   }
-
-  const submit = async () => {
-    setSubmitting(true);
-    try {
-      await dispatch(requestRole(choice));
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   // A lecturer may still ask to be an admin, so the card stays — with the role
   // they already hold removed from the choices, since the server refuses it.

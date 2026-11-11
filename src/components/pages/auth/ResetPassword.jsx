@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -11,8 +9,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Link from "@mui/material/Link";
 import AuthLayout from "./AuthLayout";
-import { resetPassword } from "../../../store/slicesAndThunks/authSlices/authPost";
-import { hebrewForError } from "../../../utilities/apiError";
+import { useResetPassword } from "./useResetPassword";
 import { floatingLabelSx, inputBaseSx, submitButtonSx, EyeIcon, EyeCrossedIcon } from "./authShared";
 
 // The other half of the reset, opened from the link in the message. The token
@@ -26,16 +23,7 @@ import { floatingLabelSx, inputBaseSx, submitButtonSx, EyeIcon, EyeCrossedIcon }
 const MIN_PASSWORD_LENGTH = 8; // mirrors MIN_PASSWORD_LENGTH in servicesAuth.js
 
 const ResetPassword = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const token = params.get("token");
-
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [show, setShow] = useState(false);
-  const [error, setError] = useState(null);
-  const [busy, setBusy] = useState(false);
+  const { token, password, setPassword, confirm, setConfirm, show, setShow, error, busy, handleSubmit } = useResetPassword();
 
   // A link with no token at all is a broken link, and saying so beats a form
   // that collects a password and then fails on submit.
@@ -54,21 +42,6 @@ const ResetPassword = () => {
 
   const mismatch = confirm.length > 0 && password !== confirm;
   const tooShort = password.length > 0 && password.length < MIN_PASSWORD_LENGTH;
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError(null);
-    setBusy(true);
-    const result = await dispatch(resetPassword({ token, password }));
-    setBusy(false);
-
-    if (result.meta.requestStatus === "fulfilled") {
-      navigate("/archive", { replace: true });
-      return;
-    }
-    // Keyed on the code, never on the server's English prose — see apiError.js.
-    setError(hebrewForError(result.payload, "איפוס הסיסמה נכשל. נסה שוב."));
-  };
 
   return (
     <AuthLayout title="בחירת סיסמה חדשה">

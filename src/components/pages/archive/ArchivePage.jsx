@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -10,17 +9,14 @@ import ArchiveBrowser from "./componentsArchive/ArchiveBrowser";
 import UploadMedia from "../../features/UploadMedia/UploadMedia";
 import SmartSearch from "../../features/SmartSearch/SmartSearch";
 import useArchivePageController from "./useArchivePageController";
-import { selectUser } from "../../../store/selectors/authSelectors";
-import { isPrivileged } from "../../../utilities/permissions";
+import { useArchiveUpload } from "./useArchiveUpload";
 
 // The filters, the cards and their dialogs are ArchiveBrowser, shared with a
 // lecturer's page (PRD ATTR-10). What is only the archive's is here: the
 // upload button, the smart-search tab and the picture beside them.
 const ArchivePage = () => {
   const archive = useArchivePageController();
-  const { isUploadOpen } = useSelector((state) => state.ui);
-  const user = useSelector(selectUser);
-  const canUpload = isPrivileged(user);
+  const { user, isUploadOpen, canUpload } = useArchiveUpload();
   const [tab, setTab] = useState(0);
 
   return (

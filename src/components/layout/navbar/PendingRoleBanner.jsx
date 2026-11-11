@@ -1,6 +1,5 @@
-import { useSelector } from "react-redux";
 import Alert from "@mui/material/Alert";
-import { selectUser } from "../../../store/selectors/authSelectors";
+import { useAccount } from "./useAccount";
 import { roleLabels, roles } from "../../../utilities/constant";
 
 // "Your request is still waiting."
@@ -21,7 +20,7 @@ import { roleLabels, roles } from "../../../utilities/constant";
 // one-line answer here rather than only in an email they may not read.
 
 const PendingRoleBanner = () => {
-  const user = useSelector(selectUser);
+  const { user } = useAccount();
 
   const status = user?.approval_status;
   const requested = user?.requested_role;

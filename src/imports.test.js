@@ -204,12 +204,11 @@ test("a page imports another page's files only where that is allowed", () => {
 
 // ── Where state lives (CLAUDE.md) ───────────────────────────────────────────
 //
-// A .jsx renders what its hook hands it. Dispatching and selecting belong in
-// the hook — the page's useXxxPageController, or a useXxx beside a component —
-// so a component can be read as layout, and its logic tested without it.
-//
-// By design, the shell that wires the store in: the Provider, the routes that
-// read who is signed in, and the snackbar that shows what the store queued.
+// A .jsx renders what its hook hands it. ESLint holds the rule
+// (no-restricted-imports on react-redux, eslint.config.js), so a breach shows
+// in the editor as it is typed; this runs the real config on a probe file, so
+// the rule cannot quietly disappear from it — and every .jsx in src/ is held
+// to it, the four by-design exceptions apart.
 const JSX_STORE_BY_DESIGN = [
   "main.jsx",
   "App.jsx",
@@ -217,31 +216,27 @@ const JSX_STORE_BY_DESIGN = [
   "components/features/Notification/GlobalSnackbar.jsx",
 ];
 
-// Written before the rule. This list only shrinks: a component whose store use
-// moves into a hook comes off it, and a new .jsx that reaches for react-redux
-// fails the test below instead of joining it.
-const JSX_STORE_NOT_YET_MOVED = [
-  "components/layout/navbar/Navbar.jsx",
-  "components/layout/navbar/PendingRoleBanner.jsx",
-  "components/pages/archive/ArchivePage.jsx",
-  "components/pages/auth/ForgotPassword.jsx",
-  "components/pages/auth/GoogleCallback.jsx",
-  "components/pages/auth/ResetPassword.jsx",
-  "components/pages/auth/SignIn.jsx",
-  "components/pages/auth/SignUp.jsx",
-  "components/pages/auth/VerifyEmail.jsx",
-  "components/pages/courses/componentsCourses/CourseReport.jsx",
-  "components/pages/courses/componentsCourses/CourseRoster.jsx",
-  "components/pages/profile/RoleRequestCard.jsx",
-];
+const PROBE = [
+  'import { useSelector } from "react-redux";',
+  "export const Probe = () => useSelector(() => null);",
+  "",
+].join("\n");
+const storeRuleHits = async (filePath, code = PROBE) => {
+  const { ESLint } = await import("eslint");
+  const [result] = await new ESLint().lintText(code, { filePath });
+  return result.messages.filter((m) => m.ruleId === "no-restricted-imports");
+};
 
-test("a .jsx does not dispatch or select, except where listed", () => {
+test("ESLint refuses react-redux in a .jsx, and only there", async () => {
+  expect(await storeRuleHits("src/components/features/Probe.jsx")).toHaveLength(1);
+  expect(await storeRuleHits("src/components/features/useProbe.js")).toHaveLength(0);
+  expect(await storeRuleHits("src/components/features/Probe.test.jsx")).toHaveLength(0);
+  for (const file of JSX_STORE_BY_DESIGN) expect(await storeRuleHits(`src/${file}`)).toHaveLength(0);
+}, 60000);
+
+test("only the by-design shell imports react-redux from a .jsx", () => {
   const usingStore = collectFiles(SRC)
     .filter((file) => file.endsWith(".jsx") && /from\s*["']react-redux["']/.test(fs.readFileSync(file, "utf8")))
     .map(rel);
-  expect(usingStore.length).toBeGreaterThan(3);
-  const listed = new Set([...JSX_STORE_BY_DESIGN, ...JSX_STORE_NOT_YET_MOVED]);
-  expect(usingStore.filter((file) => !listed.has(file))).toEqual([]);
-  // A listed file that no longer imports react-redux comes off the list.
-  expect([...listed].filter((file) => !usingStore.includes(file))).toEqual([]);
+  expect(usingStore.sort()).toEqual([...JSX_STORE_BY_DESIGN].sort());
 });

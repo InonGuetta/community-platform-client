@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -11,13 +10,10 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import { login } from "../../../store/slicesAndThunks/authSlices/authPost";
 import { authApi } from "../../../api/authApi";
-import { clearError } from "../../../store/slicesAndThunks/authSlices/authSlice";
-import { selectLoginStatus, selectAuthError } from "../../../store/selectors/authSelectors";
 import { hebrewForError } from "../../../utilities/apiError";
-import { statuses } from "../../../utilities/constant";
 import AuthLayout from "./AuthLayout";
 import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
-import { takeReturnTo } from "../../../utilities/returnTo";
+import { useAuthSubmit } from "./useAuthSubmit";
 
 // Shown when the failure carries no code we have specific Hebrew for. It must
 // never fall back to the server's own `message`: that text is English prose
@@ -26,24 +22,16 @@ import { takeReturnTo } from "../../../utilities/returnTo";
 const FALLBACK = "ההתחברות נכשלה. נסה שוב.";
 
 const SignIn = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const loginStatus = useSelector(selectLoginStatus);
-  const error = useSelector(selectAuthError);
+  const { error, isSubmitting, submit } = useAuthSubmit(login);
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => { dispatch(clearError()); }, [dispatch]);
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await dispatch(login(form));
-    if (result.meta.requestStatus === "fulfilled") navigate(takeReturnTo());
+    await submit(form);
   };
-
-  const isSubmitting = loginStatus === statuses.loading;
 
   return (
     <AuthLayout title="התחברות">

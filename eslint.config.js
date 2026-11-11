@@ -84,6 +84,32 @@ export default [
     },
   },
   {
+    // Where state lives (CLAUDE.md, CONTRIBUTING): a component renders what its
+    // hook hands it. Dispatching and selecting belong in the hook — the page's
+    // useXxxPageController, or a useXxx beside the component — so a component
+    // reads as layout and its logic is tested without it.
+    //
+    // The four exceptions are the shell that wires the store in: the Provider,
+    // the routes that read who is signed in, and the snackbar that shows what
+    // the store queued. Tests render with a Provider of their own.
+    files: ["src/**/*.jsx"],
+    ignores: [
+      "src/**/*.test.jsx",
+      "src/main.jsx",
+      "src/App.jsx",
+      "src/components/pages/auth/ProtectedRoute.jsx",
+      "src/components/features/Notification/GlobalSnackbar.jsx",
+    ],
+    rules: {
+      "no-restricted-imports": ["error", {
+        paths: [{
+          name: "react-redux",
+          message: "A .jsx renders what its hook returns: move the dispatch/select into a useXxx.js beside it (CLAUDE.md, \"Where state lives\").",
+        }],
+      }],
+    },
+  },
+  {
     // Tests import their globals explicitly, but they run under node rather
     // than in a browser.
     files: ["src/**/*.test.{js,jsx}"],

@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -9,13 +7,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { coursesApi } from "../../../../api/coursesApi";
-import { notify } from "../../../../store/slicesAndThunks/notificationSlice";
-import { reportCsv, reportFileName } from "../../../../utilities/courseReport";
-import { CSV_BOM } from "../../../../utilities/rosterCsv";
-import { saveBlob } from "../../../../utilities/saveBlob";
 import { formatHebrewDate } from "../../../../utilities/formatDate";
 import { formatTime } from "../../../../utilities/formatTime";
+import { useCourseReport } from "./useCourseReport";
 
 // "מי שמע מה" (PRD CRS-4): every student in the course against every recording,
 // in the track's order. Shown to the course's lecturer on the course page —
@@ -24,27 +18,6 @@ import { formatTime } from "../../../../utilities/formatTime";
 // A grid rather than a list per student, because the questions a lecturer asks
 // run both ways: "has Dana kept up?" is a row, "did anyone get to lesson 7?" is
 // a column. On a phone it scrolls sideways, with the names held in place.
-
-const useCourseReport = (courseId) => {
-  const dispatch = useDispatch();
-  const [state, setState] = useState({ status: "loading", report: null });
-  useEffect(() => {
-    let current = true;
-    coursesApi.getReport(courseId)
-      .then((report) => { if (current) setState({ status: "succeeded", report }); })
-      .catch(() => { if (current) setState({ status: "failed", report: null }); });
-    return () => { current = false; };
-  }, [courseId]);
-
-  const exportCsv = (courseTitle) => {
-    try {
-      saveBlob(new Blob([CSV_BOM + reportCsv(state.report)], { type: "text/csv;charset=utf-8" }), reportFileName(courseTitle));
-    } catch {
-      dispatch(notify({ message: "ייצוא הדוח נכשל", severity: "error" }));
-    }
-  };
-  return { ...state, exportCsv };
-};
 
 const nameCellSx = {
   position: "sticky",

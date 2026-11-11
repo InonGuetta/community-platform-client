@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -11,11 +10,10 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
-import { fetchPlaylists } from "../../../store/slicesAndThunks/savesSlice/savesGet";
-import { selectUser } from "../../../store/selectors/authSelectors";
 import { statuses } from "../../../utilities/constant";
 import { countLabel } from "../../../utilities/countLabel";
 import { savedListPath } from "../../layout/personalShelves";
+import { usePlaylistsSection } from "./usePlaylistsSection";
 
 // How many more the arrow reveals each time.
 //
@@ -116,18 +114,10 @@ const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
   );
 };
 
+// Layout only: what the section loads is usePlaylistsSection's.
 const PlaylistsSection = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const playlists = useSelector((state) => state.saves.playlists);
-  const status = useSelector((state) => state.saves.playlistsStatus);
-  const user = useSelector(selectUser);
-
-  // withItems, because this page draws what is INSIDE each list. The save menu
-  // calls the same thunk without it — see savesApi.listPlaylists.
-  useEffect(() => { dispatch(fetchPlaylists({ withItems: true })); }, [dispatch]);
-
-  const loading = status === statuses.loading && playlists.length === 0;
+  const { playlists, status, user, loading } = usePlaylistsSection();
 
   return (
     <Box sx={{ mt: 5 }}>

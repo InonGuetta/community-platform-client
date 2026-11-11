@@ -239,10 +239,8 @@ const JSX_STORE_NOT_YET_MOVED = [
   "components/pages/courses/componentsCourses/CourseReport.jsx",
   "components/pages/courses/componentsCourses/CourseRoster.jsx",
   "components/pages/mediaView/componentsMediaView/NotesPanel.jsx",
-  "components/pages/mediaView/componentsMediaView/SaveMenu.jsx",
   "components/pages/mediaView/componentsMediaView/ShareDialog.jsx",
   "components/pages/mediaView/componentsMediaView/SourcePreviewDialog.jsx",
-  "components/pages/personal/PlaylistsSection.jsx",
   "components/pages/profile/RoleRequestCard.jsx",
 ];
 

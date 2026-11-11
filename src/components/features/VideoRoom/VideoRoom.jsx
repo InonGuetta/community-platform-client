@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -18,7 +17,6 @@ import ParticipantGrid from "./ParticipantGrid";
 import ChatPanel from "./ChatPanel";
 import { useVideoRoom } from "./useVideoRoom";
 import { RecordButton, RecordingIndicator, ConsentDialog } from "./RecordingControls";
-import { selectUser } from "../../../store/selectors/authSelectors";
 
 // Presentation only — every piece of signalling lives in useVideoRoom, and the
 // peer bookkeeping under it in peerMesh, where it can be tested without a
@@ -36,9 +34,9 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
     messages, sendMessage,
     recording, mySocketId, recorderStatus, pendingParts, recordNotice,
     startRecording, stopRecording, answerRecording, dismissRecordNotice,
+    user,
   } = useVideoRoom({ roomToken, onEnd, sessionId });
 
-  const user = useSelector(selectUser);
   const [chatOpen, setChatOpen] = useState(false);
   // Cleared by opening the panel, so the badge counts what arrived while it was
   // shut rather than the whole conversation.

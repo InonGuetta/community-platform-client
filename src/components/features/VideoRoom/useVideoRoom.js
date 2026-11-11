@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import { createPeerMesh } from "./peerMesh";
 import { describeMediaError, mediaDevicesUnavailable } from "./mediaErrors";
 import { toggleTrackKind, hasTrackKind } from "./mediaToggles";
 import { SOCKET_EVENTS, SOCKET_LIFECYCLE } from "../../../utilities/socketEvents";
 import { logger } from "../../../utilities/logger";
+import { selectUser } from "../../../store/selectors/authSelectors";
 import { sessionsApi } from "../../../api/sessionsApi";
 import { hebrewForError } from "../../../utilities/apiError";
 import { createAudioMix, createPartUploader, createRecorder, pickRecordingType } from "./sessionRecorder";
@@ -36,6 +38,8 @@ export const NOT_RECORDING = { active: false, recordingId: null, hostSocketId: n
 const isFinalUploadError = (err) => [403, 404, 409].includes(err?.response?.status);
 
 export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
+  // Who this is — the chat marks their own messages by it.
+  const user = useSelector(selectUser);
   const [streams, setStreams] = useState([]);
   const [connected, setConnected] = useState(false);
   const [mediaError, setMediaError] = useState(null);
@@ -456,5 +460,6 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
     messages, sendMessage,
     recording, mySocketId, recorderStatus, pendingParts, recordNotice,
     startRecording, stopRecording, answerRecording, dismissRecordNotice,
+    user,
   };
 };

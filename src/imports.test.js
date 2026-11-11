@@ -221,12 +221,6 @@ const JSX_STORE_BY_DESIGN = [
 // moves into a hook comes off it, and a new .jsx that reaches for react-redux
 // fails the test below instead of joining it.
 const JSX_STORE_NOT_YET_MOVED = [
-  "components/features/DownloadMenu/downloadOptions.jsx",
-  "components/features/SmartSearch/SmartSearch.jsx",
-  "components/features/TagPicker/TagProposalsSection.jsx",
-  "components/features/TranscriptEditor/TranscriptEditor.jsx",
-  "components/features/UploadMedia/UploadMedia.jsx",
-  "components/features/VideoRoom/VideoRoom.jsx",
   "components/layout/navbar/Navbar.jsx",
   "components/layout/navbar/PendingRoleBanner.jsx",
   "components/pages/archive/ArchivePage.jsx",
@@ -238,9 +232,6 @@ const JSX_STORE_NOT_YET_MOVED = [
   "components/pages/auth/VerifyEmail.jsx",
   "components/pages/courses/componentsCourses/CourseReport.jsx",
   "components/pages/courses/componentsCourses/CourseRoster.jsx",
-  "components/pages/mediaView/componentsMediaView/NotesPanel.jsx",
-  "components/pages/mediaView/componentsMediaView/ShareDialog.jsx",
-  "components/pages/mediaView/componentsMediaView/SourcePreviewDialog.jsx",
   "components/pages/profile/RoleRequestCard.jsx",
 ];
 

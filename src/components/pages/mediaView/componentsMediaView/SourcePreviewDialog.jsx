@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -21,7 +20,7 @@ import MediaActionsBar from "./MediaActionsBar";
 import useMediaInsights from "../useMediaInsights";
 import useMediaLike from "../useMediaLike";
 import useMediaSave from "../useMediaSave";
-import { createBookmark } from "../../../../store/slicesAndThunks/bookmarksSlice/bookmarksPost";
+import { useSourcePreview } from "./useSourcePreview";
 import { mediaApi } from "../../../../api/mediaApi";
 import { mediaTypes } from "../../../../utilities/constant";
 import { formatTime } from "../../../../utilities/formatTime";
@@ -92,29 +91,12 @@ const SourcePreviewDialog = ({
   bookmarks = [],
   trailPosition, trailLength, onPrev, onNext,
 }) => {
-  const dispatch = useDispatch();
-  const [media, setMedia] = useState(null);
-  const [error, setError] = useState(false);
+  const { media, error, handleCreateBookmark, handleCreateTextBookmark } = useSourcePreview({ open, mediaId });
   const playerRef = useRef(null);
 
   // Where playback has reached, so a bookmark written here lands on the moment
   // the user is actually listening to rather than at zero.
   const [currentTime, setCurrentTime] = useState(0);
-
-  // Fetched here rather than through the media slice on purpose: that slice's
-  // selectedItem belongs to the media page, and writing this preview into it
-  // would leave the wrong lecture behind for the next visit there.
-  useEffect(() => {
-    if (!open || !mediaId) return;
-    let cancelled = false;
-    setMedia(null);
-    setError(false);
-    mediaApi
-      .getOne(mediaId)
-      .then((data) => { if (!cancelled) setMedia(data); })
-      .catch(() => { if (!cancelled) setError(true); });
-    return () => { cancelled = true; };
-  }, [open, mediaId]);
 
   // Same hook the media page uses, so the transcript, its polling while the
   // workers run, and the two AI actions behave identically here.
@@ -129,35 +111,6 @@ const SourcePreviewDialog = ({
   const seekPlayer = useCallback((seconds) => {
     playerRef.current?.seekTo(seconds);
   }, []);
-
-  // Marking a spot has to work from here too, not only from the full lecture
-  // page — this window is where the user is listening. The new bookmark goes
-  // into the shared slice, which is the same list the notebook renders behind
-  // this window, so it appears there immediately and under the right lecture.
-  const handleCreateBookmark = useCallback((timestampSeconds, note) => {
-    if (!media?.id) return;
-    dispatch(createBookmark({ mediaId: Number(media.id), timestampSeconds, note }));
-  }, [dispatch, media?.id]);
-
-  // The same act for a book, in the other coordinate space. A separate function
-  // rather than one taking either, for the reason the lecture page gives: an
-  // offset and a number of seconds are both integers, and one function accepting
-  // both is one call site away from storing a position as a timestamp.
-  const handleCreateTextBookmark = useCallback(({
-    chunkId: chunk, charPosition, charEnd, quotedText, note, pageNumber, rect,
-  }) => {
-    if (!media?.id) return;
-    return dispatch(createBookmark({
-      mediaId: Number(media.id),
-      chunkId: chunk,
-      charPosition,
-      charEnd,
-      quotedText,
-      note,
-      pageNumber,
-      rect,
-    }));
-  }, [dispatch, media?.id]);
 
   // Where the reader should scroll. Seeded from the source that was opened — a
   // bookmark in the sidebar, or a chip inside a note — and then re-set by

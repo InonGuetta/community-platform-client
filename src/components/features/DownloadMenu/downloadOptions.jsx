@@ -1,5 +1,3 @@
-import { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -13,16 +11,12 @@ import DownloadForOfflineOutlinedIcon from "@mui/icons-material/DownloadForOffli
 import OfflinePinOutlinedIcon from "@mui/icons-material/OfflinePinOutlined";
 import ClosedCaptionOutlinedIcon from "@mui/icons-material/ClosedCaptionOutlined";
 import { mediaApi } from "../../../api/mediaApi";
-import { transcriptsApi } from "../../../api/transcriptsApi";
-import { transcriptToText } from "../../../utilities/transcriptText";
 import { mediaTypes } from "../../../utilities/constant";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
-import { saveForOffline } from "../../../store/slicesAndThunks/offlineSlice/offlineGet";
-import { selectIsOffline, selectOfflineProgressFor } from "../../../store/selectors/offlineSelectors";
 import { offlineSupported, percentOf } from "../../../utilities/offlineStore";
 import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
-import { transcriptCues, toVtt } from "../../../utilities/transcriptTiming";
+import { toVtt } from "../../../utilities/transcriptTiming";
 import { saveBlob } from "../../../utilities/saveBlob";
+import { useDownloadActions } from "./useDownloadActions";
 
 // WHAT CAN BE DOWNLOADED FROM A LECTURE — stated once, for every menu that
 // offers it.
@@ -68,52 +62,12 @@ const itemSx = { textAlign: "start" };
  * it navigated to a file or finished building a PDF.
  */
 export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) => {
-  const dispatch = useDispatch();
+  const { busy, savedOffline, saving, captions, offerTranscript, handleTranscript, saveOffline } =
+    useDownloadActions({ media, transcript, hasTranscript, onClose });
   const navigate = useNavigate();
-  const [busy, setBusy] = useState(false);
-  const savedOffline = useSelector(selectIsOffline(media.id));
-  const saving = useSelector(selectOfflineProgressFor(media.id));
 
   const { label: fileLabel, Icon: FileIcon } = FILE_OPTION[media.media_type] || FILE_OPTION[mediaTypes.text];
   const isVideo = media.media_type === mediaTypes.video;
-
-  const loadedText = transcriptToText(transcript);
-  const captions = useMemo(
-    () => (media.media_type === mediaTypes.text ? null : transcriptCues(transcript)),
-    [media.media_type, transcript]
-  );
-  const offerTranscript = Boolean(loadedText) || Boolean(hasTranscript);
-
-  // Building the PDF pulls in jsPDF, the bidi tables and the Hebrew font, and may
-  // need the transcript itself first, so it is async and can fail. A failure is
-  // reported rather than swallowed: from the user's side a silent no-op is
-  // indistinguishable from a click that missed.
-  const handleTranscript = async () => {
-    setBusy(true);
-    try {
-      const text = loadedText || transcriptToText(await transcriptsApi.get(media.id));
-      if (!text) {
-        dispatch(notify({ message: "אין תמלול זמין לפריט זה.", severity: "warning" }));
-        return;
-      }
-      // Both come from the same dynamic import: the filename rule belongs with
-      // the writer that uses it, and pulling it in statically would drag the
-      // PDF module into the bundle everyone loads.
-      const { downloadHebrewPdf, safeFileBaseName } = await import("../../../utilities/hebrewPdf");
-      // One section, no heading: the transcript IS the document, and a heading
-      // repeating the title directly under it would only be the title twice.
-      await downloadHebrewPdf({
-        title: media.title,
-        sections: [{ text }],
-        filename: `${safeFileBaseName(media.title, "תמלול")}.pdf`,
-      });
-    } catch {
-      dispatch(notify({ message: "יצירת ה-PDF נכשלה. נסה שוב.", severity: "error" }));
-    } finally {
-      setBusy(false);
-      onClose?.();
-    }
-  };
 
   const items = [
     <MenuItem
@@ -170,7 +124,7 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
       );
     } else {
       items.push(
-        <MenuItem key="offline" onClick={() => { onClose?.(); dispatch(saveForOffline(media)); }} sx={itemSx}>
+        <MenuItem key="offline" onClick={() => { onClose?.(); saveOffline(); }} sx={itemSx}>
           <ListItemIcon><DownloadForOfflineOutlinedIcon fontSize="small" /></ListItemIcon>
           <ListItemText primary="שמירה להאזנה בלי רשת" />
         </MenuItem>

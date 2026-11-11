@@ -5,18 +5,19 @@ import { fetchNotes, fetchNoteBodies } from "../../../store/slicesAndThunks/note
 import { notesApi } from "../../../api/notesApi";
 import { useDebounced } from "../../../utilities/useDebounced";
 import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost";
-import { updateNote, reorderNotes } from "../../../store/slicesAndThunks/notesSlice/notesPut";
+import { reorderNotes } from "../../../store/slicesAndThunks/notesSlice/notesPut";
 import { deleteNote } from "../../../store/slicesAndThunks/notesSlice/notesDelete";
 import { fetchBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksGet";
 import { clearBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksSlice";
 import { updateBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPut";
 import { notify } from "../../../store/slicesAndThunks/notificationSlice";
 import { isSaveShortcut } from "../../../utilities/keyboard";
-import { noteBodyToHtml, noteHtmlToPlainText, sanitizeNoteHtml } from "../../../utilities/noteHtml";
+import { noteHtmlToPlainText } from "../../../utilities/noteHtml";
 import { bookmarkNames, syncChipNames } from "../../../utilities/noteSource";
 import { inReadingOrder } from "../../../utilities/bookmarks";
 import { downloadNotesPdf, downloadNotesWord, downloadNotebooks } from "../../../utilities/notesExport";
 import { SOURCE_STYLES } from "../../../utilities/noteFootnotes";
+import { useNoteEditing } from "../../features/Notes/useNoteEditing";
 
 // Everything the notebook page DOES — what it reads from the store, what it
 // dispatches, and the state of the editors, the selection, the source window and
@@ -45,23 +46,6 @@ export const useNotebookPageController = () => {
 
   const [search, setSearch] = useState("");
 
-  // EVERY note is open for editing at once, one card under the other, so a
-  // draft is per note rather than a single "the note being edited".
-  //
-  // `drafts` holds only the notes actually touched. Anything absent is read from
-  // the note itself, which means opening the notebook allocates nothing, a
-  // reload of the list cannot silently discard someone's unsaved typing, and
-  // "is this dirty" is answered by comparing against the same baseline the
-  // editor was seeded from.
-  const [drafts, setDrafts] = useState({});
-
-  // Which card the caret is in. The toolbar is one strip for a column of
-  // editors, so it needs to know which of them to talk to — and the card is
-  // outlined to say so, because a toolbar acting on an unidentifiable note is
-  // worse than no toolbar.
-  const [activeNoteId, setActiveNoteId] = useState(null);
-  const [formats, setFormats] = useState({});
-
   // The notes ticked for a bulk action, and the notes queued for deletion (one
   // from a card's own button, or the whole tick-list).
   const [selectedIds, setSelectedIds] = useState(() => new Set());
@@ -75,13 +59,6 @@ export const useNotebookPageController = () => {
   // on the user's behalf. See ExportSourcesDialog.
   const [pendingExport, setPendingExport] = useState(null);
   const [sourceStyle, setSourceStyle] = useState(SOURCE_STYLES.footnotes);
-
-  // The editors' imperative handles and the cards' DOM nodes, by note id. Refs
-  // rather than state: nothing on screen depends on them, and re-rendering the
-  // page every time one registered would be a render per card on every load.
-  const editorApis = useRef(new Map());
-  const cardNodes = useRef(new Map());
-  const [pendingScrollId, setPendingScrollId] = useState(null);
 
   // Every source opened in this visit, in the order they were opened, and which
   // of them the window is showing. Closing only moves the pointer back to -1 —
@@ -127,36 +104,11 @@ export const useNotebookPageController = () => {
     dispatch(fetchBookmarks());
   }, [dispatch]);
 
-  // What each note looks like BEFORE anyone edits it — the editor's starting
-  // value and the thing "dirty" is measured against.
-  //
-  // The body goes through noteBodyToHtml because the column holds two kinds of
-  // value: markup for anything written since the toolbar existed, and plain text
-  // with newlines for everything written before it. Computed once per change to
-  // the list rather than per render: the conversion parses HTML, and doing it
-  // for every note on every keystroke would be a parse per note per character.
   // Every chip that is a bookmark shows that bookmark's current name — this page
   // holds all of the user's bookmarks, so all of them. A rename in the sidebar,
   // under a lesson's "הערות אישיות", or with a chip's pencil is one value seen
   // everywhere. See syncChipNames.
   const names = useMemo(() => bookmarkNames(bookmarks), [bookmarks]);
-
-  // Only for notes whose body has arrived (PRD NOTE-17): the list is light, and
-  // a body is loaded as its card comes into view — see requestBodies.
-  const baselines = useMemo(() => {
-    const map = new Map();
-    for (const note of items) {
-      if (typeof note.body !== "string") continue;
-      map.set(note.id, { title: note.title || "", body: syncChipNames(noteBodyToHtml(note.body), names) });
-    }
-    return map;
-  }, [items, names]);
-
-  // null for a note whose body has not arrived — never an empty draft. The card
-  // shows the note's preview and asks for the body, rather than opening an
-  // empty editor over a note that has text; and handleSave refuses a null
-  // draft, so an empty one can never be written over the real body.
-  const draftFor = (id) => drafts[id] ?? baselines.get(id) ?? null;
 
   // ── Loading bodies (NOTE-17) ──────────────────────────────────────────────
   //
@@ -180,12 +132,29 @@ export const useNotebookPageController = () => {
   const onNeedBody = useCallback((id) => requestBodies([id]), [requestBodies]);
   useEffect(() => () => clearTimeout(bodyTimer.current), []);
 
-  const isDirty = (id) => {
-    const draft = drafts[id];
-    const baseline = baselines.get(id);
-    if (!draft || !baseline) return false;
-    return draft.title !== baseline.title || draft.body !== baseline.body;
-  };
+  // EVERY note is open for editing at once, one card under the other, so a
+  // draft is per note rather than a single "the note being edited". The drafts,
+  // the save, the untitled-note question and the caret are the lesson strip's
+  // rules too, from one hook (features/Notes/useNoteEditing).
+  //
+  // The list is light (NOTE-17): a note whose body has not arrived has no
+  // draft — draftFor is null, never an empty draft. Its card shows the note's
+  // preview and asks for the body, rather than opening an empty editor over a
+  // note that has text, and a save asked for it is answered here instead.
+  const editing = useNoteEditing({
+    notes: items,
+    names,
+    lightList: true,
+    onBodyMissing: (note) => {
+      dispatch(notify({ message: "ההערה עוד נטענת. נסה שוב בעוד רגע.", severity: "info" }));
+      requestBodies([note.id]);
+    },
+    scrollBlock: "start",
+  });
+  const {
+    drafts, setDrafts, draftFor, isDirty, activeNoteId, setActiveNoteId, formats, setFormats,
+    editorApis, cardNodes, requestSave, titlePrompt, setTitlePrompt, confirmTitle, saveActiveNote,
+  } = editing;
 
   // Searched on the WORDS, not on the stored body: a body is markup, and
   // matching it raw would find notes by their tag names ("mark", "li") and miss
@@ -266,21 +235,10 @@ export const useNotebookPageController = () => {
     [bookmarks, source]
   );
 
-  // A note created or picked from the list is scrolled to, but its card may not
-  // exist yet — a new note only has one after the store has come back and the
-  // page has re-rendered. So the request is parked and the effect below spends
-  // it as soon as there is something to scroll to.
-  useEffect(() => {
-    if (!pendingScrollId) return;
-    const node = cardNodes.current.get(pendingScrollId);
-    if (!node) return;
-    node.scrollIntoView({ behavior: "smooth", block: "start" });
-    setPendingScrollId(null);
-  }, [items, pendingScrollId]);
-
+  // A note created or picked from the list is scrolled to the top of the view
+  // (useNoteEditing parks the request until its card exists).
   const goToNote = (id) => {
-    setActiveNoteId(id);
-    setPendingScrollId(id);
+    editing.focusNote(id);
     // The card is about to be on screen; its body should be on its way already.
     requestBodies([id]);
   };
@@ -290,90 +248,15 @@ export const useNotebookPageController = () => {
     if (res.meta.requestStatus === "fulfilled") goToNote(res.payload.id);
   };
 
-  // Sanitized on the way out as well as on the way in. The editor already does
-  // it when it loses focus, and saving normally moves the focus — but "normally"
-  // is not a guarantee, and this is the one path that writes to the database.
-  //
-  // The draft is dropped only on success: a failed save must leave the user's
-  // typing exactly where it is, which is the whole reason the store's copy is
-  // not treated as the truth until it agrees.
-  const handleSave = async (note, { announce = false, title } = {}) => {
-    const draft = draftFor(note.id);
-    // Nothing to save until the body has arrived — see draftFor.
-    if (!draft) return;
-    const res = await dispatch(updateNote({
-      id: note.id,
-      // The name given in the untitled-note dialog, when there was one.
-      title: title ?? draft.title,
-      body: sanitizeNoteHtml(draft.body),
-    }));
-    if (res.meta.requestStatus === "fulfilled") {
-      setDrafts((prev) => Object.fromEntries(
-        Object.entries(prev).filter(([id]) => Number(id) !== note.id)
-      ));
-      // A click on the save button is its own receipt — the button greys out
-      // under the cursor that pressed it. A keyboard save has no button and no
-      // cursor near one, so that path says so out loud instead.
-      if (announce) dispatch(notify({ message: "ההערה נשמרה", severity: "success" }));
-    }
-  };
-
-  // A card with no title asks for one before it is saved — the same question,
-  // in the same dialog, as the notebook strip under a lesson. See
-  // UntitledNoteDialog for why it is a question and not a refusal.
-  const [titlePrompt, setTitlePrompt] = useState(null);
-
-  const requestSave = (note, options = {}) => {
-    const draft = draftFor(note.id);
-    if (!draft) {
-      dispatch(notify({ message: "ההערה עוד נטענת. נסה שוב בעוד רגע.", severity: "info" }));
-      requestBodies([note.id]);
-      return;
-    }
-    if (!draft.title.trim()) {
-      setTitlePrompt({ note, options });
-      return;
-    }
-    handleSave(note, options);
-  };
-
-  const confirmTitle = (name) => {
-    const prompt = titlePrompt;
-    setTitlePrompt(null);
-    if (prompt) handleSave(prompt.note, { ...prompt.options, title: name });
-  };
-
   // Ctrl+S / Cmd+S saves the card the caret is in, and only that one.
   //
   // Deliberately not "save everything unsaved": the notebook has every note
   // open at once, so a save-all would write notes the user may have edited an
   // hour ago and left open on purpose. The shortcut means what it means in an
   // editor — save the thing I am writing — and the card's own button is right
-  // there for anything else.
-  //
-  // Held in a ref rather than listed as dependencies. The handler reads the
-  // drafts, which change on every keystroke; an effect keyed on those would
-  // detach and re-attach a window listener as fast as the user can type.
-  const saveActiveNote = useRef(() => {});
-  useEffect(() => {
-    saveActiveNote.current = () => {
-      const note = items.find((n) => n.id === activeNoteId);
-      // Both of these used to be silent. Since the shortcut swallows the
-      // keystroke either way, a user pressing it and getting NOTHING — no save,
-      // no browser dialog, no message — has no way to tell the difference
-      // between "it saved" and "this application ignores Ctrl+S".
-      if (!note) {
-        dispatch(notify({ message: "לא נבחרה הערה. לחץ בתוך הערה ואז שמור.", severity: "info" }));
-        return;
-      }
-      if (!isDirty(note.id)) {
-        dispatch(notify({ message: "אין שינויים לשמירה", severity: "info" }));
-        return;
-      }
-      requestSave(note, { announce: true });
-    };
-  });
-
+  // there for anything else. Saving it is useNoteEditing's saveActiveNote, the
+  // lesson strip's too; when the keystroke is this page's business is decided
+  // here.
   useEffect(() => {
     const onKeyDown = (event) => {
       // Which key this is — and on which keyboard — is a question with a
@@ -392,11 +275,18 @@ export const useNotebookPageController = () => {
       // user cannot see happening.
       if (event.target?.closest?.('[role="dialog"]')) return;
 
-      saveActiveNote.current();
+      // "Nothing to save" is said by saveActiveNote. No card at all used to be
+      // silent too: since the shortcut swallows the keystroke either way, a
+      // user pressing it and getting NOTHING — no save, no browser dialog, no
+      // message — has no way to tell "it saved" from "this application ignores
+      // Ctrl+S".
+      if (!saveActiveNote()) {
+        dispatch(notify({ message: "לא נבחרה הערה. לחץ בתוך הערה ואז שמור.", severity: "info" }));
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [dispatch]);
+  }, [dispatch, saveActiveNote]);
 
   // Deleting is irreversible and the notes are the user's own writing, so both
   // the single-note button and the bulk action go through the same confirmation
@@ -427,9 +317,8 @@ export const useNotebookPageController = () => {
     // Everything the page still holds ABOUT those notes goes with them: a
     // lingering draft would be re-applied to whatever note reused the id, and a
     // lingering tick would keep a deleted note in the selection count.
-    setDrafts((prev) => Object.fromEntries(Object.entries(prev).filter(([id]) => !gone.has(Number(id)))));
+    editing.forgetNotes(gone);
     setSelectedIds((prev) => new Set([...prev].filter((id) => !gone.has(id))));
-    if (activeNoteId && gone.has(activeNoteId)) setActiveNoteId(null);
   };
 
   // Dragging notes into a new order, in the index down the side — which is now

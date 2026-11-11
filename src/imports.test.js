@@ -201,3 +201,58 @@ test("a page imports another page's files only where that is allowed", () => {
   }));
   expect([...allowed].filter((edge) => !used.has(edge))).toEqual([]);
 });
+
+// ── Where state lives (CLAUDE.md) ───────────────────────────────────────────
+//
+// A .jsx renders what its hook hands it. Dispatching and selecting belong in
+// the hook — the page's useXxxPageController, or a useXxx beside a component —
+// so a component can be read as layout, and its logic tested without it.
+//
+// By design, the shell that wires the store in: the Provider, the routes that
+// read who is signed in, and the snackbar that shows what the store queued.
+const JSX_STORE_BY_DESIGN = [
+  "main.jsx",
+  "App.jsx",
+  "components/pages/auth/ProtectedRoute.jsx",
+  "components/features/Notification/GlobalSnackbar.jsx",
+];
+
+// Written before the rule. This list only shrinks: a component whose store use
+// moves into a hook comes off it, and a new .jsx that reaches for react-redux
+// fails the test below instead of joining it.
+const JSX_STORE_NOT_YET_MOVED = [
+  "components/features/DownloadMenu/downloadOptions.jsx",
+  "components/features/SmartSearch/SmartSearch.jsx",
+  "components/features/TagPicker/TagProposalsSection.jsx",
+  "components/features/TranscriptEditor/TranscriptEditor.jsx",
+  "components/features/UploadMedia/UploadMedia.jsx",
+  "components/features/VideoRoom/VideoRoom.jsx",
+  "components/layout/navbar/Navbar.jsx",
+  "components/layout/navbar/PendingRoleBanner.jsx",
+  "components/pages/archive/ArchivePage.jsx",
+  "components/pages/auth/ForgotPassword.jsx",
+  "components/pages/auth/GoogleCallback.jsx",
+  "components/pages/auth/ResetPassword.jsx",
+  "components/pages/auth/SignIn.jsx",
+  "components/pages/auth/SignUp.jsx",
+  "components/pages/auth/VerifyEmail.jsx",
+  "components/pages/courses/componentsCourses/CourseReport.jsx",
+  "components/pages/courses/componentsCourses/CourseRoster.jsx",
+  "components/pages/mediaView/componentsMediaView/NotesPanel.jsx",
+  "components/pages/mediaView/componentsMediaView/SaveMenu.jsx",
+  "components/pages/mediaView/componentsMediaView/ShareDialog.jsx",
+  "components/pages/mediaView/componentsMediaView/SourcePreviewDialog.jsx",
+  "components/pages/personal/PlaylistsSection.jsx",
+  "components/pages/profile/RoleRequestCard.jsx",
+];
+
+test("a .jsx does not dispatch or select, except where listed", () => {
+  const usingStore = collectFiles(SRC)
+    .filter((file) => file.endsWith(".jsx") && /from\s*["']react-redux["']/.test(fs.readFileSync(file, "utf8")))
+    .map(rel);
+  expect(usingStore.length).toBeGreaterThan(3);
+  const listed = new Set([...JSX_STORE_BY_DESIGN, ...JSX_STORE_NOT_YET_MOVED]);
+  expect(usingStore.filter((file) => !listed.has(file))).toEqual([]);
+  // A listed file that no longer imports react-redux comes off the list.
+  expect([...listed].filter((file) => !usingStore.includes(file))).toEqual([]);
+});

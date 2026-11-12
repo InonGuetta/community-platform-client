@@ -19,3 +19,6 @@ export const useAccount = () => {
 
   return { user, role, signOut };
 };
+
+// The letter the bar's avatars show when there is no picture.
+export const avatarInitial = (user) => user?.display_name?.[0]?.toUpperCase() || "U";

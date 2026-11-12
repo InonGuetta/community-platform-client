@@ -7,7 +7,7 @@ import {
   wordFootnoteList,
   SOURCE_STYLES,
 } from "./noteFootnotes";
-import { formatLocalHebrewDate } from "./formatDate";
+import { formatHebrewDate } from "./formatDate";
 
 // Exporting a run of notes, as a PDF or as a Word document.
 //
@@ -32,7 +32,7 @@ import { formatLocalHebrewDate } from "./formatDate";
 const headingFor = (note) => {
   const title = note.title?.trim() || "(ללא כותרת)";
   const source = note.media_title ? ` — מתוך: ${note.media_title}` : "";
-  const date = formatLocalHebrewDate(note.updated_at);
+  const date = formatHebrewDate(note.updated_at);
   return `${title}${source}${date ? ` (${date})` : ""}`;
 };
 

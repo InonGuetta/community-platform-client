@@ -15,7 +15,7 @@ import { formatTime } from "../../../utilities/formatTime";
 import { noteHtmlToPlainText } from "../../../utilities/noteHtml";
 import { BOOKMARK_DRAG_MIME } from "../../../utilities/noteSource";
 import { iconForMediaType } from "../../../utilities/mediaIcons";
-import { formatLocalHebrewDate } from "../../../utilities/formatDate";
+import { formatHebrewDate } from "../../../utilities/formatDate";
 
 // One note, open for editing. The notebook stacks these — every note is on the
 // page at once, one under the other, and the user scrolls between them instead
@@ -225,7 +225,7 @@ const NoteCard = ({
         <Typography variant="caption" color={sourceHovering ? "success.main" : "text.secondary"}>
           {sourceHovering
             ? "שחרר כאן כדי לשבץ קישור לשיעור"
-            : (isDirty ? "יש שינויים שלא נשמרו" : `עודכן לאחרונה: ${formatLocalHebrewDate(note.updated_at)}`)}
+            : (isDirty ? "יש שינויים שלא נשמרו" : `עודכן לאחרונה: ${formatHebrewDate(note.updated_at)}`)}
         </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton color="error" onClick={onDelete} aria-label={`מחיקת ההערה ${note.title?.trim() || "ללא כותרת"}`}>

@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { formatHebrewDate, formatLocalHebrewDate, formatShortHebrewDate, formatHebrewDateTime } from "./formatDate";
+import { formatHebrewDate, formatShortHebrewDate, formatHebrewDateTime } from "./formatDate";
 
 test("a timestamp is a Hebrew calendar date", () => {
   expect(formatHebrewDate("2026-09-07T10:00:00Z")).toBe("7 בספטמבר 2026");
@@ -17,31 +17,21 @@ test("nothing for a value that is not a date", () => {
   expect(formatHebrewDate("not a date")).toBe("");
 });
 
-// ── The three gathered from their screens ───────────────────────────────────
-//
-// Moved, not changed: each must still be the private copy it replaced, for a
-// missing value, a value that is not a date and a real one alike. (Midday UTC,
-// so the calendar day is the same in any zone the suite runs in.)
-const SAMPLES = [undefined, null, "", "not a date", "2026-09-07T12:00:00Z", 1788782400000];
-
-test("formatLocalHebrewDate is the notes' copy, value for value", () => {
-  const notesCopy = (value) =>
-    value ? new Date(value).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" }) : "";
-  for (const value of SAMPLES) expect(formatLocalHebrewDate(value)).toBe(notesCopy(value));
-  expect(formatLocalHebrewDate("2026-09-07T12:00:00Z")).toBe("7 בספטמבר 2026");
-});
-
-test("formatShortHebrewDate is the tag proposals' copy, value for value", () => {
-  const proposalsCopy = (value) => (value ? new Date(value).toLocaleDateString("he-IL") : "");
-  for (const value of SAMPLES) expect(formatShortHebrewDate(value)).toBe(proposalsCopy(value));
+test("the short date follows the same rule: Israel's day, nothing for a non-date", () => {
   expect(formatShortHebrewDate("2026-09-07T12:00:00Z")).toBe("7.9.2026");
+  expect(formatShortHebrewDate("2026-09-06T23:30:00Z")).toBe("7.9.2026");
+  expect(formatShortHebrewDate(undefined)).toBe("");
+  expect(formatShortHebrewDate("not a date")).toBe("");
 });
 
-test("formatHebrewDateTime is the sessions page's and the pipeline table's copy", () => {
-  const copy = (value, empty) =>
-    value ? new Date(value).toLocaleString("he-IL", { dateStyle: "short", timeStyle: "short" }) : empty;
-  for (const value of SAMPLES) {
-    expect(formatHebrewDateTime(value)).toBe(copy(value, ""));
-    expect(formatHebrewDateTime(value, "—")).toBe(copy(value, "—"));
-  }
+// A session's time is the reader's own clock — it is typed into a
+// datetime-local field — so it is compared with the same formatting done here.
+test("a date and time is the reader's clock, with the caller's placeholder for nothing", () => {
+  const value = "2026-09-07T16:30:00Z";
+  expect(formatHebrewDateTime(value)).toBe(
+    new Date(value).toLocaleString("he-IL", { dateStyle: "short", timeStyle: "short" })
+  );
+  expect(formatHebrewDateTime(null)).toBe("");
+  expect(formatHebrewDateTime(null, "—")).toBe("—");
+  expect(formatHebrewDateTime("not a date", "—")).toBe("—");
 });

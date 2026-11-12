@@ -1,51 +1,34 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { discussionApi } from "../../../api/discussionApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const fetchConversation = createAsyncThunk(
-  "discussion/fetchConversation",
-  async (mediaId, { rejectWithValue }) => {
-    try {
-      return await discussionApi.getConversation(mediaId);
-    } catch (err) {
-      return rejectWithValue(rejectionOf(err, "Failed to load the conversation"));
-    }
+export const fetchConversation = createApiThunk(
+  "discussion/fetchConversation", "Failed to load the conversation",
+  async (mediaId) => {
+    return await discussionApi.getConversation(mediaId);
   }
 );
 
 // `query` rides in the thunk's arg, so the reducer can drop an answer that
 // arrives after the user has already typed and run a newer search.
-export const searchInLesson = createAsyncThunk(
-  "discussion/search",
-  async ({ mediaId, query }, { rejectWithValue }) => {
-    try {
-      return await discussionApi.search(mediaId, query);
-    } catch (err) {
-      return rejectWithValue(rejectionOf(err, "Search failed"));
-    }
+export const searchInLesson = createApiThunk(
+  "discussion/search", "Search failed",
+  async ({ mediaId, query }) => {
+    return await discussionApi.search(mediaId, query);
   }
 );
 
 // The caller's earlier conversations on the lesson, for the history mode.
-export const fetchHistory = createAsyncThunk(
-  "discussion/fetchHistory",
-  async (mediaId, { rejectWithValue }) => {
-    try {
-      return await discussionApi.listConversations(mediaId);
-    } catch (err) {
-      return rejectWithValue(rejectionOf(err, "Failed to load the history"));
-    }
+export const fetchHistory = createApiThunk(
+  "discussion/fetchHistory", "Failed to load the history",
+  async (mediaId) => {
+    return await discussionApi.listConversations(mediaId);
   }
 );
 
 // One earlier conversation, to read in the history.
-export const openHistoryConversation = createAsyncThunk(
-  "discussion/openHistoryConversation",
-  async ({ mediaId, conversationId }, { rejectWithValue }) => {
-    try {
-      return await discussionApi.getConversationById(mediaId, conversationId);
-    } catch (err) {
-      return rejectWithValue(rejectionOf(err, "Failed to open the conversation"));
-    }
+export const openHistoryConversation = createApiThunk(
+  "discussion/openHistoryConversation", "Failed to open the conversation",
+  async ({ mediaId, conversationId }) => {
+    return await discussionApi.getConversationById(mediaId, conversationId);
   }
 );

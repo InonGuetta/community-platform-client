@@ -7,6 +7,7 @@ import {
   wordFootnoteList,
   SOURCE_STYLES,
 } from "./noteFootnotes";
+import { formatLocalHebrewDate } from "./formatDate";
 
 // Exporting a run of notes, as a PDF or as a Word document.
 //
@@ -25,16 +26,13 @@ import {
 //   * Word keeps EVERYTHING, images included, because a .doc is opened from
 //     HTML — which is exactly what a note already is.
 
-const formatExportDate = (value) =>
-  value ? new Date(value).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" }) : "";
-
 // The heading over one note in the document: its title, and — when the note was
 // written from a lecture — which lecture, because that is often the only thing
 // that identifies an untitled note.
 const headingFor = (note) => {
   const title = note.title?.trim() || "(ללא כותרת)";
   const source = note.media_title ? ` — מתוך: ${note.media_title}` : "";
-  const date = formatExportDate(note.updated_at);
+  const date = formatLocalHebrewDate(note.updated_at);
   return `${title}${source}${date ? ` (${date})` : ""}`;
 };
 

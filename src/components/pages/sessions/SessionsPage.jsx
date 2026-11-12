@@ -22,6 +22,7 @@ import DialogActions from "../../features/Dialogs/DialogActions";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import useSessionsPageController from "./useSessionsPageController";
 import { sessionTypes, sessionTypeLabels } from "../../../utilities/constant";
+import { formatHebrewDateTime } from "../../../utilities/formatDate";
 
 // Enough of a lead that the default is a plan rather than "now", which is what
 // the unscheduled button next to it is already for.
@@ -33,11 +34,6 @@ const defaultScheduledAt = () => {
   // the offset. Subtracting it back is the standard workaround.
   return new Date(when.getTime() - when.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
-
-const formatWhen = (value) =>
-  value
-    ? new Date(value).toLocaleString("he-IL", { dateStyle: "short", timeStyle: "short" })
-    : "";
 
 const SessionsPage = () => {
   const {
@@ -110,7 +106,7 @@ const SessionsPage = () => {
                   <CardContent>
                     <Typography variant="subtitle1" fontWeight={600}>{room.title || "מפגש ללא כותרת"}</Typography>
                     <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
-                      <Chip icon={<EventIcon />} label={formatWhen(room.scheduled_at)} size="small" color="secondary" />
+                      <Chip icon={<EventIcon />} label={formatHebrewDateTime(room.scheduled_at)} size="small" color="secondary" />
                       <Chip label={`מארח: ${room.host_name}`} size="small" variant="outlined" />
                       {room.course_title && <Chip label={room.course_title} size="small" color="primary" variant="outlined" />}
                     </Box>

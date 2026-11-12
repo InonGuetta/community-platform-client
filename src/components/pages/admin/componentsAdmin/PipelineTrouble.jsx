@@ -15,6 +15,7 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import DialogTitle from "../../../features/Dialogs/DialogTitle";
 import DialogContent from "../../../features/Dialogs/DialogContent";
 import DialogActions from "../../../features/Dialogs/DialogActions";
+import { formatHebrewDateTime } from "../../../../utilities/formatDate";
 
 // What broke, and the one button that does something about it.
 //
@@ -27,8 +28,6 @@ import DialogActions from "../../../features/Dialogs/DialogActions";
 // a job that RAN and failed leaves a reason in Redis; media that was never
 // queued leaves nothing there at all, and is exactly what the reconcile sweep is
 // for.
-const whenText = (value) =>
-  value ? new Date(value).toLocaleString("he-IL", { dateStyle: "short", timeStyle: "short" }) : "—";
 
 const PipelineTrouble = ({ trouble, onReconciled }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -108,7 +107,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
                   <TableCell><Chip size="small" label={job.queue} /></TableCell>
                   <TableCell>{job.mediaId ?? "—"}</TableCell>
                   <TableCell sx={{ maxWidth: 380, wordBreak: "break-word" }}>{job.reason || "—"}</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>{whenText(job.failedAt)}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>{formatHebrewDateTime(job.failedAt, "—")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

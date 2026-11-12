@@ -15,6 +15,7 @@ import { formatTime } from "../../../utilities/formatTime";
 import { noteHtmlToPlainText } from "../../../utilities/noteHtml";
 import { BOOKMARK_DRAG_MIME } from "../../../utilities/noteSource";
 import { iconForMediaType } from "../../../utilities/mediaIcons";
+import { formatLocalHebrewDate } from "../../../utilities/formatDate";
 
 // One note, open for editing. The notebook stacks these — every note is on the
 // page at once, one under the other, and the user scrolls between them instead
@@ -31,9 +32,6 @@ import { iconForMediaType } from "../../../utilities/mediaIcons";
 // A card used to accept a dragged NOTE as well, for reordering, through a grip
 // beside its title — see useDragReorder for why that needed a handle and where
 // the feature lives now.
-
-const formatDate = (value) =>
-  value ? new Date(value).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" }) : "";
 
 // A note whose body has not arrived yet (PRD NOTE-17: the notebook's list is
 // light, and a body is fetched as its card comes near the screen). Its title
@@ -227,7 +225,7 @@ const NoteCard = ({
         <Typography variant="caption" color={sourceHovering ? "success.main" : "text.secondary"}>
           {sourceHovering
             ? "שחרר כאן כדי לשבץ קישור לשיעור"
-            : (isDirty ? "יש שינויים שלא נשמרו" : `עודכן לאחרונה: ${formatDate(note.updated_at)}`)}
+            : (isDirty ? "יש שינויים שלא נשמרו" : `עודכן לאחרונה: ${formatLocalHebrewDate(note.updated_at)}`)}
         </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton color="error" onClick={onDelete} aria-label={`מחיקת ההערה ${note.title?.trim() || "ללא כותרת"}`}>

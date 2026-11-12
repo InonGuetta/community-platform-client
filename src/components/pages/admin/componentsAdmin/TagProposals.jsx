@@ -17,6 +17,7 @@ import ProposeTagDialog from "../../../features/TagPicker/ProposeTagDialog";
 import { pathOf } from "../../../features/TagPicker/tagOptions";
 import { buildTagRelations } from "../../../../utilities/tagStates";
 import { useTagProposalsAdmin } from "./useTagProposalsAdmin";
+import { formatShortHebrewDate } from "../../../../utilities/formatDate";
 
 // New tags lecturers asked for, waiting for an admin.
 //
@@ -24,8 +25,6 @@ import { useTagProposalsAdmin } from "./useTagProposalsAdmin";
 // in one step on the server. "עריכה ואישור" opens the same dialog the lecturer
 // used, pre-filled, so a misspelling or a wrong branch is corrected before the
 // tag exists rather than renamed after items already carry it.
-
-const formatDate = (value) => (value ? new Date(value).toLocaleDateString("he-IL") : "");
 
 const TagProposals = () => {
   const { proposals, tree, error, notice, clearNotice, approve, reject } = useTagProposalsAdmin();
@@ -89,7 +88,7 @@ const TagProposals = () => {
                 תחת: {placeOf(proposal.parent_id)}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                הוצעה על ידי {proposal.proposed_by_name || "משתמש שנמחק"} · {formatDate(proposal.created_at)}
+                הוצעה על ידי {proposal.proposed_by_name || "משתמש שנמחק"} · {formatShortHebrewDate(proposal.created_at)}
               </Typography>
               {proposal.media.length > 0 && (
                 <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>

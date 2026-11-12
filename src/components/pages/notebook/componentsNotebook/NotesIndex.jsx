@@ -14,9 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { dropIndicatorSx } from "../../../../utilities/useDragReorder";
 import { statuses, listRowSx } from "../../../../utilities/constant";
 import { noteHtmlToPlainText } from "../../../../utilities/noteHtml";
-
-const formatDate = (value) =>
-  value ? new Date(value).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" }) : "";
+import { formatLocalHebrewDate } from "../../../../utilities/formatDate";
 
 // The index of the notebook: the search box, the tick-all bar with its bulk
 // delete, and one row per note — a row scrolls to its card, is ticked for a
@@ -153,7 +151,7 @@ const NotesIndex = ({
                   {(n.preview ?? noteHtmlToPlainText(n.body)).trim() || "—"}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
-                  <Typography variant="caption" sx={{ opacity: 0.7 }}>{formatDate(n.updated_at)}</Typography>
+                  <Typography variant="caption" sx={{ opacity: 0.7 }}>{formatLocalHebrewDate(n.updated_at)}</Typography>
                   {isDirty(n.id) && (
                     <Chip size="small" color="warning" label="לא נשמר" sx={{ height: 18, fontSize: "0.65rem" }} />
                   )}

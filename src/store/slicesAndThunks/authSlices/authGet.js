@@ -1,11 +1,6 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { authApi } from "../../../api/authApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const fetchMe = createAsyncThunk("auth/fetchMe", async (_, { rejectWithValue }) => {
-  try {
-    return await authApi.me();
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch user"));
-  }
+export const fetchMe = createApiThunk("auth/fetchMe", "Failed to fetch user", async () => {
+  return await authApi.me();
 });

@@ -105,7 +105,7 @@ describe("the same, action for action, as the hand-written form", () => {
 // createApiThunk — this fails on it, and on an entry here that is no longer
 // true, so the list cannot go stale.
 const HAND_WRITTEN = {
-  "store/slicesAndThunks/authSlices/authPost.js": "auth/logout — a comment inside its catch says why rejecting is fine",
+  "store/slicesAndThunks/authSlice/authPost.js": "auth/logout — a comment inside its catch says why rejecting is fine",
   "store/slicesAndThunks/mediaSlice/mediaGet.js": "media/fetchMore — reads the slice before the try",
   "store/slicesAndThunks/notesSlice/notesGet.js": "notes/fetchBodies — works out what to ask for before the try",
   "store/slicesAndThunks/notesSlice/notesPut.js": "notes/reorder — its catch also re-reads the list",

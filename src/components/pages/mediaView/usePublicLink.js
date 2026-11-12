@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaPut";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { canManageMedia } from "../../../utilities/permissions";
 import { publicApi } from "../../../api/publicApi";

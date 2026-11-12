@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionGet";
 import { startConversation, askQuestion } from "../../../store/slicesAndThunks/discussionSlice/discussionPost";
 import { clearAskError } from "../../../store/slicesAndThunks/discussionSlice/discussionSlice";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { selectDiscussionByMediaId, selectDiscussionQuota } from "../../../store/selectors/discussionSelectors";
 import { ARCHIVE_DISCUSSION } from "../../../api/discussionApi";
 import { statuses } from "../../../utilities/constant";

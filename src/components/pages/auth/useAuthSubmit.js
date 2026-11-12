@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { clearError } from "../../../store/slicesAndThunks/authSlices/authSlice";
+import { clearError } from "../../../store/slicesAndThunks/authSlice/authSlice";
 import { selectLoginStatus, selectAuthError } from "../../../store/selectors/authSelectors";
 import { statuses } from "../../../utilities/constant";
 import { takeReturnTo } from "../../../utilities/returnTo";

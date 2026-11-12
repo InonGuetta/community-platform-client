@@ -5,7 +5,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { MemoryRouter } from "react-router-dom";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 import offlineReducer from "../../../store/slicesAndThunks/offlineSlice/offlineSlice";
 import { buildTheme } from "../../../theme/theme";
 import { mediaTypeAccents } from "../../../utilities/constant";

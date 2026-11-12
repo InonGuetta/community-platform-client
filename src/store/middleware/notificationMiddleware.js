@@ -1,4 +1,4 @@
-import { notify } from "../slicesAndThunks/notificationSlice";
+import { notify } from "../slicesAndThunks/snackbarSlice";
 import { hebrewForError } from "../../utilities/apiError";
 
 // Central place that turns Redux mutation outcomes into user-facing toasts, so

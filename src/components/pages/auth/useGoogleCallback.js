@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { fetchMe } from "../../../store/slicesAndThunks/authSlices/authGet";
+import { fetchMe } from "../../../store/slicesAndThunks/authSlice/authGet";
 import { takeReturnTo } from "../../../utilities/returnTo";
 
 // What the return from Google does: Google's refusal goes back to sign-in;

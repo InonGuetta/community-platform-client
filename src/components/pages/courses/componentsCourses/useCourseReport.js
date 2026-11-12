@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { coursesApi } from "../../../../api/coursesApi";
-import { notify } from "../../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../../store/slicesAndThunks/snackbarSlice";
 import { reportCsv, reportFileName } from "../../../../utilities/courseReport";
 import { CSV_BOM } from "../../../../utilities/rosterCsv";
 import { saveBlob } from "../../../../utilities/saveBlob";

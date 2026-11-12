@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 import { publicApi } from "../../../api/publicApi";
 import GuestLessonPage from "./GuestLessonPage";
 import ShareDialog from "../mediaView/componentsMediaView/ShareDialog";

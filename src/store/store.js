@@ -1,5 +1,5 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import authReducer from "./slicesAndThunks/authSlices/authSlice";
+import authReducer from "./slicesAndThunks/authSlice/authSlice";
 import mediaReducer from "./slicesAndThunks/mediaSlice/mediaSlice";
 import sessionsReducer from "./slicesAndThunks/sessionsSlice/sessionsSlice";
 import transcriptReducer from "./slicesAndThunks/transcriptSlice/transcriptSlice";
@@ -11,13 +11,13 @@ import usersReducer from "./slicesAndThunks/usersSlice/usersSlice";
 import coursesReducer from "./slicesAndThunks/coursesSlice/coursesSlice";
 import discussionReducer from "./slicesAndThunks/discussionSlice/discussionSlice";
 import uiReducer from "./slicesAndThunks/uiSlice";
-import notificationReducer from "./slicesAndThunks/notificationSlice";
+import notificationReducer from "./slicesAndThunks/snackbarSlice";
 import inboxReducer from "./slicesAndThunks/inboxSlice/inboxSlice";
 import offlineReducer from "./slicesAndThunks/offlineSlice/offlineSlice";
 import { notificationMiddleware } from "./middleware/notificationMiddleware";
 import { loggerMiddleware } from "./middleware/loggerMiddleware";
 import { setUnauthorizedHandler } from "../utilities/axiosInstance";
-import { sessionExpired } from "./slicesAndThunks/authSlices/authSlice";
+import { sessionExpired } from "./slicesAndThunks/authSlice/authSlice";
 
 const appReducer = combineReducers({
   auth: authReducer,

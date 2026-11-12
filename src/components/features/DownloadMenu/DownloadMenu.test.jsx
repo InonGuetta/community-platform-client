@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 import offlineReducer from "../../../store/slicesAndThunks/offlineSlice/offlineSlice";
 import { mediaApi } from "../../../api/mediaApi";
 import { fakeCaches, fakeStorage } from "../../../utilities/offlineStore.fakes";

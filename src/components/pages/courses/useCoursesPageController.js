@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllCourses, fetchCourseStudents, fetchMyStudents } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
-import { createCourse, enrollStudent } from "../../../store/slicesAndThunks/coursesSlice/coursesSlicePost";
-import { updateCourse } from "../../../store/slicesAndThunks/coursesSlice/coursesSlicePut";
-import { deleteCourse, unenrollStudent } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceDelete";
-import { fetchAllUsers } from "../../../store/slicesAndThunks/usersSlice/usersSliceGet";
+import { fetchAllCourses, fetchCourseStudents, fetchMyStudents } from "../../../store/slicesAndThunks/coursesSlice/coursesGet";
+import { createCourse, enrollStudent } from "../../../store/slicesAndThunks/coursesSlice/coursesPost";
+import { updateCourse } from "../../../store/slicesAndThunks/coursesSlice/coursesPut";
+import { deleteCourse, unenrollStudent } from "../../../store/slicesAndThunks/coursesSlice/coursesDelete";
+import { fetchAllUsers } from "../../../store/slicesAndThunks/usersSlice/usersGet";
 import { selectAllCourses, selectCoursesStatus } from "../../../store/selectors/coursesSelectors";
 import { selectAllUsers } from "../../../store/selectors/usersSelectors";
 import { selectUser } from "../../../store/selectors/authSelectors";

@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
-import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
+import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
 import offlineReducer from "../../../store/slicesAndThunks/offlineSlice/offlineSlice";
 import { buildTheme } from "../../../theme/theme";
 

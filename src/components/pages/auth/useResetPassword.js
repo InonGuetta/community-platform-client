@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { resetPassword } from "../../../store/slicesAndThunks/authSlices/authPost";
+import { resetPassword } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { hebrewForError } from "../../../utilities/apiError";
 
 // What the reset link does: the token it carries, the new password typed

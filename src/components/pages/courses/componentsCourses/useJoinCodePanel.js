@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchJoinRequests } from "../../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
-import { createJoinCode, decideJoinRequest } from "../../../../store/slicesAndThunks/coursesSlice/coursesSlicePost";
-import { removeJoinCode } from "../../../../store/slicesAndThunks/coursesSlice/coursesSliceDelete";
-import { notify } from "../../../../store/slicesAndThunks/notificationSlice";
+import { fetchJoinRequests } from "../../../../store/slicesAndThunks/coursesSlice/coursesGet";
+import { createJoinCode, decideJoinRequest } from "../../../../store/slicesAndThunks/coursesSlice/coursesPost";
+import { removeJoinCode } from "../../../../store/slicesAndThunks/coursesSlice/coursesDelete";
+import { notify } from "../../../../store/slicesAndThunks/snackbarSlice";
 import { ERROR_CODES } from "../../../../utilities/apiError";
 
 // The lecturer's half of joining a course by its code (PRD ROST-9): the code,

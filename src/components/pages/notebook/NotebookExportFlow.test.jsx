@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import notesReducer from "../../../store/slicesAndThunks/notesSlice/notesSlice";
 import bookmarksReducer from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksSlice";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 
 // The path from "I want a file" to a file, which is now three steps: the export
 // button opens a menu of three, one of those opens the question about sources,

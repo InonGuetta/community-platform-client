@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
-import { verifyEmail } from "../../../store/slicesAndThunks/authSlices/authPost";
+import { verifyEmail } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { hebrewForError } from "../../../utilities/apiError";
 
 // What the verification link does: spends its single-use token once, and

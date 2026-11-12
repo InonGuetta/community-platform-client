@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateNote } from "../../../store/slicesAndThunks/notesSlice/notesPut";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { noteBodyToHtml, sanitizeNoteHtml } from "../../../utilities/noteHtml";
 import { syncChipNames } from "../../../utilities/noteSource";
 

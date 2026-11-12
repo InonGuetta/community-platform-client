@@ -5,7 +5,7 @@ import { startConversation, askQuestion, resumeConversation } from "../../../sto
 import { deleteConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionDelete";
 import { clearSearch, clearAskError, closeHistoryConversation } from "../../../store/slicesAndThunks/discussionSlice/discussionSlice";
 import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { selectDiscussionByMediaId, selectDiscussionQuota } from "../../../store/selectors/discussionSelectors";
 import { statuses } from "../../../utilities/constant";
 import { answerNote, questionBefore, conversationText, SAVE_STATES } from "../../../utilities/discussionNote";

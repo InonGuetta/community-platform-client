@@ -9,11 +9,11 @@ import {
 } from "../../../store/selectors/mediaSelectors";
 import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
 import { selectUser } from "../../../store/selectors/authSelectors";
-import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
+import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesGet";
 import { editChanges } from "../../features/UploadMedia/lessonFields";
 import { useDebounced } from "../../../utilities/useDebounced";
 import { openUpload } from "../../../store/slicesAndThunks/uiSlice";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { mediaApi } from "../../../api/mediaApi";
 import { readFilters, writeFilters } from "./archiveFilterParams";
 import { creatorPath } from "../../../utilities/creatorPage";

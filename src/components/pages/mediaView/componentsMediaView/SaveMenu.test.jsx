@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { savesApi } from "../../../../api/savesApi";
 import savesReducer from "../../../../store/slicesAndThunks/savesSlice/savesSlice";
-import notificationReducer from "../../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../../store/slicesAndThunks/snackbarSlice";
 import SaveMenu from "./SaveMenu";
 
 // Ticking a list files the lecture, closes the menu a moment later, and says in

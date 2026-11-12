@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
+import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
 import coursesReducer from "../../../store/slicesAndThunks/coursesSlice/coursesSlice";
 import usersReducer from "../../../store/slicesAndThunks/usersSlice/usersSlice";
 import { coursesApi } from "../../../api/coursesApi";

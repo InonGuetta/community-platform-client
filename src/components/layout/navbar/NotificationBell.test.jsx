@@ -6,7 +6,7 @@ import { Provider } from "react-redux";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import { ThemeProvider } from "@mui/material/styles";
-import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
+import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
 import inboxReducer from "../../../store/slicesAndThunks/inboxSlice/inboxSlice";
 import { buildTheme } from "../../../theme/theme";
 import { notificationsApi } from "../../../api/notificationsApi";

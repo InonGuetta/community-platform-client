@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import notesReducer from "../../../store/slicesAndThunks/notesSlice/notesSlice";
 import bookmarksReducer from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksSlice";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 
 // The notebook with a LIGHT list (PRD NOTE-17): the server sends a preview and
 // no body, and the page fetches bodies as it needs them. The other notebook

@@ -4,7 +4,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
+import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
 import sessionsReducer from "../../../store/slicesAndThunks/sessionsSlice/sessionsSlice";
 
 // Entering a room, which stopped being "read the token out of the URL" and

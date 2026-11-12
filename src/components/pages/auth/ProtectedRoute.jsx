@@ -6,7 +6,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { selectUser, selectAuthInitialized, selectAuthUnreachable } from "../../../store/selectors/authSelectors";
 import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
 import { rememberReturnTo } from "../../../utilities/returnTo";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 
 // Rendered instead of the page while fetchMe is still in flight. It used to be
 // `null`, which is a blank white screen for the length of a round trip — on a

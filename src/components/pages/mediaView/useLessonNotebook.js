@@ -6,7 +6,7 @@ import { deleteNote } from "../../../store/slicesAndThunks/notesSlice/notesDelet
 import { createBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPost";
 import { updateBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPut";
 import { deleteBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksDelete";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { statuses } from "../../../utilities/constant";
 import { isSaveShortcut } from "../../../utilities/keyboard";
 import {

@@ -11,7 +11,7 @@ import { canManageMedia } from "../../../utilities/permissions";
 import { mediaTypes } from "../../../utilities/constant";
 import { nextPollDelay, hasExceededPollWindow } from "../../../utilities/pollingSchedule";
 import { isAiActionBusy, aiActionOutcome, AI_ACTION_FIELDS } from "../../../utilities/aiActionState";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { hebrewForError } from "../../../utilities/apiError";
 
 // Everything behind the summary / chapters / transcript panels: fetching the

@@ -8,7 +8,7 @@ import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import { buildTheme } from "../../../theme/theme";
 import discussionReducer from "../../../store/slicesAndThunks/discussionSlice/discussionSlice";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 import { discussionApi } from "../../../api/discussionApi";
 import { placeOf, placeHref } from "../../../utilities/discussionPlace";
 import AskArchivePage from "./AskArchivePage";

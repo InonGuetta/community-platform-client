@@ -9,7 +9,7 @@ import {
   reconcileOffline,
   storeOffline,
 } from "../../../utilities/offlineStore";
-import { notify } from "../notificationSlice";
+import { notify } from "../snackbarSlice";
 import { offlineProgress } from "./offlineSlice";
 
 // Lessons kept for listening with no network (PRD MOB-2). The storage itself is

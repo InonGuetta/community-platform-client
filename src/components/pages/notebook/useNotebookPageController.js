@@ -8,7 +8,7 @@ import { deleteNote } from "../../../store/slicesAndThunks/notesSlice/notesDelet
 import { fetchBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksGet";
 import { clearBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksSlice";
 import { updateBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPut";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { isSaveShortcut } from "../../../utilities/keyboard";
 import { bookmarkNames } from "../../../utilities/noteSource";
 import { inReadingOrder } from "../../../utilities/bookmarks";

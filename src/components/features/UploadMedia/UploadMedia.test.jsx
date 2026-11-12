@@ -6,7 +6,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import uiReducer, { openUpload } from "../../../store/slicesAndThunks/uiSlice";
 import mediaReducer from "../../../store/slicesAndThunks/mediaSlice/mediaSlice";
 import coursesReducer from "../../../store/slicesAndThunks/coursesSlice/coursesSlice";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 
 // Uploading a lesson: what the dialog asks the server for when it opens, the
 // form it sends, what happens on success and on failure, and the tag question

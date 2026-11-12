@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import notesReducer from "../../../../store/slicesAndThunks/notesSlice/notesSlice";
-import notificationReducer from "../../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../../store/slicesAndThunks/snackbarSlice";
 
 // Editing a note under a lesson — the drafts, the save, Ctrl+S and deletion —
 // which the notebook page does by the same rules (NotebookEditing.test.jsx),

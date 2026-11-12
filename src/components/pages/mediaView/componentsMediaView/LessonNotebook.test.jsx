@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import notesReducer from "../../../../store/slicesAndThunks/notesSlice/notesSlice";
-import notificationReducer from "../../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../../store/slicesAndThunks/snackbarSlice";
 import { sourceChipHtml, sourceFromChip } from "../../../../utilities/noteSource";
 
 // The notebook strip under a lesson. Mocked at the API, as the notebook's own

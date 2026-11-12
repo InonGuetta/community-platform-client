@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { fetchNoteBodies } from "../../../store/slicesAndThunks/notesSlice/notesGet";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { syncChipNames } from "../../../utilities/noteSource";
 import { downloadNotesPdf, downloadNotesWord, downloadNotebooks } from "../../../utilities/notesExport";
 import { SOURCE_STYLES } from "../../../utilities/noteFootnotes";

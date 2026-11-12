@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { mediaApi } from "../../../api/mediaApi";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { hebrewForError } from "../../../utilities/apiError";
 
 // Tags the LLM proposed for this lesson (PRD ARCH-4), for whoever may tag it:

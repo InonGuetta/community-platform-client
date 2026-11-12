@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { notify } from "../../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../../store/slicesAndThunks/snackbarSlice";
 
 // What the share dialog does — the link it shares, and each way of sending
 // it — so that ShareDialog.jsx is layout only. See ShareDialog.jsx for which

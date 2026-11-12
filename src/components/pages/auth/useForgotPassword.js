@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { requestPasswordReset } from "../../../store/slicesAndThunks/authSlices/authPost";
+import { requestPasswordReset } from "../../../store/slicesAndThunks/authSlice/authPost";
 
 // What the forgot-password page does — sends the address, and tells a request
 // that never arrived from one that was handled — so that ForgotPassword.jsx is

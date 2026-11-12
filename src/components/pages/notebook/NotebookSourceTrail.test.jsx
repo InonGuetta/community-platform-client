@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import notesReducer from "../../../store/slicesAndThunks/notesSlice/notesSlice";
 import bookmarksReducer from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksSlice";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 
 // The trail of sources a notebook visit opens: every bookmark opened from the
 // sidebar joins it once (the same place again is the entry it already has),

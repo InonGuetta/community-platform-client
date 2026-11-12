@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import coursesReducer from "../../../../store/slicesAndThunks/coursesSlice/coursesSlice";
-import notificationReducer from "../../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../../store/slicesAndThunks/snackbarSlice";
 
 // A course's roster — who is in it, from the store, and the type-ahead that
 // finds someone to add (one request per pause in typing, never for a single

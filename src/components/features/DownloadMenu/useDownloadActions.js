@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { transcriptsApi } from "../../../api/transcriptsApi";
 import { transcriptToText } from "../../../utilities/transcriptText";
 import { mediaTypes } from "../../../utilities/constant";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { saveForOffline } from "../../../store/slicesAndThunks/offlineSlice/offlineGet";
 import { selectIsOffline, selectOfflineProgressFor } from "../../../store/selectors/offlineSelectors";
 import { transcriptCues } from "../../../utilities/transcriptTiming";

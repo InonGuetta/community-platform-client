@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { coursesApi } from "../../../api/coursesApi";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 
 // One course as a track (PRD CRS-1, CRS-2): its lessons in order with the
 // reader's progress, the lesson to carry on from, and — for its lecturer —

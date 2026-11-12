@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import notesReducer from "../../../store/slicesAndThunks/notesSlice/notesSlice";
 import bookmarksReducer from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksSlice";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 
 // Editing in the notebook — the drafts, the save, Ctrl+S and deletion — which
 // the strip under a lesson does by the same rules (LessonNotebookEditing.test.jsx),

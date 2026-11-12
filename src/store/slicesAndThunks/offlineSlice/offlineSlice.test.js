@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { configureStore } from "@reduxjs/toolkit";
 import offlineReducer from "./offlineSlice";
-import notificationReducer from "../notificationSlice";
+import notificationReducer from "../snackbarSlice";
 import { saveForOffline, cancelOfflineSave, loadOfflineLessons, claimOfflineLessons } from "./offlineGet";
 import { removeOfflineLesson, clearOfflineLessons } from "./offlineDelete";
 import { mediaApi } from "../../../api/mediaApi";

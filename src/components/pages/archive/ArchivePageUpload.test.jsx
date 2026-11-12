@@ -7,7 +7,7 @@ import { MemoryRouter } from "react-router-dom";
 import uiReducer from "../../../store/slicesAndThunks/uiSlice";
 import mediaReducer from "../../../store/slicesAndThunks/mediaSlice/mediaSlice";
 import coursesReducer from "../../../store/slicesAndThunks/coursesSlice/coursesSlice";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 
 // The archive page's own part: the upload button, offered to a lecturer or an
 // admin only, and the upload dialog it opens. The filters and cards

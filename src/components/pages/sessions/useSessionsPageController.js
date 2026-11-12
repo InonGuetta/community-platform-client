@@ -3,12 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchActiveSessions, fetchUpcomingSessions } from "../../../store/slicesAndThunks/sessionsSlice/sessionsGet";
 import { createSession, startSession } from "../../../store/slicesAndThunks/sessionsSlice/sessionsPost";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { selectAllRooms, selectSessionsStatus } from "../../../store/selectors/sessionsSelectors";
 import { hebrewForError } from "../../../utilities/apiError";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { isPrivileged } from "../../../utilities/permissions";
-import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
+import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesGet";
 import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
 
 const useSessionsPageController = () => {

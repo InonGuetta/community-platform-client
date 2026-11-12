@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fetchMyCourses, fetchMyJoinRequests } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceGet";
-import { joinCourseByCode } from "../../../store/slicesAndThunks/coursesSlice/coursesSlicePost";
-import { cancelJoinRequest } from "../../../store/slicesAndThunks/coursesSlice/coursesSliceDelete";
+import { fetchMyCourses, fetchMyJoinRequests } from "../../../store/slicesAndThunks/coursesSlice/coursesGet";
+import { joinCourseByCode } from "../../../store/slicesAndThunks/coursesSlice/coursesPost";
+import { cancelJoinRequest } from "../../../store/slicesAndThunks/coursesSlice/coursesDelete";
 import { ERROR_CODES, hebrewForError } from "../../../utilities/apiError";
 import { statuses } from "../../../utilities/constant";
 

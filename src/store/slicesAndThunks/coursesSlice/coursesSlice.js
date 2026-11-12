@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchAllCourses, fetchMyCourses, fetchCourseStudents, fetchMyStudents, fetchJoinRequests, fetchMyJoinRequests } from "./coursesSliceGet";
-import { createCourse, enrollStudent, createJoinCode, decideJoinRequest } from "./coursesSlicePost";
-import { updateCourse } from "./coursesSlicePut";
-import { deleteCourse, unenrollStudent, removeJoinCode, cancelJoinRequest } from "./coursesSliceDelete";
+import { fetchAllCourses, fetchMyCourses, fetchCourseStudents, fetchMyStudents, fetchJoinRequests, fetchMyJoinRequests } from "./coursesGet";
+import { createCourse, enrollStudent, createJoinCode, decideJoinRequest } from "./coursesPost";
+import { updateCourse } from "./coursesPut";
+import { deleteCourse, unenrollStudent, removeJoinCode, cancelJoinRequest } from "./coursesDelete";
 import { statuses } from "../../../utilities/constant";
 
 // `studentsByCourse` is a map rather than a list on the selected course: the

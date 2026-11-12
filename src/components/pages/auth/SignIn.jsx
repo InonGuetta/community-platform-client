@@ -8,7 +8,7 @@ import Alert from "@mui/material/Alert";
 import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import { login } from "../../../store/slicesAndThunks/authSlices/authPost";
+import { login } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { authApi } from "../../../api/authApi";
 import { hebrewForError } from "../../../utilities/apiError";
 import AuthLayout from "./AuthLayout";

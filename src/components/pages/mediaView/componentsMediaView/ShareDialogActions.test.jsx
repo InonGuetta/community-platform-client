@@ -3,7 +3,7 @@ import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import notificationReducer from "../../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../../store/slicesAndThunks/snackbarSlice";
 import ShareDialog from "./ShareDialog";
 
 // What each way of sharing sends, and what copying says when it works and when

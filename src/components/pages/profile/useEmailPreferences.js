@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { notificationsApi } from "../../../api/notificationsApi";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 
 // The mail switches on the profile page (PRD NOTIF-6) — local state, because
 // nothing else on any screen reads them. The server decides which categories

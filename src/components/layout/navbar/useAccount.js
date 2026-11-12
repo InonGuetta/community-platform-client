@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../../store/slicesAndThunks/authSlices/authPost";
+import { logout } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { clearOfflineLessons } from "../../../store/slicesAndThunks/offlineSlice/offlineDelete";
 import { selectUser, selectUserRole } from "../../../store/selectors/authSelectors";
 

@@ -4,7 +4,7 @@ import { fetchPlaylists } from "../../../../store/slicesAndThunks/savesSlice/sav
 import { createPlaylist, addMediaToPlaylist } from "../../../../store/slicesAndThunks/savesSlice/savesPost";
 import { renamePlaylist } from "../../../../store/slicesAndThunks/savesSlice/savesPatch";
 import { deletePlaylist, removeMediaFromPlaylist } from "../../../../store/slicesAndThunks/savesSlice/savesDelete";
-import { notify } from "../../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../../store/slicesAndThunks/snackbarSlice";
 import {
   selectPlaylists, selectPlaylistsStatus, selectPlaylistsForMediaId,
 } from "../../../../store/selectors/savesSelectors";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { requestRole } from "../../../store/slicesAndThunks/authSlices/authPost";
+import { requestRole } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { roles } from "../../../utilities/constant";
 

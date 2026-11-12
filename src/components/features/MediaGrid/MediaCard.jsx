@@ -37,9 +37,8 @@ const TYPE_COLOR = { video: "warning", audio: "info", text: "success" };
 // a bright white square. An icon inherits `color`, so it can follow the theme.
 const TYPE_ICON = { video: MovieRoundedIcon, audio: VolumeUpRoundedIcon, text: MenuBookRoundedIcon };
 
-// This card's ownership rule was the original — and, until the server caught up,
-// the only — place it lived. It now defers to the shared helper so the card and
-// the API cannot drift.
+// Who may delete is the shared ownership rule (utilities/permissions), the same
+// one the server enforces, so the card and the API cannot drift.
 const canDelete = canManageMedia;
 
 // The floating action buttons sit over the thumbnail, so they need their own

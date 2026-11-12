@@ -72,7 +72,7 @@ export const ERROR_CODES = {
   DOCUMENT_UNREADABLE: "DOCUMENT_UNREADABLE",
   ALREADY_QUEUED: "ALREADY_QUEUED",
   ALREADY_RUNNING: "ALREADY_RUNNING",
-  // The monthly AI budget (server lib/aiUsage.js).
+  // The monthly AI budget (server services/servicesAiUsage.js).
   AI_BUDGET_EXCEEDED: "AI_BUDGET_EXCEEDED",
 
   // The "דיון עם AI" chat.

@@ -40,8 +40,8 @@ const useMediaViewPageController = () => {
 
   const media = useSelector(selectSelectedMedia);
 
-  // Everything behind the summary / chapters / transcript tabs now lives in a
-  // hook of its own, because the notebook's source preview shows the same block
+  // Everything behind the summary / chapters / transcript tabs is a hook of its
+  // own, because the notebook's source preview shows the same block
   // and the polling loop inside it is not something to keep two copies of.
   const insights = useMediaInsights(id, media);
 

@@ -18,11 +18,10 @@ const NavLinksBar = ({ links, pathname, personalActive, personalAnchor, setPerso
       aria-expanded={Boolean(personalAnchor)}
       size="small"
       endIcon={<ExpandMoreIcon />}
-      // The arrow's spacing used to be corrected here by hand, because
-      // MUI's physical margins put it on the wrong side of the label in
-      // this unflipped RTL context. That correction now lives in the
-      // theme, as logical margins, for every button in the app — see
-      // MuiButton in theme.js.
+      // The arrow's spacing is not set here: MUI's physical margins put it
+      // on the wrong side of the label in this unflipped RTL context, and
+      // the theme corrects that, as logical margins, for every button in
+      // the app — see MuiButton in theme.js.
       sx={navButtonSx(personalActive)}
     >
       תוכן אישי

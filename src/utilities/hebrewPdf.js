@@ -2,10 +2,9 @@ import fontUrl from "../assets/fonts/NotoSansHebrew-Regular.ttf?url";
 
 // Writing a Hebrew document to PDF in the browser.
 //
-// Was transcriptPdf.js, which is what it was first written for. Nothing in it is
-// about transcripts — it is a Hebrew text writer — and the notebook's export
-// needs exactly the same two hard parts, so it is named for what it does rather
-// than for its first caller.
+// Nothing in it is about transcripts or notes — it is a Hebrew text writer, used
+// by the transcript download and the notebook's export alike, which need the
+// same two hard parts — so it is named for what it does rather than for either.
 //
 // Generating a PDF directly — rather than handing the user a print dialog —
 // means taking on the two jobs a browser's print engine normally does for us:

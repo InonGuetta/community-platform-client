@@ -167,9 +167,8 @@ export const useDragReorder = ({ ids, onReorder, disabled = false, mime = NOTE_D
   //
   // A drag has no keyboard equivalent, so a notebook that can only be
   // rearranged by dragging cannot be rearranged at all by someone who does not
-  // use a mouse. This used to live on a visible grip; the grip is gone, and the
-  // rows in the notebook's index are focusable in their own right, so the
-  // behaviour moved onto them and costs nothing on screen.
+  // use a mouse. The rows in the notebook's index are focusable in their own
+  // right, so this sits on them and costs nothing on screen.
   const keyProps = (id) => ({
     onKeyDown: (event) => {
       const delta = { ArrowUp: -1, ArrowDown: 1 }[event.key];

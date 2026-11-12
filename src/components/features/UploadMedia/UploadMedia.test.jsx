@@ -132,6 +132,17 @@ describe("the tag question after it", () => {
     expect(screen.getByTestId("suggest")).toBeInTheDocument();
   });
 
+  // As text: the thunk rejects with { message, code }, and the toast carried the
+  // object until it was turned into a sentence.
+  test("a refused save says why in Hebrew, as text", async () => {
+    mediaApi.update.mockRejectedValue(Object.assign(new Error("Request failed"), {
+      response: { status: 422, data: { message: "Validation failed", code: "SOMETHING_UNKNOWN" } },
+    }));
+    const store = await upload();
+    fireEvent.click(screen.getByText("save-tags"));
+    await waitFor(() => expect(store.getState().notification.message).toBe("שמירת התגיות נכשלה"));
+  });
+
   test("skipping closes it", async () => {
     await upload();
     fireEvent.click(screen.getByText("skip-tags"));

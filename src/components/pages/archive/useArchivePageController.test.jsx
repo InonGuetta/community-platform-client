@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { it, expect, describe, vi, beforeEach } from "vitest";
+import { it, expect, describe, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
+import { ERROR_CODES, ERROR_CODE_HE } from "../../../utilities/apiError";
 
 // The wiring between the filter and the address.
 //
@@ -337,5 +338,48 @@ describe("with the lecturer fixed by the page", () => {
     act(() => fixedApi.handleClearFilters());
     await waitFor(() => expect(lastListing().type).toBeUndefined());
     expect(lastListing().creator).toBe("הרב כהן");
+  });
+});
+
+// A refused save says why, as text. The thunk rejects with { message, code };
+// the toast is the Hebrew for a code we know, else the action's own sentence —
+// never the object itself, which React refuses to render (the toast crashed
+// the page), and never the server's English.
+describe("a refused edit says why, as text", () => {
+  const refused = (code) => ({ meta: { requestStatus: "rejected" }, payload: { message: "Validation failed", code } });
+  const answerThunksWith = (result) =>
+    dispatch.mockImplementation((action) => (typeof action === "function" ? Promise.resolve(result) : action));
+  const lastToast = () =>
+    dispatch.mock.calls.map(([a]) => a).filter((a) => a?.type === "notification/notify").at(-1)?.payload;
+  const ITEM = { id: 4, title: "שיעור", description: "", creator_name: "הרב", course_id: null, is_published: false };
+
+  afterEach(() => dispatch.mockImplementation(() => undefined));
+
+  it("publishing", async () => {
+    await open();
+    answerThunksWith(refused("SOMETHING_UNKNOWN"));
+    await act(() => api.handleTogglePublish(ITEM));
+    expect(lastToast()).toEqual({ message: "עדכון הפרסום נכשל", severity: "error" });
+  });
+
+  it("tagging", async () => {
+    await open();
+    answerThunksWith(refused("SOMETHING_UNKNOWN"));
+    await act(() => api.handleEditTagsSave(4, { tagIds: [1], tags: [] }));
+    expect(lastToast()).toEqual({ message: "עדכון התגיות נכשל", severity: "error" });
+  });
+
+  it("the details", async () => {
+    await open();
+    answerThunksWith(refused("SOMETHING_UNKNOWN"));
+    await act(() => api.handleEditDetailsSave(ITEM, { title: "שיעור חדש", description: "", creatorName: "הרב", courseId: "" }));
+    expect(lastToast()).toEqual({ message: "עדכון הפרטים נכשל", severity: "error" });
+  });
+
+  it("a code we have Hebrew for says that instead", async () => {
+    await open();
+    answerThunksWith(refused(ERROR_CODES.FORBIDDEN));
+    await act(() => api.handleTogglePublish(ITEM));
+    expect(lastToast()).toEqual({ message: ERROR_CODE_HE[ERROR_CODES.FORBIDDEN], severity: "error" });
   });
 });

@@ -10,6 +10,7 @@ import { selectAssignableCourses } from "../../../store/selectors/coursesSelecto
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { lecturerIdFor } from "./lessonFields";
 import { selectUploadProgress } from "../../../store/selectors/uiSelectors";
+import { hebrewForError } from "../../../utilities/apiError";
 
 // What the upload dialog does — what it loads when it opens, the form it
 // sends, and the tag question after an untagged upload — so that
@@ -162,7 +163,7 @@ export const useUploadMedia = ({ open }) => {
       notify(
         result.meta.requestStatus === "fulfilled"
           ? { message: "התגיות נשמרו", severity: "success" }
-          : { message: result.payload || "שמירת התגיות נכשלה", severity: "error" }
+          : { message: hebrewForError(result.payload, "שמירת התגיות נכשלה"), severity: "error" }
       )
     );
     if (result.meta.requestStatus === "fulfilled") handleSkipTags();

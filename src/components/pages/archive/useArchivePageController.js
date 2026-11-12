@@ -20,6 +20,7 @@ import { creatorPath } from "../../../utilities/creatorPage";
 import { toggleType, pressAllTypes } from "./componentsArchive/typeSelection";
 import { readSort, DEFAULT_SORT } from "./componentsArchive/sortOptions";
 import { readDuration, durationParams, lengthApplies } from "../../../utilities/durationOptions";
+import { hebrewForError } from "../../../utilities/apiError";
 import {
   buildTagRelations,
   normalizeSelection,
@@ -335,7 +336,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
       notify(
         ok
           ? { message: "התגיות עודכנו", severity: "success" }
-          : { message: result.payload || "עדכון התגיות נכשל", severity: "error" }
+          : { message: hebrewForError(result.payload, "עדכון התגיות נכשל"), severity: "error" }
       )
     );
     if (!ok) return;
@@ -368,7 +369,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
       notify(
         ok
           ? { message: "פרטי השיעור עודכנו", severity: "success" }
-          : { message: result.payload || "עדכון הפרטים נכשל", severity: "error" }
+          : { message: hebrewForError(result.payload, "עדכון הפרטים נכשל"), severity: "error" }
       )
     );
     if (!ok) return;
@@ -395,7 +396,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
       notify(
         ok
           ? { message: next ? "הפריט פורסם ומוצג לתלמידים" : "הפריט הוסתר מהתלמידים", severity: "success" }
-          : { message: result.payload || "עדכון הפרסום נכשל", severity: "error" }
+          : { message: hebrewForError(result.payload, "עדכון הפרסום נכשל"), severity: "error" }
       )
     );
   };

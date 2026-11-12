@@ -4,6 +4,7 @@ import { updateTranscript, triggerTranscriptPipeline, fixHebrewTranscript } from
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
 import { transcriptToText } from "../../../utilities/transcriptText";
 import { isAiActionBusy, aiActionOutcome } from "../../../utilities/aiActionState";
+import { hebrewForError } from "../../../utilities/apiError";
 
 // What the transcript editor does — the text being edited, kept in step with
 // the server's, and its three actions (save, start the pipeline, queue the
@@ -64,7 +65,7 @@ export const useTranscriptEditor = ({ transcript, mediaId, canEdit = false }) =>
     setSaveFeedback(
       result.meta.requestStatus === "fulfilled"
         ? "saved"
-        : result.payload || "השמירה נכשלה"
+        : hebrewForError(result.payload, "השמירה נכשלה")
     );
   };
 

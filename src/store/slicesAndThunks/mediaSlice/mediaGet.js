@@ -1,14 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { mediaApi } from "../../../api/mediaApi";
 import { rejectionOf } from "../../../utilities/apiError";
 
 // The archive's FIRST page for a filter — replaces whatever the archive held.
-export const fetchAllMedia = createAsyncThunk("media/fetchAll", async (filters = {}, { rejectWithValue }) => {
-  try {
-    return await mediaApi.getAll(filters);
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch media"));
-  }
+export const fetchAllMedia = createApiThunk("media/fetchAll", "Failed to fetch media", async (filters = {}) => {
+  return await mediaApi.getAll(filters);
 });
 
 // The next page of the SAME filter, appended. The filter, the cursor and the id
@@ -35,18 +32,10 @@ export const fetchMoreMedia = createAsyncThunk("media/fetchMore", async (_, { ge
 // are lists of media rows, but the archive is loaded and reloaded by the archive
 // page's own filters, and a shelf that borrowed that array would be emptied the
 // first time the user searched.
-export const fetchContinueWatching = createAsyncThunk("media/continueWatching", async (_, { rejectWithValue }) => {
-  try {
-    return await mediaApi.continueWatching();
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch continue watching"));
-  }
+export const fetchContinueWatching = createApiThunk("media/continueWatching", "Failed to fetch continue watching", async () => {
+  return await mediaApi.continueWatching();
 });
 
-export const fetchOneMedia = createAsyncThunk("media/fetchOne", async (id, { rejectWithValue }) => {
-  try {
-    return await mediaApi.getOne(id);
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch media item"));
-  }
+export const fetchOneMedia = createApiThunk("media/fetchOne", "Failed to fetch media item", async (id) => {
+  return await mediaApi.getOne(id);
 });

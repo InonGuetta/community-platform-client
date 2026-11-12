@@ -1,11 +1,6 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { mediaApi } from "../../../api/mediaApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const updateMedia = createAsyncThunk("media/update", async ({ id, ...payload }, { rejectWithValue }) => {
-  try {
-    return await mediaApi.update(id, payload);
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Update failed"));
-  }
+export const updateMedia = createApiThunk("media/update", "Update failed", async ({ id, ...payload }) => {
+  return await mediaApi.update(id, payload);
 });

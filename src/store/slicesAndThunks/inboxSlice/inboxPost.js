@@ -1,21 +1,12 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { notificationsApi } from "../../../api/notificationsApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const markNotificationRead = createAsyncThunk("inbox/markRead", async (id, { rejectWithValue }) => {
-  try {
-    await notificationsApi.markRead(id);
-    return id;
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to mark the notification read"));
-  }
+export const markNotificationRead = createApiThunk("inbox/markRead", "Failed to mark the notification read", async (id) => {
+  await notificationsApi.markRead(id);
+  return id;
 });
 
-export const markAllNotificationsRead = createAsyncThunk("inbox/markAllRead", async (_, { rejectWithValue }) => {
-  try {
-    await notificationsApi.markAllRead();
-    return true;
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to mark notifications read"));
-  }
+export const markAllNotificationsRead = createApiThunk("inbox/markAllRead", "Failed to mark notifications read", async () => {
+  await notificationsApi.markAllRead();
+  return true;
 });

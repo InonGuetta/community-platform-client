@@ -240,3 +240,15 @@ test("only the by-design shell imports react-redux from a .jsx", () => {
     .map(rel);
   expect(usingStore.sort()).toEqual([...JSX_STORE_BY_DESIGN].sort());
 });
+
+// Every read of the store is a named selector in store/selectors/ — so the
+// question "who reads this field" is one search, and a field renamed in a slice
+// is one file to fix rather than a hunt through hooks. An arrow written inside
+// useSelector(…) is the thing this refuses; a selector built by a named factory,
+// useSelector(selectXFor(id)), is not an arrow and passes.
+test("no hook reads the store through an inline arrow", () => {
+  const inline = collectFiles(SRC)
+    .filter((file) => /useSelector\(\s*(\(\s*\w*\s*\)|\w+)\s*=>/.test(fs.readFileSync(file, "utf8")))
+    .map(rel);
+  expect(inline).toEqual([]);
+});

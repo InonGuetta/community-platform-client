@@ -1,14 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { notesApi } from "../../../api/notesApi";
 import { rejectionOf } from "../../../utilities/apiError";
 import { fetchNotes } from "./notesGet";
 
-export const updateNote = createAsyncThunk("notes/update", async ({ id, title, body }, { rejectWithValue }) => {
-  try {
-    return await notesApi.update(id, { title, body });
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to update note"));
-  }
+export const updateNote = createApiThunk("notes/update", "Failed to update note", async ({ id, title, body }) => {
+  return await notesApi.update(id, { title, body });
 });
 
 // Dragging a note to a new place in the notebook.

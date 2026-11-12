@@ -1,14 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { notesApi } from "../../../api/notesApi";
 import { rejectionOf } from "../../../utilities/apiError";
 
 // The notebook's list — light: a preview per note, no bodies (PRD NOTE-17).
-export const fetchNotes = createAsyncThunk("notes/fetch", async (_, { rejectWithValue }) => {
-  try {
-    return await notesApi.list();
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch notes"));
-  }
+export const fetchNotes = createApiThunk("notes/fetch", "Failed to fetch notes", async () => {
+  return await notesApi.list();
 });
 
 // The bodies of these notes, merged into the list. Asks only for the ones not
@@ -27,10 +24,6 @@ export const fetchNoteBodies = createAsyncThunk("notes/fetchBodies", async (ids,
 // One lesson's notes, whole — the lesson page's "הערות אישיות". Replaces the
 // list: that page shows these and nothing else, and the notebook page fetches
 // its own list on arrival.
-export const fetchNotesAboutMedia = createAsyncThunk("notes/fetchAboutMedia", async (mediaId, { rejectWithValue }) => {
-  try {
-    return await notesApi.aboutMedia(mediaId);
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch notes"));
-  }
+export const fetchNotesAboutMedia = createApiThunk("notes/fetchAboutMedia", "Failed to fetch notes", async (mediaId) => {
+  return await notesApi.aboutMedia(mediaId);
 });

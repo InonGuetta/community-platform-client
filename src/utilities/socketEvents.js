@@ -28,7 +28,6 @@ export const SOCKET_EVENTS = {
   SESSION_ENDED: "session-ended",
   JOIN_ERROR: "join-error",
   SESSION_ERROR: "session-error",
-  CHAT_HISTORY: "chat-history",
   RECORDING_STATE: "recording-state",
 
   // WebRTC signalling, relayed in both directions

@@ -195,7 +195,6 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
     // optimistic local copy, and therefore nothing to reconcile when the two
     // orders disagree.
     on(SOCKET_EVENTS.CHAT_MESSAGE, (message) => setMessages((prev) => [...prev, message]));
-    on(SOCKET_EVENTS.CHAT_HISTORY, (history) => setMessages(Array.isArray(history) ? history : []));
 
     // Who is being recorded. A host still recording that hears the room is NOT
     // being recorded by it — its connection dropped and the server forgot —

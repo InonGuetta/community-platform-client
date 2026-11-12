@@ -1,14 +1,9 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { coursesApi } from "../../../api/coursesApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const updateCourse = createAsyncThunk(
-  "courses/update",
-  async ({ id, ...payload }, { rejectWithValue }) => {
-    try {
-      return await coursesApi.update(id, payload);
-    } catch (err) {
-      return rejectWithValue(rejectionOf(err, "Failed to update course"));
-    }
+export const updateCourse = createApiThunk(
+  "courses/update", "Failed to update course",
+  async ({ id, ...payload }) => {
+    return await coursesApi.update(id, payload);
   }
 );

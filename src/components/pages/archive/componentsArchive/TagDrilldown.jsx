@@ -19,7 +19,7 @@ import {
   tagStateOf,
   isPartiallyIncluded,
   countUnder,
-} from "./tagStates";
+} from "../../../../utilities/tagStates";
 
 // Choosing a tag by walking down the taxonomy, one level at a time.
 //
@@ -263,6 +263,7 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
         placeholder="חיפוש תגית..."
         sx={{ alignSelf: "center", width: "100%", maxWidth: 260 }}
         slotProps={{
+          htmlInput: { "aria-label": "חיפוש תגית" },
           input: {
             startAdornment: (
               <InputAdornment position="start">

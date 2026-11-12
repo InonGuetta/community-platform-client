@@ -1,0 +1,250 @@
+import { useEffect, useRef, useState } from "react";
+import Skeleton from "@mui/material/Skeleton";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SaveIcon from "@mui/icons-material/Save";
+import RichNoteEditor from "./RichNoteEditor";
+import { hasDragType } from "../../../utilities/useDragReorder";
+import { formatTime } from "../../../utilities/formatTime";
+import { noteHtmlToPlainText } from "../../../utilities/noteHtml";
+import { BOOKMARK_DRAG_MIME } from "../../../utilities/noteSource";
+import { iconForMediaType } from "../../../utilities/mediaIcons";
+import { formatHebrewDate } from "../../../utilities/formatDate";
+
+// One note, open for editing. The notebook stacks these — every note is on the
+// page at once, one under the other, and the user scrolls between them instead
+// of selecting one at a time.
+//
+// It owns nothing. The draft, the dirty flag and the editor's handle all belong
+// to the page, because the toolbar at the top of the page has to reach whichever
+// of these the caret is currently in — and a card that kept its own state would
+// be invisible to it. The one exception is below: whether a bookmark is
+// currently hovering over THIS card is nothing any other component could want.
+//
+// One thing can be dropped on a card: a BOOKMARK from the sidebar, which is
+// written into this note's body as a source chip at the point it was dropped.
+// A card used to accept a dragged NOTE as well, for reordering, through a grip
+// beside its title — see useDragReorder for why that needed a handle and where
+// the feature lives now.
+
+// A note whose body has not arrived yet (PRD NOTE-17: the notebook's list is
+// light, and a body is fetched as its card comes near the screen). Its title
+// and the opening of its text, in a card the same shape as the real one, so the
+// column does not jump when the editor replaces it.
+//
+// It asks for its body once, when it comes within a screen's reach — or at
+// once, where IntersectionObserver does not exist. `cardRef` is attached here
+// too: jumping to a note from the list scrolls to this card, and arriving there
+// is what brings the body in.
+const NotePlaceholder = ({ note, cardRef, onNeedBody }) => {
+  const node = useRef(null);
+  useEffect(() => {
+    const element = node.current;
+    if (!element || !onNeedBody) return undefined;
+    if (typeof IntersectionObserver === "undefined") {
+      onNeedBody(note.id);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          onNeedBody(note.id);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [note.id, onNeedBody]);
+
+  return (
+    <Paper
+      ref={(element) => {
+        node.current = element;
+        if (typeof cardRef === "function") cardRef(element);
+      }}
+      elevation={0}
+      aria-busy="true"
+      sx={{ p: 3, borderRadius: 3, display: "flex", flexDirection: "column", gap: 2, border: "1px solid", borderColor: "divider", scrollMarginTop: { xs: 80, md: 8 } }}
+    >
+      <Typography sx={{ fontSize: "1.5rem", fontWeight: 700 }}>{note.title?.trim() || "(ללא כותרת)"}</Typography>
+      <Typography color="text.secondary" sx={{ overflowWrap: "anywhere" }}>{note.preview || ""}</Typography>
+      <Skeleton variant="rounded" height={120} />
+    </Paper>
+  );
+};
+
+const NoteCard = ({
+  note, draft, isDirty, isActive,
+  // Ticked in the list down the side, for a bulk delete or an export.
+  isSelected = false,
+  editorRef, cardRef,
+  onDraftChange, onFormatsChange, onFocus, onError,
+  onSave, onDelete, onOpenSource, onDropSource, onRenameSource,
+  editorMinHeight,
+  // Asked when the body is needed — see NotePlaceholder.
+  onNeedBody,
+}) => {
+  const [sourceHovering, setSourceHovering] = useState(false);
+
+  // No draft means no body yet: the page passes null rather than an empty one
+  // (an empty draft, saved, would erase the note). Nothing below can run on it.
+  if (!draft) return <NotePlaceholder note={note} cardRef={cardRef} onNeedBody={onNeedBody} />;
+
+  const handleDragOver = (event) => {
+    if (!hasDragType(event.dataTransfer, BOOKMARK_DRAG_MIME)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    if (!sourceHovering) setSourceHovering(true);
+  };
+
+  const handleDrop = (event) => {
+    const payload = event.dataTransfer.getData(BOOKMARK_DRAG_MIME);
+    if (!payload) return;
+    // The browser's own handling of a drop into a contentEditable is what would
+    // otherwise insert something here; this is the note's body, so it is ours
+    // to write.
+    event.preventDefault();
+    setSourceHovering(false);
+    try {
+      // The point is passed through so the chip lands where the pointer let go
+      // rather than at the end of the note — see RichNoteEditor.insertSource.
+      onDropSource?.(JSON.parse(payload), { x: event.clientX, y: event.clientY });
+    } catch {
+      // A payload this card cannot read is not this card's problem to report:
+      // nothing was inserted, which is exactly what a drop of nonsense should
+      // do. The only wrong behaviour would be writing the raw string in.
+    }
+  };
+
+  return (
+    <Paper
+      ref={cardRef}
+      elevation={0}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      // relatedTarget is null when the pointer leaves for a child of this card,
+      // which happens constantly while crossing the editor; without the
+      // containment check the highlight would flicker off on every internal
+      // boundary the drag crosses.
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setSourceHovering(false);
+      }}
+      sx={{
+        p: 3, borderRadius: 3, display: "flex", flexDirection: "column", gap: 2,
+        border: "1px solid",
+        // The card the caret is in is outlined, because with a column of them the
+        // toolbar at the top would otherwise be acting on something the user
+        // cannot identify. A card a bookmark is hovering over says so more
+        // loudly still: it is about to be written into.
+        borderColor: sourceHovering ? "success.main" : (isActive || isSelected ? "primary.main" : "divider"),
+        // A ticked note gets a thick frame, so the notes a bulk action is about
+        // to act on can be seen in the column itself, not only as ticks in the
+        // list beside it. Drawn as an outer ring on top of the 1px border rather
+        // than by widening the border, so ticking a note does not shift its
+        // contents by a pixel. A bookmark hovering over the card still wins.
+        ...(sourceHovering
+          ? { boxShadow: "0 0 0 3px rgba(46,125,50,0.18)" }
+          : isSelected && { boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}` }),
+        transition: "border-color 0.2s, box-shadow 0.2s",
+        // Where a card lands when the list scrolls to it. In the desktop layout
+        // the column is its own scroll container and a small inset is enough; on
+        // a phone the PAGE scrolls, and the sticky navbar would otherwise cover
+        // the card's first line.
+        scrollMarginTop: { xs: 80, md: 8 },
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <TextField
+          value={draft.title}
+          onChange={(e) => onDraftChange({ ...draft, title: e.target.value })}
+          onFocus={onFocus}
+          placeholder="כותרת ההערה"
+          variant="standard"
+          fullWidth
+          // The placeholder is gone once a title is typed; this name stays.
+          inputProps={{ "aria-label": "כותרת ההערה" }}
+          InputProps={{ disableUnderline: true, sx: { fontSize: "1.5rem", fontWeight: 700 } }}
+        />
+      </Box>
+
+      {note.media_id && (() => {
+        // The same picture the bookmark sidebar draws for this lecture. It was a
+        // play triangle for everything, including notes taken on a filmed shiur
+        // and on a sefer — see utilities/mediaIcons.
+        const SourceIcon = iconForMediaType(note.media_type);
+        return (
+        <Button
+          // The source opens in a floating dialog over the notebook rather than
+          // navigating: the user is writing *about* it, so the note has to stay
+          // where it is — and an unsaved draft would be lost the moment this page
+          // unmounted.
+          onClick={() => onOpenSource({
+            mediaId: note.media_id,
+            timestampSeconds: note.timestamp_seconds,
+            mediaTitle: note.media_title,
+            // The draft, not the saved note: what is on screen is what the user is
+            // thinking about, saved or not. As text, because the source window
+            // prints it in a header line.
+            noteText: noteHtmlToPlainText(draft.body) || draft.title,
+          })}
+          startIcon={<SourceIcon />}
+          size="small"
+          sx={{ alignSelf: "flex-start", textTransform: "none" }}
+        >
+          {`מתוך: ${note.media_title || "שיעור"}${note.timestamp_seconds != null ? ` · ${formatTime(note.timestamp_seconds)}` : ""}`}
+        </Button>
+        );
+      })()}
+
+      <RichNoteEditor
+        ref={editorRef}
+        html={draft.body}
+        onChange={(body) => onDraftChange({ ...draft, body })}
+        onFormatsChange={onFormatsChange}
+        onFocus={onFocus}
+        onError={onError}
+        // A source chip inside the body opens the same dialog the button above
+        // does. They are the same idea at two scales: this note came from a
+        // lecture, and this SENTENCE came from a moment in one.
+        onOpenSource={onOpenSource}
+        // A chip that is a bookmark is renamed by renaming the bookmark.
+        onRenameSource={onRenameSource}
+        minHeight={editorMinHeight}
+        placeholder="כתוב כאן את ההערה שלך... אפשר גם להדביק תמונות ולגרור לכאן סימניות."
+      />
+
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Typography variant="caption" color={sourceHovering ? "success.main" : "text.secondary"}>
+          {sourceHovering
+            ? "שחרר כאן כדי לשבץ קישור לשיעור"
+            : (isDirty ? "יש שינויים שלא נשמרו" : `עודכן לאחרונה: ${formatHebrewDate(note.updated_at)}`)}
+        </Typography>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <IconButton color="error" onClick={onDelete} aria-label={`מחיקת ההערה ${note.title?.trim() || "ללא כותרת"}`}>
+            <DeleteIcon />
+          </IconButton>
+          {/* Ctrl+S does the same thing for the card the caret is in — see the
+              keyboard handler in NotebookPage. */}
+          <Tooltip title="שמירה (Ctrl+S)">
+            <span>
+              <Button variant="contained" startIcon={<SaveIcon />} onClick={onSave} disabled={!isDirty}
+                sx={{ borderRadius: 2, fontWeight: 700 }}>
+                שמירה
+              </Button>
+            </span>
+          </Tooltip>
+        </Box>
+      </Box>
+    </Paper>
+  );
+};
+
+export default NoteCard;

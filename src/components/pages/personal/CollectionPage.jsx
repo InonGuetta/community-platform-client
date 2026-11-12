@@ -1,9 +1,10 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import MediaGrid from "../archive/componentsArchive/MediaGrid";
+import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import PlaylistsSection from "./PlaylistsSection";
 import { countLabel } from "../../../utilities/countLabel";
 import { useCollectionPageController } from "./useCollectionPageController";
+import { creatorPath } from "../../../utilities/creatorPage";
 
 // One page for every personal collection, driven by the shelf handed to it.
 //
@@ -47,6 +48,7 @@ const CollectionPage = ({ shelf }) => {
           items={shown}
           status={status}
           onView={(id) => navigate(`/media/${id}`)}
+          onOpenCreator={(name) => navigate(creatorPath(name))}
           user={user}
           emptyMessage={emptyMessage}
           emptyActionLabel="לארכיון"

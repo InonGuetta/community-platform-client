@@ -1,21 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchNotes } from "../../../store/slicesAndThunks/notesSlice/notesGet";
+import { fetchNotesAboutMedia } from "../../../store/slicesAndThunks/notesSlice/notesGet";
 import { createNote } from "../../../store/slicesAndThunks/notesSlice/notesPost";
-import { updateNote } from "../../../store/slicesAndThunks/notesSlice/notesPut";
 import { deleteNote } from "../../../store/slicesAndThunks/notesSlice/notesDelete";
 import { createBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPost";
 import { updateBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPut";
 import { deleteBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksDelete";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { statuses } from "../../../utilities/constant";
 import { isSaveShortcut } from "../../../utilities/keyboard";
-import { noteBodyToHtml, sanitizeNoteHtml } from "../../../utilities/noteHtml";
 import {
   isNoteAboutMedia, sourceChipHtml, referencesBlockHtml, GENERAL_REFERENCE_LABEL,
-  bookmarkNames, syncChipNames,
+  bookmarkNames,
 } from "../../../utilities/noteSource";
 import { isPageBookmark } from "../../../utilities/bookmarks";
+import { useNoteEditing } from "../../features/Notes/useNoteEditing";
+import { selectNotesState } from "../../../store/selectors/notesSelectors";
 
 // Where the bookmark that accompanies a new lesson note sits.
 //
@@ -45,10 +45,12 @@ export const generalBookmarkPlace = ({ isText, currentTime, page }) => {
 // when clicked: a chip pointing at the lesson already on screen moves the player
 // or the reader instead of opening a second copy of it in a window.
 //
-// The draft handling is deliberately the notebook page's, rule for rule — drafts
-// only for notes actually touched, dropped only on a successful save, the body
-// sanitised on the way out. A second notebook with its own idea of when typing
-// is safe to discard is how a user loses a paragraph in one of the two.
+// The draft handling IS the notebook page's — drafts only for notes actually
+// touched, dropped only on a successful save, the body sanitised on the way
+// out — from one hook both use (features/Notes/useNoteEditing). A second
+// notebook with its own idea of when typing is safe to discard is how a user
+// loses a paragraph in one of the two.
+//
 // One empty list for every render that has none, so the names memoised from it
 // below are not rebuilt — and every note re-synced — on each render.
 const NO_BOOKMARKS = [];
@@ -57,14 +59,18 @@ const useLessonNotebook = ({
   media, isText, currentTime, readerPage = null, bookmarks = NO_BOOKMARKS, onSeek, onJumpTo,
 }) => {
   const dispatch = useDispatch();
-  const { items, status } = useSelector((state) => state.notes);
+  const { items, status } = useSelector(selectNotesState);
   const mediaId = media?.id;
 
+  // Every visit, not once: a note written in /notebook since this slice was
+  // last filled would otherwise be missing here until a full reload.
+  //
+  // Only THIS lesson's notes, whole (PRD NOTE-17). The server decides which
+  // notes are about it — attached, or quoting it with a chip — so the page no
+  // longer has to load every body in the notebook to find out.
   useEffect(() => {
-    // Every visit, not once: a note written in /notebook since this slice was
-    // last filled would otherwise be missing here until a full reload.
-    dispatch(fetchNotes());
-  }, [dispatch]);
+    if (mediaId) dispatch(fetchNotesAboutMedia(mediaId));
+  }, [dispatch, mediaId]);
 
   // A note created here comes back from the server without the joined
   // media_title and media_type (the INSERT returns the bare row), so its card
@@ -78,53 +84,28 @@ const useLessonNotebook = ({
     [items, mediaId, media?.title, media?.media_type]
   );
 
-  const [drafts, setDrafts] = useState({});
-  const [activeNoteId, setActiveNoteId] = useState(null);
-  const [formats, setFormats] = useState({});
+  // Every chip that is one of this lesson's bookmarks shows that bookmark's
+  // current name, however the note was saved — so a rename under "הערות
+  // אישיות" appears in the note the moment it is made. See syncChipNames.
+  const names = useMemo(() => bookmarkNames(bookmarks), [bookmarks]);
+
+  // The drafts, the save, the untitled-note question and the caret — the
+  // notebook page's rules, from the same hook (features/Notes/useNoteEditing).
+  // A new card is scrolled to the middle of the strip.
+  const editing = useNoteEditing({ notes, names, scrollBlock: "center" });
+  const {
+    draftFor, isDirty, activeNoteId, setActiveNoteId, editorApis, cardNodes, setDrafts, setFormats,
+  } = editing;
+
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [preview, setPreview] = useState(null);
-  const editorApis = useRef(new Map());
-  const cardNodes = useRef(new Map());
-  const [pendingScrollId, setPendingScrollId] = useState(null);
 
   // Leaving for another lesson starts clean: a toolbar still pointed at a note
   // from the previous lesson would format a card that is no longer on screen.
   useEffect(() => {
     setActiveNoteId(null);
     setPreview(null);
-  }, [mediaId]);
-
-  // Every chip that is one of this lesson's bookmarks shows that bookmark's
-  // current name, however the note was saved — so a rename under "הערות
-  // אישיות" appears in the note the moment it is made. See syncChipNames.
-  const names = useMemo(() => bookmarkNames(bookmarks), [bookmarks]);
-
-  const baselines = useMemo(() => {
-    const map = new Map();
-    for (const note of notes) {
-      map.set(note.id, { title: note.title || "", body: syncChipNames(noteBodyToHtml(note.body), names) });
-    }
-    return map;
-  }, [notes, names]);
-
-  const draftFor = (id) => drafts[id] ?? baselines.get(id) ?? { title: "", body: "" };
-
-  const isDirty = (id) => {
-    const draft = drafts[id];
-    const baseline = baselines.get(id);
-    if (!draft || !baseline) return false;
-    return draft.title !== baseline.title || draft.body !== baseline.body;
-  };
-
-  // Same parking as the notebook page: a new note's card exists only after the
-  // store answers and the list re-renders.
-  useEffect(() => {
-    if (!pendingScrollId) return;
-    const node = cardNodes.current.get(pendingScrollId);
-    if (!node) return;
-    node.scrollIntoView?.({ behavior: "smooth", block: "center" });
-    setPendingScrollId(null);
-  }, [notes, pendingScrollId]);
+  }, [mediaId, setActiveNoteId]);
 
   // A new note opens with one line to write on and, under it, a reference back
   // to where the user is: the second the player is at, or the page the reader
@@ -175,45 +156,7 @@ const useLessonNotebook = ({
       if (bookmarkId) dispatch(deleteBookmark(bookmarkId));
       return;
     }
-    setActiveNoteId(res.payload.id);
-    setPendingScrollId(res.payload.id);
-  };
-
-  // `title` overrides the draft's — it is the name given in the untitled-note
-  // dialog, which has not been through the card's own field.
-  const handleSave = async (note, { announce = false, title } = {}) => {
-    const draft = draftFor(note.id);
-    const res = await dispatch(updateNote({
-      id: note.id,
-      title: title ?? draft.title,
-      body: sanitizeNoteHtml(draft.body),
-    }));
-    if (res.meta.requestStatus === "fulfilled") {
-      setDrafts((prev) => Object.fromEntries(
-        Object.entries(prev).filter(([id]) => Number(id) !== note.id)
-      ));
-      if (announce) dispatch(notify({ message: "ההערה נשמרה", severity: "success" }));
-    }
-  };
-
-  // Every save goes through here, the button and Ctrl+S alike: a card with no
-  // title asks for one first (UntitledNoteDialog), and saves as it is only when
-  // the user says so.
-  const [titlePrompt, setTitlePrompt] = useState(null);
-
-  const requestSave = (note, options = {}) => {
-    if (!draftFor(note.id).title.trim()) {
-      setTitlePrompt({ note, options });
-      return;
-    }
-    handleSave(note, options);
-  };
-
-  const confirmTitle = (name) => {
-    const prompt = titlePrompt;
-    setTitlePrompt(null);
-    if (!prompt) return;
-    handleSave(prompt.note, { ...prompt.options, title: name });
+    editing.focusNote(res.payload.id);
   };
 
   // Waits for the delete before forgetting the draft — see the notebook page's
@@ -224,8 +167,7 @@ const useLessonNotebook = ({
     if (!note) return;
     const res = await dispatch(deleteNote(note.id));
     if (res.meta.requestStatus !== "fulfilled") return;
-    setDrafts((prev) => Object.fromEntries(Object.entries(prev).filter(([id]) => Number(id) !== note.id)));
-    if (activeNoteId === note.id) setActiveNoteId(null);
+    editing.forgetNotes([note.id]);
   };
 
   // A chip, or a card's "מתוך" button.
@@ -261,29 +203,16 @@ const useLessonNotebook = ({
   // keystroke is only taken when there IS such a card: this is a lesson page
   // first, and swallowing the browser's shortcut for someone who never touched
   // a note would be this strip reaching outside itself.
-  const saveActiveNote = useRef(() => false);
-  useEffect(() => {
-    saveActiveNote.current = () => {
-      const note = notes.find((n) => n.id === activeNoteId);
-      if (!note) return false;
-      if (!isDirty(note.id)) {
-        dispatch(notify({ message: "אין שינויים לשמירה", severity: "info" }));
-      } else {
-        requestSave(note, { announce: true });
-      }
-      return true;
-    };
-  });
-
+  const { saveActiveNote } = editing;
   useEffect(() => {
     const onKeyDown = (event) => {
       if (!isSaveShortcut(event)) return;
       if (event.target?.closest?.('[role="dialog"]')) return;
-      if (saveActiveNote.current()) event.preventDefault();
+      if (saveActiveNote()) event.preventDefault();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [saveActiveNote]);
 
   const cardProps = (note) => ({
     note,
@@ -302,7 +231,7 @@ const useLessonNotebook = ({
     onFormatsChange: setFormats,
     onFocus: () => setActiveNoteId(note.id),
     onError: (message) => dispatch(notify({ message, severity: "warning" })),
-    onSave: () => requestSave(note),
+    onSave: () => editing.requestSave(note),
     onDelete: () => setDeleteTarget(note),
     onOpenSource: openSource,
     // The pencil on a chip that is a bookmark renames the bookmark — one value,
@@ -320,7 +249,7 @@ const useLessonNotebook = ({
     cardProps,
     handleCreate,
     activeNoteId,
-    formats,
+    formats: editing.formats,
     execCommand: (command, value) => editorApis.current.get(activeNoteId)?.exec(command, value),
     setFontSize: (px) => editorApis.current.get(activeNoteId)?.setFontSize(px),
     deleteTarget,
@@ -328,9 +257,9 @@ const useLessonNotebook = ({
     handleDeleteConfirm,
     preview,
     closePreview: () => setPreview(null),
-    titlePromptOpen: Boolean(titlePrompt),
-    confirmTitle,
-    cancelTitle: () => setTitlePrompt(null),
+    titlePromptOpen: Boolean(editing.titlePrompt),
+    confirmTitle: editing.confirmTitle,
+    cancelTitle: () => editing.setTitlePrompt(null),
   };
 };
 

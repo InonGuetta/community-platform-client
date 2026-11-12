@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchNotes } from "./notesGet";
+import { fetchNotes, fetchNoteBodies, fetchNotesAboutMedia } from "./notesGet";
 import { createNote } from "./notesPost";
 import { updateNote, reorderNotes } from "./notesPut";
 import { deleteNote } from "./notesDelete";
@@ -14,7 +14,35 @@ const notesSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchNotes.pending, (state) => { state.status = statuses.loading; })
-      .addCase(fetchNotes.fulfilled, (state, action) => { state.status = statuses.succeeded; state.items = action.payload; })
+      // The list is light (PRD NOTE-17): no body. A note whose body this page
+      // already holds keeps it — as long as the note has not changed since —
+      // so a refetch (after a reorder, on returning to the page) does not throw
+      // every open editor back to its preview and load it all again.
+      .addCase(fetchNotes.fulfilled, (state, action) => {
+        state.status = statuses.succeeded;
+        const held = new Map(state.items.filter((n) => typeof n.body === "string").map((n) => [n.id, n]));
+        state.items = action.payload.map((light) => {
+          const whole = held.get(light.id);
+          return whole && whole.updated_at === light.updated_at ? { ...light, body: whole.body } : light;
+        });
+      })
+
+      .addCase(fetchNoteBodies.fulfilled, (state, action) => {
+        const bodies = new Map(action.payload.map((n) => [n.id, n.body]));
+        for (const note of state.items) {
+          if (bodies.has(note.id)) note.body = bodies.get(note.id);
+        }
+      })
+
+      .addCase(fetchNotesAboutMedia.pending, (state) => { state.status = statuses.loading; })
+      .addCase(fetchNotesAboutMedia.fulfilled, (state, action) => {
+        state.status = statuses.succeeded;
+        state.items = action.payload;
+      })
+      .addCase(fetchNotesAboutMedia.rejected, (state, action) => {
+        state.status = statuses.failed;
+        state.error = action.payload?.message;
+      })
       .addCase(fetchNotes.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
 
       // New notes go to the top, which is where the server puts them too — see

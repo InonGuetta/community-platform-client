@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { selectNotification } from "../../../store/selectors/notificationSelectors";
-import { closeNotification } from "../../../store/slicesAndThunks/notificationSlice";
+import { closeNotification } from "../../../store/slicesAndThunks/snackbarSlice";
 
 // The single app-wide toast host. Rendered once in App (outside <Routes>) so a
 // message survives navigation and any page can trigger it via the notify()

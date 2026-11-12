@@ -23,7 +23,14 @@ import {
 // it prevents is the same person being entered as "הרב כהן", "הרב  כהן" and
 // "רב כהן" within a week, which no amount of server-side cleaning can undo
 // afterwards and which quietly breaks the filter and the per-lecturer page.
-const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [], knownTags = [] }) => (
+//
+// `editing` is the same form opened on a lesson that already exists (the
+// archive's "עריכת פרטים"). Two fields drop out there. The media type is decided
+// by the stored file — the server checks it against the extension on upload, and
+// changing it afterwards would send a recording down the book pipeline. The tags
+// have their own dialog, which carries what this form cannot: proposing a new
+// tag for approval.
+const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [], knownTags = [], editing = false }) => (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
     <TextField
       label="כותרת"
@@ -40,18 +47,20 @@ const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [
       rows={3}
       fullWidth
     />
-    <TextField
-      label="סוג מדיה"
-      value={values.mediaType}
-      onChange={(e) => onChange("mediaType", e.target.value)}
-      select
-      fullWidth
-      required
-    >
-      {Object.values(mediaTypes).map((type) => (
-        <MenuItem key={type} value={type}>{mediaTypeLabels[type] || type}</MenuItem>
-      ))}
-    </TextField>
+    {!editing && (
+      <TextField
+        label="סוג מדיה"
+        value={values.mediaType}
+        onChange={(e) => onChange("mediaType", e.target.value)}
+        select
+        fullWidth
+        required
+      >
+        {Object.values(mediaTypes).map((type) => (
+          <MenuItem key={type} value={type}>{mediaTypeLabels[type] || type}</MenuItem>
+        ))}
+      </TextField>
+    )}
     {/* Attribution. The label follows the media type — a lecture has a מרצה, a
         book has a מחבר — and both write the same column. Optional by design:
         left blank, the server stores "כללי", which is also what every item
@@ -81,18 +90,20 @@ const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [
         The picker is shared with the edit dialog: the two must offer the same
         vocabulary and the same cap, or an item edited in one could not be
         reproduced in the other. */}
-    <TagPicker
-      nodes={knownTags}
-      value={values.tags}
-      onChange={(next) => onChange("tags", next)}
-      // Optional, and said out loud rather than enforced. Blocking the upload on
-      // it was tried and taken back out: somebody uploading a shiur they have
-      // just recorded does not always know where it belongs, and a form that
-      // will not submit until they decide is a form they abandon. The archive
-      // still needs the tag, so it is asked for again — with suggestions — once
-      // the file is safely stored.
-      helperText={`עד ${MAX_TAGS} תגיות. אפשר גם לדלג — נציע תגיות אחרי ההעלאה.`}
-    />
+    {!editing && (
+      <TagPicker
+        nodes={knownTags}
+        value={values.tags}
+        onChange={(next) => onChange("tags", next)}
+        // Optional, and said out loud rather than enforced. Blocking the upload on
+        // it was tried and taken back out: somebody uploading a shiur they have
+        // just recorded does not always know where it belongs, and a form that
+        // will not submit until they decide is a form they abandon. The archive
+        // still needs the tag, so it is asked for again — with suggestions — once
+        // the file is safely stored.
+        helperText={`עד ${MAX_TAGS} תגיות. אפשר גם לדלג — נציע תגיות אחרי ההעלאה.`}
+      />
+    )}
 
     {courses.length > 0 && (
       <TextField

@@ -37,6 +37,11 @@ vi.mock("../../features/TranscriptEditor/TranscriptEditor", () => ({
 vi.mock("./componentsMediaView/NotesPanel", () => ({
   default: () => <div data-testid="notes-panel" />,
 }));
+// The actions bar asks whether the lesson is public (PRD COM-3b) through a hook
+// that reads the store; its own behaviour is tested in GuestLessonPage.test.
+vi.mock("./usePublicLink", () => ({
+  default: () => ({ isPublic: false, isPublished: true, canManage: false, busy: false, toggle: () => {}, url: "" }),
+}));
 // These two call useDispatch themselves — legitimately, they own their own
 // actions — which would otherwise demand a real store to render the page at all.
 // Their behaviour belongs to their own tests, not to this file.

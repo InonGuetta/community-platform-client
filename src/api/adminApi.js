@@ -2,6 +2,9 @@ import axiosInstance from "../utilities/axiosInstance";
 
 export const adminApi = {
   stats: async () => (await axiosInstance.get("/admin/stats")).data,
+  // This month's estimated OpenAI spend, by purpose and by day, and the cap
+  // (null when none is set) — PRD ADM-1, NFR-3.
+  aiUsage: async () => (await axiosInstance.get("/admin/ai-usage")).data,
   queueStatus: async () => (await axiosInstance.get("/admin/queue-status")).data,
   systemHealth: async () => (await axiosInstance.get("/admin/system-health")).data,
 

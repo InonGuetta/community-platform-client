@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
 import {
@@ -10,6 +10,9 @@ import { selectUser } from "../../../store/selectors/authSelectors";
 import { canManageMedia } from "../../../utilities/permissions";
 import { mediaTypes } from "../../../utilities/constant";
 import { nextPollDelay, hasExceededPollWindow } from "../../../utilities/pollingSchedule";
+import { isAiActionBusy, aiActionOutcome, AI_ACTION_FIELDS } from "../../../utilities/aiActionState";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
+import { hebrewForError } from "../../../utilities/apiError";
 
 // Everything behind the summary / chapters / transcript panels: fetching the
 // transcript, watching it while the workers run, the two on-demand AI actions,
@@ -83,8 +86,14 @@ const useMediaInsights = (mediaId, media) => {
   //
   // A self-scheduling timeout rather than setInterval: the delay changes between
   // ticks, and this way a slow response can never overlap the next request.
+  // Also while either AI action is queued or running (PRD PIPE-5): they are
+  // done by the LLM worker now, and the row is how the page learns the result.
+  const hebrewFixStatus = transcript?.[AI_ACTION_FIELDS.hebrewFix.status];
+  const headingsStatus = transcript?.[AI_ACTION_FIELDS.headings.status];
+  const aiBusy = isAiActionBusy(hebrewFixStatus) || isAiActionBusy(headingsStatus);
+
   useEffect(() => {
-    if (!mediaId || !transcript || !IN_FLIGHT_STATUSES.has(transcript.status)) return;
+    if (!mediaId || !transcript || !(IN_FLIGHT_STATUSES.has(transcript.status) || aiBusy)) return;
 
     let timer = null;
     let attempt = 0;
@@ -130,18 +139,45 @@ const useMediaInsights = (mediaId, media) => {
     // the ceiling clock each time, and defeating the point of both. Only a
     // change of status should restart it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, mediaId, transcript?.status, pollAttemptEpoch, transcriptRequest]);
+  }, [dispatch, mediaId, transcript?.status, aiBusy, pollAttemptEpoch, transcriptRequest]);
+
+  // An action finishing or failing is said out loud: it ran on the server for
+  // minutes, and the reader may be looking at another tab of the page. Only a
+  // CHANGE from busy is announced — a row first seen already finished (a visit
+  // long after the run) is not news.
+  const previousAi = useRef({ mediaId, hebrewFix: hebrewFixStatus, headings: headingsStatus });
+  useEffect(() => {
+    const before = previousAi.current;
+    previousAi.current = { mediaId, hebrewFix: hebrewFixStatus, headings: headingsStatus };
+    if (before.mediaId !== mediaId) return;
+    const say = (outcome, done, failed, errorField) => {
+      if (outcome === "done") dispatch(notify({ message: done, severity: "success" }));
+      if (outcome === "error") {
+        dispatch(notify({ message: hebrewForError({ code: transcript?.[errorField] }, failed), severity: "error" }));
+      }
+    };
+    say(aiActionOutcome(before.hebrewFix, hebrewFixStatus), "העברית תוקנה", "תיקון העברית נכשל", AI_ACTION_FIELDS.hebrewFix.error);
+    say(aiActionOutcome(before.headings, headingsStatus), "כותרות המשנה נוצרו", "יצירת כותרות המשנה נכשלה", AI_ACTION_FIELDS.headings.error);
+    // The transcript is read for the error code only, at the moment a status
+    // changes; depending on it would re-run this on every poll.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, mediaId, hebrewFixStatus, headingsStatus]);
 
   // ── The two on-demand AI actions ───────────────────────────────────────────
 
-  const [generatingHeadings, setGeneratingHeadings] = useState(false);
+  // "Generating" is the ROW's word, not this page's: the work is on the server's
+  // queue, so it is still generating after a reload, in another tab, or for a
+  // second person looking at the same lesson. `requestingHeadings` covers only
+  // the moment between the press and the server's 202.
+  const [requestingHeadings, setRequestingHeadings] = useState(false);
+  const generatingHeadings = requestingHeadings || isAiActionBusy(headingsStatus);
   const [generatingSummary, setGeneratingSummary] = useState(false);
 
   const generateHeadings = useCallback(async () => {
     if (!media?.id) return;
-    setGeneratingHeadings(true);
+    setRequestingHeadings(true);
     await dispatch(generateKeyPointHeadings(media.id));
-    setGeneratingHeadings(false);
+    setRequestingHeadings(false);
   }, [dispatch, media?.id]);
 
   // Books have no transcription step to piggyback on, so the summary needs its

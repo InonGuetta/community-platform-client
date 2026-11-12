@@ -11,10 +11,8 @@ import {
   pageMarksFor,
 } from "./bookmarks";
 
-// The cases in the first block were carried by bookAnchors.test.js, which held a
-// TRANSCRIPTION of the rule rather than an import of it — with a header saying so
-// and asking to be kept in step by hand. They are here now, importing the one
-// definition, which is the whole point of that file having been retired.
+// The rule is imported, never restated: a test holding its own transcription of
+// a rule goes on passing over logic the screen no longer runs.
 
 describe("telling the two kinds of bookmark apart", () => {
   test("a bookmark with an offset is a text bookmark", () => {

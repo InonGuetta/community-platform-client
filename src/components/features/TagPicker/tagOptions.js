@@ -1,4 +1,4 @@
-import { buildTagRelations } from "../../pages/archive/componentsArchive/tagStates";
+import { buildTagRelations } from "../../../utilities/tagStates";
 
 // Turning the taxonomy into a list somebody can pick from.
 //

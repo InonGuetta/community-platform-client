@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { buildTheme } from "./theme/theme";
 import { ColorModeContext } from "./theme/colorMode";
@@ -14,6 +14,7 @@ import GoogleCallback from "./components/pages/auth/GoogleCallback";
 import ForgotPassword from "./components/pages/auth/ForgotPassword";
 import ResetPassword from "./components/pages/auth/ResetPassword";
 import VerifyEmail from "./components/pages/auth/VerifyEmail";
+import Unsubscribe from "./components/pages/auth/Unsubscribe";
 import ProfilePage from "./components/pages/profile/ProfilePage";
 import ArchivePage from "./components/pages/archive/ArchivePage";
 import MediaViewPage from "./components/pages/mediaView/MediaViewPage";
@@ -24,11 +25,20 @@ import CoursesPage from "./components/pages/courses/CoursesPage";
 import MyCoursesPage from "./components/pages/courses/MyCoursesPage";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import DonatePage from "./components/pages/donate/DonatePage";
+import AskArchivePage from "./components/pages/askArchive/AskArchivePage";
+import DonateResultPage from "./components/pages/donate/DonateResultPage";
 import NotebookPage from "./components/pages/notebook/NotebookPage";
 import CollectionPage from "./components/pages/personal/CollectionPage";
 import PlaylistPage from "./components/pages/personal/PlaylistPage";
-import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE } from "./components/pages/personal/personalShelves";
-import { fetchMe } from "./store/slicesAndThunks/authSlices/authGet";
+import DownloadsPage from "./components/pages/downloads/DownloadsPage";
+import CreatorPage from "./components/pages/creators/CreatorPage";
+import CourseTrackPage from "./components/pages/courses/CourseTrackPage";
+import GuestLessonPage from "./components/pages/guest/GuestLessonPage";
+import { CREATOR_ROUTE } from "./utilities/creatorPage";
+import { NOTEBOOK_SHELF, COLLECTION_SHELVES, SAVED_LIST_ROUTE, DOWNLOADS_SHELF } from "./components/layout/personalShelves";
+import { fetchMe } from "./store/slicesAndThunks/authSlice/authGet";
+import { claimOfflineLessons } from "./store/slicesAndThunks/offlineSlice/offlineGet";
+import { selectUser } from "./store/selectors/authSelectors";
 
 // Pages that render WITHOUT the navigation bar: they are reached by someone who
 // is not signed in, and the recovery three by someone who by definition cannot
@@ -41,7 +51,15 @@ const AUTH_PATHS = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  // From a notification mail, often signed out — the navbar would also start
+  // polling the bell for a session that is not there.
+  "/unsubscribe",
 ];
+
+// A lesson made public, opened by a guest (PRD COM-3b): its own header, with
+// no navigation bar whose every link would send a guest to sign in.
+const GUEST_LESSON_ROUTE = "/l/:id";
+const isGuestPath = (pathname) => pathname.startsWith("/l/");
 
 // Mac-style page transition: each time the route changes, the new page slides
 // in gradually from the side with a fade. Keying off the pathname remounts this
@@ -84,6 +102,8 @@ const saveColorMode = (mode) => {
   }
 };
 
+const CreatorPageByName = () => <CreatorPage key={useParams().name} />;
+
 const App = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -115,6 +135,13 @@ const App = () => {
     dispatch(fetchMe());
   }, [dispatch]);
 
+  // The lessons saved on this device for listening offline belong to whoever is
+  // signed in — or are deleted, when someone else saved them (PRD MOB-2).
+  const userId = useSelector(selectUser)?.id;
+  useEffect(() => {
+    if (userId != null) dispatch(claimOfflineLessons(userId));
+  }, [dispatch, userId]);
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
@@ -122,7 +149,7 @@ const App = () => {
         {/* Directly under the bar, on every signed-in page, and outside the
             page-transition wrapper so it does not slide in and out on every
             navigation — it is a standing state, not page content. */}
-        {!AUTH_PATHS.includes(pathname) && (
+        {!AUTH_PATHS.includes(pathname) && !isGuestPath(pathname) && (
           <>
             <Navbar />
             <PendingRoleBanner />
@@ -138,10 +165,19 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          {/* Public, like /verify-email: followed from a notification mail. */}
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
+          {/* Public, like the two above: a lesson its lecturer opened to anyone
+              with the link (PRD COM-3b). The API decides what is public. */}
+          <Route path={GUEST_LESSON_ROUTE} element={<GuestLessonPage />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/archive" replace />} />
           <Route path="/archive" element={<ProtectedRoute><ArchivePage /></ProtectedRoute>} />
           <Route path="/media/:id" element={<ProtectedRoute><MediaViewPage /></ProtectedRoute>} />
+          <Route path="/ask" element={<ProtectedRoute><AskArchivePage /></ProtectedRoute>} />
+          {/* A lecturer's page (PRD ATTR-10). Keyed by the name, so going from
+              one lecturer to another starts the page — and its filters — afresh. */}
+          <Route path={CREATOR_ROUTE} element={<ProtectedRoute><CreatorPageByName /></ProtectedRoute>} />
           <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
           {/* By id, not by room token. The token is a credential the server
               hands out only to a caller it has decided may enter — putting it in
@@ -157,8 +193,13 @@ const App = () => {
               answers "what am I in". Open to everyone — a lecturer may also be
               enrolled in someone else's course. */}
           <Route path="/my-courses" element={<ProtectedRoute><MyCoursesPage /></ProtectedRoute>} />
+          {/* One course as a track (PRD CRS-1, CRS-2): its lessons in order with
+              the reader's progress. The lecturer arranges the order here too. */}
+          <Route path="/my-courses/:id" element={<ProtectedRoute><CourseTrackPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
           <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
+          {/* Where Stripe returns a donor after their bank's check (PRD PAY-1). */}
+          <Route path="/donate/result" element={<ProtectedRoute><DonateResultPage /></ProtectedRoute>} />
           {/* The personal shelves take their paths from personalShelves.js, the
               same file the navigation builds its links from — so a path can no
               longer be changed on one side only, which used to leave the link
@@ -174,6 +215,9 @@ const App = () => {
           {/* One saved list, opened from the cards on the saved shelf. Its path
               is built from that shelf's own, in personalShelves.js. */}
           <Route path={SAVED_LIST_ROUTE} element={<ProtectedRoute><PlaylistPage /></ProtectedRoute>} />
+          {/* The one page that opens with no server: where the app goes when it
+              cannot reach one (PRD MOB-2). */}
+          <Route path={DOWNLOADS_SHELF.path} element={<ProtectedRoute offlineOk><DownloadsPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/archive" replace />} />
         </Routes>
         </PageTransition>

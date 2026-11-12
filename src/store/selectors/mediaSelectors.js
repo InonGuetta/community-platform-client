@@ -5,6 +5,11 @@ const selectMediaState = (state) => state.media;
 export const selectAllMedia = createSelector(selectMediaState, (media) => media.items);
 export const selectSelectedMedia = createSelector(selectMediaState, (media) => media.selectedItem);
 export const selectMediaStatus = createSelector(selectMediaState, (media) => media.status);
+// The archive's paging (ARCH-1): whether there is a next page, whether it is
+// on its way, and how many rows the current filter matches in all.
+export const selectMediaHasMore = createSelector(selectMediaState, (media) => Boolean(media.nextCursor));
+export const selectMediaLoadingMore = createSelector(selectMediaState, (media) => media.loadingMore);
+export const selectMediaTotal = createSelector(selectMediaState, (media) => media.total);
 export const selectMediaError = createSelector(selectMediaState, (media) => media.error);
 
 export const selectMediaByType = (type) =>

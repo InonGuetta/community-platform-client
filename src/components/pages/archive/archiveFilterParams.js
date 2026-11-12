@@ -1,6 +1,6 @@
 import { readTypes } from "./componentsArchive/typeSelection";
 import { readSort, DEFAULT_SORT } from "./componentsArchive/sortOptions";
-import { readDuration } from "./componentsArchive/durationOptions";
+import { readDuration } from "../../../utilities/durationOptions";
 
 // The archive's filters, as an address.
 //
@@ -48,7 +48,7 @@ export const EMPTY_FILTERS = {
   // An order rather than a filter, but it belongs in a shared link all the same:
   // "the most liked shiurim on שבת" is a link somebody means to send.
   sortOrder: DEFAULT_SORT,
-  // Empty is every length — see componentsArchive/durationOptions.js.
+  // Empty is every length — see utilities/durationOptions.js.
   durationRange: "",
 };
 

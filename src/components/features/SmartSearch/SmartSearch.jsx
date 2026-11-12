@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
@@ -10,10 +8,9 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import SearchIcon from "@mui/icons-material/Search";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { searchTranscripts } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
-import { clearSearchResults } from "../../../store/slicesAndThunks/transcriptSlice/transcriptSlice";
-import { selectSearchResults } from "../../../store/selectors/transcriptSelectors";
 import { formatTime } from "../../../utilities/formatTime";
+import { creatorPrefixes } from "../../../utilities/constant";
+import { useSmartSearch } from "./useSmartSearch";
 
 // ts_headline returns the snippet with <b>…</b> around matches; render as plain
 // text to avoid injecting transcript-derived HTML into the DOM.
@@ -41,32 +38,7 @@ const BORDER_COLOR = { strong: "success.main", medium: "#b8860b", normal: "trans
 // text via OpenAI on the server. Clicking a result jumps to the player at the
 // matching segment's start_time (onOpenResult is wired by the page).
 const SmartSearch = ({ onOpenResult }) => {
-  const dispatch = useDispatch();
-  const results = useSelector(selectSearchResults);
-  const [value, setValue] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-
-  const runSearch = async () => {
-    // Guard against overlapping searches: a search runs an embedding + a GPT-4o
-    // rerank (a few seconds). Without this, a second Enter mid-search could let
-    // the older (slower) request resolve last and overwrite the newer results.
-    if (loading) return;
-    const q = value.trim();
-    if (!q) {
-      dispatch(clearSearchResults());
-      setSearched(false);
-      return;
-    }
-    setLoading(true);
-    await dispatch(searchTranscripts({ q, mode: "hybrid" }));
-    setLoading(false);
-    setSearched(true);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") runSearch();
-  };
+  const { results, value, setValue, loading, searched, runSearch, handleKeyDown } = useSmartSearch();
 
   return (
     <Box>
@@ -76,6 +48,8 @@ const SmartSearch = ({ onOpenResult }) => {
         onKeyDown={handleKeyDown}
         placeholder="חיפוש עומק חכם"
         fullWidth
+        // A placeholder is not a name, and is gone once something is typed.
+        inputProps={{ "aria-label": "חיפוש עומק חכם" }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -123,9 +97,20 @@ const SmartSearch = ({ onOpenResult }) => {
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5, gap: 1 }}>
-                <Typography variant="subtitle1" fontWeight={700} color={TITLE_COLOR[tier]} noWrap>
-                  {r.media_title}
-                </Typography>
+                {/* minWidth 0, or the flex item refuses to shrink and noWrap
+                    pushes the chips off the row instead of truncating. */}
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="subtitle1" fontWeight={700} color={TITLE_COLOR[tier]} noWrap>
+                    {r.media_title}
+                  </Typography>
+                  {/* Who said it, labelled the way the archive card labels it — two
+                      shiurim with the same title are otherwise one line twice. */}
+                  {r.creator_name && (
+                    <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                      {`${creatorPrefixes[r.media_type] || creatorPrefixes.video}: ${r.creator_name}`}
+                    </Typography>
+                  )}
+                </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
                   {/* TEMP (calibration): the rerank relevance score, shown so we
                       can verify the colour thresholds against real values. Decide

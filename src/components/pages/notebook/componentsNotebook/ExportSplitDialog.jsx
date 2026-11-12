@@ -19,7 +19,7 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import DialogTitle from "../../../features/Dialogs/DialogTitle";
 import DialogContent from "../../../features/Dialogs/DialogContent";
 import DialogActions from "../../../features/Dialogs/DialogActions";
-import { dropIndicatorSx, hasDragType } from "./useDragReorder";
+import { dropIndicatorSx, hasDragType } from "../../../../utilities/useDragReorder";
 
 // Splitting an export across several documents.
 //

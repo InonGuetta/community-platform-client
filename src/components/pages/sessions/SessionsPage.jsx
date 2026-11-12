@@ -2,6 +2,8 @@ import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import { sessionsApi } from "../../../api/sessionsApi";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -20,6 +22,7 @@ import DialogActions from "../../features/Dialogs/DialogActions";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import useSessionsPageController from "./useSessionsPageController";
 import { sessionTypes, sessionTypeLabels } from "../../../utilities/constant";
+import { formatHebrewDateTime } from "../../../utilities/formatDate";
 
 // Enough of a lead that the default is a plan rather than "now", which is what
 // the unscheduled button next to it is already for.
@@ -32,15 +35,10 @@ const defaultScheduledAt = () => {
   return new Date(when.getTime() - when.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
 
-const formatWhen = (value) =>
-  value
-    ? new Date(value).toLocaleString("he-IL", { dateStyle: "short", timeStyle: "short" })
-    : "";
-
 const SessionsPage = () => {
   const {
     rooms, upcoming, createDialogOpen, setCreateDialogOpen,
-    handleJoinRoom, handleStartSession, handleCreateSession, canCreate, isHost,
+    handleJoinRoom, handleStartSession, handleCreateSession, canCreate, isHost, courses,
   } = useSessionsPageController();
   const [form, setForm] = useState({
     title: "",
@@ -48,6 +46,8 @@ const SessionsPage = () => {
     maxParticipants: 10,
     // Empty means "start it now", which is what this dialog has always done.
     scheduledAt: "",
+    // Empty is a general session (PRD D8).
+    courseId: "",
   });
 
   return (
@@ -77,6 +77,7 @@ const SessionsPage = () => {
                   <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
                     <Chip label={sessionTypeLabels[room.session_type] || room.session_type} size="small" color="primary" />
                     <Chip label={`מארח: ${room.host_name}`} size="small" variant="outlined" />
+                      {room.course_title && <Chip label={room.course_title} size="small" color="primary" variant="outlined" />}
                   </Box>
                 </CardContent>
                 <CardActions>
@@ -105,8 +106,9 @@ const SessionsPage = () => {
                   <CardContent>
                     <Typography variant="subtitle1" fontWeight={600}>{room.title || "מפגש ללא כותרת"}</Typography>
                     <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
-                      <Chip icon={<EventIcon />} label={formatWhen(room.scheduled_at)} size="small" color="secondary" />
+                      <Chip icon={<EventIcon />} label={formatHebrewDateTime(room.scheduled_at)} size="small" color="secondary" />
                       <Chip label={`מארח: ${room.host_name}`} size="small" variant="outlined" />
+                      {room.course_title && <Chip label={room.course_title} size="small" color="primary" variant="outlined" />}
                     </Box>
                   </CardContent>
                   <CardActions>
@@ -121,6 +123,21 @@ const SessionsPage = () => {
                       <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>
                         המפגש ייפתח על ידי המארח
                       </Typography>
+                    )}
+                    {/* NOTIF-3 — for everyone, host included: the session goes
+                        into whatever calendar the reader uses. Only a session
+                        with a time has anything to put there. */}
+                    {room.scheduled_at && (
+                      <Button
+                        component="a"
+                        href={sessionsApi.calendarUrl(room.id)}
+                        download
+                        startIcon={<EventAvailableIcon />}
+                        size="small"
+                        sx={{ flexShrink: 0 }}
+                      >
+                        הוספה ליומן
+                      </Button>
                     )}
                   </CardActions>
                 </Card>
@@ -139,6 +156,26 @@ const SessionsPage = () => {
               {Object.values(sessionTypes).map((t) => <MenuItem key={t} value={t}>{sessionTypeLabels[t] || t}</MenuItem>)}
             </TextField>
             <TextField label="מספר משתתפים מרבי" type="number" value={form.maxParticipants} onChange={(e) => setForm((p) => ({ ...p, maxParticipants: Number(e.target.value) }))} fullWidth />
+
+            {/* Who is TOLD about the session (PRD D8) — not who may join, which
+                stays everyone. Hidden for somebody who teaches no course. */}
+            {courses.length > 0 && (
+              <TextField
+                label="קורס"
+                value={form.courseId}
+                onChange={(e) => setForm((p) => ({ ...p, courseId: e.target.value }))}
+                select
+                fullWidth
+                // Show "ללא קורס" rather than an empty box: no course is a real
+                // choice with its own consequence, stated in the helper below.
+                SelectProps={{ displayEmpty: true }}
+                InputLabelProps={{ shrink: true }}
+                helperText={form.courseId ? "תלמידי הקורס יקבלו התראה" : "תלמידי כל הקורסים שלך יקבלו התראה"}
+              >
+                <MenuItem value="">ללא קורס</MenuItem>
+                {courses.map((c) => <MenuItem key={c.id} value={c.id}>{c.title}</MenuItem>)}
+              </TextField>
+            )}
 
             {/* Empty is the default and means "open it now" — the behaviour this
                 dialog has always had. Filling it in makes the session exist

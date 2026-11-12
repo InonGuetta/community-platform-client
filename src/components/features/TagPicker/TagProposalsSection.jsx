@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -10,9 +9,7 @@ import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import ProposeTagDialog from "./ProposeTagDialog";
 import { pathOf } from "./tagOptions";
 import { useTagProposals } from "./useTagProposals";
-import { buildTagRelations } from "../../pages/archive/componentsArchive/tagStates";
-import { selectUserRole } from "../../../store/selectors/authSelectors";
-import { roles } from "../../../utilities/constant";
+import { buildTagRelations } from "../../../utilities/tagStates";
 
 // "הוסף תגית", and the tags this item is waiting for.
 //
@@ -28,8 +25,7 @@ import { roles } from "../../../utilities/constant";
 // `onTagCreated`: the dialog must add it to its selection, or the save that
 // follows (which REPLACES the item's tags) would take it straight back off.
 const TagProposalsSection = ({ itemId, nodes, active = true, onTagCreated }) => {
-  const isAdmin = useSelector(selectUserRole) === roles.admin;
-  const { pending, propose, withdraw } = useTagProposals(itemId, active);
+  const { pending, propose, withdraw, isAdmin } = useTagProposals(itemId, active);
   const [open, setOpen] = useState(false);
   const relations = useMemo(() => buildTagRelations(nodes), [nodes]);
 

@@ -145,11 +145,19 @@ export const RETRY_DELAYS_MS = [400, 900, 1800, 3200, 5000];
 // after the first two delays and leave a user room to click again.
 const PROCESSED_RETRY_LIMIT = 2;
 
+// `navigator.onLine` is only trustworthy as a NO: false means there is no
+// network at all, while true says nothing about whether the server answers.
+const isDeviceOffline = () => typeof navigator !== "undefined" && navigator.onLine === false;
+
 export const shouldRetry = (error, attempt) => {
   if (attempt >= RETRY_DELAYS_MS.length) return false;
   if (axios.isCancel(error)) return false;
   if (!error?.config) return false; // nothing to replay
   if (!isReplayable(error.config)) return false;
+  // The device itself says it has no network. Waiting eleven seconds for a
+  // server that cannot be reached only delays the app opening on the lessons
+  // saved for listening offline (PRD MOB-2).
+  if (!error.response && isDeviceOffline()) return false;
   if (error.response && !RETRIABLE_STATUSES.has(error.response.status)) return false;
   return neverReachedServer(error) || attempt < PROCESSED_RETRY_LIMIT;
 };

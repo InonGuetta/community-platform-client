@@ -39,3 +39,8 @@ Thumbs.db
 # Cache
 .eslintcache
 .vite/
+
+# End-to-end runs (PRD NFR-9): the run's throwaway admin, and Playwright's output
+e2e/.run.json
+test-results/
+playwright-report/

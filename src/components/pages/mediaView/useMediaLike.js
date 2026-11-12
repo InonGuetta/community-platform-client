@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchLikedIds } from "../../../store/slicesAndThunks/likesSlice/likesGet";
 import { likeMedia } from "../../../store/slicesAndThunks/likesSlice/likesPost";
 import { unlikeMedia } from "../../../store/slicesAndThunks/likesSlice/likesDelete";
+import { selectLikedIds } from "../../../store/selectors/likesSelectors";
 
 // Whether this viewer has liked a given lecture, and the toggle for it.
 //
@@ -13,7 +14,7 @@ import { unlikeMedia } from "../../../store/slicesAndThunks/likesSlice/likesDele
 const useMediaLike = (mediaId) => {
   const dispatch = useDispatch();
 
-  const likedIds = useSelector((state) => state.likes.ids);
+  const likedIds = useSelector(selectLikedIds);
 
   // Which lectures this user has liked is not part of the media payload, so it
   // is fetched once per mount. The slice is shared with the likes page, which

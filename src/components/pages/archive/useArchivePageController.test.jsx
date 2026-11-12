@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { it, expect, describe, vi, beforeEach } from "vitest";
+import { it, expect, describe, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
+import { ERROR_CODES, ERROR_CODE_HE } from "../../../utilities/apiError";
 
 // The wiring between the filter and the address.
 //
@@ -297,5 +298,88 @@ describe("the length filter", () => {
     await open("/archive?len=long");
     await act(async () => api.handleClearFilters());
     expect(api.durationRange).toBe("");
+  });
+});
+
+// A lecturer's page (PRD ATTR-10): the same controller with the lecturer fixed
+// by the page. It filters the request, but it is not the reader's filter — not
+// in the address, not counted, not clearable, and not a way back to itself.
+describe("with the lecturer fixed by the page", () => {
+  let fixedApi;
+  const FixedProbe = () => {
+    fixedApi = useArchivePageController({ fixedCreator: "הרב כהן" });
+    const { search } = useLocation();
+    return <span data-testid="url">{search}</span>;
+  };
+  const openFixed = async (at = "/creators/x") => {
+    render(
+      <MemoryRouter initialEntries={[at]}>
+        <Routes>
+          <Route path="/creators/:name" element={<FixedProbe />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    await waitFor(() => expect(fixedApi.tagTree.length).toBe(TREE.length));
+  };
+  const lastListing = () =>
+    dispatch.mock.calls.map(([action]) => action).filter((a) => a?.type === "media/fetchAll").at(-1).meta.arg;
+
+  it("asks only for that lecturer, and keeps them out of the address", async () => {
+    await openFixed();
+    expect(lastListing().creator).toBe("הרב כהן");
+    expect(url()).not.toContain("creator");
+    expect(fixedApi.hasActiveFilter).toBe(false);
+    expect(fixedApi.handleOpenCreator).toBeUndefined();
+  });
+
+  it("is not cleared with the reader's filters, and ignores one in the address", async () => {
+    await openFixed("/creators/x?creator=מישהו אחר&type=audio");
+    expect(fixedApi.creatorFilter).toBe("הרב כהן");
+    act(() => fixedApi.handleClearFilters());
+    await waitFor(() => expect(lastListing().type).toBeUndefined());
+    expect(lastListing().creator).toBe("הרב כהן");
+  });
+});
+
+// A refused save says why, as text. The thunk rejects with { message, code };
+// the toast is the Hebrew for a code we know, else the action's own sentence —
+// never the object itself, which React refuses to render (the toast crashed
+// the page), and never the server's English.
+describe("a refused edit says why, as text", () => {
+  const refused = (code) => ({ meta: { requestStatus: "rejected" }, payload: { message: "Validation failed", code } });
+  const answerThunksWith = (result) =>
+    dispatch.mockImplementation((action) => (typeof action === "function" ? Promise.resolve(result) : action));
+  const lastToast = () =>
+    dispatch.mock.calls.map(([a]) => a).filter((a) => a?.type === "notification/notify").at(-1)?.payload;
+  const ITEM = { id: 4, title: "שיעור", description: "", creator_name: "הרב", course_id: null, is_published: false };
+
+  afterEach(() => dispatch.mockImplementation(() => undefined));
+
+  it("publishing", async () => {
+    await open();
+    answerThunksWith(refused("SOMETHING_UNKNOWN"));
+    await act(() => api.handleTogglePublish(ITEM));
+    expect(lastToast()).toEqual({ message: "עדכון הפרסום נכשל", severity: "error" });
+  });
+
+  it("tagging", async () => {
+    await open();
+    answerThunksWith(refused("SOMETHING_UNKNOWN"));
+    await act(() => api.handleEditTagsSave(4, { tagIds: [1], tags: [] }));
+    expect(lastToast()).toEqual({ message: "עדכון התגיות נכשל", severity: "error" });
+  });
+
+  it("the details", async () => {
+    await open();
+    answerThunksWith(refused("SOMETHING_UNKNOWN"));
+    await act(() => api.handleEditDetailsSave(ITEM, { title: "שיעור חדש", description: "", creatorName: "הרב", courseId: "" }));
+    expect(lastToast()).toEqual({ message: "עדכון הפרטים נכשל", severity: "error" });
+  });
+
+  it("a code we have Hebrew for says that instead", async () => {
+    await open();
+    answerThunksWith(refused(ERROR_CODES.FORBIDDEN));
+    await act(() => api.handleTogglePublish(ITEM));
+    expect(lastToast()).toEqual({ message: ERROR_CODE_HE[ERROR_CODES.FORBIDDEN], severity: "error" });
   });
 });

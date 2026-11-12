@@ -4,8 +4,14 @@ import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
+import JoinCourseDialog from "./componentsCourses/JoinCourseDialog";
+import { trackPath } from "../../../utilities/courseTrack";
 import { countLabel } from "../../../utilities/countLabel";
 import { useMyCoursesPageController } from "./useMyCoursesPageController";
 
@@ -28,6 +34,10 @@ const MyCoursesPage = () => {
     courses,
     navigate,
     loadingFirstTime,
+    pendingRequests,
+    cancelRequest,
+    join,
+    openJoin,
   } = useMyCoursesPageController();
 
   if (loadingFirstTime) {
@@ -40,29 +50,50 @@ const MyCoursesPage = () => {
 
   return (
     <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, mb: 3, flexWrap: "wrap" }}>
         <Typography variant="h4" fontWeight={800} color="primary">הקורסים שלי</Typography>
-        {courses.length > 0 && (
-          <Typography variant="body2" color="text.secondary">
-            {countLabel(courses.length, "קורס אחד", "קורסים")}
-          </Typography>
-        )}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {courses.length > 0 && (
+            <Typography variant="body2" color="text.secondary">
+              {countLabel(courses.length, "קורס אחד", "קורסים")}
+            </Typography>
+          )}
+          {/* PRD ROST-9. */}
+          <Button variant="contained" endIcon={<VpnKeyOutlinedIcon />} onClick={openJoin}>הצטרפות לקורס</Button>
+        </Box>
       </Box>
 
+      {/* Requests the lecturer has not answered yet — so a student who typed
+          a code sees that it went somewhere, until the course itself appears. */}
+      {pendingRequests.length > 0 && (
+        <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+          <Typography fontWeight={700} sx={{ mb: 1 }}>ממתינים לאישור המרצה</Typography>
+          {pendingRequests.map((request) => (
+            <Box key={request.id} sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.5 }}>
+              <HourglassEmptyIcon fontSize="small" color="warning" />
+              <Typography sx={{ flex: 1 }}>
+                {request.course_title}
+                {request.lecturer_name && <Typography component="span" color="text.secondary"> · {request.lecturer_name}</Typography>}
+              </Typography>
+              <Button size="small" color="inherit" onClick={() => cancelRequest(request.id)}>ביטול הבקשה</Button>
+            </Box>
+          ))}
+        </Paper>
+      )}
+
       {courses.length === 0 ? (
-        // The archive is the honest place to send them: it holds the general
-        // library, which is everything not attached to a course and is what a
-        // student with no enrolments can still read.
+        // Joining by code is the way in a student can take themselves; the
+        // archive's general library is still open to them meanwhile.
         <NoDataDialog
-          message="עדיין לא שויכת לאף קורס"
-          actionLabel="לארכיון"
-          onAction={() => navigate("/archive")}
+          message="עדיין לא שויכת לאף קורס. קיבלת קוד מהמרצה? אפשר להצטרף איתו."
+          actionLabel="הצטרפות לקורס"
+          onAction={openJoin}
         />
       ) : (
         <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "1fr 1fr 1fr" } }}>
           {courses.map((course) => (
             <Card key={course.id} sx={{ borderRadius: 2 }}>
-              <CardActionArea onClick={() => navigate("/archive")} sx={{ p: 2, textAlign: "start", height: "100%" }}>
+              <CardActionArea onClick={() => navigate(trackPath(course.id))} sx={{ p: 2, textAlign: "start", height: "100%" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                   <SchoolOutlinedIcon color="primary" fontSize="small" />
                   <Typography variant="subtitle1" fontWeight={800} color="primary">
@@ -100,6 +131,8 @@ const MyCoursesPage = () => {
           ))}
         </Box>
       )}
+
+      <JoinCourseDialog {...join} />
     </Box>
   );
 };

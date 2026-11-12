@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import notesReducer from "../../../../store/slicesAndThunks/notesSlice/notesSlice";
-import notificationReducer from "../../../../store/slicesAndThunks/notificationSlice";
+import notificationReducer from "../../../../store/slicesAndThunks/snackbarSlice";
 import { sourceChipHtml, sourceFromChip } from "../../../../utilities/noteSource";
 
 // The notebook strip under a lesson. Mocked at the API, as the notebook's own
@@ -31,7 +31,11 @@ vi.mock("../../../../api/bookmarksApi", () => ({
 
 vi.mock("../../../../api/notesApi", () => ({
   notesApi: {
-    list: (...args) => listNotes(...args),
+    // The lesson page asks for ITS notes (PRD NOTE-17); the server decides
+    // which. The fixture below still includes other lessons' notes, so the
+    // page's own isNoteAboutMedia filter is exercised too.
+    aboutMedia: (...args) => listNotes(...args),
+    list: vi.fn(),
     create: (...args) => createNote(...args),
     update: (...args) => updateNote(...args),
     remove: vi.fn(),
@@ -40,7 +44,7 @@ vi.mock("../../../../api/notesApi", () => ({
 }));
 
 // The window loads a whole second lesson; whether it opens is all that matters.
-vi.mock("../../notebook/componentsNotebook/SourcePreviewDialog", () => ({
+vi.mock("./SourcePreviewDialog", () => ({
   default: ({ mediaId }) => <div data-testid="source-preview" data-media-id={mediaId} />,
 }));
 
@@ -93,6 +97,8 @@ beforeEach(() => {
 describe("which notes the lesson shows", () => {
   test("the ones taken on it and the ones quoting it — no others", async () => {
     await renderNotebook();
+    // Asked of the server by THIS lesson's id, not "every note".
+    expect(listNotes).toHaveBeenCalledWith(LESSON.id);
     await waitFor(() => expect(titles()).toEqual(["נלקחה בשיעור", "מצטטת את השיעור"]));
   });
 

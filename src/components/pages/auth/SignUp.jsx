@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -9,26 +8,22 @@ import Alert from "@mui/material/Alert";
 import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import { register } from "../../../store/slicesAndThunks/authSlices/authPost";
+import { register } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { authApi } from "../../../api/authApi";
-import { clearError } from "../../../store/slicesAndThunks/authSlices/authSlice";
-import { selectLoginStatus, selectAuthError } from "../../../store/selectors/authSelectors";
 import { hebrewForError } from "../../../utilities/apiError";
 import { emailProblem } from "../../../utilities/emailShape";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { statuses, roles, roleLabels } from "../../../utilities/constant";
+import { roles, roleLabels } from "../../../utilities/constant";
 import AuthLayout from "./AuthLayout";
 import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
+import { useAuthSubmit } from "./useAuthSubmit";
 
 // See SignIn: never fall back to the server's English message.
 const FALLBACK = "ההרשמה נכשלה. נסה שוב.";
 
 const SignUp = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const loginStatus = useSelector(selectLoginStatus);
-  const error = useSelector(selectAuthError);
+  const { error, isSubmitting, submit } = useAuthSubmit(register);
   // requestedRole, not role — this is an APPLICATION. The server creates every
   // account as a student whatever is sent here and stores the request separately;
   // lecturer and admin only take effect once an admin approves.
@@ -45,8 +40,6 @@ const SignUp = () => {
   const [emailTouched, setEmailTouched] = useState(false);
   const emailError = emailTouched ? emailProblem(form.email) : null;
 
-  useEffect(() => { dispatch(clearError()); }, [dispatch]);
-
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
@@ -56,11 +49,8 @@ const SignUp = () => {
     // saves the round trip.
     setEmailTouched(true);
     if (emailProblem(form.email)) return;
-    const result = await dispatch(register(form));
-    if (result.meta.requestStatus === "fulfilled") navigate("/archive");
+    await submit(form);
   };
-
-  const isSubmitting = loginStatus === statuses.loading;
 
   return (
     <AuthLayout title="הרשמה">

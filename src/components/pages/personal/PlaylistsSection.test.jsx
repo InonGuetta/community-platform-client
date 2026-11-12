@@ -36,6 +36,8 @@ const show = (playlists) => {
     reducer: {
       saves: () => ({ playlists, playlistsStatus: "succeeded" }),
       auth: () => ({ user: { id: 3, role: "student" } }),
+      // Each card's download menu reads what is saved for offline listening.
+      offline: () => ({ items: [], loaded: true, progress: {} }),
     },
   });
   return render(

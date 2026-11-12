@@ -54,6 +54,7 @@ const SessionRoom = () => {
           token rather than from anything the client claims. */}
       <VideoRoom
         roomToken={entry.roomToken}
+        sessionId={entry.session?.id ?? null}
         isHost={isHost}
         onEnd={handleEnd}
       />

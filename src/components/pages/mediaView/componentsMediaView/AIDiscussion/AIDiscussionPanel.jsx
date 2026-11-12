@@ -5,7 +5,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import useAIDiscussionController, { DISCUSSION_MODES } from "../../useAIDiscussionController";
 import SmartSearchPane from "./SmartSearchPane";
-import ChatPane from "./ChatPane";
+import ChatPane from "../../../../features/ChatPane/ChatPane";
 import HistoryPane from "./HistoryPane";
 import TextQualityNotice from "../TextQualityNotice";
 
@@ -92,7 +92,15 @@ const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek,
             <SmartSearchPane search={search} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
           )}
           {mode === DISCUSSION_MODES.chat && (
-            <ChatPane chat={chat} notebook={notebook} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
+            <ChatPane
+              chat={chat}
+              notebook={notebook}
+              isText={isText}
+              onSeek={onSeek}
+              onOpenPage={onOpenPage}
+              // This lesson's own starting questions (PRD ASK-7).
+              suggestedQuestions={transcript?.suggested_questions}
+            />
           )}
           {mode === DISCUSSION_MODES.history && (
             <HistoryPane history={history} notebook={notebook} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />

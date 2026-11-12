@@ -1,18 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fetchAllMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
+import { fetchAllMedia, fetchMoreMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
 import { deleteMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaDelete";
 import { updateMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaPut";
-import { selectAllMedia, selectMediaStatus } from "../../../store/selectors/mediaSelectors";
+import {
+  selectAllMedia, selectMediaStatus, selectMediaHasMore, selectMediaLoadingMore, selectMediaTotal,
+} from "../../../store/selectors/mediaSelectors";
+import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
+import { selectUser } from "../../../store/selectors/authSelectors";
+import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesGet";
+import { editChanges } from "../../features/UploadMedia/lessonFields";
 import { useDebounced } from "../../../utilities/useDebounced";
 import { openUpload } from "../../../store/slicesAndThunks/uiSlice";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { mediaApi } from "../../../api/mediaApi";
 import { readFilters, writeFilters } from "./archiveFilterParams";
+import { creatorPath } from "../../../utilities/creatorPage";
 import { toggleType, pressAllTypes } from "./componentsArchive/typeSelection";
 import { readSort, DEFAULT_SORT } from "./componentsArchive/sortOptions";
-import { readDuration, durationParams, lengthApplies } from "./componentsArchive/durationOptions";
+import { readDuration, durationParams, lengthApplies } from "../../../utilities/durationOptions";
+import { hebrewForError } from "../../../utilities/apiError";
 import {
   buildTagRelations,
   normalizeSelection,
@@ -20,13 +28,24 @@ import {
   forgetTag,
   pruneUnknownTags,
   sameSelection,
-} from "./componentsArchive/tagStates";
+} from "../../../utilities/tagStates";
 
-const useArchivePageController = () => {
+// `fixedCreator` — the lecturer's page (PRD ATTR-10): the same archive, filters
+// and all, with the lecturer chosen by the page rather than by the reader. It is
+// not written into the address (the path already names them), not counted as a
+// filter the reader can clear, and not offered as a choice.
+const useArchivePageController = ({ fixedCreator = "" } = {}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const allMedia = useSelector(selectAllMedia);
   const status = useSelector(selectMediaStatus);
+  const hasMore = useSelector(selectMediaHasMore);
+  const loadingMore = useSelector(selectMediaLoadingMore);
+  const total = useSelector(selectMediaTotal);
+  const user = useSelector(selectUser);
+  // The courses the edit dialog may file a lesson into — the same list, and the
+  // same rule, as the upload dialog's.
+  const assignableCourses = useSelector(selectAssignableCourses);
   const [searchParams, setSearchParams] = useSearchParams();
 
   // ── The filter is in the address ────────────────────────────────────────
@@ -48,17 +67,18 @@ const useArchivePageController = () => {
   // Which card comes first. Not a filter — see componentsArchive/sortOptions.js.
   const [sortOrder, setSortOrder] = useState(initial.sortOrder);
   const [searchQuery, setSearchQuery] = useState(initial.searchQuery);
-  const [creatorFilter, setCreatorFilter] = useState(initial.creatorFilter);
+  const [chosenCreator, setCreatorFilter] = useState(fixedCreator ? "" : initial.creatorFilter);
+  const creatorFilter = fixedCreator || chosenCreator;
   // Two lists, not one. `tagIds` says which branches to look in; `excludedTagIds`
   // says which parts of them to leave out. "Everything in תורה except שמות" needs
   // both: naming the four books to keep says something else entirely — choices
   // under one heading are alternatives, so it would also return an item that is
   // in only one of them and says nothing about שמות. The rule the two describe
-  // together lives in componentsArchive/tagStates.js.
+  // together lives in utilities/tagStates.js.
   const [tagIds, setTagIds] = useState(initial.tagIds);
   const [excludedTagIds, setExcludedTagIds] = useState(initial.excludedTagIds);
   const [dates, setDates] = useState(initial.dates);
-  // One of the length ranges in componentsArchive/durationOptions.js, or "".
+  // One of the length ranges in utilities/durationOptions.js, or "".
   const [durationRange, setDurationRange] = useState(initial.durationRange);
 
   // With only "קריאה" chosen a length has nothing to apply to — a book has none —
@@ -83,6 +103,8 @@ const useArchivePageController = () => {
   // seeds itself from tag_ids and titles itself from the title, and looking both
   // up again from a list that the next fetch may have replaced is a race.
   const [tagTargetItem, setTagTargetItem] = useState(null);
+  // The item whose details are being edited — the whole row, for the same reason.
+  const [editTargetItem, setEditTargetItem] = useState(null);
 
   useEffect(() => {
     mediaApi
@@ -159,7 +181,7 @@ const useArchivePageController = () => {
     const next = writeFilters({
       selectedTypes,
       searchQuery,
-      creatorFilter,
+      creatorFilter: chosenCreator,
       tagIds,
       excludedTagIds,
       dates,
@@ -168,7 +190,7 @@ const useArchivePageController = () => {
     }).toString();
     if (next === searchParams.toString()) return;
     setSearchParams(next, { replace: true });
-  }, [selectedTypes, searchQuery, creatorFilter, tagIds, excludedTagIds, dates, sortOrder, durationRange, searchParams, setSearchParams]);
+  }, [selectedTypes, searchQuery, chosenCreator, tagIds, excludedTagIds, dates, sortOrder, durationRange, searchParams, setSearchParams]);
 
   // ── Filtering happens in ONE place, and it is the server ─────────────────
   //
@@ -223,6 +245,11 @@ const useArchivePageController = () => {
     );
   }, [dispatch, selectedTypes, debouncedSearch, creatorFilter, tagIds, excludedTagIds, dates, sortOrder, length]);
 
+  // The next page of the list on screen (ARCH-1). The thunk reads the filter and
+  // the cursor from the store and does nothing at the end of the list or while
+  // a page is already coming, so the grid may call this as often as it likes.
+  const handleLoadMore = () => dispatch(fetchMoreMedia());
+
   // An order, not a filter: none of the clears below touch it.
   const handleSortChange = (value) => setSortOrder(readSort(value));
 
@@ -244,7 +271,7 @@ const useArchivePageController = () => {
   // existed, clicking a child of a chosen branch could only ever ADD it, which
   // is why an inherited tag could not be un-chosen at all.
   //
-  // The rule itself is in componentsArchive/tagStates.js, with its test. What
+  // The rule itself is in utilities/tagStates.js, with its test. What
   // belongs here is only that a click changes page state, which is the line
   // between this file and the components.
   const applyTagDecision = (next) => {
@@ -275,6 +302,8 @@ const useArchivePageController = () => {
   };
   const handleSearch = (query) => setSearchQuery(query);
   const handleOpenMedia = (id) => navigate(`/media/${id}`);
+  // A lecturer's name on a card leads to their page — except on that page.
+  const handleOpenCreator = fixedCreator ? undefined : (name) => navigate(creatorPath(name));
   // Smart-search result → open the media and jump the player to the segment.
   // The ?t= seconds are read by MediaViewPage and seeked once the player is ready.
   // A hit inside a book has no timestamp (start_time is null), so it opens the
@@ -307,7 +336,7 @@ const useArchivePageController = () => {
       notify(
         ok
           ? { message: "התגיות עודכנו", severity: "success" }
-          : { message: result.payload || "עדכון התגיות נכשל", severity: "error" }
+          : { message: hebrewForError(result.payload, "עדכון התגיות נכשל"), severity: "error" }
       )
     );
     if (!ok) return;
@@ -316,6 +345,44 @@ const useArchivePageController = () => {
     // rather than adjusted by hand: the count is over a whole subtree, so
     // guessing which nodes moved is a second implementation of the query.
     mediaApi.tags().then(setTagTree).catch(() => {});
+  };
+
+  // Editing a lesson's title, description, credited name and course. Only what
+  // changed is sent — editChanges says why that is a rule and not a saving.
+  const handleEditDetails = (item) => {
+    setEditTargetItem(item);
+    // When the dialog opens, like the upload dialog: the archive itself has no
+    // use for the course list.
+    dispatch(fetchAllCourses());
+  };
+  const handleEditDetailsCancel = () => setEditTargetItem(null);
+
+  const handleEditDetailsSave = async (item, fields) => {
+    const changes = editChanges(item, fields, user, assignableCourses);
+    if (Object.keys(changes).length === 0) {
+      setEditTargetItem(null);
+      return;
+    }
+    const result = await dispatch(updateMedia({ id: item.id, ...changes }));
+    const ok = result.meta.requestStatus === "fulfilled";
+    dispatch(
+      notify(
+        ok
+          ? { message: "פרטי השיעור עודכנו", severity: "success" }
+          : { message: hebrewForError(result.payload, "עדכון הפרטים נכשל"), severity: "error" }
+      )
+    );
+    if (!ok) return;
+    setEditTargetItem(null);
+    // A corrected name has to reach the creator filter and the autocomplete, or
+    // the misspelling it replaced is still offered as a choice — the one thing
+    // this dialog exists to fix.
+    if ("creatorName" in changes) {
+      mediaApi
+        .creators()
+        .then((rows) => setKnownCreators(rows.map((r) => r.name)))
+        .catch(() => {});
+    }
   };
 
   // Publishing is what makes an item visible to students, so it is worth
@@ -329,7 +396,7 @@ const useArchivePageController = () => {
       notify(
         ok
           ? { message: next ? "הפריט פורסם ומוצג לתלמידים" : "הפריט הוסתר מהתלמידים", severity: "success" }
-          : { message: result.payload || "עדכון הפרסום נכשל", severity: "error" }
+          : { message: hebrewForError(result.payload, "עדכון הפרסום נכשל"), severity: "error" }
       )
     );
   };
@@ -343,7 +410,7 @@ const useArchivePageController = () => {
   const hasActiveFilter = Boolean(
     selectedTypes.length ||
       searchQuery ||
-      creatorFilter ||
+      chosenCreator ||
       tagIds.length ||
       // An exclusion narrows the archive on its own — "everything except X" is a
       // filter, so an empty grid under one is "no results", not an empty archive.
@@ -355,14 +422,17 @@ const useArchivePageController = () => {
 
   return {
     filteredMedia, status, selectedTypes, hasActiveFilter,
+    hasMore, loadingMore, total, handleLoadMore,
     sortOrder, handleSortChange,
     durationRange, handleDurationFilter, lengthOffered,
     creatorFilter, knownCreators, handleCreatorFilter,
     tagIds, excludedTagIds, tagTree, handleCycleTag, handleRemoveTag, handleClearTags,
     dates, handleDateFilter, handleClearFilters,
     handleToggleType, handlePressAllTypes, handleSearch, handleOpenMedia, handleOpenUpload, handleOpenResult,
+    handleOpenCreator,
     deleteTargetId, handleDeleteRequest, handleDeleteCancel, handleDeleteConfirm,
     tagTargetItem, handleEditTags, handleEditTagsCancel, handleEditTagsSave,
+    editTargetItem, assignableCourses, handleEditDetails, handleEditDetailsCancel, handleEditDetailsSave,
     handleTogglePublish,
   };
 };

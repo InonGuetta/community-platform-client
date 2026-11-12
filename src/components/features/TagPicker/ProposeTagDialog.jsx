@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import TagParentPicker from "./TagParentPicker";
 import { pathOf } from "./tagOptions";
-import { buildTagRelations } from "../../pages/archive/componentsArchive/tagStates";
+import { buildTagRelations } from "../../../utilities/tagStates";
 
 // A tag that does not exist yet: its name, and where in the tree it goes.
 //

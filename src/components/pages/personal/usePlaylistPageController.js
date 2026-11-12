@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchPlaylist } from "../../../store/slicesAndThunks/savesSlice/savesGet";
 import { selectUser } from "../../../store/selectors/authSelectors";
+import { selectOpenPlaylist } from "../../../store/selectors/savesSelectors";
 import { statuses } from "../../../utilities/constant";
 
 // One saved list: the fetch by the id in the address and the selection, so
@@ -12,7 +13,7 @@ export const usePlaylistPageController = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { playlist, items, status } = useSelector((state) => state.saves.openList);
+  const { playlist, items, status } = useSelector(selectOpenPlaylist);
   const user = useSelector(selectUser);
 
   useEffect(() => { dispatch(fetchPlaylist(Number(playlistId))); }, [dispatch, playlistId]);

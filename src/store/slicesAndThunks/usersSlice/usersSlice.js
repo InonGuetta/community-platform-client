@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchAllUsers, fetchUserById } from "./usersSliceGet";
-import { createUser, approveUser, rejectUser } from "./usersSlicePost";
-import { updateUser } from "./usersSlicePut";
-import { deleteUser } from "./usersSliceDelete";
+import { fetchAllUsers, fetchUserById } from "./usersGet";
+import { createUser, approveUser, rejectUser } from "./usersPost";
+import { updateUser } from "./usersPut";
+import { deleteUser } from "./usersDelete";
 import { statuses } from "../../../utilities/constant";
 
 // The decision endpoints return only the columns they touched, so the stored row

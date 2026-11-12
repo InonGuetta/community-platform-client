@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -9,7 +7,7 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Link from "@mui/material/Link";
 import AuthLayout from "./AuthLayout";
-import { requestPasswordReset } from "../../../store/slicesAndThunks/authSlices/authPost";
+import { useForgotPassword } from "./useForgotPassword";
 import { floatingLabelSx, inputBaseSx, submitButtonSx } from "./authShared";
 
 // "שכחתי סיסמה" — which until now did not exist, and its absence was the one
@@ -22,24 +20,7 @@ import { floatingLabelSx, inputBaseSx, submitButtonSx } from "./authShared";
 // UI that the endpoint refuses to be. The sentence is written so it is true
 // either way rather than being a comfortable lie in one of them.
 const ForgotPassword = () => {
-  const dispatch = useDispatch();
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [busy, setBusy] = useState(false);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setBusy(true);
-    setFailed(false);
-    const result = await dispatch(requestPasswordReset(email.trim()));
-    setBusy(false);
-    // Only a request that never reached the server is reported as a failure. A
-    // 200 means "handled", and what it was handled as is none of the caller's
-    // business.
-    if (result.meta.requestStatus === "fulfilled") setSent(true);
-    else setFailed(true);
-  };
+  const { email, setEmail, sent, failed, busy, handleSubmit } = useForgotPassword();
 
   if (sent) {
     return (

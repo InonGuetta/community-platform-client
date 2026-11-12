@@ -6,7 +6,9 @@ const DialogTitle = ({ children, onClose }) => (
   <MuiDialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
     {children}
     {onClose && (
-      <IconButton onClick={onClose} size="small">
+      // Named: every dialog in the app closes through this one button, and a
+      // bare ✕ is read as just "button" (PRD MOB-7 review).
+      <IconButton onClick={onClose} size="small" aria-label="סגירת החלון">
         <CloseIcon />
       </IconButton>
     )}

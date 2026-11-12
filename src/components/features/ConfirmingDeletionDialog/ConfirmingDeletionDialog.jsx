@@ -12,9 +12,16 @@ const TYPE_LABEL = { media: "את פריט המדיה", user: "את המשתמש
 // `message` overrides the default sentence for callers that need their own
 // wording; everything else about the dialog stays identical, so the confirm
 // step looks the same wherever it appears.
-const ConfirmingDeletionDialog = ({ open, onClose, onConfirm, itemName, type = "item", message }) => (
+//
+// `title` and `confirmLabel` exist for a destructive action that is not a
+// deletion — removing a student from a course deletes nobody, and a button
+// reading "מחיקה" there would make a lecturer think it does.
+const ConfirmingDeletionDialog = ({
+  open, onClose, onConfirm, itemName, type = "item", message,
+  title = "אישור מחיקה", confirmLabel = "מחיקה",
+}) => (
   <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle onClose={onClose}>אישור מחיקה</DialogTitle>
+    <DialogTitle onClose={onClose}>{title}</DialogTitle>
     <DialogContent>
       <Typography>
         {message || (
@@ -24,7 +31,7 @@ const ConfirmingDeletionDialog = ({ open, onClose, onConfirm, itemName, type = "
     </DialogContent>
     <DialogActions>
       <Button onClick={onClose} variant="outlined">ביטול</Button>
-      <Button onClick={onConfirm} variant="contained" color="error">מחיקה</Button>
+      <Button onClick={onConfirm} variant="contained" color="error">{confirmLabel}</Button>
     </DialogActions>
   </Dialog>
 );

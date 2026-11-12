@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -17,7 +16,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import ParticipantGrid from "./ParticipantGrid";
 import ChatPanel from "./ChatPanel";
 import { useVideoRoom } from "./useVideoRoom";
-import { selectUser } from "../../../store/selectors/authSelectors";
+import { RecordButton, RecordingIndicator, ConsentDialog } from "./RecordingControls";
 
 // Presentation only — every piece of signalling lives in useVideoRoom, and the
 // peer bookkeeping under it in peerMesh, where it can be tested without a
@@ -28,14 +27,16 @@ const controlSx = (active) => ({
   "&:hover": { bgcolor: active ? "grey.700" : "rgba(211,47,47,0.25)" },
 });
 
-const VideoRoom = ({ roomToken, isHost, onEnd }) => {
+const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
   const {
     streams, connected, mediaError, roomError, endSession, leave,
     micOn, cameraOn, hasMic, hasCamera, sharing, toggleMic, toggleCamera, shareScreen,
     messages, sendMessage,
-  } = useVideoRoom({ roomToken, onEnd });
+    recording, mySocketId, recorderStatus, pendingParts, recordNotice,
+    startRecording, stopRecording, answerRecording, dismissRecordNotice,
+    user,
+  } = useVideoRoom({ roomToken, onEnd, sessionId });
 
-  const user = useSelector(selectUser);
   const [chatOpen, setChatOpen] = useState(false);
   // Cleared by opening the panel, so the badge counts what arrived while it was
   // shut rather than the whole conversation.
@@ -64,11 +65,25 @@ const VideoRoom = ({ roomToken, isHost, onEnd }) => {
         {/* The room token is no longer shown. It is a credential the server hands
             out to enter this room, not a name for it — printing it put it on
             every screenshot of a session. */}
-        <Typography variant="body2" color="grey.400">
-          {connected ? `${participantCount} משתתפים` : "מתחבר…"}
-        </Typography>
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap", minWidth: 0 }}>
+          <Typography variant="body2" color="grey.400">
+            {connected ? `${participantCount} משתתפים` : "מתחבר…"}
+          </Typography>
+          <RecordingIndicator recording={recording} mySocketId={mySocketId} onAnswer={answerRecording} />
+        </Box>
 
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          {/* Recording is the host's (PRD REC-1): the server takes parts only
+              from the session's host, and the mix is made in this browser. */}
+          {canEndSession && sessionId && (
+            <RecordButton
+              recorderStatus={recorderStatus}
+              pendingParts={pendingParts}
+              onStart={startRecording}
+              onStop={stopRecording}
+              disabled={!connected}
+            />
+          )}
           {canEndSession ? (
             <Button size="small" variant="contained" color="error" onClick={endSession}>סיום מפגש</Button>
           ) : (
@@ -87,6 +102,22 @@ const VideoRoom = ({ roomToken, isHost, onEnd }) => {
       )}
 
       {mediaError && <Alert severity="warning" sx={{ m: 1 }}>{mediaError}</Alert>}
+      {recordNotice && (
+        <Alert
+          severity={recordNotice.severity}
+          onClose={dismissRecordNotice}
+          sx={{ m: 1 }}
+          action={recordNotice.mediaId ? (
+            // A new tab: leaving this page would leave the session.
+            <Button color="inherit" size="small" href={`/media/${recordNotice.mediaId}`} target="_blank" rel="noopener">
+              לשיעור
+            </Button>
+          ) : undefined}
+        >
+          {recordNotice.text}
+        </Alert>
+      )}
+      <ConsentDialog recording={recording} mySocketId={mySocketId} onAnswer={answerRecording} />
 
       {/* The grid and the chat sit side by side rather than the chat floating
           over the video: in a study session the text IS content, and covering a

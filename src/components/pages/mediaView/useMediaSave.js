@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchSavedIds } from "../../../store/slicesAndThunks/savesSlice/savesGet";
 import { saveMedia } from "../../../store/slicesAndThunks/savesSlice/savesPost";
 import { unsaveMedia } from "../../../store/slicesAndThunks/savesSlice/savesDelete";
+import { selectSavedIds } from "../../../store/selectors/savesSelectors";
 
 // Whether this viewer has saved a given lecture, and the toggle for it — the
 // same shape as useMediaLike, and shared by the same two screens.
@@ -13,7 +14,7 @@ import { unsaveMedia } from "../../../store/slicesAndThunks/savesSlice/savesDele
 const useMediaSave = (mediaId) => {
   const dispatch = useDispatch();
 
-  const savedIds = useSelector((state) => state.saves.ids);
+  const savedIds = useSelector(selectSavedIds);
 
   // Fetched once per mount, as the liked ids are. Both are small id sets that
   // several screens read, which is why they live in the store rather than being

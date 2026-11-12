@@ -44,12 +44,15 @@ export const ERROR_CODES = {
 
   // Donations.
   RECURRING_UNAVAILABLE: "RECURRING_UNAVAILABLE",
+  PAYMENTS_NOT_CONFIGURED: "PAYMENTS_NOT_CONFIGURED",
 
   // Resources.
   MEDIA_NOT_FOUND: "MEDIA_NOT_FOUND",
   SESSION_NOT_FOUND: "SESSION_NOT_FOUND",
   SESSION_FORBIDDEN: "SESSION_FORBIDDEN",
   SESSION_NOT_STARTED: "SESSION_NOT_STARTED",
+  RECORDING_NOT_FOUND: "RECORDING_NOT_FOUND",
+  RECORDING_CLOSED: "RECORDING_CLOSED",
   BOOKMARK_NOT_FOUND: "BOOKMARK_NOT_FOUND",
   BOOKMARK_ANCHOR_INVALID: "BOOKMARK_ANCHOR_INVALID",
   NOTE_NOT_FOUND: "NOTE_NOT_FOUND",
@@ -69,11 +72,18 @@ export const ERROR_CODES = {
   DOCUMENT_UNREADABLE: "DOCUMENT_UNREADABLE",
   ALREADY_QUEUED: "ALREADY_QUEUED",
   ALREADY_RUNNING: "ALREADY_RUNNING",
+  // The monthly AI budget (server services/servicesAiUsage.js).
+  AI_BUDGET_EXCEEDED: "AI_BUDGET_EXCEEDED",
 
   // The "דיון עם AI" chat.
   AI_NOT_READY: "AI_NOT_READY",
   AI_ANSWER_FAILED: "AI_ANSWER_FAILED",
   AI_DAILY_LIMIT: "AI_DAILY_LIMIT",
+  // Joining a course by its code (PRD ROST-9).
+  JOIN_CODE_NOT_FOUND: "JOIN_CODE_NOT_FOUND",
+  ALREADY_ENROLLED: "ALREADY_ENROLLED",
+  COURSE_IS_YOURS: "COURSE_IS_YOURS",
+  JOIN_REQUEST_DECIDED: "JOIN_REQUEST_DECIDED",
 
   // ── Client-originated ──────────────────────────────────────────────────────
   // These never come from the server; axiosInstance stamps them on failures the
@@ -139,6 +149,7 @@ const ERROR_CODE_HE = {
   [ERROR_CODES.WEAK_PASSWORD]: "הסיסמה חייבת להכיל לפחות 8 תווים",
   [ERROR_CODES.NO_PASSWORD_SET]:
     "החשבון הזה מתחבר עם Google ואין לו סיסמה לשינוי",
+  [ERROR_CODES.PAYMENTS_NOT_CONFIGURED]: "התשלומים באתר עוד לא הוגדרו. אפשר לנסות שוב מאוחר יותר.",
   [ERROR_CODES.RECURRING_UNAVAILABLE]:
     "תרומה חודשית אינה זמינה עדיין. אפשר לתרום סכום חד-פעמי.",
 
@@ -146,6 +157,8 @@ const ERROR_CODE_HE = {
   [ERROR_CODES.SESSION_NOT_FOUND]: "המפגש לא נמצא",
   [ERROR_CODES.SESSION_FORBIDDEN]: "המפגש לא נמצא או שאין לך הרשאה",
   [ERROR_CODES.SESSION_NOT_STARTED]: "המפגש עדיין לא נפתח על ידי המארח",
+  [ERROR_CODES.RECORDING_NOT_FOUND]: "ההקלטה לא נמצאה",
+  [ERROR_CODES.RECORDING_CLOSED]: "ההקלטה כבר הסתיימה",
   [ERROR_CODES.BOOKMARK_NOT_FOUND]: "הסימנייה לא נמצאה",
   // The generic "שמירת הסימנייה נכשלה" would send the user to press the same
   // button again, which is the one thing that cannot work: the text on screen
@@ -178,12 +191,19 @@ const ERROR_CODE_HE = {
     "לא ניתן לקרוא את הקובץ — ייתכן שהוא פגום או מוגן בסיסמה.",
   [ERROR_CODES.ALREADY_QUEUED]: "הפעולה כבר רצה עבור מדיה זו",
   [ERROR_CODES.ALREADY_RUNNING]: "הפעולה כבר רצה עבור מדיה זו",
+  // Not this lesson's fault, and not fixed by retrying — said plainly.
+  [ERROR_CODES.AI_BUDGET_EXCEEDED]:
+    "הגעתם לתקרת העלות החודשית של ה‑AI. עיבוד חדש יתאפשר בחודש הבא, או אחרי שמנהל יעלה את התקרה.",
   // Two different instructions: wait, or ask again. The generic failure would
   // send someone with an unprocessed lesson to retry a question that cannot work.
   [ERROR_CODES.AI_NOT_READY]: "השיעור עדיין בעיבוד — אפשר יהיה לשוחח עליו כשהעיבוד יסתיים",
   [ERROR_CODES.AI_ANSWER_FAILED]: "לא הצלחנו לקבל תשובה כרגע. נסה לשאול שוב.",
   // Says when it will work again, and what still works now — "try again"
   // would send the reader into a loop that cannot succeed until midnight.
+  [ERROR_CODES.JOIN_CODE_NOT_FOUND]: "אין קורס פתוח עם הקוד הזה. בדקו את הקוד מול המרצה.",
+  [ERROR_CODES.ALREADY_ENROLLED]: "אתם כבר רשומים לקורס הזה. הוא מופיע ברשימת הקורסים שלכם.",
+  [ERROR_CODES.COURSE_IS_YOURS]: "זה קורס שאתם מלמדים, אין צורך להצטרף אליו.",
+  [ERROR_CODES.JOIN_REQUEST_DECIDED]: "כבר הוחלט על הבקשה הזאת. הרשימה רועננה.",
   [ERROR_CODES.AI_DAILY_LIMIT]: "הגעת למכסת השאלות היומית בצ'אט. אפשר להמשיך מחר — והחיפוש החכם זמין גם עכשיו.",
 
   [ERROR_CODES.DB_UNAVAILABLE]: "מסד הנתונים אינו זמין כרגע, נסה שוב",

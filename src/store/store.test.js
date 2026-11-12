@@ -40,7 +40,14 @@ describe("signing out empties every slice", () => {
   const loadUserData = () => {
     store.dispatch({ type: "bookmarks/fetch/fulfilled", payload: [{ id: 1, media_id: 7, timestamp_seconds: 10 }] });
     store.dispatch({ type: "notes/fetch/fulfilled", payload: [{ id: 1, title: "פרטי" }] });
-    store.dispatch({ type: "media/fetchAll/fulfilled", payload: [{ id: 1, title: "שיעור" }] });
+    // A page of the archive, as a real request delivers it: pending, then the
+    // answer for that same request id (ARCH-1).
+    store.dispatch({ type: "media/fetchAll/pending", meta: { requestId: "r1", arg: {} } });
+    store.dispatch({
+      type: "media/fetchAll/fulfilled",
+      meta: { requestId: "r1" },
+      payload: { items: [{ id: 1, title: "שיעור" }], nextCursor: "c", total: 30 },
+    });
     store.dispatch({ type: "transcript/fetch/fulfilled", payload: { media_id: 7, status: "done" } });
     store.dispatch({ type: "users/fetchAll/fulfilled", payload: [{ id: 1, email: "a@b.c" }] });
   };

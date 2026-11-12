@@ -129,3 +129,126 @@ test("the store is the side that wires the two together", () => {
   expect(deps).toContain("utilities/axiosInstance.js");
   expect(deps.some((d) => d.endsWith("authSlice.js"))).toBe(true);
 });
+
+// utilities/ is the floor of the client: everything may import it, and it
+// imports nothing above it — no component, no slice or thunk, no api module.
+// That is what lets a helper move there from a page and be shared without
+// dragging a page's dependencies along. Something that needs the store (a
+// shelf's thunk, say) belongs higher up: components/layout/personalShelves.js
+// is the example.
+test("utilities/ imports nothing from components/, store/ or api/", () => {
+  const graph = buildGraph();
+  const above = /^(components|store|api)\//;
+  const crossings = [...graph.entries()]
+    .filter(([file]) => rel(file).startsWith("utilities/"))
+    .flatMap(([file, deps]) => deps.map(rel).filter((d) => above.test(d)).map((d) => `${rel(file)} -> ${d}`));
+  expect(crossings).toEqual([]);
+
+  // Guards against the rule passing because no utilities file was found.
+  expect([...graph.keys()].filter((f) => rel(f).startsWith("utilities/")).length).toBeGreaterThan(20);
+});
+
+// ── Page folders ────────────────────────────────────────────────────────────
+//
+// components/pages/<page>/ holds what that page alone uses. A component two
+// screens share is in components/features/ (the note cards, the media grid,
+// the chat pane) and the app's shell is in components/layout/ — and neither of
+// those may reach back into a page, or changing one page silently changes
+// another. Tests are not part of the graph, so a page's test may still render
+// a neighbour.
+const pageOf = (relPath) => relPath.match(/^components\/pages\/([^/]+)\//)?.[1] ?? null;
+
+test("features/ and layout/ import nothing from pages/", () => {
+  const crossings = [...buildGraph().entries()]
+    .filter(([file]) => /^components\/(features|layout)\//.test(rel(file)))
+    .flatMap(([file, deps]) => deps.map(rel).filter((d) => pageOf(d)).map((d) => `${rel(file)} -> ${d}`));
+  expect(crossings).toEqual([]);
+});
+
+// The only places one page uses another's files, each on purpose. Adding to
+// this list is a decision: the alternative is nearly always to move the file
+// to features/ (a component) or utilities/ (a helper).
+const ALLOWED_PAGE_CROSSINGS = [
+  // A lesson opened in a floating window over the notebook is the lesson
+  // page's own player, reader, notes and actions — so it lives with them, and
+  // the notebook opens it.
+  ["notebook", "components/pages/mediaView/componentsMediaView/SourcePreviewDialog.jsx"],
+  // A lecturer's page is the archive with the creator fixed: the same cards,
+  // filters and paging (useArchivePageController({ fixedCreator })).
+  ["creators", "components/pages/archive/componentsArchive/ArchiveBrowser.jsx"],
+  ["creators", "components/pages/archive/useArchivePageController.js"],
+];
+
+test("a page imports another page's files only where that is allowed", () => {
+  const allowed = new Set(ALLOWED_PAGE_CROSSINGS.map(([page, target]) => `${page} -> ${target}`));
+  const graph = buildGraph();
+  const crossings = [...graph.entries()].flatMap(([file, deps]) => {
+    const from = pageOf(rel(file));
+    if (!from) return [];
+    return deps.map(rel)
+      .filter((d) => pageOf(d) && pageOf(d) !== from)
+      .map((d) => `${from} -> ${d}`)
+      .filter((edge) => !allowed.has(edge))
+      .map((edge) => `${rel(file)}: ${edge}`);
+  });
+  expect(crossings).toEqual([]);
+
+  // Every allowance is still used — an entry nothing needs any more is a
+  // permission waiting to be misused, so it goes.
+  const used = new Set([...graph.entries()].flatMap(([file, deps]) => {
+    const from = pageOf(rel(file));
+    return from ? deps.map((d) => `${from} -> ${rel(d)}`) : [];
+  }));
+  expect([...allowed].filter((edge) => !used.has(edge))).toEqual([]);
+});
+
+// ── Where state lives (CLAUDE.md) ───────────────────────────────────────────
+//
+// A .jsx renders what its hook hands it. ESLint holds the rule
+// (no-restricted-imports on react-redux, eslint.config.js), so a breach shows
+// in the editor as it is typed; this runs the real config on a probe file, so
+// the rule cannot quietly disappear from it — and every .jsx in src/ is held
+// to it, the four by-design exceptions apart.
+const JSX_STORE_BY_DESIGN = [
+  "main.jsx",
+  "App.jsx",
+  "components/pages/auth/ProtectedRoute.jsx",
+  "components/features/Notification/GlobalSnackbar.jsx",
+];
+
+const PROBE = [
+  'import { useSelector } from "react-redux";',
+  "export const Probe = () => useSelector(() => null);",
+  "",
+].join("\n");
+const storeRuleHits = async (filePath, code = PROBE) => {
+  const { ESLint } = await import("eslint");
+  const [result] = await new ESLint().lintText(code, { filePath });
+  return result.messages.filter((m) => m.ruleId === "no-restricted-imports");
+};
+
+test("ESLint refuses react-redux in a .jsx, and only there", async () => {
+  expect(await storeRuleHits("src/components/features/Probe.jsx")).toHaveLength(1);
+  expect(await storeRuleHits("src/components/features/useProbe.js")).toHaveLength(0);
+  expect(await storeRuleHits("src/components/features/Probe.test.jsx")).toHaveLength(0);
+  for (const file of JSX_STORE_BY_DESIGN) expect(await storeRuleHits(`src/${file}`)).toHaveLength(0);
+}, 60000);
+
+test("only the by-design shell imports react-redux from a .jsx", () => {
+  const usingStore = collectFiles(SRC)
+    .filter((file) => file.endsWith(".jsx") && /from\s*["']react-redux["']/.test(fs.readFileSync(file, "utf8")))
+    .map(rel);
+  expect(usingStore.sort()).toEqual([...JSX_STORE_BY_DESIGN].sort());
+});
+
+// Every read of the store is a named selector in store/selectors/ — so the
+// question "who reads this field" is one search, and a field renamed in a slice
+// is one file to fix rather than a hunt through hooks. An arrow written inside
+// useSelector(…) is the thing this refuses; a selector built by a named factory,
+// useSelector(selectXFor(id)), is not an arrow and passes.
+test("no hook reads the store through an inline arrow", () => {
+  const inline = collectFiles(SRC)
+    .filter((file) => /useSelector\(\s*(\(\s*\w*\s*\)|\w+)\s*=>/.test(fs.readFileSync(file, "utf8")))
+    .map(rel);
+  expect(inline).toEqual([]);
+});

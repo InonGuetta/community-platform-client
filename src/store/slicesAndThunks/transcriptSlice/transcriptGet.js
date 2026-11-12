@@ -1,4 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { transcriptsApi } from "../../../api/transcriptsApi";
 import { rejectionOf } from "../../../utilities/apiError";
 
@@ -15,10 +16,6 @@ export const fetchTranscript = createAsyncThunk("transcript/fetch", async (arg, 
 
 // mode: "hybrid" (default) | "semantic" | "keyword". The "smart deep search"
 // box passes "hybrid" — meaning + keyword fused on the server.
-export const searchTranscripts = createAsyncThunk("transcript/search", async ({ q, mode = "hybrid" }, { rejectWithValue }) => {
-  try {
-    return await transcriptsApi.search({ q, mode });
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Search failed"));
-  }
+export const searchTranscripts = createApiThunk("transcript/search", "Search failed", async ({ q, mode = "hybrid" }) => {
+  return await transcriptsApi.search({ q, mode });
 });

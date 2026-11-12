@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -12,9 +11,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
-import { useDispatch } from "react-redux";
-import { deleteBookmark } from "../../../../store/slicesAndThunks/bookmarksSlice/bookmarksDelete";
-import { updateBookmark } from "../../../../store/slicesAndThunks/bookmarksSlice/bookmarksPut";
+import { useNotesPanel } from "./useNotesPanel";
 import { formatTime } from "../../../../utilities/formatTime";
 import { listRowSx } from "../../../../utilities/constant";
 import Paper from "@mui/material/Paper";
@@ -54,38 +51,9 @@ const NotesPanel = ({
   onSeekText,
   isText = false,
 }) => {
-  const dispatch = useDispatch();
-  const [note, setNote] = useState("");
-
-  // Which row is open for editing, and what is being typed into it. One at a
-  // time: two rows in edit mode is two drafts, and the list is where the user
-  // came to read rather than to write.
-  //
-  // Editing happens IN the row rather than in a dialog. The note is one line,
-  // the surrounding rows are the context that makes it make sense, and a modal
-  // would hide them to ask for a sentence.
-  const [editingId, setEditingId] = useState(null);
-  const [draft, setDraft] = useState("");
-
-  const startEditing = (bookmark) => {
-    setEditingId(bookmark.id);
-    setDraft(bookmark.note ?? "");
-  };
-  const stopEditing = () => {
-    setEditingId(null);
-    setDraft("");
-  };
-  const commit = (bookmark) => {
-    // Nothing changed — do not spend a request, and do not make the row flicker.
-    if (draft.trim() === (bookmark.note ?? "").trim()) return stopEditing();
-    dispatch(updateBookmark({ id: bookmark.id, note: draft.trim() }));
-    stopEditing();
-  };
-
-  const handleCreate = () => {
-    onCreateBookmark(Math.floor(currentTime), note);
-    setNote("");
-  };
+  const {
+    note, setNote, editingId, draft, setDraft, startEditing, stopEditing, commit, handleCreate, removeBookmark,
+  } = useNotesPanel({ currentTime, onCreateBookmark });
 
   // bookmarks arrive in reading order — see utilities/bookmarks.js.
   const activeId = isText ? null : findActiveBookmarkId(bookmarks, Math.floor(currentTime));
@@ -264,7 +232,7 @@ const NotesPanel = ({
                 </IconButton>
                 <IconButton
                   size="small"
-                  onClick={(e) => { e.stopPropagation(); dispatch(deleteBookmark(bm.id)); }}
+                  onClick={(e) => { e.stopPropagation(); removeBookmark(bm.id); }}
                   aria-label="מחיקת סימנייה"
                   sx={{ color: "inherit" }}
                 >

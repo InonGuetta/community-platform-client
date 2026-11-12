@@ -1,12 +1,7 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { bookmarksApi } from "../../../api/bookmarksApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const deleteBookmark = createAsyncThunk("bookmarks/delete", async (id, { rejectWithValue }) => {
-  try {
-    await bookmarksApi.remove(id);
-    return { id };
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to delete bookmark"));
-  }
+export const deleteBookmark = createApiThunk("bookmarks/delete", "Failed to delete bookmark", async (id) => {
+  await bookmarksApi.remove(id);
+  return { id };
 });

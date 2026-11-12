@@ -12,6 +12,8 @@ import { mediaApi } from "../../../api/mediaApi";
 import useMediaInsights from "./useMediaInsights";
 import useMediaLike from "./useMediaLike";
 import useMediaSave from "./useMediaSave";
+import useCourseTrackForLesson from "./useCourseTrackForLesson";
+import { transcriptCues } from "../../../utilities/transcriptTiming";
 
 // Everything on this page that dispatches, selects or derives from the server's
 // data. The page component keeps only what is genuinely presentational — which
@@ -38,8 +40,8 @@ const useMediaViewPageController = () => {
 
   const media = useSelector(selectSelectedMedia);
 
-  // Everything behind the summary / chapters / transcript tabs now lives in a
-  // hook of its own, because the notebook's source preview shows the same block
+  // Everything behind the summary / chapters / transcript tabs is a hook of its
+  // own, because the notebook's source preview shows the same block
   // and the polling loop inside it is not something to keep two copies of.
   const insights = useMediaInsights(id, media);
 
@@ -165,6 +167,25 @@ const useMediaViewPageController = () => {
     mediaApi.saveProgress(id, seconds).catch(() => {});
   }, [id]);
 
+  // ── The course's track (PRD CRS-1, CRS-3) ──────────────────────────────────
+  //
+  // When a recording ends, its last position is saved at once rather than at
+  // the next ten-second mark that will never come — that save is what marks
+  // the lesson finished (completed_at, migration 043) — and the page moves on
+  // to the course's next lesson after a countdown.
+  const courseTrack = useCourseTrackForLesson(media);
+  const currentTimeRef = useRef(0);
+  useEffect(() => { currentTimeRef.current = currentTime; }, [currentTime]);
+  // The lesson's tags changed from its page (accepting a proposed tag, PRD
+  // ARCH-4) — read it again so the tags under the summary are the new ones.
+  const refreshMedia = useCallback(() => dispatch(fetchOneMedia(id)), [dispatch, id]);
+
+  const handlePlayerEnded = useCallback(() => {
+    const end = Math.max(currentTimeRef.current, Number(media?.duration_seconds) || 0);
+    if (end > 0) mediaApi.saveProgress(id, Math.round(end)).catch(() => {});
+    courseTrack.handleEnded();
+  }, [id, media?.duration_seconds, courseTrack]);
+
   // ── Likes ──────────────────────────────────────────────────────────────────
 
   // Each in a hook of its own because the actions bar they feed is also rendered
@@ -175,14 +196,26 @@ const useMediaViewPageController = () => {
 
   const { isSaved, toggleSave } = useMediaSave(media?.id);
 
+  // ── Captions and the scrolling transcript (PRD MOB-5, MOB-6) ───────────────
+  //
+  // { cues, precise } or null — one derivation for the player's captions, the
+  // transcript tab and the captions download, so the three cannot disagree
+  // about when a sentence is said. Rebuilt only when the transcript changes
+  // (an edit, a Hebrew fix), not on every tick of the player.
+  const transcript = insights.transcript;
+  const isText = insights.isText;
+  const captions = useMemo(() => (isText ? null : transcriptCues(transcript)), [isText, transcript]);
+
   return {
     media, bookmarks,
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
     readerPage, handleReaderPageChange: setReaderPage,
     seekOnReady, currentTime, handlePlayerProgress,
+    handlePlayerEnded, courseTrack, refreshMedia,
     handleCreateBookmark,
     isLiked, toggleLike,
     isSaved, toggleSave,
+    captions,
     // Spread rather than nested, so the page keeps reading `isText` and the
     // rest straight off the controller as it always has.
     ...insights,

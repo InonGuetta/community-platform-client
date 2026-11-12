@@ -1,7 +1,8 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { inReadingOrder } from "../../utilities/bookmarks";
 
-const selectBookmarksState = (state) => state.bookmarks;
+// The slice whole, for a screen that reads the list and its status together.
+export const selectBookmarksState = (state) => state.bookmarks;
 
 export const selectAllBookmarks = createSelector(selectBookmarksState, (b) => b.items);
 export const selectBookmarksStatus = createSelector(selectBookmarksState, (b) => b.status);

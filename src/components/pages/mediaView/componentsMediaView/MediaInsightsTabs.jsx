@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import AISummaryPanel from "./AISummaryPanel";
 import ChaptersPanel from "./ChaptersPanel";
 import TranscriptEditor from "../../../features/TranscriptEditor/TranscriptEditor";
+import FollowAlongTranscript from "./FollowAlongTranscript";
 
 // The summary / chapters / transcript block, shared by the media page and the
 // notebook's source preview so the two cannot drift apart.
@@ -22,7 +25,20 @@ import TranscriptEditor from "../../../features/TranscriptEditor/TranscriptEdito
 // "דיון עם AI" arrives as a slot for the same reason as the notes: it owns its
 // own dispatches and needs the page's player and reader to open a citation,
 // which the notebook's source preview does not offer. No slot, no tab.
-const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, discussionPanel = null, onSeek, tags = [] }) => {
+//
+// `captions` and `currentTime` let the transcript tab follow the lesson as it
+// plays (PRD MOB-6). Without them — the notebook's preview — the tab shows the
+// full text only, as before.
+const MediaInsightsTabs = ({
+  mediaId, insights, notesPanel = null, discussionPanel = null, onSeek, tags = [],
+  captions = null, currentTime = 0,
+  // Tags the LLM proposed (PRD ARCH-4), at the foot of the summary — a slot,
+  // like the notes, because only the page knows whether the reader may tag.
+  tagSuggestionsPanel = null,
+  // A lesson recorded in a live session: that session's chat (PRD REC-3).
+  // No slot, no tab — every other lesson.
+  sessionChatPanel = null,
+}) => {
   const {
     transcript, isText, keyPointHeadings,
     canEditTranscript, canGenerateHeadings,
@@ -32,6 +48,9 @@ const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, discussionPan
   } = insights;
 
   const [tab, setTab] = useState(0);
+  // "follow" — the sentence being said, highlighted; "text" — the whole
+  // transcript, where the lecturer edits it and starts the AI actions.
+  const [transcriptView, setTranscriptView] = useState("follow");
 
   // Different media types offer different tabs, so an index kept across a
   // navigation could land on a tab that no longer exists there.
@@ -49,6 +68,7 @@ const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, discussionPan
     ...(isText ? [] : [{ key: "chapters", label: "פרקים" }]),
     ...(isText ? [] : [{ key: "transcript", label: "תמלול" }]),
     ...(notesPanel ? [{ key: "notes", label: "הערות אישיות" }] : []),
+    ...(sessionChatPanel ? [{ key: "sessionChat", label: "צ'אט המפגש" }] : []),
     // Last in the list, which in this right-to-left row is to the LEFT of
     // "הערות אישיות". Offered for books too: a book's text is in the same
     // chunks a recording's transcript is.
@@ -82,6 +102,7 @@ const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, discussionPan
             tags={tags}
           />
         )}
+        {activeKey === "summary" && tagSuggestionsPanel}
         {activeKey === "chapters" && (
           <ChaptersPanel
             keyPointHeadings={keyPointHeadings}
@@ -93,8 +114,25 @@ const MediaInsightsTabs = ({ mediaId, insights, notesPanel = null, discussionPan
           />
         )}
         {activeKey === "notes" && notesPanel}
+        {activeKey === "sessionChat" && sessionChatPanel}
         {activeKey === "discuss" && discussionPanel}
-        {activeKey === "transcript" && (
+        {activeKey === "transcript" && captions && (
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={transcriptView}
+            onChange={(_, next) => next && setTranscriptView(next)}
+            aria-label="תצוגת התמלול"
+            sx={{ mb: 1.5, display: "flex", "& .MuiToggleButton-root": { flex: 1, py: 0.25 } }}
+          >
+            <ToggleButton value="follow">עם הנגינה</ToggleButton>
+            <ToggleButton value="text">{canEditTranscript ? "טקסט מלא ועריכה" : "טקסט מלא"}</ToggleButton>
+          </ToggleButtonGroup>
+        )}
+        {activeKey === "transcript" && captions && transcriptView === "follow" && (
+          <FollowAlongTranscript captions={captions} currentTime={currentTime} onSeek={onSeek} />
+        )}
+        {activeKey === "transcript" && (!captions || transcriptView === "text") && (
           <TranscriptEditor
             transcript={transcript}
             mediaId={mediaId}

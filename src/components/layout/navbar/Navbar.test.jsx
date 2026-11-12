@@ -1,15 +1,21 @@
 // @vitest-environment jsdom
-import { test, expect, describe } from "vitest";
+import { test, expect, describe, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import { ThemeProvider } from "@mui/material/styles";
-import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
+import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
 import { buildTheme } from "../../../theme/theme";
-import { PERSONAL_SHELVES } from "../../pages/personal/personalShelves";
+import { PERSONAL_SHELVES } from "../personalShelves";
 import Navbar from "./Navbar";
+
+// The bell polls on mount; NotificationBell.test.jsx is where it is tested.
+// Here it only must not reach the network.
+vi.mock("../../../api/notificationsApi", () => ({
+  notificationsApi: { list: vi.fn().mockResolvedValue({ items: [], unread: 0 }), markRead: vi.fn(), markAllRead: vi.fn() },
+}));
 
 // What the navigation offers is decided by the signed-in user's role, and the
 // three link sets are built by extending one another — student ⊂ lecturer ⊂
@@ -233,4 +239,24 @@ test("the privileged entries are strictly additive, never a different set", () =
   for (const href of studentBar) {
     expect(admin, `admin lost the student entry ${href}`).toContain(href);
   }
+});
+
+// PRD MOB-7 review: the drawer was 20.4vw wide at every size — 77px on a 375px
+// phone, where it holds every link. Below md it now takes most of the screen.
+describe("the drawer on a phone", () => {
+  test("is wide enough to read, not a fifth of the screen", async () => {
+    renderNavbar("student");
+    await userEvent.setup().click(screen.getByRole("button", { name: "פתיחת תפריט אישי" }));
+    const paper = document.querySelector(".MuiDrawer-paper");
+    // jsdom cannot evaluate min() or media queries, so the rule emotion wrote
+    // for the paper's class is read instead: the phone's width as the base, and
+    // the desktop's 20.4vw only inside a media query.
+    // jsdom cannot evaluate min() or media queries, so the rules emotion
+    // inserted for the paper's class are read from the stylesheets instead: a
+    // phone's width from the smallest breakpoint up, 20.4vw only from md.
+    const cls = [...paper.classList].find((c) => /^css-.*MuiDrawer-paper$/.test(c));
+    const rules = [...document.styleSheets].flatMap((sheet) => [...sheet.cssRules].map((r) => r.cssText));
+    expect(rules).toContain(`@media (min-width:0px) {.${cls} {width: min(85vw, 320px);}}`);
+    expect(rules).toContain(`@media (min-width:900px) {.${cls} {width: 20.4vw;}}`);
+  });
 });

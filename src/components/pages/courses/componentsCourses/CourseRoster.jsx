@@ -1,5 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -7,14 +5,8 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import { selectCourseStudents } from "../../../../store/selectors/coursesSelectors";
-import { coursesApi } from "../../../../api/coursesApi";
-
-// Below this the server answers an empty list, so asking is pure round trip.
-// Mirrored from MIN_SEARCH_LENGTH in the server's servicesCourses.js — the two
-// repositories share no code, and the mismatch is harmless in this direction:
-// a client that asks too early only wastes a request.
-const MIN_SEARCH_LENGTH = 2;
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { useCourseRoster, MIN_SEARCH_LENGTH } from "./useCourseRoster";
 
 // The enrolled students of one course, plus the control that adds another.
 //
@@ -34,52 +26,11 @@ const MIN_SEARCH_LENGTH = 2;
 // address book to everyone approved as a lecturer. It is to ask a question the
 // server can answer safely — a search, minimum two characters, capped, scoped to
 // this course and to people not already in it.
-const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll }) => {
-  const selectRoster = useMemo(() => selectCourseStudents(courseId), [courseId]);
-  const enrolled = useSelector(selectRoster);
-  const [picked, setPicked] = useState(null);
-  const [query, setQuery] = useState("");
-  const [options, setOptions] = useState([]);
-  const [searching, setSearching] = useState(false);
-
-  // Debounced, because this fires per keystroke and each one is a request.
-  // The cleanup both cancels the pending timer and marks the in-flight result
-  // stale, so a slow early response cannot land after a faster later one and
-  // repopulate the list with results for a query the user has moved on from.
-  useEffect(() => {
-    const term = query.trim();
-    if (!canEnroll || term.length < MIN_SEARCH_LENGTH) {
-      setOptions([]);
-      return undefined;
-    }
-
-    let stale = false;
-    setSearching(true);
-    const timer = setTimeout(() => {
-      coursesApi
-        .searchEnrollable(courseId, term)
-        .then((rows) => { if (!stale) setOptions(rows); })
-        // Silent: a failed type-ahead shows no options, which is the same thing
-        // the user sees while typing anyway. A toast per keystroke is worse than
-        // the empty list.
-        .catch(() => { if (!stale) setOptions([]); })
-        .finally(() => { if (!stale) setSearching(false); });
-    }, 250);
-
-    return () => {
-      stale = true;
-      clearTimeout(timer);
-    };
-  }, [query, courseId, canEnroll]);
-
-  const add = async () => {
-    if (!picked) return;
-    await onEnroll(courseId, picked.id);
-    setPicked(null);
-    // Clearing the query empties the options through the effect, so the person
-    // just added cannot be offered a second time from a stale list.
-    setQuery("");
-  };
+//
+// `onUnenroll` receives the whole student, not an id: the page asks before
+// removing anybody (ROST-8), and the question names the person.
+const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll, onExport }) => {
+  const { enrolled, picked, setPicked, query, setQuery, options, searching, add } = useCourseRoster({ courseId, canEnroll, onEnroll });
 
   return (
     <Box sx={{ pt: 1 }}>
@@ -121,6 +72,14 @@ const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll }) => {
         </Box>
       )}
 
+      {canEnroll && onExport && enrolled.length > 0 && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+          <Button size="small" startIcon={<FileDownloadIcon />} onClick={() => onExport(enrolled)}>
+            ייצוא ל‑CSV
+          </Button>
+        </Box>
+      )}
+
       {enrolled.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           אין תלמידים רשומים לקורס זה.
@@ -133,7 +92,7 @@ const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll }) => {
               label={s.display_name || s.email}
               // onDelete is what renders the X, so a lecturer viewing the roster
               // sees names without a remove affordance they cannot use.
-              onDelete={canEnroll ? () => onUnenroll(courseId, s.id) : undefined}
+              onDelete={canEnroll ? () => onUnenroll(courseId, s) : undefined}
               variant="outlined"
             />
           ))}

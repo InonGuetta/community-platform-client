@@ -1,27 +1,14 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { sessionsApi } from "../../../api/sessionsApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const fetchActiveSessions = createAsyncThunk("sessions/fetchActive", async (_, { rejectWithValue }) => {
-  try {
-    return await sessionsApi.listActive();
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch sessions"));
-  }
+export const fetchActiveSessions = createApiThunk("sessions/fetchActive", "Failed to fetch sessions", async () => {
+  return await sessionsApi.listActive();
 });
 
-export const fetchUpcomingSessions = createAsyncThunk("sessions/fetchUpcoming", async (_, { rejectWithValue }) => {
-  try {
-    return await sessionsApi.listUpcoming();
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch upcoming sessions"));
-  }
+export const fetchUpcomingSessions = createApiThunk("sessions/fetchUpcoming", "Failed to fetch upcoming sessions", async () => {
+  return await sessionsApi.listUpcoming();
 });
 
-export const fetchSessionById = createAsyncThunk("sessions/fetchById", async (id, { rejectWithValue }) => {
-  try {
-    return await sessionsApi.getOne(id);
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch session"));
-  }
+export const fetchSessionById = createApiThunk("sessions/fetchById", "Failed to fetch session", async (id) => {
+  return await sessionsApi.getOne(id);
 });

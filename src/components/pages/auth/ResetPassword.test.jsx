@@ -5,8 +5,8 @@ import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
-import { resetPassword as realResetPassword } from "../../../store/slicesAndThunks/authSlices/authPost";
+import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
+import { resetPassword as realResetPassword } from "../../../store/slicesAndThunks/authSlice/authPost";
 
 // Choosing a new password, reached from a link in an inbox.
 //
@@ -23,7 +23,7 @@ import { resetPassword as realResetPassword } from "../../../store/slicesAndThun
 // the action SHAPE the component actually reads keeps every assertion below
 // honest and involves no rejection at all.
 const dispatched = vi.hoisted(() => vi.fn());
-vi.mock("../../../store/slicesAndThunks/authSlices/authPost", async (importOriginal) => {
+vi.mock("../../../store/slicesAndThunks/authSlice/authPost", async (importOriginal) => {
   const actual = await importOriginal();
   // The action-type properties are carried over deliberately: authSlice builds
   // its reducer from `resetPassword.pending` and the two beside it, so a bare

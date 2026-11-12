@@ -4,8 +4,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../../../store/slicesAndThunks/authSlices/authSlice";
-import notificationReducer from "../../../store/slicesAndThunks/notificationSlice";
+import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
+import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 
 // The user's own account — the only write they make to their own row, and until
 // this screen existed an admin could rename anybody while nobody could rename
@@ -18,7 +18,13 @@ import notificationReducer from "../../../store/slicesAndThunks/notificationSlic
 const profileCall = vi.hoisted(() => vi.fn());
 const passwordCall = vi.hoisted(() => vi.fn());
 
-vi.mock("../../../store/slicesAndThunks/authSlices/authPut", async (importOriginal) => {
+// The mail switches load their own data; EmailPreferencesCard.test.jsx tests
+// them. Here they only must not reach the network.
+vi.mock("../../../api/notificationsApi", () => ({
+  notificationsApi: { preferences: vi.fn().mockResolvedValue({ categories: [], allOff: false }), setPreference: vi.fn() },
+}));
+
+vi.mock("../../../store/slicesAndThunks/authSlice/authPut", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -29,7 +35,7 @@ vi.mock("../../../store/slicesAndThunks/authSlices/authPut", async (importOrigin
     }),
   };
 });
-vi.mock("../../../store/slicesAndThunks/authSlices/authPost", async (importOriginal) => {
+vi.mock("../../../store/slicesAndThunks/authSlice/authPost", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,

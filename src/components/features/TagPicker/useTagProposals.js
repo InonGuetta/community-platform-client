@@ -1,13 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { mediaApi } from "../../../api/mediaApi";
 import { hebrewForError, rejectionOf } from "../../../utilities/apiError";
 import { logger } from "../../../utilities/logger";
+import { selectUserRole } from "../../../store/selectors/authSelectors";
+import { roles } from "../../../utilities/constant";
 
 // The new tags an item is waiting for, and the two things that change them.
 //
 // Local state rather than a slice: nothing else on the page reads proposals, and
 // they live only as long as the tagging dialog that shows them.
+//
+// `isAdmin` decides what a proposal becomes: an admin's tag is created on the
+// spot, a lecturer's waits for one (see TagProposalsSection).
 export const useTagProposals = (itemId, active) => {
+  const isAdmin = useSelector(selectUserRole) === roles.admin;
   const [pending, setPending] = useState([]);
 
   useEffect(() => {
@@ -57,5 +64,5 @@ export const useTagProposals = (itemId, active) => {
     [itemId, pending]
   );
 
-  return { pending, propose, withdraw };
+  return { pending, propose, withdraw, isAdmin };
 };

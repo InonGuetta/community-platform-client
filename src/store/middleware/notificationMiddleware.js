@@ -1,4 +1,4 @@
-import { notify } from "../slicesAndThunks/notificationSlice";
+import { notify } from "../slicesAndThunks/snackbarSlice";
 import { hebrewForError } from "../../utilities/apiError";
 
 // Central place that turns Redux mutation outcomes into user-facing toasts, so
@@ -25,14 +25,21 @@ const SUCCESS_MESSAGES = {
   "bookmarks/delete": "הסימנייה נמחקה",
   "sessions/create": "המפגש נוצר",
   "transcript/trigger": "התמלול הופעל",
-  "transcript/fixHebrew": "העברית תוקנה",
-  "transcript/keyPointHeadings": "כותרות המשנה נוצרו",
+  // Queued, not finished (PRD PIPE-5): the work runs on the server's queue and
+  // the page announces the result when the row says so (useMediaInsights).
+  "transcript/fixHebrew": "תיקון העברית התחיל. זה עשוי לקחת כמה דקות",
+  "transcript/keyPointHeadings": "יצירת כותרות המשנה התחילה",
   // The save toggle itself stays silent — the button lights up, which is the
   // feedback. Making and discarding a LIST is not visible outside the menu it
   // happens in, so those two do get a toast.
   "saves/createPlaylist": "הרשימה נוצרה",
   "saves/renamePlaylist": "שם הרשימה עודכן",
   "saves/deletePlaylist": "הרשימה נמחקה",
+  // Joining by code (PRD ROST-9): what changes is not visible from the list
+  // alone — the student gone from the queue could be either answer.
+  "courses/createJoinCode": "נוצר קוד הצטרפות חדש. הקוד הקודם כבר לא עובד",
+  "courses/removeJoinCode": "ההצטרפות בקוד בוטלה",
+  "courses/cancelJoinRequest": "הבקשה בוטלה",
 };
 
 // Error toasts: surfaces failures that were previously silent. Uses curated
@@ -43,6 +50,9 @@ const ERROR_MESSAGES = {
   "media/update": "עדכון המדיה נכשל",
   "media/delete": "מחיקת המדיה נכשלה",
   "media/fetchAll": "טעינת המדיה נכשלה",
+  // The next page of the archive. Said out loud: otherwise the grid simply
+  // stops growing, which reads as "that was everything".
+  "media/fetchMore": "טעינת המשך הרשימה נכשלה",
   "users/create": "יצירת המשתמש נכשלה",
   "users/update": "עדכון המשתמש נכשל",
   "users/delete": "מחיקת המשתמש נכשלה",
@@ -72,8 +82,18 @@ const ERROR_MESSAGES = {
   // happen looks identical to one that did until the page is reloaded, and a
   // reorder is applied optimistically and then quietly re-fetched away.
   "notes/update": "שמירת ההערה נכשלה",
+  // A note's body, loaded as its card comes into view (NOTE-17). Without this
+  // the card would sit on its preview with nothing to say why.
+  "notes/fetchBodies": "טעינת ההערה נכשלה",
+  "notes/fetchAboutMedia": "טעינת ההערות של השיעור נכשלה",
   "notes/delete": "מחיקת ההערה נכשלה",
   "notes/reorder": "שינוי סדר ההערות נכשל",
+  // Joining by code (PRD ROST-9). Typing a code ("courses/join") is not here:
+  // the dialog it is typed in says what went wrong, next to the code.
+  "courses/createJoinCode": "יצירת קוד ההצטרפות נכשלה",
+  "courses/removeJoinCode": "ביטול קוד ההצטרפות נכשל",
+  "courses/decideJoinRequest": "הטיפול בבקשת ההצטרפות נכשל",
+  "courses/cancelJoinRequest": "ביטול הבקשה נכשל",
 };
 
 // The Hebrew for a specific reason — a duplicate email, an expired session —

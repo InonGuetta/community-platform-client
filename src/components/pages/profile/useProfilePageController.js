@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../../../store/selectors/authSelectors";
-import { updateProfile } from "../../../store/slicesAndThunks/authSlices/authPut";
-import { changePassword } from "../../../store/slicesAndThunks/authSlices/authPost";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { updateProfile } from "../../../store/slicesAndThunks/authSlice/authPut";
+import { changePassword } from "../../../store/slicesAndThunks/authSlice/authPost";
+import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { hebrewForError } from "../../../utilities/apiError";
 
 // What the profile page does — the profile edit and the password change, and

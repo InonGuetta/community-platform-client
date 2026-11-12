@@ -12,6 +12,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import { roleLabels } from "../../../utilities/constant";
 import RoleRequestCard from "./RoleRequestCard";
+import EmailPreferencesCard from "./EmailPreferencesCard";
 import { useProfilePageController, MIN_PASSWORD_LENGTH } from "./useProfilePageController";
 
 // The user's own account, which nobody could edit before this — an admin could
@@ -98,6 +99,9 @@ const ProfilePage = () => {
             account is rather than how it is secured. Renders nothing for an
             admin, who has nothing left to ask for. */}
         <RoleRequestCard />
+
+        {/* NOTIF-6 — the place every notification mail's footer points back to. */}
+        <EmailPreferencesCard />
 
         <Card sx={{ borderRadius: 2 }}>
           <CardContent component="form" onSubmit={handleChangePassword} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

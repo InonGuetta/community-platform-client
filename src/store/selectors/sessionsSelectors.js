@@ -6,3 +6,5 @@ export const selectAllRooms = createSelector(selectSessionsState, (s) => s.rooms
 export const selectActiveRoom = createSelector(selectSessionsState, (s) => s.activeRoom);
 export const selectSessionsStatus = createSelector(selectSessionsState, (s) => s.status);
 export const selectSessionsError = createSelector(selectSessionsState, (s) => s.error);
+
+export const selectUpcomingSessions = (state) => state.sessions.upcoming;

@@ -84,10 +84,57 @@ export default [
     },
   },
   {
+    // Where state lives (CLAUDE.md, CONTRIBUTING): a component renders what its
+    // hook hands it. Dispatching and selecting belong in the hook — the page's
+    // useXxxPageController, or a useXxx beside the component — so a component
+    // reads as layout and its logic is tested without it.
+    //
+    // The four exceptions are the shell that wires the store in: the Provider,
+    // the routes that read who is signed in, and the snackbar that shows what
+    // the store queued. Tests render with a Provider of their own.
+    files: ["src/**/*.jsx"],
+    ignores: [
+      "src/**/*.test.jsx",
+      "src/main.jsx",
+      "src/App.jsx",
+      "src/components/pages/auth/ProtectedRoute.jsx",
+      "src/components/features/Notification/GlobalSnackbar.jsx",
+    ],
+    rules: {
+      "no-restricted-imports": ["error", {
+        paths: [{
+          name: "react-redux",
+          message: "A .jsx renders what its hook returns: move the dispatch/select into a useXxx.js beside it (CLAUDE.md, \"Where state lives\").",
+        }],
+      }],
+    },
+  },
+  {
     // Tests import their globals explicitly, but they run under node rather
     // than in a browser.
     files: ["src/**/*.test.{js,jsx}"],
     languageOptions: { globals: { ...globals.node } },
+  },
+  {
+    // Build-time scripts run under node, not in the page (generate-icons.mjs
+    // draws the app's icons, PRD MOB-1), and report to the terminal.
+    files: ["scripts/**/*.{js,mjs}"],
+    languageOptions: { ecmaVersion: 2023, sourceType: "module", globals: { ...globals.node } },
+    rules: { "no-console": "off" },
+  },
+  {
+    // The end-to-end test and its config (PRD NFR-9) run under node and drive a
+    // browser from the outside; they report to the terminal.
+    files: ["e2e/**/*.js", "playwright.config.js"],
+    languageOptions: { ecmaVersion: 2023, sourceType: "module", globals: { ...globals.node } },
+    rules: { "no-console": "off" },
+  },
+  {
+    // The service worker (PRD MOB-2): a plain script in the worker's own scope,
+    // where `self`, `caches` and `clients` are the globals and there is no
+    // window.
+    files: ["public/sw.js"],
+    languageOptions: { ecmaVersion: 2023, sourceType: "script", globals: { ...globals.serviceworker } },
   },
   {
     // logger.js is where console.* is the implementation. ErrorBoundary is the

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
@@ -8,11 +7,16 @@ import AudiotrackOutlinedIcon from "@mui/icons-material/AudiotrackOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
+import DownloadForOfflineOutlinedIcon from "@mui/icons-material/DownloadForOfflineOutlined";
+import OfflinePinOutlinedIcon from "@mui/icons-material/OfflinePinOutlined";
+import ClosedCaptionOutlinedIcon from "@mui/icons-material/ClosedCaptionOutlined";
 import { mediaApi } from "../../../api/mediaApi";
-import { transcriptsApi } from "../../../api/transcriptsApi";
-import { transcriptToText } from "../../../utilities/transcriptText";
 import { mediaTypes } from "../../../utilities/constant";
-import { notify } from "../../../store/slicesAndThunks/notificationSlice";
+import { offlineSupported, percentOf } from "../../../utilities/offlineStore";
+import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
+import { toVtt } from "../../../utilities/transcriptTiming";
+import { saveBlob } from "../../../utilities/saveBlob";
+import { useDownloadActions } from "./useDownloadActions";
 
 // WHAT CAN BE DOWNLOADED FROM A LECTURE — stated once, for every menu that
 // offers it.
@@ -58,45 +62,12 @@ const itemSx = { textAlign: "start" };
  * it navigated to a file or finished building a PDF.
  */
 export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) => {
-  const dispatch = useDispatch();
-  const [busy, setBusy] = useState(false);
+  const { busy, savedOffline, saving, captions, offerTranscript, handleTranscript, saveOffline } =
+    useDownloadActions({ media, transcript, hasTranscript, onClose });
+  const navigate = useNavigate();
 
   const { label: fileLabel, Icon: FileIcon } = FILE_OPTION[media.media_type] || FILE_OPTION[mediaTypes.text];
   const isVideo = media.media_type === mediaTypes.video;
-
-  const loadedText = transcriptToText(transcript);
-  const offerTranscript = Boolean(loadedText) || Boolean(hasTranscript);
-
-  // Building the PDF pulls in jsPDF, the bidi tables and the Hebrew font, and may
-  // need the transcript itself first, so it is async and can fail. A failure is
-  // reported rather than swallowed: from the user's side a silent no-op is
-  // indistinguishable from a click that missed.
-  const handleTranscript = async () => {
-    setBusy(true);
-    try {
-      const text = loadedText || transcriptToText(await transcriptsApi.get(media.id));
-      if (!text) {
-        dispatch(notify({ message: "אין תמלול זמין לפריט זה.", severity: "warning" }));
-        return;
-      }
-      // Both come from the same dynamic import: the filename rule belongs with
-      // the writer that uses it, and pulling it in statically would drag the
-      // PDF module into the bundle everyone loads.
-      const { downloadHebrewPdf, safeFileBaseName } = await import("../../../utilities/hebrewPdf");
-      // One section, no heading: the transcript IS the document, and a heading
-      // repeating the title directly under it would only be the title twice.
-      await downloadHebrewPdf({
-        title: media.title,
-        sections: [{ text }],
-        filename: `${safeFileBaseName(media.title, "תמלול")}.pdf`,
-      });
-    } catch {
-      dispatch(notify({ message: "יצירת ה-PDF נכשלה. נסה שוב.", severity: "error" }));
-    } finally {
-      setBusy(false);
-      onClose?.();
-    }
-  };
 
   const items = [
     <MenuItem
@@ -127,6 +98,57 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
       >
         <ListItemIcon><AudiotrackOutlinedIcon fontSize="small" /></ListItemIcon>
         <ListItemText primary="הורדת שמע בלבד" />
+      </MenuItem>
+    );
+  }
+
+  // Keeping the lesson on the device for listening with no network (PRD MOB-2).
+  // A recording only — a document has nothing to listen to — and a video is
+  // kept as its audio. Three states, one entry: offered, running (with how far),
+  // and done, which leads to the downloads page where it is played.
+  if (media.media_type !== mediaTypes.text && offlineSupported()) {
+    if (savedOffline) {
+      items.push(
+        <MenuItem key="offline" onClick={() => { onClose?.(); navigate(DOWNLOADS_SHELF.path); }} sx={itemSx}>
+          <ListItemIcon><OfflinePinOutlinedIcon fontSize="small" color="success" /></ListItemIcon>
+          <ListItemText primary="זמין בלי רשת" secondary="להורדות להאזנה" />
+        </MenuItem>
+      );
+    } else if (saving) {
+      const percent = percentOf(saving.received, saving.total);
+      items.push(
+        <MenuItem key="offline" disabled sx={itemSx}>
+          <ListItemIcon><CircularProgress size={18} /></ListItemIcon>
+          <ListItemText primary={percent === null ? "שומר להאזנה…" : `שומר להאזנה… ${percent}%`} />
+        </MenuItem>
+      );
+    } else {
+      items.push(
+        <MenuItem key="offline" onClick={() => { onClose?.(); saveOffline(); }} sx={itemSx}>
+          <ListItemIcon><DownloadForOfflineOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText primary="שמירה להאזנה בלי רשת" />
+        </MenuItem>
+      );
+    }
+  }
+
+  // The captions as a WebVTT file (PRD MOB-5) — for a video player, an editor,
+  // or a copy of the lesson put up elsewhere. Only where the transcript is
+  // already loaded (the lesson page): the cues are built from it, and an archive
+  // card has none.
+  if (captions) {
+    items.push(
+      <MenuItem
+        key="captions"
+        onClick={() => {
+          const name = (media.title || "כתוביות").replace(/[\\/:*?"<>|]+/g, " ").trim() || "כתוביות";
+          saveBlob(new Blob([toVtt(captions.cues, { precise: captions.precise })], { type: "text/vtt" }), `${name}.vtt`);
+          onClose?.();
+        }}
+        sx={itemSx}
+      >
+        <ListItemIcon><ClosedCaptionOutlinedIcon fontSize="small" /></ListItemIcon>
+        <ListItemText primary="הורדת כתוביות (VTT)" />
       </MenuItem>
     );
   }

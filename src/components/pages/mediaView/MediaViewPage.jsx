@@ -14,8 +14,14 @@ import NotesPanel from "./componentsMediaView/NotesPanel";
 import MediaActionsBar from "./componentsMediaView/MediaActionsBar";
 import LessonNotebook from "./componentsMediaView/LessonNotebook";
 import AIDiscussionPanel from "./componentsMediaView/AIDiscussion/AIDiscussionPanel";
+import CourseTrackBar from "./componentsMediaView/CourseTrackBar";
+import AiTagSuggestions from "./componentsMediaView/AiTagSuggestions";
+import SessionChatPanel from "./componentsMediaView/SessionChatPanel";
 import useMediaViewPageController from "./useMediaViewPageController";
 import { creatorPrefixes } from "../../../utilities/constant";
+import { creatorPath, hasCreatorPage } from "../../../utilities/creatorPage";
+import Link from "@mui/material/Link";
+import { Link as RouterLink } from "react-router-dom";
 import { formatHebrewDate } from "../../../utilities/formatDate";
 
 // Presentation only. Everything that dispatches, selects or derives from server
@@ -37,6 +43,9 @@ const MediaViewPage = () => {
     isLiked, toggleLike,
     isSaved, toggleSave,
     isText,
+    captions,
+    handlePlayerEnded, courseTrack, refreshMedia,
+    canEditTranscript,
   } = controller;
 
   // Stays here rather than in the controller: a ref has to be created in the
@@ -127,7 +136,15 @@ const MediaViewPage = () => {
             accident rather than on purpose. */}
         {media.creator_name && (
           <Typography variant="body2" color="text.secondary">
-            {creatorPrefixes[media.media_type] || creatorPrefixes.video}: {media.creator_name}
+            {creatorPrefixes[media.media_type] || creatorPrefixes.video}:{" "}
+            {/* Their other lessons are one click away (PRD ATTR-10). */}
+            {hasCreatorPage(media.creator_name) ? (
+              <Link component={RouterLink} to={creatorPath(media.creator_name)} color="inherit" underline="hover" fontWeight={600}>
+                {media.creator_name}
+              </Link>
+            ) : (
+              media.creator_name
+            )}
           </Typography>
         )}
       </Box>
@@ -162,7 +179,11 @@ const MediaViewPage = () => {
                 // Only so the player's settings menu can offer the transcript
                 // PDF without fetching one it already has.
                 transcript={transcript}
+                // Captions over the stage (PRD MOB-5): the same cues the
+                // transcript tab follows the lesson with.
+                captions={captions}
                 onProgress={handlePlayerProgress}
+                onEnded={handlePlayerEnded}
                 seekOnReady={seekOnReady}
               />
             )}
@@ -188,6 +209,9 @@ const MediaViewPage = () => {
               {formatHebrewDate(media.created_at)}
             </Typography>
           )}
+          {/* Its place in its course, and the way on (PRD CRS-1, CRS-3). Also
+              outside the measured box, for the same reason as the date. */}
+          {!isText && <CourseTrackBar track={courseTrack} />}
         </Grid>
 
         <Grid item xs={12} md={4}>
@@ -206,6 +230,19 @@ const MediaViewPage = () => {
               tags={media.tags}
               insights={controller}
               onSeek={seekPlayer}
+              // The transcript tab follows the lesson as it plays (PRD MOB-6).
+              captions={captions}
+              currentTime={currentTime}
+              // Proposed tags (PRD ARCH-4): for whoever may tag this lesson,
+              // once it has a summary to propose them from.
+              // Recorded in a live session (PRD REC-3): its chat, in a tab of
+              // its own; a message's time plays the moment it was written.
+              sessionChatPanel={media.session_id ? <SessionChatPanel mediaId={media.id} onSeek={seekPlayer} /> : null}
+              tagSuggestionsPanel={
+                canEditTranscript && transcript?.ai_summary ? (
+                  <AiTagSuggestions mediaId={media.id} onTagged={refreshMedia} />
+                ) : null
+              }
               notesPanel={
                 <NotesPanel
                   bookmarks={bookmarks}

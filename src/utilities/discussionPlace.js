@@ -1,4 +1,5 @@
 import { formatTime } from "./formatTime";
+import { TIME_PARAM, PAGE_PARAM } from "./deepLink";
 
 // Where a passage of a lesson is, for the "דיון עם AI" tab — a search hit and
 // a chat citation both carry the same fields (start_time, page_number,
@@ -15,7 +16,12 @@ import { formatTime } from "./formatTime";
 // `!= null` and not truthiness, deliberately: 0 is the first second of every
 // recording, and "0 is falsy, so this has no time" is exactly the slip
 // utilities/bookmarks.js exists to stop.
-export const placeOf = (item) => {
+//
+// A citation from the archive chat (PRD ASK-2) also names its lesson
+// (media_id, media_title): the place then carries the lesson's id, and its
+// label starts with the lesson's title — "«שיחת הכנה», 12:34" — because
+// "12:34" alone does not say in which of eight lessons.
+const placeIn = (item) => {
   if (item?.start_time != null) {
     const seconds = Number(item.start_time);
     return { kind: "time", seconds, label: formatTime(seconds) };
@@ -25,6 +31,22 @@ export const placeOf = (item) => {
     return { kind: "page", page, label: `עמ' ${page}` };
   }
   return { kind: "none", label: `קטע ${Number(item?.chunk_index ?? 0) + 1}` };
+};
+
+export const placeOf = (item) => {
+  const place = placeIn(item);
+  if (item?.media_id == null) return place;
+  const title = String(item.media_title ?? "").trim();
+  return { ...place, mediaId: Number(item.media_id), label: title ? `«${title}», ${place.label}` : place.label };
+};
+
+// The lesson page, opened at the cited place — for a citation that names its
+// lesson. The same parameters the lesson page reads (utilities/deepLink.js).
+export const placeHref = (place) => {
+  const base = `/media/${place.mediaId}`;
+  if (place.kind === "time" && place.seconds > 0) return `${base}?${TIME_PARAM}=${Math.floor(place.seconds)}`;
+  if (place.kind === "page" && place.page > 1) return `${base}?${PAGE_PARAM}=${place.page}`;
+  return base;
 };
 
 // Whether this place can be opened with what the page offers. A book has no

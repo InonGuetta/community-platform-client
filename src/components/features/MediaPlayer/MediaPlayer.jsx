@@ -1,14 +1,26 @@
 import { forwardRef, useImperativeHandle, useRef, useState, useCallback, useEffect } from "react";
+import useMediaSession from "./useMediaSession";
 import ReactPlayer from "react-player";
 import Box from "@mui/material/Box";
 import PlayerControls from "./PlayerControls";
 import { mediaTypes } from "../../../utilities/constant";
 import { STAGE_ASPECT } from "./stageGeometry";
+import { captionAt } from "../../../utilities/transcriptTiming";
 
 // How long the control bar stays up over a playing video after the last pointer
 // movement. Long enough to reach it without chasing, short enough that it is out
 // of the picture for the rest of the lecture.
 const CONTROLS_HIDE_AFTER_MS = 2500;
+
+// Whether captions are on is a reader's habit, not a lesson's property, so it is
+// remembered across lessons — in a try, because localStorage can throw.
+const CAPTIONS_KEY = "captionsOn";
+const readCaptionsOn = () => {
+  try { return localStorage.getItem(CAPTIONS_KEY) === "1"; } catch { return false; }
+};
+const saveCaptionsOn = (on) => {
+  try { localStorage.setItem(CAPTIONS_KEY, on ? "1" : "0"); } catch { /* not remembered */ }
+};
 
 // forwardRef so callers can drive the player from a sibling — the chapters list
 // seeks it, and so does the notebook's source preview.
@@ -17,8 +29,10 @@ const CONTROLS_HIDE_AFTER_MS = 2500;
 // settings menu offers the same downloads as the page's download pill (see
 // downloadOptions.jsx), and those need the title and the media type as well.
 // `transcript` is optional and only decides whether a PDF is offered.
+// `captions` is { cues, precise } from utilities/transcriptTiming (PRD MOB-5),
+// or null when the lesson has nothing to caption.
 const MediaPlayer = forwardRef((
-  { url, media, transcript, onProgress, seekOnReady = 0 },
+  { url, media, transcript, captions = null, onProgress, onEnded, seekOnReady = 0 },
   ref
 ) => {
   const mediaType = media?.media_type;
@@ -111,6 +125,19 @@ const MediaPlayer = forwardRef((
 
   const isVideo = mediaType === mediaTypes.video;
 
+  // The lock screen, the notification shade and the media keys (PRD MOB-3) —
+  // driving the same state as the bar below. See useMediaSession.
+  useMediaSession({
+    media,
+    active: isReady,
+    playing,
+    position: played,
+    duration: effectiveDuration,
+    playbackRate,
+    onPlayingChange: setPlaying,
+    onSeek: seekTo,
+  });
+
   // ── The bar getting out of the way ─────────────────────────────────────────
   //
   // Over a picture the control bar is an overlay, and an overlay that never
@@ -141,6 +168,19 @@ const MediaPlayer = forwardRef((
   useEffect(() => () => clearTimeout(hideTimerRef.current), []);
 
   const controlsVisible = !isVideo || !playing || controlsBusy || pointerAwake;
+
+  // ── Captions (PRD MOB-5) ────────────────────────────────────────────────────
+  //
+  // Drawn by the page rather than as a <track> on the media element: an audio
+  // lesson plays in an <audio>, which shows no captions at all, and this way the
+  // same line appears over a picture and over the empty stage of a recording,
+  // in the same right-to-left type as the rest of the page.
+  const [captionsOn, setCaptionsOn] = useState(readCaptionsOn);
+  const toggleCaptions = useCallback(() => {
+    setCaptionsOn((on) => { saveCaptionsOn(!on); return !on; });
+  }, []);
+  const hasCaptions = Boolean(captions?.cues?.length);
+  const caption = hasCaptions && captionsOn ? captionAt(captions.cues, played) : null;
 
   return (
     // The BLACK belongs to a picture; the space does not. A lecture with no
@@ -181,10 +221,10 @@ const MediaPlayer = forwardRef((
           p: 2,
         }}
       >
-        {/* The media element stays rendered and playing in BOTH cases, and it is
-            a <video> in both: the stream URL carries no file extension, so
-            ReactPlayer builds one even for a lecture with no picture. What
-            changes is its box. For video it fills the frame behind the bar; for
+        {/* The media element stays rendered and playing in BOTH cases — a
+            <video> for a picture, an <audio> for a lecture without one (see
+            forceAudio below; it was a <video> for both until background play
+            needed otherwise). What changes is its box. For video it fills the frame behind the bar; for
             audio it is kept to an invisible 1×1 — still laid out, still playing,
             but with no surface left to paint the black rectangle this change is
             here to remove. Not `display: none`, which would take its box away
@@ -222,9 +262,56 @@ const MediaPlayer = forwardRef((
             onReady={handleReady}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
-            onEnded={() => setPlaying(false)}
+            // The page moves on to the course's next lesson (PRD CRS-3).
+            onEnded={() => { setPlaying(false); onEnded?.(); }}
+            // An audio lesson as an <audio> element (PRD MOB-3). The stream URL
+            // has no extension, so ReactPlayer would otherwise build a <video>
+            // for it too — and a phone pauses a VIDEO when the screen locks or
+            // the browser goes to the background, which made a shiur stop the
+            // moment the phone went into a pocket. Audio is allowed to play on.
+            config={{ file: { forceAudio: !isVideo } }}
           />
         </Box>
+
+        {caption && (
+          <Box
+            data-testid="player-caption"
+            dir="rtl"
+            sx={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              zIndex: 1,
+              display: "flex",
+              justifyContent: "center",
+              px: 2,
+              pointerEvents: "none",
+              // Over a picture, just above the bar — lower when the bar has
+              // faded away. On a recording's empty stage, above the bar in the
+              // middle of it.
+              ...(isVideo
+                ? { bottom: controlsVisible ? 76 : 20, transition: "bottom 220ms ease" }
+                : { bottom: "calc(50% + 34px)" }),
+            }}
+          >
+            <Box
+              component="span"
+              sx={{
+                maxWidth: 680,
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+                bgcolor: "rgba(0,0,0,0.72)",
+                color: "#fff",
+                textAlign: "center",
+                lineHeight: 1.5,
+                fontSize: { xs: "0.95rem", sm: "1.15rem" },
+              }}
+            >
+              {caption}
+            </Box>
+          </Box>
+        )}
 
         {/* visibility, not just opacity: a bar faded to nothing would still
             swallow the click meant for the picture underneath it. The transition
@@ -262,6 +349,9 @@ const MediaPlayer = forwardRef((
             overPicture={isVideo}
             // Keeps the bar up while its own menus are open — see PlayerControls.
             onBusyChange={setControlsBusy}
+            captionsAvailable={hasCaptions}
+            captionsOn={captionsOn}
+            onToggleCaptions={toggleCaptions}
           />
         </Box>
       </Box>

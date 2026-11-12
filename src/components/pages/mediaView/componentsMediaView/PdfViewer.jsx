@@ -66,7 +66,9 @@ const PdfViewer = ({
   const { pdf, error, pageSize } = usePdfDocument({ media, onStatusChange });
   const { page, setPage, goToPage, observe } = usePdfPageTracking({ containerRef, pdf, onPageChange });
   const { fitScale, zoom, scale, changeZoom } = usePdfFit({ containerRef, pageSize, page, goToPage });
-  const { pending, note, setNote, saving, save, dismiss } = usePdfMarkSelection({ containerRef, onAddBookmark });
+  const { pending, note, setNote, saving, save, dismiss } = usePdfMarkSelection({
+    containerRef, onAddBookmark, ready: Boolean(pdf && pageSize),
+  });
   const flashed = usePdfJump({ containerRef, pdf, fitScale, jumpTo, setPage });
 
   if (error) {

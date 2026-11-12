@@ -3,7 +3,14 @@ import { pageAnchorFromSelection } from "../../../../utilities/pageAnchors";
 
 // A passage selected on a page, turned into a bookmark: the panel's state, and
 // saving it through onAddBookmark.
-export const usePdfMarkSelection = ({ containerRef, onAddBookmark }) => {
+//
+// `ready` is whether the document is on screen. The listener needs the page box,
+// which exists only from then — and the effect that attaches it must run again
+// at that moment. It used to run only when onAddBookmark changed: on the lesson
+// page that happened to follow (its handler is a new function every render),
+// in the notebook's source window it never did (a useCallback), and there a
+// selection offered nothing at all.
+export const usePdfMarkSelection = ({ containerRef, onAddBookmark, ready }) => {
   // containerRef (and any setter) is in the dependency lists below only because
   // it arrives as an argument: it is one object for the viewer's life, so it
   // never re-runs anything.
@@ -45,7 +52,7 @@ export const usePdfMarkSelection = ({ containerRef, onAddBookmark }) => {
 
     document.addEventListener("selectionchange", onSelectionChange);
     return () => document.removeEventListener("selectionchange", onSelectionChange);
-  }, [containerRef, onAddBookmark]);
+  }, [containerRef, onAddBookmark, ready]);
 
   const dismiss = useCallback(() => {
     setPending(null);

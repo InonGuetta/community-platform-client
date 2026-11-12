@@ -376,14 +376,12 @@ describe("marking a passage", () => {
   const panel = () => screen.queryByLabelText("שמירת סימנייה על הקטע המסומן");
   const noteField = () => within(panel()).getByLabelText("הערה (לא חובה)");
 
-  // The listener is attached by an effect keyed on onAddBookmark that reads the
-  // scroll box when it runs — and the box exists only once the document is open.
-  // So, as a parent re-rendering does, the handler is handed in again after that.
-  const renderMarkable = async (onAddBookmark) => {
-    const view = await renderViewer({ onAddBookmark: (...a) => onAddBookmark(...a) });
-    view.rerender(<PdfViewer media={{ id: 7 }} onAddBookmark={(...a) => onAddBookmark(...a)} />);
-    return view;
-  };
+  // The handler is handed in once and never changes — as the notebook's source
+  // window passes it (a useCallback). Marking used to depend on the parent
+  // re-rendering with a NEW handler after the document opened: the listener's
+  // effect ran while the spinner was up, found no page box, and never ran again,
+  // so in the source window a selection offered nothing at all.
+  const renderMarkable = (onAddBookmark) => renderViewer({ onAddBookmark });
 
   test("a selection offers the words back, and a new one starts a new note", async () => {
     openWith(makeDoc(5));

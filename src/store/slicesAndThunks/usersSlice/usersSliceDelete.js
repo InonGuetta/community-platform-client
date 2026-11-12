@@ -1,12 +1,7 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { usersApi } from "../../../api/usersApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const deleteUser = createAsyncThunk("users/delete", async (id, { rejectWithValue }) => {
-  try {
-    await usersApi.remove(id);
-    return { id };
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to delete user"));
-  }
+export const deleteUser = createApiThunk("users/delete", "Failed to delete user", async (id) => {
+  await usersApi.remove(id);
+  return { id };
 });

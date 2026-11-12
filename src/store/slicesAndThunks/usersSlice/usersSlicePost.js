@@ -1,13 +1,8 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { usersApi } from "../../../api/usersApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const createUser = createAsyncThunk("users/create", async (payload, { rejectWithValue }) => {
-  try {
-    return await usersApi.create(payload);
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to create user"));
-  }
+export const createUser = createApiThunk("users/create", "Failed to create user", async (payload) => {
+  return await usersApi.create(payload);
 });
 
 // ── Role approval ───────────────────────────────────────────────────────────
@@ -17,21 +12,13 @@ export const createUser = createAsyncThunk("users/create", async (payload, { rej
 // in one action, with no refetch and therefore no window in which it appears in
 // both.
 
-export const approveUser = createAsyncThunk("users/approve", async (id, { rejectWithValue }) => {
-  try {
-    return await usersApi.approve(id);
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to approve the request"));
-  }
+export const approveUser = createApiThunk("users/approve", "Failed to approve the request", async (id) => {
+  return await usersApi.approve(id);
 });
 
-export const rejectUser = createAsyncThunk(
-  "users/reject",
-  async ({ id, reason }, { rejectWithValue }) => {
-    try {
-      return await usersApi.reject(id, reason);
-    } catch (err) {
-      return rejectWithValue(rejectionOf(err, "Failed to reject the request"));
-    }
+export const rejectUser = createApiThunk(
+  "users/reject", "Failed to reject the request",
+  async ({ id, reason }) => {
+    return await usersApi.reject(id, reason);
   }
 );

@@ -1,19 +1,10 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createApiThunk } from "../../createApiThunk";
 import { usersApi } from "../../../api/usersApi";
-import { rejectionOf } from "../../../utilities/apiError";
 
-export const fetchAllUsers = createAsyncThunk("users/fetchAll", async (_, { rejectWithValue }) => {
-  try {
-    return await usersApi.getAll();
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch users"));
-  }
+export const fetchAllUsers = createApiThunk("users/fetchAll", "Failed to fetch users", async () => {
+  return await usersApi.getAll();
 });
 
-export const fetchUserById = createAsyncThunk("users/fetchById", async (id, { rejectWithValue }) => {
-  try {
-    return await usersApi.getOne(id);
-  } catch (err) {
-    return rejectWithValue(rejectionOf(err, "Failed to fetch user"));
-  }
+export const fetchUserById = createApiThunk("users/fetchById", "Failed to fetch user", async (id) => {
+  return await usersApi.getOne(id);
 });

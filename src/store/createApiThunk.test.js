@@ -1,4 +1,7 @@
 import { test, expect, describe, vi } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { createApiThunk } from "./createApiThunk";
 import { rejectionOf } from "../utilities/apiError";
@@ -92,4 +95,36 @@ describe("the same, action for action, as the hand-written form", () => {
       expect(factory).toEqual(original);
     });
   }
+});
+
+// ── No new thunk writes the wrapper out again ───────────────────────────────
+//
+// The five below are hand-written on purpose: something in each must NOT run
+// inside the try that turns every throw into a rejection payload. Anything else
+// that catches into rejectionOf by hand is a thunk that should have been
+// createApiThunk — this fails on it, and on an entry here that is no longer
+// true, so the list cannot go stale.
+const HAND_WRITTEN = {
+  "store/slicesAndThunks/authSlices/authPost.js": "auth/logout — a comment inside its catch says why rejecting is fine",
+  "store/slicesAndThunks/mediaSlice/mediaGet.js": "media/fetchMore — reads the slice before the try",
+  "store/slicesAndThunks/notesSlice/notesGet.js": "notes/fetchBodies — works out what to ask for before the try",
+  "store/slicesAndThunks/notesSlice/notesPut.js": "notes/reorder — its catch also re-reads the list",
+  "store/slicesAndThunks/transcriptSlice/transcriptGet.js": "transcript/fetch — normalises its argument before the try",
+};
+const SRC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const sources = (dir) =>
+  fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) return sources(full);
+    return /\.jsx?$/.test(entry.name) && !/\.test\.jsx?$/.test(entry.name) ? [full] : [];
+  });
+
+test("only the listed thunks catch into rejectionOf by hand", () => {
+  const files = sources(SRC);
+  expect(files.length).toBeGreaterThan(100);
+  const byHand = files
+    .map((file) => path.relative(SRC, file).split(path.sep).join("/"))
+    .filter((rel) => rel !== "store/createApiThunk.js")
+    .filter((rel) => fs.readFileSync(path.join(SRC, rel), "utf8").includes("rejectWithValue(rejectionOf("));
+  expect(byHand.sort()).toEqual(Object.keys(HAND_WRITTEN).sort());
 });

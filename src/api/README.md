@@ -44,9 +44,9 @@ The rules these follow:
 - **Thin.** A function here builds a URL, picks the method, and unwraps
   `response.data`. That is all.
 - **No error handling.** Errors propagate untouched so the caller decides:
-  thunks turn them into `rejectWithValue`, components into local state. The
-  interceptors in `utilities/axiosInstance.js` have already normalised the
-  failure by the time it arrives.
+  thunks turn them into a rejection (`store/createApiThunk.js`), components
+  into local state. The interceptors in `utilities/axiosInstance.js` have
+  already normalised the failure by the time it arrives.
 - **No Redux.** Nothing here imports a store, a slice or an action — that is
   what keeps this layer usable from a component (`AdminDashboard`, `DonateForm`)
   as well as from a thunk, and what keeps it out of the import cycle the store

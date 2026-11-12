@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { test, expect, describe, vi, beforeEach, afterEach } from "vitest";
+import { render, renderHook, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
@@ -17,6 +17,7 @@ const saveBlob = vi.hoisted(() => vi.fn());
 vi.mock("../../../../utilities/saveBlob", () => ({ saveBlob: (...a) => saveBlob(...a) }));
 
 import CourseRoster from "./CourseRoster";
+import { useCourseRoster } from "./useCourseRoster";
 import CourseReport from "./CourseReport";
 
 const storeWithRoster = (students) => {
@@ -30,7 +31,8 @@ describe("the roster", () => {
     vi.clearAllMocks();
     coursesApi.searchEnrollable.mockResolvedValue([{ id: 9, display_name: "שרה", email: "s@x.co" }]);
   });
-  // Real time: the debounce is a quarter of a second.
+  afterEach(() => vi.useRealTimers());
+  // Real time, for the tests that only need the list to have arrived.
   const pause = (ms) => act(() => new Promise((resolve) => setTimeout(resolve, ms)));
 
   const renderRoster = (props = {}) => {
@@ -49,15 +51,34 @@ describe("the roster", () => {
     expect(screen.getByText("דוד")).toBeInTheDocument();
   });
 
+  // The debounce, asked of the hook that owns it, on a fake clock. This test
+  // COUNTS requests, so it cannot run on real time: a loaded machine let the
+  // third letter arrive after the debounce had already fired for the first two.
+  // (Typing through the screen on a fake clock is not an option either — the
+  // testing library waits on a real setTimeout after every keystroke.)
   test("one letter asks nothing; a pause after two asks once", async () => {
-    renderRoster();
-    await userEvent.type(box(), "ש");
-    await pause(400);
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const store = storeWithRoster([]);
+    const { result } = renderHook(() => useCourseRoster({ courseId: 5, canEnroll: true, onEnroll: vi.fn() }), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+    const typed = (text) => act(() => result.current.setQuery(text));
+    const later = (ms) => act(() => vi.advanceTimersByTimeAsync(ms));
+
+    typed("ש");
+    await later(400);
     expect(coursesApi.searchEnrollable).not.toHaveBeenCalled();
-    await userEvent.type(box(), "רה");
-    await pause(400);
+
+    typed("שר");
+    await later(100);
+    typed("שרה");
+    await later(200);
+    // A quarter of a second has passed since "שר", but not since "שרה".
+    expect(coursesApi.searchEnrollable).not.toHaveBeenCalled();
+    await later(100);
     expect(coursesApi.searchEnrollable).toHaveBeenCalledTimes(1);
     expect(coursesApi.searchEnrollable).toHaveBeenCalledWith(5, "שרה");
+    expect(result.current.options).toEqual([{ id: 9, display_name: "שרה", email: "s@x.co" }]);
   });
 
   test("the person picked is the one added", async () => {

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchActiveSessions, fetchUpcomingSessions } from "../../../store/slicesAndThunks/sessionsSlice/sessionsGet";
 import { createSession, startSession } from "../../../store/slicesAndThunks/sessionsSlice/sessionsPost";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
-import { selectAllRooms, selectSessionsStatus } from "../../../store/selectors/sessionsSelectors";
+import { selectAllRooms, selectSessionsStatus, selectUpcomingSessions } from "../../../store/selectors/sessionsSelectors";
 import { hebrewForError } from "../../../utilities/apiError";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { isPrivileged } from "../../../utilities/permissions";
@@ -15,7 +15,7 @@ const useSessionsPageController = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const rooms = useSelector(selectAllRooms);
-  const upcoming = useSelector((state) => state.sessions.upcoming);
+  const upcoming = useSelector(selectUpcomingSessions);
   const status = useSelector(selectSessionsStatus);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   // The courses a session may be held for (PRD D8) — the same list, and the

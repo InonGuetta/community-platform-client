@@ -5,6 +5,7 @@ import { fetchInbox } from "../../../store/slicesAndThunks/inboxSlice/inboxGet";
 import { markNotificationRead, markAllNotificationsRead } from "../../../store/slicesAndThunks/inboxSlice/inboxPost";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { describeNotification } from "../../../utilities/notificationText";
+import { selectInboxItems, selectInboxUnread, selectPendingRoleRequests } from "../../../store/selectors/inboxSelectors";
 
 // How often the bell asks. A minute: what it reports — a pipeline that took
 // twenty minutes, a role request — is not measured in seconds, and this runs on
@@ -12,17 +13,15 @@ import { describeNotification } from "../../../utilities/notificationText";
 // and cannot push over the API server's socket, so it is a poll.
 export const INBOX_POLL_MS = 60_000;
 
-const EMPTY = [];
-
 // The bell's logic, kept out of the component by the project's rule: it
 // dispatches and selects. Also read by Navbar for the admin's "משתמשים" badge.
 const useNotificationBell = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(selectUser);
-  const items = useSelector((state) => state.inbox?.items ?? EMPTY);
-  const unread = useSelector((state) => state.inbox?.unread ?? 0);
-  const pendingRoleRequests = useSelector((state) => state.inbox?.pendingRoleRequests ?? null);
+  const items = useSelector(selectInboxItems);
+  const unread = useSelector(selectInboxUnread);
+  const pendingRoleRequests = useSelector(selectPendingRoleRequests);
   const [anchor, setAnchor] = useState(null);
 
   const refresh = useCallback(() => {

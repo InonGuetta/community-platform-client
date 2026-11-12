@@ -17,6 +17,8 @@ import { useSourceTrail } from "./useSourceTrail";
 import { useNoteBodies } from "./useNoteBodies";
 import { useNotesSearch } from "./useNotesSearch";
 import { useNotesExport } from "./useNotesExport";
+import { selectNotesState } from "../../../store/selectors/notesSelectors";
+import { selectBookmarksState } from "../../../store/selectors/bookmarksSelectors";
 
 // Everything the notebook page DOES — what it reads from the store, what it
 // dispatches, and the state of the editors, the selection, the source window and
@@ -39,8 +41,8 @@ import { useNotesExport } from "./useNotesExport";
 
 export const useNotebookPageController = () => {
   const dispatch = useDispatch();
-  const { items, status } = useSelector((state) => state.notes);
-  const { items: bookmarks, status: bookmarksStatus } = useSelector((state) => state.bookmarks);
+  const { items, status } = useSelector(selectNotesState);
+  const { items: bookmarks, status: bookmarksStatus } = useSelector(selectBookmarksState);
 
 
   // The notes ticked for a bulk action, and the notes queued for deletion (one

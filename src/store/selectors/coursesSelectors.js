@@ -28,3 +28,10 @@ export const selectCourseStudents = (courseId) =>
   createSelector(selectCoursesState, (c) => c.studentsByCourse[courseId] ?? EMPTY);
 
 const EMPTY = [];
+
+// The lecturer's students across their courses, the student's own courses'
+// status, the join requests they have sent, and one course's waiting requests.
+export const selectMyStudents = (state) => state.courses.myStudents;
+export const selectMyCoursesStatus = (state) => state.courses.myCoursesStatus;
+export const selectMyJoinRequests = (state) => state.courses.myJoinRequests;
+export const selectJoinRequestsFor = (courseId) => (state) => state.courses.joinRequestsByCourse[courseId];

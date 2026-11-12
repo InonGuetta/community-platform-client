@@ -6,6 +6,7 @@ import { joinCourseByCode } from "../../../store/slicesAndThunks/coursesSlice/co
 import { cancelJoinRequest } from "../../../store/slicesAndThunks/coursesSlice/coursesDelete";
 import { ERROR_CODES, hebrewForError } from "../../../utilities/apiError";
 import { statuses } from "../../../utilities/constant";
+import { selectMyCourses, selectMyCoursesStatus, selectMyJoinRequests } from "../../../store/selectors/coursesSelectors";
 
 // The student's own courses: the fetch and the selection, so MyCoursesPage.jsx is
 // layout only (the useXxxPageController rule).
@@ -19,9 +20,9 @@ export const useMyCoursesPageController = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const courses = useSelector((state) => state.courses.myCourses);
-  const status = useSelector((state) => state.courses.myCoursesStatus);
-  const pendingRequests = useSelector((state) => state.courses.myJoinRequests);
+  const courses = useSelector(selectMyCourses);
+  const status = useSelector(selectMyCoursesStatus);
+  const pendingRequests = useSelector(selectMyJoinRequests);
 
   const [joinOpen, setJoinOpen] = useState(false);
   const [code, setCode] = useState("");

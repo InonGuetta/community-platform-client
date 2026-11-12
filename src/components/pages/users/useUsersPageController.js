@@ -8,6 +8,7 @@ import { selectAllUsers, selectUsersStatus } from "../../../store/selectors/user
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { openDeleteDialog, closeDeleteDialog } from "../../../store/slicesAndThunks/uiSlice";
 import { roles } from "../../../utilities/constant";
+import { selectUiState } from "../../../store/selectors/uiSelectors";
 
 const useUsersPageController = () => {
   const dispatch = useDispatch();
@@ -15,7 +16,7 @@ const useUsersPageController = () => {
   const status = useSelector(selectUsersStatus);
   const currentUser = useSelector(selectUser);
   const isAdmin = currentUser?.role === roles.admin;
-  const { isDeleteOpen, itemToDelete } = useSelector((state) => state.ui);
+  const { isDeleteOpen, itemToDelete } = useSelector(selectUiState);
 
   const [search, setSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);

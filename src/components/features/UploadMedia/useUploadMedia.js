@@ -9,6 +9,7 @@ import { mediaApi } from "../../../api/mediaApi";
 import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { lecturerIdFor } from "./lessonFields";
+import { selectUploadProgress } from "../../../store/selectors/uiSelectors";
 
 // What the upload dialog does — what it loads when it opens, the form it
 // sends, and the tag question after an untagged upload — so that
@@ -24,7 +25,7 @@ const EMPTY_FIELDS = { title: "", description: "", mediaType: "video", courseId:
  */
 export const useUploadMedia = ({ open }) => {
   const dispatch = useDispatch();
-  const progress = useSelector((state) => state.ui.uploadProgress);
+  const progress = useSelector(selectUploadProgress);
   // Only the courses this user may file into — the server refuses the others.
   const courses = useSelector(selectAssignableCourses);
   const user = useSelector(selectUser);

@@ -5,7 +5,7 @@ import { createCourse, enrollStudent } from "../../../store/slicesAndThunks/cour
 import { updateCourse } from "../../../store/slicesAndThunks/coursesSlice/coursesPut";
 import { deleteCourse, unenrollStudent } from "../../../store/slicesAndThunks/coursesSlice/coursesDelete";
 import { fetchAllUsers } from "../../../store/slicesAndThunks/usersSlice/usersGet";
-import { selectAllCourses, selectCoursesStatus } from "../../../store/selectors/coursesSelectors";
+import { selectAllCourses, selectCoursesStatus, selectMyStudents } from "../../../store/selectors/coursesSelectors";
 import { selectAllUsers } from "../../../store/selectors/usersSelectors";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { roles } from "../../../utilities/constant";
@@ -18,7 +18,7 @@ const useCoursesPageController = () => {
   const status = useSelector(selectCoursesStatus);
   const allUsers = useSelector(selectAllUsers);
   const currentUser = useSelector(selectUser);
-  const myStudents = useSelector((state) => state.courses.myStudents);
+  const myStudents = useSelector(selectMyStudents);
   const isAdmin = currentUser?.role === roles.admin;
   // Only a lecturer has a choice to make: an admin manages every course, so
   // "mine" and "all" would differ only in which ones they happen to teach.

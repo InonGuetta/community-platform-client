@@ -5,6 +5,7 @@ import { createJoinCode, decideJoinRequest } from "../../../../store/slicesAndTh
 import { removeJoinCode } from "../../../../store/slicesAndThunks/coursesSlice/coursesDelete";
 import { notify } from "../../../../store/slicesAndThunks/snackbarSlice";
 import { ERROR_CODES } from "../../../../utilities/apiError";
+import { selectJoinRequestsFor } from "../../../../store/selectors/coursesSelectors";
 
 // The lecturer's half of joining a course by its code (PRD ROST-9): the code,
 // the link that carries it, and the people waiting for an answer. Rendered in a
@@ -27,7 +28,7 @@ const copy = async (text) => {
 
 const useJoinCodePanel = (course) => {
   const dispatch = useDispatch();
-  const requests = useSelector((state) => state.courses.joinRequestsByCourse[course.id]);
+  const requests = useSelector(selectJoinRequestsFor(course.id));
   const [busy, setBusy] = useState(false);
   const [confirmReplace, setConfirmReplace] = useState(false);
 

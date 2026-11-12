@@ -15,6 +15,7 @@ import {
 } from "../../../utilities/noteSource";
 import { isPageBookmark } from "../../../utilities/bookmarks";
 import { useNoteEditing } from "../../features/Notes/useNoteEditing";
+import { selectNotesState } from "../../../store/selectors/notesSelectors";
 
 // Where the bookmark that accompanies a new lesson note sits.
 //
@@ -58,7 +59,7 @@ const useLessonNotebook = ({
   media, isText, currentTime, readerPage = null, bookmarks = NO_BOOKMARKS, onSeek, onJumpTo,
 }) => {
   const dispatch = useDispatch();
-  const { items, status } = useSelector((state) => state.notes);
+  const { items, status } = useSelector(selectNotesState);
   const mediaId = media?.id;
 
   // Every visit, not once: a note written in /notebook since this slice was

@@ -323,17 +323,26 @@ describe("a jump to a mark", () => {
     const { onPageChange, rerender } = await renderViewer({ bookmarks: [MARK, OTHER], jumpTo: MARK });
 
     const pageTop = PAD + 2 * (800 + GAP);
-    await waitFor(() => expect(box().scrollTop).toBe(
-      scrollTopForMark({ pageTop, pageHeight: 800, boxHeight: BOX_HEIGHT, rect: { y: 0.5, h: 0.1 } })
-    ));
-    expect(lastCall(onPageChange)).toBe(3);
     const ink = (id) => getComputedStyle(markEl(id)).backgroundColor;
-    expect(ink(5)).not.toBe(ink(6));
+    // Together: the scroll is set in the effect, and the page and the flash are
+    // state it sets, on screen and reported one render later.
+    await waitFor(() => {
+      expect(box().scrollTop).toBe(
+        scrollTopForMark({ pageTop, pageHeight: 800, boxHeight: BOX_HEIGHT, rect: { y: 0.5, h: 0.1 } })
+      );
+      expect(lastCall(onPageChange)).toBe(3);
+      expect(ink(5)).not.toBe(ink(6));
+    });
     await waitFor(() => expect(ink(5)).toBe(ink(6)), { timeout: 2500 });
 
-    // The same mark again is not a second jump: a reader who has scrolled away
-    // stays where they went.
+    // The effect runs again whenever the column is re-measured, but a mark it
+    // has served is not served twice: a reader who has scrolled away stays
+    // where they went.
     box().scrollTop = 0;
+    resizeColumn(324);
+    await waitFor(() => expect(sizeOf(pageEl(1)).width).toBe(300));
+    await nextFrame();
+    expect(box().scrollTop).toBe(0);
     rerender(<PdfViewer media={{ id: 7 }} bookmarks={[MARK, OTHER]} jumpTo={MARK} onPageChange={onPageChange} />);
     await nextFrame();
     expect(box().scrollTop).toBe(0);
@@ -341,9 +350,14 @@ describe("a jump to a mark", () => {
 
   test("a page past the end lands at the top of the last page, with nothing flashed", async () => {
     openWith(makeDoc(5));
-    const { onPageChange } = await renderViewer({ bookmarks: [MARK], jumpTo: { ...MARK, id: 9, page_number: 99 } });
-    await waitFor(() => expect(box().scrollTop).toBe(PAD + 4 * (800 + GAP)));
-    expect(lastCall(onPageChange)).toBe(5);
+    // Asking for mark 5's own rectangle on a page that does not exist.
+    const { onPageChange } = await renderViewer({ bookmarks: [MARK, OTHER], jumpTo: { ...MARK, page_number: 99 } });
+    await waitFor(() => {
+      expect(box().scrollTop).toBe(PAD + 4 * (800 + GAP));
+      expect(lastCall(onPageChange)).toBe(5);
+    });
+    const ink = (id) => getComputedStyle(markEl(id)).backgroundColor;
+    expect(ink(5)).toBe(ink(6));
   });
 
   test("a bookmark that names only a page goes to the top of it", async () => {

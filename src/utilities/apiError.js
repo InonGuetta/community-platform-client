@@ -148,7 +148,7 @@ const ERROR_CODE_HE = {
     "הקישור אינו תקף או שפג תוקפו. אפשר לבקש קישור חדש.",
   [ERROR_CODES.WEAK_PASSWORD]: "הסיסמה חייבת להכיל לפחות 8 תווים",
   [ERROR_CODES.NO_PASSWORD_SET]:
-    "החשבון הזה מתחבר עם Google ואין לו סיסמה לשינוי",
+    "החשבון הזה מתחבר עם Google, Apple או LinkedIn ואין לו סיסמה לשינוי",
   [ERROR_CODES.PAYMENTS_NOT_CONFIGURED]: "התשלומים באתר עוד לא הוגדרו. אפשר לנסות שוב מאוחר יותר.",
   [ERROR_CODES.RECURRING_UNAVAILABLE]:
     "תרומה חודשית אינה זמינה עדיין. אפשר לתרום סכום חד-פעמי.",

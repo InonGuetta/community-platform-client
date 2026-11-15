@@ -4,9 +4,14 @@ import { useDispatch } from "react-redux";
 import { fetchMe } from "../../../store/slicesAndThunks/authSlice/authGet";
 import { takeReturnTo } from "../../../utilities/returnTo";
 
-// What the return from Google does: Google's refusal goes back to sign-in;
-// otherwise the session the server set is confirmed, and the user goes on to
-// where they were going. GoogleCallback.jsx shows a spinner meanwhile.
+// What the return from a provider does — Google at /auth/google/callback, Apple
+// and LinkedIn at /auth/callback: a refusal goes back to sign-in; otherwise the
+// session the server set is confirmed, and the user goes on to where they were
+// going. GoogleCallback.jsx shows a spinner meanwhile.
+//
+// "oauth_failed" rather than naming a provider: this page cannot tell which one
+// it came back from, and the server has already sent each provider's own
+// refusal to /sign-in under its name.
 
 export const useGoogleCallback = () => {
   const [searchParams] = useSearchParams();
@@ -16,15 +21,15 @@ export const useGoogleCallback = () => {
   useEffect(() => {
     const error = searchParams.get("error");
     if (error) {
-      navigate("/sign-in?error=google_failed");
+      navigate("/sign-in?error=oauth_failed");
       return;
     }
     // Cookie has been set server-side via the redirect; hydrate the user.
     dispatch(fetchMe()).then((result) => {
       if (result.meta.requestStatus === "fulfilled") navigate(takeReturnTo());
-      else navigate("/sign-in?error=google_failed");
+      else navigate("/sign-in?error=oauth_failed");
     });
-    // Runs exactly once, on arrival back from Google. Adding the dependencies
+    // Runs exactly once, on arrival back from the provider. Adding the dependencies
     // the rule asks for would let a second fetchMe fire — and this component
     // navigates away as its whole purpose, so re-running it is never wanted.
     // eslint-disable-next-line react-hooks/exhaustive-deps

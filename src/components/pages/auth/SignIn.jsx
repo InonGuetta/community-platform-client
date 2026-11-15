@@ -9,11 +9,12 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import { login } from "../../../store/slicesAndThunks/authSlice/authPost";
-import { authApi } from "../../../api/authApi";
 import { hebrewForError } from "../../../utilities/apiError";
 import AuthLayout from "./AuthLayout";
-import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
+import { EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, dividerSx } from "./authShared";
+import SocialSignIn from "./SocialSignIn";
 import { useAuthSubmit } from "./useAuthSubmit";
+import { useOAuthError } from "./useOAuthError";
 
 // Shown when the failure carries no code we have specific Hebrew for. It must
 // never fall back to the server's own `message`: that text is English prose
@@ -25,6 +26,9 @@ const SignIn = () => {
   const { error, isSubmitting, submit } = useAuthSubmit(login);
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  // A provider sign-in that came back refused or not set up. The form's own
+  // error, once there is one, is the newer news and replaces it.
+  const oauthError = useOAuthError();
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -36,6 +40,7 @@ const SignIn = () => {
   return (
     <AuthLayout title="התחברות">
       {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{hebrewForError(error, FALLBACK)}</Alert>}
+      {!error && oauthError && <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>{oauthError}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
         <TextField
@@ -86,12 +91,7 @@ const SignIn = () => {
         <Divider sx={dividerSx} />
       </Box>
 
-      <Button variant="outlined" fullWidth startIcon={<GoogleIcon />}
-        onClick={() => { window.location.href = authApi.googleLoginUrl; }}
-        sx={googleButtonSx}
-      >
-        התחברות עם Google
-      </Button>
+      <SocialSignIn verb="התחבר" />
 
       {/* The way back in for someone who cannot get in, which is the one place
           it is any use — a user who has forgotten their password is looking at

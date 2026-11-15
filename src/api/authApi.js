@@ -55,4 +55,8 @@ export const authApi = {
   // Google and back, so it cannot be an XHR. Absolute, since axiosInstance's
   // baseURL plays no part.
   googleLoginUrl: "/api/auth/google",
+  // The same, for the two providers beside Google. Unconfigured on the server,
+  // each comes straight back to /sign-in?error=<provider>_unavailable.
+  appleLoginUrl: "/api/auth/apple",
+  linkedinLoginUrl: "/api/auth/linkedin",
 };

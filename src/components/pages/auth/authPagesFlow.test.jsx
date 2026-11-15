@@ -134,6 +134,38 @@ describe("verifying an email", () => {
   });
 });
 
+describe("signing in through a provider", () => {
+  const providerButtons = () =>
+    screen.getAllByRole("button").map((b) => b.textContent).filter((t) => / באמצעות /.test(t));
+
+  // Most-used first: the order is the request, not an accident of the markup.
+  test("sign-in offers Google, then Apple, then LinkedIn", () => {
+    renderAt("/sign-in-page", <SignIn />);
+    expect(providerButtons()).toEqual(["התחבר באמצעות Google", "התחבר באמצעות Apple", "התחבר באמצעות LinkedIn"]);
+  });
+
+  test("sign-up offers the same three, in the same order", () => {
+    renderAt("/sign-up-page", <SignUp />);
+    expect(providerButtons()).toEqual(["הירשם באמצעות Google", "הירשם באמצעות Apple", "הירשם באמצעות LinkedIn"]);
+  });
+
+  test("a provider not set up yet is said in Hebrew, naming it", () => {
+    renderAt("/sign-in-page?error=apple_unavailable", <SignIn />);
+    expect(screen.getByRole("alert").textContent).toMatch(/Apple עדיין לא הוגדרה/);
+  });
+
+  test("a provider's refusal is said too", () => {
+    renderAt("/sign-in-page?error=linkedin_failed", <SignIn />);
+    expect(screen.getByRole("alert").textContent).toMatch(/LinkedIn לא הצליחה/);
+  });
+
+  // The parameter is in the address bar; what is typed there is not echoed.
+  test("an error code nobody sends says nothing", () => {
+    renderAt("/sign-in-page?error=<b>hi</b>", <SignIn />);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+});
+
 describe("coming back from Google", () => {
   test("Google's refusal goes back to sign-in, asking nothing", async () => {
     renderAt("/google?error=access_denied", <GoogleCallback />);

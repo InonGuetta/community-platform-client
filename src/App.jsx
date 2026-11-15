@@ -48,6 +48,7 @@ const AUTH_PATHS = [
   "/sign-in",
   "/sign-up",
   "/auth/google/callback",
+  "/auth/callback",
   "/forgot-password",
   "/reset-password",
   "/verify-email",
@@ -160,6 +161,10 @@ const App = () => {
             <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
+          {/* Apple and LinkedIn return here. The page is the same: the server has
+              already set the session cookie, and all that is left is to load the
+              user and go on. */}
+          <Route path="/auth/callback" element={<GoogleCallback />} />
           {/* Recovery, unprotected by necessity: whoever needs these cannot sign
               in. The token in the URL is the credential. */}
           <Route path="/forgot-password" element={<ForgotPassword />} />

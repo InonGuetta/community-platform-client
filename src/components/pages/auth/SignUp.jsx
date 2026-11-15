@@ -9,14 +9,14 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import { register } from "../../../store/slicesAndThunks/authSlice/authPost";
-import { authApi } from "../../../api/authApi";
 import { hebrewForError } from "../../../utilities/apiError";
 import { emailProblem } from "../../../utilities/emailShape";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { roles, roleLabels } from "../../../utilities/constant";
 import AuthLayout from "./AuthLayout";
-import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
+import { EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, dividerSx } from "./authShared";
+import SocialSignIn from "./SocialSignIn";
 import { useAuthSubmit } from "./useAuthSubmit";
 
 // See SignIn: never fall back to the server's English message.
@@ -153,12 +153,7 @@ const SignUp = () => {
         <Divider sx={dividerSx} />
       </Box>
 
-      <Button variant="outlined" fullWidth startIcon={<GoogleIcon />}
-        onClick={() => { window.location.href = authApi.googleLoginUrl; }}
-        sx={googleButtonSx}
-      >
-        הרשמה עם Google
-      </Button>
+      <SocialSignIn verb="הירשם" />
 
       <Typography textAlign="center" mt={4} variant="body2" color="#757575">
         כבר יש לך חשבון?{" "}

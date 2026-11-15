@@ -89,10 +89,6 @@ const AuthLayout = ({ title, children }) => (
         {children}
       </CardContent>
     </Card>
-
-    <Typography variant="caption" sx={{ mt: 3, color: "#6e6e6e", zIndex: 2 }}>
-      כל השדות הם שדות חובה
-    </Typography>
   </Box>
   </ThemeProvider>
 );

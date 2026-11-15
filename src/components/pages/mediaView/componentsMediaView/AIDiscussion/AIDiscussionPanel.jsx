@@ -63,6 +63,7 @@ const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek,
         // side the page reads from.
         sx={{
           "& .MuiToggleButtonGroup-grouped:not(:first-of-type)": {
+            // eslint-disable-next-line no-restricted-syntax -- zeroes MUI's own physical margin
             marginLeft: 0,
             marginInlineStart: "-1px",
           },

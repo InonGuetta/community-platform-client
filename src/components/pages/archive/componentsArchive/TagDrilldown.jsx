@@ -413,7 +413,7 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
                   size="small"
                   aria-label={`פתיחת ${node.name}`}
                   onClick={() => openBranch(node)}
-                  sx={{ p: 0.25, ml: -0.25, color: "text.secondary" }}
+                  sx={{ p: 0.25, marginInlineEnd: -0.25, color: "text.secondary" }}
                 >
                   <ChevronLeftIcon sx={{ fontSize: 16 }} />
                 </IconButton>

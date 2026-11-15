@@ -173,7 +173,7 @@ const NotesPanel = ({
                 borderRadius: 1,
                 mb: 0.5,
                 // Room for two controls now, not one.
-                pr: 10,
+                paddingInlineStart: 10,
                 ...listRowSx,
                 // Still legible: the row is not an error, it is a note whose
                 // place is gone, and the words on it are the reason to keep it.
@@ -218,7 +218,7 @@ const NotesPanel = ({
                   away from the thing being annotated. */}
               <Box
                 sx={{
-                  position: "absolute", right: 4, display: "flex",
+                  position: "absolute", insetInlineStart: 4, display: "flex",
                   color: isActive ? "primary.contrastText" : "inherit",
                 }}
               >

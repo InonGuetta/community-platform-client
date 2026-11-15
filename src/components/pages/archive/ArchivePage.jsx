@@ -64,7 +64,7 @@ const ArchivePage = () => {
           top: 64,
           alignSelf: "flex-start",
           height: "calc(100vh - 64px)",
-          borderLeft: "1px solid rgba(0,0,0,0.06)",
+          borderInlineEnd: "1px solid rgba(0,0,0,0.06)",
           opacity: 0.5,
         }}
       />

@@ -88,7 +88,7 @@ const GuestLessonPage = () => {
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>על השיעור</Typography>
                 <Typography sx={{ whiteSpace: "pre-line", lineHeight: 1.8 }}>{lesson.ai_summary || lesson.description}</Typography>
                 {Array.isArray(lesson.ai_key_points) && lesson.ai_key_points.length > 0 && (
-                  <Box component="ul" sx={{ mt: 2, mb: 0, pr: 2.5, pl: 0 }}>
+                  <Box component="ul" sx={{ mt: 2, mb: 0, paddingInlineStart: 2.5, paddingInlineEnd: 0 }}>
                     {lesson.ai_key_points.map((point, i) => (
                       <Typography component="li" key={i} sx={{ mb: 0.5 }}>{typeof point === "string" ? point : point?.text}</Typography>
                     ))}

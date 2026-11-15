@@ -176,7 +176,7 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
               size="small"
               aria-label={`שינוי שם הרשימה ${playlist.title}`}
               onClick={(e) => { e.stopPropagation(); setEditing({ id: playlist.id, title: playlist.title }); }}
-              sx={{ ml: -0.5, ...rowActionSx("primary.main") }}
+              sx={{ marginInlineEnd: -0.5, ...rowActionSx("primary.main") }}
             >
               <EditOutlinedIcon fontSize="small" />
             </IconButton>

@@ -50,7 +50,7 @@ const LessonNotebook = ({ media, isText, currentTime, readerPage, bookmarks, onS
           </Box>
         )}
 
-        <Box sx={{ display: "flex", gap: 1, ml: "auto" }}>
+        <Box sx={{ display: "flex", gap: 1, marginInlineEnd: "auto" }}>
           <Button
             component={RouterLink}
             to={NOTEBOOK_SHELF.path}

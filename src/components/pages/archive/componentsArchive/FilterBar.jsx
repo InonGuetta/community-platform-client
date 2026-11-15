@@ -206,6 +206,8 @@ const FilterBar = ({
                 sx={{
                   position: "absolute",
                   top: 0,
+                  // Centred: left 50% with translate(-50%) is symmetric.
+                  // eslint-disable-next-line no-restricted-syntax -- centring, not a side
                   left: "50%",
                   transform: "translate(-50%, -50%)",
                   zIndex: 1,

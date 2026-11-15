@@ -239,7 +239,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
               onChange={() => setFormat("word")}
               sx={{ borderRadius: 1.5, px: 1.5, fontWeight: 700 }}
             >
-              <DescriptionOutlinedIcon fontSize="small" sx={{ ml: 0.5 }} /> Word
+              <DescriptionOutlinedIcon fontSize="small" sx={{ marginInlineEnd: 0.5 }} /> Word
             </ToggleButton>
             <ToggleButton
               value="pdf"
@@ -248,7 +248,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
               onChange={() => setFormat("pdf")}
               sx={{ borderRadius: 1.5, px: 1.5, fontWeight: 700 }}
             >
-              <PictureAsPdfOutlinedIcon fontSize="small" sx={{ ml: 0.5 }} /> PDF
+              <PictureAsPdfOutlinedIcon fontSize="small" sx={{ marginInlineEnd: 0.5 }} /> PDF
             </ToggleButton>
           </Box>
 
@@ -368,7 +368,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
       </DialogContent>
 
       <DialogActions>
-        <Typography variant="caption" color="text.secondary" sx={{ mr: "auto" }}>
+        <Typography variant="caption" color="text.secondary" sx={{ marginInlineStart: "auto" }}>
           {`${plan.length} קבצים · ${notes.length} הערות`}
         </Typography>
         <Button onClick={onClose} variant="outlined" disabled={exporting}>ביטול</Button>

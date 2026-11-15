@@ -51,8 +51,7 @@ const AuthLayout = ({ title, children }) => {
     <Box sx={{
       position: "absolute",
       top: "-12.5%",
-      left: "-12.5%",
-      right: "-12.5%",
+      insetInline: "-12.5%",
       bottom: "-12.5%",
       backgroundImage: 'url("/images/entry_image.png")',
       backgroundSize: "cover",
@@ -80,6 +79,7 @@ const AuthLayout = ({ title, children }) => {
       <Box sx={{
         position: "absolute",
         top: -1,
+        // eslint-disable-next-line no-restricted-syntax -- centring, not a side
         left: "50%",
         transform: "translateX(-50%)",
         width: 108,

@@ -90,7 +90,7 @@ const EditTagsDialog = ({ open, item, tagTree = EMPTY, onClose, onSave }) => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ textAlign: "right" }}>תגיות — {item.title}</DialogTitle>
+      <DialogTitle sx={{ textAlign: "start" }}>תגיות — {item.title}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
           התגיות קובעות איפה הפריט יימצא בסינון ובחיפוש.

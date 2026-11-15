@@ -39,7 +39,7 @@ const PlaylistPage = () => {
         <Button
           onClick={() => navigate(SAVED_SHELF.path)}
           startIcon={<ArrowForwardIcon />}
-          sx={{ mb: 2, "& .MuiButton-startIcon": { ml: -0.25, mr: 0.75 } }}
+          sx={{ mb: 2, "& .MuiButton-startIcon": { marginInlineEnd: -0.25, marginInlineStart: 0.75 } }}
         >
           {SAVED_SHELF.label}
         </Button>

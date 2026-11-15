@@ -154,7 +154,7 @@ const TagProposals = () => {
       />
 
       <Dialog open={Boolean(rejecting)} onClose={() => setRejecting(null)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ textAlign: "right" }}>דחיית «{rejecting?.name}»</DialogTitle>
+        <DialogTitle sx={{ textAlign: "start" }}>דחיית «{rejecting?.name}»</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth

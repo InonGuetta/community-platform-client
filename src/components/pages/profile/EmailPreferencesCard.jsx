@@ -89,7 +89,7 @@ const EmailPreferencesCard = () => {
                     sx={{ "& .MuiFormControlLabel-label": { color: on ? "text.primary" : "text.disabled" } }}
                   />
                   {text.help && (
-                    <Typography variant="caption" color={on ? "text.secondary" : "text.disabled"} sx={{ display: "block", ms: 6.5, mt: -0.75 }}>
+                    <Typography variant="caption" color={on ? "text.secondary" : "text.disabled"} sx={{ display: "block", marginInlineStart: 6.5, mt: -0.75 }}>
                       {text.help}
                     </Typography>
                   )}

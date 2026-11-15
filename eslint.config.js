@@ -152,9 +152,10 @@ export default [
     },
   },
   {
-    // Logical properties only — see LOGICAL_ONLY above. Widened folder by
-    // folder as each is converted (i18n plan, prompts 6–7).
-    files: ["src/components/layout/**/*.jsx", "src/components/features/**/*.jsx"],
+    // Logical properties only — see LOGICAL_ONLY above. Every component; a
+    // style object in a .js file (theme.js, navStyles.js) is outside its
+    // reach, and theme.js's physical zeroes are deliberate (see there).
+    files: ["src/**/*.jsx"],
     ignores: ["src/**/*.test.jsx"],
     rules: { "no-restricted-syntax": ["error", ...LOGICAL_ONLY] },
   },

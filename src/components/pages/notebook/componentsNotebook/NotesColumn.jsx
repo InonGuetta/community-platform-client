@@ -35,7 +35,7 @@ const NotesColumn = ({
       display: "flex", flexDirection: "column", gap: 2,
       overflowY: { md: "auto" },
       // Room for the scrollbar so it does not sit on the cards' edge.
-      pl: { md: 1 },
+      paddingInlineEnd: { md: 1 },
     }}
   >
     {status === statuses.loading && items.length === 0 ? (

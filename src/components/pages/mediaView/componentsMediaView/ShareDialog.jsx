@@ -74,7 +74,7 @@ const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime
               }
               label={
                 <span>
-                  <PublicIcon fontSize="small" sx={{ verticalAlign: "middle", ml: 0.5 }} />
+                  <PublicIcon fontSize="small" sx={{ verticalAlign: "middle", marginInlineEnd: 0.5 }} />
                   קישור ציבורי: פתוח גם בלי חשבון
                 </span>
               }

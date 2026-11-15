@@ -194,7 +194,7 @@ const SourcePreviewDialog = ({
                 <Chip
                   size="small"
                   label={formatTime(timestampSeconds)}
-                  sx={{ height: 18, fontSize: "0.65rem", mr: 0.75, verticalAlign: "middle" }}
+                  sx={{ height: 18, fontSize: "0.65rem", marginInlineStart: 0.75, verticalAlign: "middle" }}
                 />
               )}
             </Typography>

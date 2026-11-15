@@ -163,6 +163,8 @@ const PdfPage = ({ pdf, pageNumber, scale, width, height, observe, marks, flashe
           data-mark-id={mark.id}
           sx={{
             position: "absolute",
+            // A place on the PDF's own page, measured from its left edge.
+            // eslint-disable-next-line no-restricted-syntax -- page coordinates, physical
             left: `${mark.x * 100}%`,
             top: `${mark.y * 100}%`,
             width: `${mark.w * 100}%`,

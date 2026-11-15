@@ -36,7 +36,7 @@ const BookmarksSidebar = ({
             finds — and it is the ONLY thing here allowed to be squeezed
             out, because the heading and the count are what the panel is. */}
         {bookmarks.length > 0 && (
-          <Typography variant="caption" color="text.secondary" noWrap sx={{ ml: "auto", minWidth: 0 }}>
+          <Typography variant="caption" color="text.secondary" noWrap sx={{ marginInlineEnd: "auto", minWidth: 0 }}>
             גרור אל תוך הערה ↩
           </Typography>
         )}

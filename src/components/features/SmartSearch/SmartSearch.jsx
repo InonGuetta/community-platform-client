@@ -100,7 +100,7 @@ const SmartSearch = ({ onOpenResult }) => {
                 {/* minWidth 0, or the flex item refuses to shrink and noWrap
                     pushes the chips off the row instead of truncating. */}
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="subtitle1" fontWeight={700} color={TITLE_COLOR[tier]} noWrap>
+                  <Typography variant="subtitle1" fontWeight={700} color={TITLE_COLOR[tier]} noWrap dir="auto">
                     {r.media_title}
                   </Typography>
                   {/* Who said it, labelled the way the archive card labels it — two

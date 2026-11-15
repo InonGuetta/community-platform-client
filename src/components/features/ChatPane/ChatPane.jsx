@@ -177,7 +177,7 @@ export const MessageBubble = ({ message, onOpen, save = null }) => {
         opacity: message.pending ? 0.7 : 1,
       }}
     >
-      <Typography variant="body2" component="div" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
+      <Typography variant="body2" component="div" dir="auto" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
         {mine ? message.content : <AnswerText content={message.content} citations={message.citations} onOpen={onOpen} />}
       </Typography>
       {!mine && message.citations?.length > 0 && <Sources citations={message.citations} onOpen={onOpen} />}

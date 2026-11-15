@@ -109,7 +109,7 @@ const FollowAlongTranscript = ({ captions, currentTime, onSeek }) => {
           </Button>
         </Box>
       )}
-      <Typography component="div" sx={{ lineHeight: 2, textAlign: "start", whiteSpace: "normal" }}>
+      <Typography component="div" dir="auto" sx={{ lineHeight: 2, textAlign: "start", whiteSpace: "normal" }}>
         {cues.map((cue, index) => (
           <Cue key={index} cue={cue} index={index} active={index === active} onSeek={onSeek} />
         ))}

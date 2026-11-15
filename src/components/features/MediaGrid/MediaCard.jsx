@@ -316,12 +316,13 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
         variant="subtitle1"
         fontWeight={800}
         noWrap
+        dir="auto"
         sx={(theme) => ({ mb: 0.5, color: theme.palette.mode === "dark" ? "primary.light" : "primary.main" })}
       >
         {item.title}
       </Typography>
       {item.description && (
-        <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.4 }}>
+        <Typography variant="body2" color="text.secondary" dir="auto" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.4 }}>
           {item.description}
         </Typography>
       )}

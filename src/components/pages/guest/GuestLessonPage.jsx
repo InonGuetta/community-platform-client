@@ -70,7 +70,7 @@ const GuestLessonPage = () => {
 
         {lesson && (
           <>
-            <Typography variant="h4" fontWeight={800} color="primary" sx={{ mb: 0.5 }}>{lesson.title}</Typography>
+            <Typography variant="h4" fontWeight={800} color="primary" dir="auto" sx={{ mb: 0.5 }}>{lesson.title}</Typography>
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center", mb: 2 }}>
               {lesson.creator_name && lesson.creator_name !== defaultCreatorName && (
                 <Typography color="text.secondary">
@@ -86,9 +86,9 @@ const GuestLessonPage = () => {
             {(lesson.ai_summary || lesson.description) && (
               <Paper variant="outlined" sx={{ p: 2.5, mb: 2, borderRadius: 3 }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>על השיעור</Typography>
-                <Typography sx={{ whiteSpace: "pre-line", lineHeight: 1.8 }}>{lesson.ai_summary || lesson.description}</Typography>
+                <Typography dir="auto" sx={{ whiteSpace: "pre-line", lineHeight: 1.8 }}>{lesson.ai_summary || lesson.description}</Typography>
                 {Array.isArray(lesson.ai_key_points) && lesson.ai_key_points.length > 0 && (
-                  <Box component="ul" sx={{ mt: 2, mb: 0, paddingInlineStart: 2.5, paddingInlineEnd: 0 }}>
+                  <Box component="ul" dir="auto" sx={{ mt: 2, mb: 0, paddingInlineStart: 2.5, paddingInlineEnd: 0 }}>
                     {lesson.ai_key_points.map((point, i) => (
                       <Typography component="li" key={i} sx={{ mb: 0.5 }}>{typeof point === "string" ? point : point?.text}</Typography>
                     ))}

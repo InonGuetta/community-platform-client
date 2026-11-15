@@ -57,7 +57,7 @@ const ResultCard = ({ hit, isText, onSeek, onOpenPage }) => {
           </Typography>
         )}
       </Box>
-      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+      <Typography variant="body2" color="text.secondary" dir="auto" sx={{ lineHeight: 1.7 }}>
         {segments.map((s, i) =>
           s.bold ? <Box component="mark" key={i} sx={{ bgcolor: "warning.light", color: "inherit", px: 0.25, borderRadius: 0.5 }}>{s.text}</Box> : s.text
         )}

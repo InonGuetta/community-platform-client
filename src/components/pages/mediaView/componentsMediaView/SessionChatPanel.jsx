@@ -56,7 +56,7 @@ const SessionChatPanel = ({ mediaId, onSeek }) => {
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="caption" fontWeight={700} color="text.secondary">{m.name || "משתתף"}</Typography>
             {/* Plain text, never markup: it is what a participant typed. */}
-            <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{m.text}</Typography>
+            <Typography variant="body2" dir="auto" sx={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{m.text}</Typography>
           </Box>
         </Box>
       ))}

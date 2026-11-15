@@ -104,7 +104,7 @@ const CoursesPage = () => {
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexGrow: 1, flexWrap: "wrap" }}>
-                <Typography fontWeight={700} color="primary">{course.title}</Typography>
+                <Typography fontWeight={700} color="primary" dir="auto">{course.title}</Typography>
                 {!course.is_active && <Chip label="לא פעיל" size="small" color="default" />}
                 <Chip label={course.lecturer_name || "ללא מרצה"} size="small" variant="outlined" />
                 <Chip label={`${course.student_count} תלמידים`} size="small" color="info" variant="outlined" />
@@ -140,7 +140,7 @@ const CoursesPage = () => {
 
             <AccordionDetails>
               {course.description && (
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" dir="auto" sx={{ mb: 2 }}>
                   {course.description}
                 </Typography>
               )}

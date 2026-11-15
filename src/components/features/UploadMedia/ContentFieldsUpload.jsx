@@ -38,6 +38,7 @@ const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [
       onChange={(e) => onChange("title", e.target.value)}
       required
       fullWidth
+      inputProps={{ dir: "auto" }}
     />
     <TextField
       label="תיאור"
@@ -46,6 +47,7 @@ const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [
       multiline
       rows={3}
       fullWidth
+      inputProps={{ dir: "auto" }}
     />
     {!editing && (
       <TextField

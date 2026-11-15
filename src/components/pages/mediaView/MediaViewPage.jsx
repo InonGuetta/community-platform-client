@@ -129,7 +129,7 @@ const MediaViewPage = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: 1, mb: 2 }}>
-        <Typography variant="h5" fontWeight={700}>{media.title}</Typography>
+        <Typography variant="h5" fontWeight={700} dir="auto">{media.title}</Typography>
         {/* "מרצה" or "מחבר" by media type — one column, worded for what it is.
             Always present: creator_name is NOT NULL and reads "כללי" when nobody
             said, so this never collapses into a title that looks unattributed by
@@ -297,7 +297,7 @@ const MediaViewPage = () => {
       {media.description && (
         <Box sx={{ mt: 3 }}>
           <Divider sx={{ mb: 2 }} />
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" dir="auto">
             {media.description}
           </Typography>
         </Box>

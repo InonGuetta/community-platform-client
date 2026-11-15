@@ -1,5 +1,7 @@
 import { Component } from "react";
 import { captureError } from "../../../utilities/monitoring";
+import i18n from "../../../i18n/i18n";
+import { directionOf } from "../../../i18n/languages";
 
 // React has no hook equivalent for error boundaries — this has to stay a class.
 //
@@ -105,7 +107,7 @@ class ErrorBoundary extends Component {
     if (!error) return this.props.children;
 
     return (
-      <div dir="rtl" style={styles.page}>
+      <div dir={directionOf(i18n.language)} style={styles.page}>
         <div style={styles.card}>
           <h1 style={styles.title}>משהו השתבש</h1>
           <p style={styles.text}>

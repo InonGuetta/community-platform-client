@@ -30,7 +30,7 @@ const CreatorPage = () => {
           {c.name.trim().replace(/^הרב\s+/, "").slice(0, 1)}
         </Avatar>
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography variant="h4" fontWeight={800} color="primary" sx={{ wordBreak: "break-word" }}>
+          <Typography variant="h4" fontWeight={800} color="primary" dir="auto" sx={{ wordBreak: "break-word" }}>
             {c.name}
           </Typography>
           {c.profileStatus === "loading" && <Skeleton width={280} />}

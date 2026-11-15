@@ -96,7 +96,7 @@ const MyCoursesPage = () => {
               <CardActionArea onClick={() => navigate(trackPath(course.id))} sx={{ p: 2, textAlign: "start", height: "100%" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                   <SchoolOutlinedIcon color="primary" fontSize="small" />
-                  <Typography variant="subtitle1" fontWeight={800} color="primary">
+                  <Typography variant="subtitle1" fontWeight={800} color="primary" dir="auto">
                     {course.title}
                   </Typography>
                 </Box>
@@ -105,6 +105,7 @@ const MyCoursesPage = () => {
                   <Typography
                     variant="body2"
                     color="text.secondary"
+                    dir="auto"
                     sx={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", mb: 1 }}
                   >
                     {course.description}

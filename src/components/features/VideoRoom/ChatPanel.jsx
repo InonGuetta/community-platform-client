@@ -76,7 +76,7 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
                   {message.displayName || "משתתף"}
                 </Typography>
               )}
-              <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+              <Typography variant="body2" dir="auto" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
                 {message.text}
               </Typography>
               <Typography variant="caption" sx={{ color: "grey.500", display: "block", textAlign: "start" }}>

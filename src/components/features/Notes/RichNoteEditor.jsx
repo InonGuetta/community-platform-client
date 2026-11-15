@@ -481,6 +481,7 @@ const RichNoteEditor = forwardRef(({
       <Box
         ref={editorRef}
         component="div"
+        dir="auto"
         contentEditable
         suppressContentEditableWarning
         role="textbox"

@@ -45,7 +45,7 @@ const DownloadingRow = ({ entry, onCancel }) => {
     <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography fontWeight={600} noWrap title={entry.title}>{entry.title}</Typography>
+          <Typography fontWeight={600} noWrap dir="auto" title={entry.title}>{entry.title}</Typography>
           <Typography variant="body2" color="text.secondary">מוריד… {progressLabel(entry)}</Typography>
         </Box>
         <Tooltip title="ביטול ההורדה">
@@ -90,7 +90,7 @@ const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
         </span>
       </Tooltip>
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography fontWeight={600} noWrap title={item.title}>{item.title}</Typography>
+        <Typography fontWeight={600} noWrap dir="auto" title={item.title}>{item.title}</Typography>
         {byline && <Typography variant="body2" color="text.secondary" noWrap>{byline}</Typography>}
         <Typography variant="caption" color="text.secondary">{lessonDetails(item)}</Typography>
       </Box>

@@ -113,6 +113,7 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
         // Read-only while the Hebrew correction runs: it will replace this text
         // when it finishes, and typing in the meantime would be thrown away.
         InputProps={{ readOnly: !canEdit || isAiActionBusy(fixStatus) }}
+        inputProps={{ dir: "auto" }}
         helperText={isAiActionBusy(fixStatus) ? "העברית מתוקנת ברקע. הטקסט יתעדכן כשהתיקון יסתיים." : undefined}
       />
 

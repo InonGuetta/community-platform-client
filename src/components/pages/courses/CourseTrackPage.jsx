@@ -61,6 +61,7 @@ const LessonRow = ({ lesson, index, canArrange, drag, onOpen }) => {
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
           component="button"
+          dir="auto"
           onClick={() => onOpen(lesson.id)}
           sx={{ all: "unset", cursor: "pointer", fontWeight: 600, "&:hover": { textDecoration: "underline" }, "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main" } }}
         >
@@ -101,11 +102,11 @@ const CourseTrackPage = () => {
           </Alert>
         ) : (
           <>
-            <Typography variant="h4" fontWeight={800} color="primary">{c.course.title}</Typography>
+            <Typography variant="h4" fontWeight={800} color="primary" dir="auto">{c.course.title}</Typography>
             {c.course.lecturer_name && (
               <Typography color="text.secondary" sx={{ mb: 1 }}>{c.course.lecturer_name}</Typography>
             )}
-            {c.course.description && <Typography sx={{ mb: 2 }}>{c.course.description}</Typography>}
+            {c.course.description && <Typography dir="auto" sx={{ mb: 2 }}>{c.course.description}</Typography>}
 
             {c.summary.total > 0 && (
               <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 3 }}>

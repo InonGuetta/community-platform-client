@@ -43,6 +43,7 @@ const ChaptersPanel = ({
             <ListItemButton key={i} onClick={() => onSeek?.(heading.start_time)} sx={{ borderRadius: 1, mb: 0.5 }}>
               <ListItemText
                 primary={heading.title}
+                primaryTypographyProps={{ dir: "auto" }}
                 secondary={formatTime(heading.start_time)}
               />
             </ListItemButton>

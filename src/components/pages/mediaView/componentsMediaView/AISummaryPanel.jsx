@@ -133,7 +133,7 @@ const AISummaryPanel = ({
       )}
 
       {summary && !running && (
-        <Typography variant="body2" color="text.secondary">{summary}</Typography>
+        <Typography variant="body2" color="text.secondary" dir="auto">{summary}</Typography>
       )}
 
       {summary && keyPoints.length > 0 && !running && (
@@ -142,7 +142,7 @@ const AISummaryPanel = ({
           <Typography variant="subtitle2" fontWeight={600}>נקודות מפתח</Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
             {keyPoints.map((point, i) => (
-              <Chip key={i} label={point} size="small" variant="outlined" color="primary" />
+              <Chip key={i} label={point} dir="auto" size="small" variant="outlined" color="primary" />
             ))}
           </Box>
         </>

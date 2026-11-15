@@ -21,7 +21,7 @@ const OfflinePlayer = ({ item, onClose }) => {
     <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 3, borderColor: "secondary.main" }}>
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, mb: 1 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="subtitle1" fontWeight={700} noWrap title={item.title}>{item.title}</Typography>
+          <Typography variant="subtitle1" fontWeight={700} noWrap dir="auto" title={item.title}>{item.title}</Typography>
           {byline && <Typography variant="body2" color="text.secondary" noWrap>{byline}</Typography>}
         </Box>
         <Tooltip title="סגירת הנגן">

@@ -68,7 +68,7 @@ const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
           start and end of one row, so space-between puts each at its edge. */}
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, mb: 1.5 }}>
         <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5, flexWrap: "wrap", minWidth: 0 }}>
-          <Typography variant="subtitle1" fontWeight={800}>{playlist.title}</Typography>
+          <Typography variant="subtitle1" fontWeight={800} dir="auto">{playlist.title}</Typography>
           <Typography variant="body2" color="text.secondary">
             {countLabel(playlist.item_count, "שיעור אחד", "שיעורים")}
           </Typography>

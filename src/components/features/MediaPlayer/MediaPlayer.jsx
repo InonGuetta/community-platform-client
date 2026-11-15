@@ -276,7 +276,8 @@ const MediaPlayer = forwardRef((
         {caption && (
           <Box
             data-testid="player-caption"
-            dir="rtl"
+            // The lesson's own words: their direction, not the interface's.
+            dir="auto"
             sx={{
               position: "absolute",
               insetInline: 0,

@@ -30,7 +30,7 @@ const MediaCardSkeleton = () => (
     <Skeleton
       variant="rectangular"
       height={180}
-      sx={{ borderTopLeftRadius: "20px", borderBottomRightRadius: "20px" }}
+      sx={{ borderStartEndRadius: "20px", borderEndStartRadius: "20px" }}
     />
     <Box sx={{ px: 2, pt: 1.5 }}>
       <Skeleton width="70%" />

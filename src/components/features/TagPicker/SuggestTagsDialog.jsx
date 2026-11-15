@@ -106,7 +106,7 @@ const SuggestTagsDialog = ({
 
   return (
     <Dialog open={open} onClose={onSkip} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ textAlign: "right" }}>על מה השיעור?</DialogTitle>
+      <DialogTitle sx={{ textAlign: "start" }}>על מה השיעור?</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
           «{item.title}» הועלה בהצלחה. התגיות קובעות איפה הוא יימצא בסינון ובחיפוש.

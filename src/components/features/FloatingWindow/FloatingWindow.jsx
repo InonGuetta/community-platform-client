@@ -124,6 +124,8 @@ const FloatingWindow = ({ open, onClose, title, storageKey, actions, children })
         onKeyDown={(e) => { if (e.key === "Escape") onClose?.(); }}
         sx={{
           position: "fixed",
+          // Physical: geometry.x is a drag position measured on the page.
+          // eslint-disable-next-line no-restricted-syntax
           left: geometry.x,
           top: geometry.y,
           width: geometry.width,
@@ -177,7 +179,7 @@ const FloatingWindow = ({ open, onClose, title, storageKey, actions, children })
                 flexShrink: 0,
                 // Its own space: a mis-click happens when the target is flush
                 // against its neighbour.
-                ml: 1.5,
+                marginInlineEnd: 1.5,
                 bgcolor: "error.main",
                 color: "error.contrastText",
                 boxShadow: 2,

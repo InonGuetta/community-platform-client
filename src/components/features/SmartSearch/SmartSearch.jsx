@@ -90,8 +90,8 @@ const SmartSearch = ({ onOpenResult }) => {
               sx={{
                 p: 2,
                 cursor: "pointer",
-                borderLeft: "4px solid",
-                borderLeftColor: BORDER_COLOR[tier],
+                borderInlineEnd: "4px solid",
+                borderInlineEndColor: BORDER_COLOR[tier],
                 transition: "box-shadow 0.15s, transform 0.15s",
                 "&:hover": { boxShadow: 4, transform: "translateY(-1px)" },
               }}

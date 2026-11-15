@@ -616,6 +616,7 @@ const RichNoteEditor = forwardRef(({
               // getBoundingClientRect, which is physical — and the page is
               // right-to-left, so a logical property would mirror it onto the
               // wrong side of the note.
+              // eslint-disable-next-line no-restricted-syntax -- measured, physical (see above)
               left: framed.left - 2,
               width: framed.width + 4,
               height: framed.height + 4,
@@ -636,6 +637,7 @@ const RichNoteEditor = forwardRef(({
                 // text begins in a right-to-left notebook — so the button sits
                 // at its start, not trailing off its end.
                 top: framed.top,
+                // eslint-disable-next-line no-restricted-syntax -- measured, physical (see above)
                 left: framed.left + framed.width,
                 transform: "translate(-50%, -50%)",
                 bgcolor: "error.main",
@@ -665,6 +667,7 @@ const RichNoteEditor = forwardRef(({
                 sx={{
                   position: "absolute",
                   top: framed.top,
+                  // eslint-disable-next-line no-restricted-syntax -- measured, physical (see above)
                   left: framed.left + framed.width - RENAME_OFFSET_PX,
                   transform: "translate(-50%, -50%)",
                   bgcolor: "primary.main",

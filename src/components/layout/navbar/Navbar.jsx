@@ -69,7 +69,7 @@ const Navbar = () => {
           component={Link}
           to="/archive"
           sx={{
-            mr: 3,
+            marginInlineStart: 3,
             flexShrink: 0,
             letterSpacing: 0.2,
             // On mobile the brand grows to push the compact avatar to the far
@@ -161,7 +161,7 @@ const Navbar = () => {
           onClick={() => setDrawerOpen((prev) => !prev)}
           aria-label={drawerOpen ? "סגירת תפריט אישי" : "פתיחת תפריט אישי"}
           aria-expanded={drawerOpen}
-          sx={{ color: "primary.main", ml: { md: 1 } }}
+          sx={{ color: "primary.main", marginInlineEnd: { md: 1 } }}
         >
           <MenuIcon />
         </IconButton>

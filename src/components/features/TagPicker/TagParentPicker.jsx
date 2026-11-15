@@ -119,7 +119,7 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
                   <ListItemText
                     primary={node.name}
                     secondary={path || "כותרת ראשית"}
-                    sx={{ textAlign: "right" }}
+                    sx={{ textAlign: "start" }}
                   />
                 </ListItemButton>
               ))}
@@ -138,7 +138,7 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
                   <ListItemText
                     primary={node.name}
                     secondary={below > 0 ? `${below} תגיות מתחת` : null}
-                    sx={{ textAlign: "right" }}
+                    sx={{ textAlign: "start" }}
                   />
                   {below > 0 && <ChevronLeftIcon fontSize="small" color="action" />}
                 </ListItemButton>

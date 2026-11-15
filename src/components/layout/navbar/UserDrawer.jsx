@@ -74,7 +74,7 @@ const UserDrawer = ({
       <IconButton
         onClick={() => setDrawerOpen(false)}
         aria-label="סגירת התפריט"
-        sx={{ position: "absolute", top: 8, right: 8, color: "error.main", zIndex: 1 }}
+        sx={{ position: "absolute", top: 8, insetInlineStart: 8, color: "error.main", zIndex: 1 }}
       >
         <CloseIcon sx={{ fontSize: 38 }} />
       </IconButton>
@@ -93,12 +93,12 @@ const UserDrawer = ({
       <List dense>
         {user?.email && (
           <ListItem>
-            <EmailOutlinedIcon fontSize="small" sx={{ color: "primary.main", ml: 1 }} />
+            <EmailOutlinedIcon fontSize="small" sx={{ color: "primary.main", marginInlineEnd: 1 }} />
             <ListItemText primary={user.email} primaryTypographyProps={{ variant: "body2", noWrap: true, color: "text.secondary" }} />
           </ListItem>
         )}
         <ListItem>
-          <BadgeOutlinedIcon fontSize="small" sx={{ color: "primary.main", ml: 1 }} />
+          <BadgeOutlinedIcon fontSize="small" sx={{ color: "primary.main", marginInlineEnd: 1 }} />
           <ListItemText primary={roleLabels[role] || "משתמש"} primaryTypographyProps={{ variant: "body2", color: "text.secondary" }} />
         </ListItem>
       </List>
@@ -118,7 +118,7 @@ const UserDrawer = ({
               {/* The LABEL stays navy in every row: only the icon carries the
                   shelf's own colour, so the list still reads as one column of
                   links rather than as two of them in different inks. */}
-              <Icon fontSize="small" sx={{ color: iconColour || "primary.main", ml: 1 }} />
+              <Icon fontSize="small" sx={{ color: iconColour || "primary.main", marginInlineEnd: 1 }} />
               <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 800, color: "primary.main" }} />
             </ListItemButton>
           </ListItem>

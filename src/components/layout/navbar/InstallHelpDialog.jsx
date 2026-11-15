@@ -11,7 +11,7 @@ import IosShareIcon from "@mui/icons-material/IosShare";
 // screen — so the most the app can do is say where that is.
 const InstallHelpDialog = ({ open, onClose }) => (
   <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle sx={{ textAlign: "right" }}>התקנה באייפון או באייפד</DialogTitle>
+    <DialogTitle sx={{ textAlign: "start" }}>התקנה באייפון או באייפד</DialogTitle>
     <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       <Typography>
         1. בספארי, לחצו על כפתור השיתוף <IosShareIcon fontSize="small" sx={{ verticalAlign: "middle" }} /> בתחתית המסך.

@@ -3,6 +3,48 @@ import globals from "globals";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 
+// ── Direction: logical properties only (docs/i18n-plan.md) ──────────────────
+//
+// The interface runs right-to-left in Hebrew and Yiddish and left-to-right in
+// English, French and Spanish, with no stylis flip plugin (see theme.js). So a
+// style must name the side a line STARTS or ENDS on, never left or right — one
+// declaration is then right in both directions.
+//
+// Note what MUI does and does not offer: marginInlineStart/End and
+// paddingInlineStart/End are spacing keys (`marginInlineStart: 2` is 16px);
+// there are NO `ms`/`me`/`ps`/`pe` shorthands — MUI passes them through as
+// unknown CSS and the browser drops them, silently. Positions are
+// insetInlineStart/End (`insetInline: 0` for both); text is textAlign
+// "start"/"end".
+//
+// A number measured from the page (getBoundingClientRect, a drag) IS physical,
+// and stays `left` with an eslint-disable comment saying so.
+const STYLE = "JSXAttribute[name.name=/^(sx|style)$/]";
+const PHYSICAL = [
+  "ml", "mr", "pl", "pr", "marginLeft", "marginRight", "paddingLeft", "paddingRight", "left", "right",
+  "borderLeft", "borderRight", "borderLeftColor", "borderRightColor", "borderLeftWidth", "borderRightWidth",
+  "borderLeftStyle", "borderRightStyle", "borderTopLeftRadius", "borderTopRightRadius",
+  "borderBottomLeftRadius", "borderBottomRightRadius",
+];
+const LOGICAL_ONLY = [
+  {
+    selector: `${STYLE} Property[key.name=/^(${PHYSICAL.join("|")})$/]`,
+    message: "Physical side in a style: use the logical property (marginInlineStart/End, paddingInlineStart/End, insetInlineStart/End, borderInlineStart/End…) so it is right in both directions. A measured, physical number stays, with an eslint-disable saying so.",
+  },
+  {
+    selector: `${STYLE} Property[key.name=/^(ms|me|ps|pe)$/]`,
+    message: "MUI has no ms/me/ps/pe shorthand — the browser drops it silently. Write marginInlineStart/End or paddingInlineStart/End.",
+  },
+  {
+    selector: `${STYLE} Property[key.name="textAlign"][value.value=/^(left|right)$/]`,
+    message: "textAlign \"start\"/\"end\", so the text sits on the right side in both directions.",
+  },
+  {
+    selector: "JSXAttribute[name.name=\"textAlign\"][value.value=/^(left|right)$/]",
+    message: "textAlign=\"start\"/\"end\", so the text sits on the right side in both directions.",
+  },
+];
+
 export default [
   { ignores: ["node_modules/**", "dist/**"] },
   js.configs.recommended,
@@ -108,6 +150,13 @@ export default [
         }],
       }],
     },
+  },
+  {
+    // Logical properties only — see LOGICAL_ONLY above. Widened folder by
+    // folder as each is converted (i18n plan, prompts 6–7).
+    files: ["src/components/layout/**/*.jsx", "src/components/features/**/*.jsx"],
+    ignores: ["src/**/*.test.jsx"],
+    rules: { "no-restricted-syntax": ["error", ...LOGICAL_ONLY] },
   },
   {
     // Tests import their globals explicitly, but they run under node rather

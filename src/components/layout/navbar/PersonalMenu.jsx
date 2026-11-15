@@ -48,7 +48,7 @@ const PersonalMenu = ({ personalAnchor, setPersonalAnchor, pathname }) => (
             stacked rows align, which in a horizontal strip is just a hole
             between the icon and its own label. The gap is a margin-LEFT
             because RTL puts the icon to the right of the text it labels. */}
-        <ListItemIcon sx={{ minWidth: 0, ml: 1, color: iconColour || "primary.main" }}>
+        <ListItemIcon sx={{ minWidth: 0, marginInlineEnd: 1, color: iconColour || "primary.main" }}>
           <Icon fontSize="small" />
         </ListItemIcon>
         {/* The lettering has to be set on the TEXT, not only on the row:

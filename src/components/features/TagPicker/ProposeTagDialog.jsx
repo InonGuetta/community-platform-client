@@ -87,7 +87,7 @@ const ProposeTagDialog = ({
 
   return (
     <Dialog open={open} onClose={submitting ? undefined : onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ textAlign: "right" }}>{title}</DialogTitle>
+      <DialogTitle sx={{ textAlign: "start" }}>{title}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <TextField
           autoFocus

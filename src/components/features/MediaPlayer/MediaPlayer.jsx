@@ -279,8 +279,7 @@ const MediaPlayer = forwardRef((
             dir="rtl"
             sx={{
               position: "absolute",
-              left: 0,
-              right: 0,
+              insetInline: 0,
               zIndex: 1,
               display: "flex",
               justifyContent: "center",

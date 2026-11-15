@@ -19,24 +19,37 @@ import reactHooks from "eslint-plugin-react-hooks";
 //
 // A number measured from the page (getBoundingClientRect, a drag) IS physical,
 // and stays `left` with an eslint-disable comment saying so.
-const STYLE = "JSXAttribute[name.name=/^(sx|style)$/]";
-const PHYSICAL = [
-  "ml", "mr", "pl", "pr", "marginLeft", "marginRight", "paddingLeft", "paddingRight", "left", "right",
+//
+// Two reaches. A spacing or border name (ml, marginLeft, borderTopLeftRadius…)
+// means a style wherever it appears, so it is refused anywhere in a component —
+// including a style object kept in a constant, which is how MediaActionsBar's
+// icon margins slipped past a rule that looked only inside sx. `left`/`right`
+// and ms/me/ps/pe are also ordinary data keys, so those are refused inside an
+// sx/style attribute or a constant whose name ends in Sx.
+const STYLE_SCOPES = ["JSXAttribute[name.name=/^(sx|style)$/]", "VariableDeclarator[id.name=/Sx$/]"];
+const inStyle = (inner) => STYLE_SCOPES.map((scope) => `${scope} ${inner}`).join(", ");
+const PHYSICAL_SPACING = [
+  "ml", "mr", "pl", "pr", "marginLeft", "marginRight", "paddingLeft", "paddingRight",
   "borderLeft", "borderRight", "borderLeftColor", "borderRightColor", "borderLeftWidth", "borderRightWidth",
   "borderLeftStyle", "borderRightStyle", "borderTopLeftRadius", "borderTopRightRadius",
   "borderBottomLeftRadius", "borderBottomRightRadius",
 ];
+const PHYSICAL_MESSAGE = "Physical side in a style: use the logical property (marginInlineStart/End, paddingInlineStart/End, insetInlineStart/End, borderInlineStart/End…) so it is right in both directions. A measured, physical number stays, with an eslint-disable saying so.";
 const LOGICAL_ONLY = [
   {
-    selector: `${STYLE} Property[key.name=/^(${PHYSICAL.join("|")})$/]`,
-    message: "Physical side in a style: use the logical property (marginInlineStart/End, paddingInlineStart/End, insetInlineStart/End, borderInlineStart/End…) so it is right in both directions. A measured, physical number stays, with an eslint-disable saying so.",
+    selector: `Property[key.name=/^(${PHYSICAL_SPACING.join("|")})$/]`,
+    message: PHYSICAL_MESSAGE,
   },
   {
-    selector: `${STYLE} Property[key.name=/^(ms|me|ps|pe)$/]`,
+    selector: inStyle("Property[key.name=/^(left|right)$/]"),
+    message: PHYSICAL_MESSAGE,
+  },
+  {
+    selector: inStyle("Property[key.name=/^(ms|me|ps|pe)$/]"),
     message: "MUI has no ms/me/ps/pe shorthand — the browser drops it silently. Write marginInlineStart/End or paddingInlineStart/End.",
   },
   {
-    selector: `${STYLE} Property[key.name="textAlign"][value.value=/^(left|right)$/]`,
+    selector: "Property[key.name=\"textAlign\"][value.value=/^(left|right)$/]",
     message: "textAlign \"start\"/\"end\", so the text sits on the right side in both directions.",
   },
   {

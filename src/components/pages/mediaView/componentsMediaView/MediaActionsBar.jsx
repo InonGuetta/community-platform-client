@@ -31,9 +31,8 @@ const pillSizeSx = { flex: 1, minWidth: 100, maxWidth: 170 };
 
 // Pill-shaped outlined actions. The label carries the meaning and the icon only
 // reinforces it, which is why these are Buttons rather than the bare IconButtons
-// they replaced. `endIcon` rather than `startIcon`: the app runs RTL without the
-// stylis flip plugin, so MUI's physical start/end margins do not swap and this
-// is what puts the icon on the label's left, as in the rest of the UI.
+// they replaced. `endIcon`: the icon comes AFTER the label, at the end of the
+// line in either direction — on its left in Hebrew, its right in English.
 const pillButtonSx = {
   borderRadius: 999,
   px: 2.5,
@@ -49,10 +48,9 @@ const pillButtonSx = {
   // The bounds are what keep that from turning into four banners on a wide panel
   // or four slivers in the notebook's narrow window.
   ...pillSizeSx,
-  // The icon sits to the LEFT of the label here, so the gap between the two is
-  // its margin-RIGHT; MUI's default puts the spacing on the left, which in this
-  // unflipped RTL context pushes it against the text instead of away from it.
-  "& .MuiButton-endIcon": { ml: -0.25, mr: 0.75, "& svg": { fontSize: 22 } },
+  // The gap between label and icon is the icon's inline-START margin, in
+  // either direction; the small negative end margin pulls it toward the edge.
+  "& .MuiButton-endIcon": { marginInlineStart: 0.75, marginInlineEnd: -0.25, "& svg": { fontSize: 22 } },
   "&:hover": { borderColor: "text.disabled", bgcolor: "action.hover" },
 };
 
@@ -125,8 +123,8 @@ const saveMainSx = () => ({
   fontWeight: 600,
   color: "text.primary",
   "& .MuiButton-endIcon": {
-    ml: -0.25,
-    mr: 0.75,
+    marginInlineStart: 0.75,
+    marginInlineEnd: -0.25,
     color: savedColour,
     "& svg": { fontSize: 22 },
   },

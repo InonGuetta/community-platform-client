@@ -61,7 +61,7 @@ const styles = {
     padding: "12px",
     background: "#fbeaea",
     borderRadius: "8px",
-    textAlign: "left",
+    textAlign: "start",
     direction: "ltr",
     fontFamily: "monospace",
     fontSize: "0.75rem",

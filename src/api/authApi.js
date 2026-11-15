@@ -14,8 +14,10 @@ export const authApi = {
   // stores it in its own column and creates every account as a student
   // regardless — see the server's servicesAuth.register. Naming it `role` here
   // would suggest to the next reader that the client decides, which it does not.
-  register: async ({ email, password, displayName, requestedRole }) =>
-    (await axiosInstance.post("/auth/register", { email, password, displayName, requestedRole })).data,
+  // `locale` is the interface language the visitor is already reading, so the
+  // new account starts in it (users.locale).
+  register: async ({ email, password, displayName, requestedRole, locale }) =>
+    (await axiosInstance.post("/auth/register", { email, password, displayName, requestedRole, locale })).data,
 
   // Returns nothing useful — the point is the cleared cookie.
   logout: async () => {
@@ -41,6 +43,10 @@ export const authApi = {
   // ── The signed-in user's own account ──────────────────────────────────────
   updateProfile: async ({ displayName, avatarUrl }) =>
     (await axiosInstance.patch("/auth/me", { displayName, avatarUrl })).data,
+
+  // The same door with only the interface language: the server leaves the name
+  // and avatar alone when they are absent.
+  setLocale: async (locale) => (await axiosInstance.patch("/auth/me", { locale })).data,
 
   // Asking for a lecturer or admin role from inside the app. Takes no id — the
   // server acts on the session's own user, which is what makes it safe to

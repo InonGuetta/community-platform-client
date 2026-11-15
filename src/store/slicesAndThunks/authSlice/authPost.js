@@ -2,13 +2,15 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { createApiThunk } from "../../createApiThunk";
 import { authApi } from "../../../api/authApi";
 import { rejectionOf } from "../../../utilities/apiError";
+import i18n from "../../../i18n/i18n";
 
 export const login = createApiThunk("auth/login", "Login failed", async ({ email, password }) => {
   return await authApi.login({ email, password });
 });
 
+// The new account starts in the language the visitor is reading right now.
 export const register = createApiThunk("auth/register", "Registration failed", async ({ email, password, displayName, requestedRole }) => {
-  return await authApi.register({ email, password, displayName, requestedRole });
+  return await authApi.register({ email, password, displayName, requestedRole, locale: i18n.language });
 });
 
 // Deliberately NOT reported through the slice's error state. The server answers

@@ -9,3 +9,9 @@ import { authApi } from "../../../api/authApi";
 export const updateProfile = createApiThunk("auth/updateProfile", "Could not save your profile", async (payload) => {
   return await authApi.updateProfile(payload);
 });
+
+// The interface language, saved to the account (users.locale) so the mail the
+// server writes and the next device both use it.
+export const saveLocale = createApiThunk("auth/saveLocale", "Could not save the language", async (locale) => {
+  return await authApi.setLocale(locale);
+});

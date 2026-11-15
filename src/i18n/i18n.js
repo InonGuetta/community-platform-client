@@ -27,7 +27,7 @@ const STORAGE_KEY = "language";
 
 // localStorage can throw (blocked site data, an older private mode) and does
 // not exist under Node — a preference must never be what stops the app.
-const readStoredLanguage = () => {
+export const readStoredLanguage = () => {
   try {
     return localStorage.getItem(STORAGE_KEY);
   } catch {

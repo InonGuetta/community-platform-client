@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { buildTheme } from "./theme/theme";
 import { useLanguage } from "./i18n/useLanguage";
+import { useAccountLanguageSync } from "./components/layout/useAccountLanguage";
 import { ColorModeContext } from "./theme/colorMode";
 import Navbar from "./components/layout/navbar/Navbar";
 import PendingRoleBanner from "./components/layout/navbar/PendingRoleBanner";
@@ -119,6 +120,8 @@ const App = () => {
   const [mode, setMode] = useState(readColorMode);
   // The theme's direction follows the interface's language, as <html dir> does.
   const { direction } = useLanguage();
+  // A signed-in account's language (users.locale) and this browser's, in step.
+  useAccountLanguageSync();
   const theme = useMemo(() => buildTheme(mode, direction), [mode, direction]);
   const colorMode = useMemo(
     () => ({

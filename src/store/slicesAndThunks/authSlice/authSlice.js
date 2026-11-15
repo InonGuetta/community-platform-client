@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { login, register, logout, resetPassword, requestRole } from "./authPost";
-import { updateProfile } from "./authPut";
+import { updateProfile, saveLocale } from "./authPut";
 import { fetchMe } from "./authGet";
 import { statuses } from "../../../utilities/constant";
 import { ERROR_CODES } from "../../../utilities/apiError";
@@ -113,6 +113,13 @@ const authSlice = createSlice({
       // decided not to change.
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.user = action.payload;
+      })
+
+      // Only the language is taken from the answer: the row PATCH returns does
+      // not carry the role-request fields the banner reads, and this change
+      // cannot have touched them.
+      .addCase(saveLocale.fulfilled, (state, action) => {
+        if (state.user) state.user.locale = action.payload.locale;
       })
 
       .addCase(fetchMe.pending, (state, action) => {

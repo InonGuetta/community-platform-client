@@ -89,7 +89,7 @@ describe("signing up", () => {
     fireEvent.change(field("password"), { target: { name: "password", value: "secret123" } });
     fireEvent.click(screen.getByRole("button", { name: "הרשמה" }));
     expect(await screen.findByText("הארכיון")).toBeInTheDocument();
-    expect(authApi.register).toHaveBeenCalledWith({ email: "a@b.co", password: "secret123", displayName: "דוד", requestedRole: "student" });
+    expect(authApi.register).toHaveBeenCalledWith({ email: "a@b.co", password: "secret123", displayName: "דוד", requestedRole: "student", locale: "he" });
   });
 });
 

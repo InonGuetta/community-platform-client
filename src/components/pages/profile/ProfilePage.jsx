@@ -13,6 +13,7 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import { roleLabels } from "../../../utilities/constant";
 import RoleRequestCard from "./RoleRequestCard";
 import EmailPreferencesCard from "./EmailPreferencesCard";
+import LanguageSwitcher from "../../layout/LanguageSwitcher";
 import { useProfilePageController, MIN_PASSWORD_LENGTH } from "./useProfilePageController";
 
 // The user's own account, which nobody could edit before this — an admin could
@@ -95,6 +96,14 @@ const ProfilePage = () => {
             >
               {savingProfile ? <CircularProgress size={20} /> : "שמירה"}
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* The interface's language, saved to the account — so the mail the
+            server writes is in it too. */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent>
+            <LanguageSwitcher variant="field" />
           </CardContent>
         </Card>
 

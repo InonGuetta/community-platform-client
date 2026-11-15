@@ -19,6 +19,7 @@ import { roleLabels } from "../../../utilities/constant";
 import { BAR_HEIGHT } from "./navStyles";
 import { avatarInitial } from "./useAccount";
 import NavLinkLabel from "./NavLinkLabel";
+import LanguageSwitcher from "../LanguageSwitcher";
 
 // The personal drawer is confined to the left-image column so it opens *over*
 // the image only. These match the archive left-image geometry (ArchivePage):
@@ -145,6 +146,8 @@ const UserDrawer = ({
       <Divider />
 
       <List>
+        {/* At every width: on a phone this is the only place to change it. */}
+        <LanguageSwitcher variant="list" />
         {/* PRD MOB-1 — offered only where installing is possible and the
             app is not already running installed. See useInstallPrompt. */}
         {installer.offer && (

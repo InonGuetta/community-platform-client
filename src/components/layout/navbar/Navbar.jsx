@@ -22,6 +22,7 @@ import { BAR_HEIGHT, barSurfaceSx } from "./navStyles";
 import NavLinksBar from "./NavLinksBar";
 import PersonalMenu from "./PersonalMenu";
 import UserDrawer from "./UserDrawer";
+import LanguageSwitcher from "../LanguageSwitcher";
 
 // The top bar. Which links each role is offered is navLinks.js and how a tab
 // looks is navStyles.js; the desktop row of tabs is NavLinksBar, the "תוכן אישי"
@@ -105,6 +106,12 @@ const Navbar = () => {
           onSelect={bell.handleSelect}
           onMarkAllRead={bell.handleMarkAllRead}
         />
+
+        {/* The interface's language — desktop only; on a phone it is in the
+            drawer, where the bar has no room for one more icon. */}
+        <Box sx={{ display: { xs: "none", md: "flex" } }}>
+          <LanguageSwitcher />
+        </Box>
 
         {/* Light/dark toggle — always visible. */}
         <Tooltip title={mode === "dark" ? "מצב בהיר" : "מצב כהה"}>

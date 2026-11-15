@@ -2,16 +2,20 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
+import { useMemo } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { buildTheme } from "../../../theme/theme";
+import { useLanguage } from "../../../i18n/useLanguage";
+import LanguageSwitcher from "../../layout/LanguageSwitcher";
 
 // Auth is a branded, always-light landing built on hardcoded light styling.
 // Forcing the light theme here keeps it consistent even when the user has dark
 // mode enabled elsewhere (e.g. MUI's own Alert/inputs won't render dark on the
-// light glass card). Built once at module scope so it's a stable reference.
-const lightTheme = buildTheme("light");
-
-const AuthLayout = ({ title, children }) => (
+// light glass card). Rebuilt only when the language's direction changes.
+const AuthLayout = ({ title, children }) => {
+  const { direction } = useLanguage();
+  const lightTheme = useMemo(() => buildTheme("light", direction), [direction]);
+  return (
   <ThemeProvider theme={lightTheme}>
   <Box sx={{
     minHeight: "100vh",
@@ -37,6 +41,12 @@ const AuthLayout = ({ title, children }) => (
       background: "radial-gradient(circle at 85% 18%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 48%)",
     },
   }}>
+    {/* The language, before anyone has signed in — in the top corner where a
+        line of text ends, as the bar's own icons are. */}
+    <Box sx={{ position: "absolute", top: 16, insetInlineEnd: 16, zIndex: 3 }}>
+      <LanguageSwitcher color="#424242" />
+    </Box>
+
     {/* Background image layer - zoomed out 20% */}
     <Box sx={{
       position: "absolute",
@@ -91,6 +101,7 @@ const AuthLayout = ({ title, children }) => (
     </Card>
   </Box>
   </ThemeProvider>
-);
+  );
+};
 
 export default AuthLayout;

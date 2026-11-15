@@ -91,7 +91,9 @@ test("signing out clears the offline lessons, then signs out, then goes to sign-
   clearOffline.mockImplementation(async () => { order.push("offline"); return []; });
   authApi.logout.mockImplementation(async () => { order.push("logout"); });
   withUser({ id: 1, role: "student", display_name: "דוד" }, <Navbar />);
-  fireEvent.click(screen.getAllByRole("button", { name: "התנתקות" })[0]);
+  // Sign-out lives only in the drawer, so open it first.
+  fireEvent.click(screen.getByRole("button", { name: "פתיחת תפריט אישי" }));
+  fireEvent.click(await screen.findByRole("button", { name: "התנתקות" }));
   expect(await screen.findByText("דף ההתחברות")).toBeInTheDocument();
   expect(order).toEqual(["offline", "logout"]);
 });

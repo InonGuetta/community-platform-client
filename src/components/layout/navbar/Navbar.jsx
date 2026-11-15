@@ -2,7 +2,6 @@ import { useState, useContext } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
@@ -139,17 +138,10 @@ const Navbar = () => {
               </Typography>
             </Box>
           </Tooltip>
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={handleLogout}
-            sx={{ fontWeight: 700, fontSize: "0.75rem", letterSpacing: 0.8, textTransform: "uppercase", borderRadius: 1.5, color: "primary.main", borderColor: "primary.main" }}
-          >
-            התנתקות
-          </Button>
         </Box>
 
-        {/* Compact avatar — mobile only (logout lives inside the drawer). */}
+        {/* Compact avatar — mobile only. Logout lives inside the drawer at
+            every width. */}
         <Avatar sx={{ display: { xs: "flex", md: "none" }, width: 34, height: 34, bgcolor: "transparent", color: "primary.main", border: "1.5px solid", borderColor: "primary.main", fontSize: 14, fontWeight: 700 }}>
           {avatarInitial(user)}
         </Avatar>

@@ -70,6 +70,8 @@ const EmailPreferencesCard = () => {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, opacity: allOff ? 0.5 : 1 }}>
             {categories.map(({ key, email }) => {
               const text = CATEGORY_TEXT[key] ?? { label: key, help: "" };
+              // A category that is off reads faded, so what is on stands out.
+              const on = email && !allOff;
               return (
                 <Box key={key}>
                   <FormControlLabel
@@ -84,9 +86,10 @@ const EmailPreferencesCard = () => {
                       />
                     }
                     label={text.label}
+                    sx={{ "& .MuiFormControlLabel-label": { color: on ? "text.primary" : "text.disabled" } }}
                   />
                   {text.help && (
-                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", ms: 6.5, mt: -0.75 }}>
+                    <Typography variant="caption" color={on ? "text.secondary" : "text.disabled"} sx={{ display: "block", ms: 6.5, mt: -0.75 }}>
                       {text.help}
                     </Typography>
                   )}

@@ -48,9 +48,12 @@ const ProfilePage = () => {
 
   return (
     <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
+      {/* The title and the cards share one centred column, so the heading sits
+          over the cards rather than at the page's edge. */}
+      <Box sx={{ maxWidth: 640, mx: "auto" }}>
       <Typography variant="h4" fontWeight={800} color="primary" sx={{ mb: 3 }}>החשבון שלי</Typography>
 
-      <Box sx={{ display: "grid", gap: 3, maxWidth: 640 }}>
+      <Box sx={{ display: "grid", gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent component="form" onSubmit={handleSaveProfile} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -155,6 +158,7 @@ const ProfilePage = () => {
             </Button>
           </CardContent>
         </Card>
+      </Box>
       </Box>
     </Box>
   );

@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DirectionalIcon from "../../../components/features/DirectionalIcon/DirectionalIcon";
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import { countLabel } from "../../../utilities/countLabel";
 import { SAVED_SHELF } from "../../layout/personalShelves";
@@ -38,7 +38,7 @@ const PlaylistPage = () => {
             chosen rather than inherited. */}
         <Button
           onClick={() => navigate(SAVED_SHELF.path)}
-          startIcon={<ArrowForwardIcon />}
+          startIcon={<DirectionalIcon toward="back" />}
           sx={{ mb: 2, "& .MuiButton-startIcon": { marginInlineEnd: -0.25, marginInlineStart: 0.75 } }}
         >
           {SAVED_SHELF.label}

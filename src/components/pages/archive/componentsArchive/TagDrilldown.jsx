@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import Tooltip from "@mui/material/Tooltip";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import DirectionalIcon from "../../../../components/features/DirectionalIcon/DirectionalIcon";
 import CheckIcon from "@mui/icons-material/Check";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import CircleIcon from "@mui/icons-material/Circle";
@@ -205,7 +205,7 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap", minHeight: 28 }}>
         {path.length > 0 && (
           <IconButton size="small" onClick={() => setPath(path.slice(0, -1))} aria-label="חזרה">
-            <ChevronLeftIcon fontSize="small" sx={{ transform: "scaleX(-1)" }} />
+            <DirectionalIcon toward="back" shape="chevron" fontSize="small" />
           </IconButton>
         )}
         {/* A button, not clickable text. The way back up the tree was reachable
@@ -415,7 +415,7 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
                   onClick={() => openBranch(node)}
                   sx={{ p: 0.25, marginInlineEnd: -0.25, color: "text.secondary" }}
                 >
-                  <ChevronLeftIcon sx={{ fontSize: 16 }} />
+                  <DirectionalIcon toward="forward" shape="chevron" sx={{ fontSize: 16 }} />
                 </IconButton>
               )}
             </Box>

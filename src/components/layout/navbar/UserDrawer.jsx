@@ -20,6 +20,7 @@ import { BAR_HEIGHT } from "./navStyles";
 import { avatarInitial } from "./useAccount";
 import NavLinkLabel from "./NavLinkLabel";
 import LanguageSwitcher from "../LanguageSwitcher";
+import { useDirection } from "../../../i18n/useDirection";
 
 // The personal drawer is confined to the left-image column so it opens *over*
 // the image only. These match the archive left-image geometry (ArchivePage):
@@ -31,23 +32,26 @@ const DRAWER_TOP = BAR_HEIGHT; // start below the sticky navbar
 // the PRD MOB-7 review). There it takes most of the screen instead.
 const DRAWER_WIDTH = { xs: "min(85vw, 320px)", md: "20.4vw" };
 
-// Personal-details drawer. Confined to the left-image column: it opens
-// over the image only, below the navbar, at 85% of the image width.
+// Personal-details drawer. Confined to the image column — on the side a line
+// ENDS on (the left in Hebrew, the right in English): it opens over the image
+// only, below the navbar, at 85% of the image width.
 // It behaves as a floating panel, NOT a blocking modal: no backdrop, the
 // page scroll isn't locked, and the modal root passes pointer/scroll
 // events through (pointerEvents:none) so the rest of the page stays
 // scrollable and clickable. Only the panel itself is interactive
 // (pointerEvents:auto). Close via the X button, the hamburger toggle, or
 // Esc while focused — never by navigating.
-// RTL note: this app has no emotion RTL cache, so MUI positions the paper
-// by the *literal* anchor ("left" => left:0) but still flips the Slide
-// direction for RTL. We override the transition to direction="right" so
-// the panel slides IN from the left edge instead of dragging across.
+// Direction note: this app has no emotion RTL cache, so MUI positions the
+// paper by the *literal* anchor ("left" => left:0) but, under an rtl theme,
+// still flips the Slide direction. The transition is therefore always set
+// explicitly, to slide in FROM the anchored edge instead of across the page.
 const UserDrawer = ({
   drawerOpen, setDrawerOpen, user, role, pathname, links, pendingRoleRequests, installer, handleLogout,
-}) => (
+}) => {
+  const { end } = useDirection();
+  return (
   <Drawer
-    anchor="left"
+    anchor={end}
     open={drawerOpen}
     onClose={() => setDrawerOpen(false)}
     hideBackdrop
@@ -57,7 +61,7 @@ const UserDrawer = ({
       sx: { pointerEvents: "none" },
     }}
     slotProps={{
-      transition: { direction: "right" },
+      transition: { direction: end === "left" ? "right" : "left" },
       paper: {
         sx: {
           width: DRAWER_WIDTH,
@@ -70,7 +74,7 @@ const UserDrawer = ({
     }}
   >
     <Box sx={{ width: "100%", position: "relative" }} role="presentation">
-      {/* Close button — top-right corner of the panel itself. */}
+      {/* Close button — the panel's top corner where a line starts. */}
       <IconButton
         onClick={() => setDrawerOpen(false)}
         aria-label="סגירת התפריט"
@@ -166,6 +170,7 @@ const UserDrawer = ({
       </List>
     </Box>
   </Drawer>
-);
+  );
+};
 
 export default UserDrawer;

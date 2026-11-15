@@ -14,7 +14,7 @@ import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DirectionalIcon from "../../../../../components/features/DirectionalIcon/DirectionalIcon";
 import ChatIcon from "@mui/icons-material/ChatOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import { statuses } from "../../../../../utilities/constant";
@@ -108,7 +108,7 @@ const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1, flex: 1, minHeight: 0 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
         {/* Forward in a right-to-left page points to the right — back to the list. */}
-        <Button size="small" startIcon={<ArrowForwardIcon />} onClick={history.close}>
+        <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={history.close}>
           חזרה לרשימה
         </Button>
         {viewing.status === statuses.succeeded && (

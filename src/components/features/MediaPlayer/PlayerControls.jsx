@@ -26,6 +26,7 @@ import { alpha } from "@mui/material/styles";
 import { useDownloadItems } from "../DownloadMenu/downloadOptions";
 import { mediaTypeAccents } from "../../../utilities/constant";
 import { formatTime } from "../../../utilities/formatTime";
+import { useDirection } from "../../../i18n/useDirection";
 
 const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
 
@@ -96,6 +97,9 @@ const PlayerControls = ({
   // PRD MOB-5. The button is there only when the lesson has captions to show.
   captionsAvailable = false, captionsOn = false, onToggleCaptions,
 }) => {
+  // The settings menu sits outside the sliders' forced-ltr theme, so it
+  // follows the interface: it opens from the side its button's line starts on.
+  const { start } = useDirection();
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [volumeAnchor, setVolumeAnchor] = useState(null);
   const closeMenu = () => setMenuAnchor(null);
@@ -309,8 +313,8 @@ const PlayerControls = ({
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={closeMenu}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        transformOrigin={{ vertical: "bottom", horizontal: "right" }}
+        anchorOrigin={{ vertical: "top", horizontal: start }}
+        transformOrigin={{ vertical: "bottom", horizontal: start }}
         slotProps={{ paper: { sx: { minWidth: 210 } } }}
       >
         <MenuItem disabled sx={{ opacity: "1 !important" }}>

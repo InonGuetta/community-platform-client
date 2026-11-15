@@ -4,7 +4,7 @@ import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DirectionalIcon from "../../../components/features/DirectionalIcon/DirectionalIcon";
 import ArchiveBrowser from "../archive/componentsArchive/ArchiveBrowser";
 import { useCreatorPageController } from "./useCreatorPageController";
 import { creatorSummary } from "./creatorSummary";
@@ -21,7 +21,7 @@ const CreatorPage = () => {
 
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)", p: 3 }}>
-      <Button size="small" startIcon={<ArrowForwardIcon />} onClick={c.goToArchive} sx={{ mb: 2 }}>
+      <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={c.goToArchive} sx={{ mb: 2 }}>
         לארכיון
       </Button>
 

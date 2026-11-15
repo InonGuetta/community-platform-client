@@ -9,8 +9,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import DirectionalIcon from "../../../../components/features/DirectionalIcon/DirectionalIcon";
 import FloatingWindow from "../../../features/FloatingWindow/FloatingWindow";
 import MediaPlayer from "../../../features/MediaPlayer/MediaPlayer";
 import TextViewer from "./TextViewer";
@@ -182,7 +181,7 @@ const SourcePreviewDialog = ({
           <Tooltip title="המקור הקודם">
             <span data-no-drag>
               <IconButton onClick={onPrev} disabled={!onPrev} aria-label="המקור הקודם" sx={arrowSx}>
-                <KeyboardArrowRightIcon sx={{ fontSize: 42 }} />
+                <DirectionalIcon toward="back" shape="keyboardArrow" sx={{ fontSize: 42 }} />
               </IconButton>
             </span>
           </Tooltip>
@@ -210,7 +209,7 @@ const SourcePreviewDialog = ({
           <Tooltip title="המקור הבא">
             <span data-no-drag>
               <IconButton onClick={onNext} disabled={!onNext} aria-label="המקור הבא" sx={arrowSx}>
-                <KeyboardArrowLeftIcon sx={{ fontSize: 42 }} />
+                <DirectionalIcon toward="forward" shape="keyboardArrow" sx={{ fontSize: 42 }} />
               </IconButton>
             </span>
           </Tooltip>

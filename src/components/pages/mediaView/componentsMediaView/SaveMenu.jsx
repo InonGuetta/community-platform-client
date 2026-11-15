@@ -17,6 +17,7 @@ import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog
 import { playlistTitleMaxLength } from "../../../../utilities/constant";
 import { countLabel } from "../../../../utilities/countLabel";
 import { useSaveMenu } from "./useSaveMenu";
+import { useDirection } from "../../../../i18n/useDirection";
 
 // Which of the user's own lists this lecture is filed in, and the way to make a
 // new one. The general save is NOT here — that is the button this menu hangs off
@@ -29,10 +30,11 @@ import { useSaveMenu } from "./useSaveMenu";
 
 // Anchored to a button at the BOTTOM of a panel, so the menu has to grow upwards
 // or it opens off-screen.
-const ORIGINS = {
-  anchorOrigin: { vertical: "top", horizontal: "right" },
-  transformOrigin: { vertical: "bottom", horizontal: "right" },
-};
+// …aligned to the side the button's line starts on (useDirection).
+const originsFor = (start) => ({
+  anchorOrigin: { vertical: "top", horizontal: start },
+  transformOrigin: { vertical: "bottom", horizontal: start },
+});
 
 // MenuItem inherits a physical `text-align: left` from MUI, and this app runs
 // RTL without the stylis flip plugin, so the label drifts away from its icon.
@@ -96,6 +98,7 @@ const TitleField = ({ value, onChange, onSubmit, onCancel, actionLabel }) => (
 
 // Layout only: what the menu loads and does is useSaveMenu's.
 const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
+  const { start } = useDirection();
   const {
     playlists, showsThisMedia, failed, loading,
     newTitle, setNewTitle, creating, setCreating, editing, setEditing, pendingDelete, setPendingDelete,
@@ -108,7 +111,7 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
         anchorEl={anchorEl}
         open={open}
         onClose={onClose}
-        {...ORIGINS}
+        {...originsFor(start)}
         slotProps={{ paper: { sx: { minWidth: 290, maxWidth: 360 } } }}
       >
         <Typography

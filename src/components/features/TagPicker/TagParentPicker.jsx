@@ -9,7 +9,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Typography from "@mui/material/Typography";
 import SearchIcon from "@mui/icons-material/Search";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import DirectionalIcon from "../DirectionalIcon/DirectionalIcon";
 import HomeIcon from "@mui/icons-material/Home";
 import { buildTagRelations } from "../../../utilities/tagStates";
 import { pathOf } from "./tagOptions";
@@ -140,7 +140,7 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
                     secondary={below > 0 ? `${below} תגיות מתחת` : null}
                     sx={{ textAlign: "start" }}
                   />
-                  {below > 0 && <ChevronLeftIcon fontSize="small" color="action" />}
+                  {below > 0 && <DirectionalIcon toward="forward" shape="chevron" fontSize="small" color="action" />}
                 </ListItemButton>
               );
             })}

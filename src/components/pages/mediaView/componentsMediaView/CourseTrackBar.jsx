@@ -4,7 +4,7 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import { Link as RouterLink } from "react-router-dom";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DirectionalIcon from "../../../../components/features/DirectionalIcon/DirectionalIcon";
 
 // Under the player, for a lesson that is part of a course (PRD CRS-1, CRS-3):
 // where it stands in the track, a way to the lesson after it, and the countdown
@@ -37,7 +37,7 @@ const CourseTrackBar = ({ track }) => {
           </Link>
         </Typography>
         {next && (
-          <Button size="small" variant="outlined" endIcon={<ArrowBackIcon />} onClick={track.goNext}>
+          <Button size="small" variant="outlined" endIcon={<DirectionalIcon toward="forward" />} onClick={track.goNext}>
             הבא: {next.title}
           </Button>
         )}

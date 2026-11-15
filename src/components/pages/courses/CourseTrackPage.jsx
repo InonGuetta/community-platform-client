@@ -6,7 +6,7 @@ import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DirectionalIcon from "../../../components/features/DirectionalIcon/DirectionalIcon";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
@@ -89,7 +89,7 @@ const CourseTrackPage = () => {
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
       <Box sx={{ maxWidth: 860, mx: "auto", p: { xs: 2, sm: 3 } }}>
-        <Button size="small" startIcon={<ArrowForwardIcon />} onClick={c.goToMyCourses} sx={{ mb: 2 }}>
+        <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={c.goToMyCourses} sx={{ mb: 2 }}>
           הקורסים שלי
         </Button>
 

@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { describeNotification, notificationAge } from "../../../utilities/notificationText";
+import { useDirection } from "../../../i18n/useDirection";
 
 // The notification centre (PRD NOTIF-4): a bell with the unread count, and a
 // menu of the latest thirty. Presentation only — the polling, the marking and
@@ -20,7 +21,11 @@ import { describeNotification, notificationAge } from "../../../utilities/notifi
 // nobody anything a badge can, and widens the bar.
 const MAX_BADGE = 99;
 
-const NotificationBell = ({ items, unread, anchor, open, onOpen, onClose, onSelect, onMarkAllRead }) => (
+const NotificationBell = ({ items, unread, anchor, open, onOpen, onClose, onSelect, onMarkAllRead }) => {
+  // The panel hangs from the bell toward the end of the line — into the page,
+  // not off its edge.
+  const { end } = useDirection();
+  return (
   <>
     <Tooltip title="התראות">
       <IconButton
@@ -40,8 +45,8 @@ const NotificationBell = ({ items, unread, anchor, open, onOpen, onClose, onSele
       anchorEl={anchor}
       open={open}
       onClose={onClose}
-      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      transformOrigin={{ vertical: "top", horizontal: "left" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: end }}
+      transformOrigin={{ vertical: "top", horizontal: end }}
       slotProps={{ paper: { sx: { width: 360, maxWidth: "calc(100vw - 24px)", maxHeight: 480 } } }}
     >
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, py: 1 }}>
@@ -99,6 +104,7 @@ const NotificationBell = ({ items, unread, anchor, open, onOpen, onClose, onSele
       )}
     </Menu>
   </>
-);
+  );
+};
 
 export default NotificationBell;

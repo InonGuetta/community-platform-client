@@ -148,6 +148,20 @@ test("utilities/ imports nothing from components/, store/ or api/", () => {
   expect([...graph.keys()].filter((f) => rel(f).startsWith("utilities/")).length).toBeGreaterThan(20);
 });
 
+// i18n/ sits on the same floor: utilities/ may word things through it (a date,
+// a count, a role's name), so it must not reach upward either — or a helper in
+// utilities/ would drag a component in behind it.
+test("i18n/ imports nothing from components/, store/ or api/", () => {
+  const graph = buildGraph();
+  const above = /^(components|store|api)\//;
+  const files = [...graph.entries()].filter(([file]) => rel(file).startsWith("i18n/"));
+  const crossings = files.flatMap(([file, deps]) =>
+    deps.map(rel).filter((d) => above.test(d)).map((d) => `${rel(file)} -> ${d}`)
+  );
+  expect(crossings).toEqual([]);
+  expect(files.length).toBeGreaterThan(1);
+});
+
 // ── Page folders ────────────────────────────────────────────────────────────
 //
 // components/pages/<page>/ holds what that page alone uses. A component two

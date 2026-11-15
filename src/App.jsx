@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation, useParams } from "react-router-do
 import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { buildTheme } from "./theme/theme";
+import { useLanguage } from "./i18n/useLanguage";
 import { ColorModeContext } from "./theme/colorMode";
 import Navbar from "./components/layout/navbar/Navbar";
 import PendingRoleBanner from "./components/layout/navbar/PendingRoleBanner";
@@ -116,7 +117,9 @@ const App = () => {
   // an older private mode — and this runs while App renders, so an unguarded
   // read left the whole application unmounted: a blank page over a preference.
   const [mode, setMode] = useState(readColorMode);
-  const theme = useMemo(() => buildTheme(mode), [mode]);
+  // The theme's direction follows the interface's language, as <html dir> does.
+  const { direction } = useLanguage();
+  const theme = useMemo(() => buildTheme(mode, direction), [mode, direction]);
   const colorMode = useMemo(
     () => ({
       mode,

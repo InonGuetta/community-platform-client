@@ -5,6 +5,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import SendIcon from "@mui/icons-material/Send";
+import { useTranslation } from "react-i18next";
+import { intlLocale } from "../../../i18n/i18n";
 
 // Text alongside the video, for the half of a chavruta that does not fit in
 // speech: a source reference, a page number, a question asked without
@@ -17,9 +19,10 @@ import SendIcon from "@mui/icons-material/Send";
 const CHAT_MAX_CHARS = 2000; // mirrors CHAT_MAX_CHARS in the server's socketManager
 
 const timeOf = (at) =>
-  new Date(at).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+  new Date(at).toLocaleTimeString(intlLocale(), { hour: "2-digit", minute: "2-digit" });
 
 const ChatPanel = ({ messages, onSend, myUserId }) => {
+  const { t } = useTranslation("sessions");
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);
 
@@ -40,13 +43,13 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: "grey.900" }}>
       <Typography variant="subtitle2" sx={{ p: 1.5, color: "grey.300", borderBottom: "1px solid", borderColor: "grey.800" }}>
-        צ׳אט
+        {t("chat.title")}
       </Typography>
 
       <Box sx={{ flex: 1, overflowY: "auto", p: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
         {messages.length === 0 && (
           <Typography variant="caption" color="grey.500">
-            אין הודעות עדיין. ההודעות אינן נשמרות לאחר סיום המפגש.
+            {t("chat.empty")}
           </Typography>
         )}
 
@@ -73,7 +76,7 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
                   server's verified row, never from the sender's payload. */}
               {!mine && (
                 <Typography variant="caption" sx={{ color: "grey.400", display: "block", fontWeight: 600 }}>
-                  {message.displayName || "משתתף"}
+                  {message.displayName || t("chat.participant")}
                 </Typography>
               )}
               <Typography variant="body2" dir="auto" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
@@ -92,7 +95,7 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
         <TextField
           value={draft}
           onChange={(e) => setDraft(e.target.value.slice(0, CHAT_MAX_CHARS))}
-          placeholder="הודעה…"
+          placeholder={t("chat.placeholder")}
           size="small"
           fullWidth
           multiline
@@ -106,7 +109,7 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
             sx: { color: "grey.100", bgcolor: "grey.850" },
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton type="submit" size="small" disabled={!draft.trim()} aria-label="שליחה">
+                <IconButton type="submit" size="small" disabled={!draft.trim()} aria-label={t("chat.send")}>
                   <SendIcon fontSize="small" sx={{ color: draft.trim() ? "primary.light" : "grey.600" }} />
                 </IconButton>
               </InputAdornment>

@@ -10,6 +10,9 @@ import { selectUser } from "../../../store/selectors/authSelectors";
 import { sessionsApi } from "../../../api/sessionsApi";
 import { hebrewForError } from "../../../utilities/apiError";
 import { createAudioMix, createPartUploader, createRecorder, pickRecordingType } from "./sessionRecorder";
+// Messages are worded when they are set, through i18n.t rather than the hook's
+// t: the room's effects must never re-run for a language switch — that would drop the camera and the socket.
+import i18n from "../../../i18n/i18n";
 
 const DEFAULT_ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
 
@@ -210,11 +213,11 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
     on(SOCKET_EVENTS.SESSION_ENDED, () => onEndRef.current?.());
     on(SOCKET_EVENTS.JOIN_ERROR, ({ message }) => {
       logger.warn(`[VideoRoom] join refused: ${message}`);
-      setRoomError(message || "לא ניתן להצטרף למפגש");
+      setRoomError(message || i18n.t("sessions:notices.cannotJoin"));
     });
     on(SOCKET_EVENTS.SESSION_ERROR, ({ message }) => {
       logger.warn(`[VideoRoom] session error: ${message}`);
-      setRoomError(message || "הפעולה נכשלה");
+      setRoomError(message || i18n.t("sessions:notices.actionFailed"));
     });
 
     // Media first, then connect: an offer must not arrive before we know
@@ -237,7 +240,7 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
           setHasMic(hasTrackKind(stream, "audio"));
           setHasCamera(hasTrackKind(stream, "video"));
           mesh.setLocalStream(stream);
-          upsertStream("local", stream, "אני");
+          upsertStream("local", stream, i18n.t("sessions:room.me"));
         } catch (err) {
           // Deliberately not fatal: the room is still joined, just without
           // anything to send. For a lecture platform, watching without a camera
@@ -323,7 +326,7 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
   const shareScreen = useCallback(async () => {
     if (sharing) return stopSharing();
     if (!navigator.mediaDevices?.getDisplayMedia) {
-      setMediaError("הדפדפן הזה אינו תומך בשיתוף מסך.");
+      setMediaError(i18n.t("sessions:room.noScreenShare"));
       return;
     }
     try {
@@ -345,7 +348,7 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
       // the user simply changed their mind.
       if (err?.name !== "NotAllowedError") {
         logger.error("[VideoRoom] screen share failed:", err);
-        setMediaError("לא ניתן לשתף מסך.");
+        setMediaError(i18n.t("sessions:room.cannotShare"));
       }
     }
   }, [sharing, stopSharing, upsertLocalPreview]);
@@ -380,7 +383,7 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
     if (recorderRef.current || recorderStatus || !sessionId) return;
     const mimeType = pickRecordingType();
     if (!mimeType || typeof globalThis.AudioContext !== "function") {
-      setRecordNotice({ severity: "error", text: "הדפדפן הזה לא תומך בהקלטה. נסו Chrome, Edge או Firefox." });
+      setRecordNotice({ severity: "error", text: i18n.t("sessions:recording.unsupported") });
       return;
     }
     setRecordNotice(null);
@@ -401,7 +404,7 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
     } catch (err) {
       logger.error("[VideoRoom] could not start recording:", err?.message);
       setRecorderStatus(null);
-      setRecordNotice({ severity: "error", text: hebrewForError(err, "לא ניתן להתחיל הקלטה.") });
+      setRecordNotice({ severity: "error", text: hebrewForError(err, i18n.t("sessions:recording.cannotStart")) });
     }
   }, [sessionId, recorderStatus]);
 
@@ -419,13 +422,15 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
       const { left } = await rec.uploader.drain();
       const done = await sessionsApi.finishRecording(rec.sessionId, rec.recordingId);
       // The recording is now a draft lesson (PRD REC-2), being transcribed.
-      const lesson = done?.media_id ? " והפכה לשיעור (טיוטה) שעובר עכשיו תמלול וסיכום" : "";
+      // A whole sentence for each case — a lesson made or not, parts lost or
+      // not — rather than clauses glued together.
+      const madeLesson = Boolean(done?.media_id);
       setRecordNotice(left > 0
-        ? { severity: "warning", text: `ההקלטה נשמרה${lesson}, אבל ${left === 1 ? "החלק האחרון שלה לא הגיע" : `${left} החלקים האחרונים שלה לא הגיעו`} לשרת.`, mediaId: done?.media_id ?? null }
-        : { severity: "success", text: `ההקלטה נשמרה${lesson}.`, mediaId: done?.media_id ?? null });
+        ? { severity: "warning", text: i18n.t(madeLesson ? "sessions:recording.savedLessonMissing" : "sessions:recording.savedMissing", { count: left }), mediaId: done?.media_id ?? null }
+        : { severity: "success", text: i18n.t(madeLesson ? "sessions:recording.savedLesson" : "sessions:recording.saved"), mediaId: done?.media_id ?? null });
     } catch (err) {
       logger.error("[VideoRoom] could not finish recording:", err?.message);
-      setRecordNotice({ severity: "error", text: "שמירת ההקלטה לא הושלמה. מה שכבר הגיע לשרת יישמר בסיום המפגש." });
+      setRecordNotice({ severity: "error", text: i18n.t("sessions:recording.finishFailed") });
     } finally {
       setRecorderStatus(null);
       setPendingParts(0);

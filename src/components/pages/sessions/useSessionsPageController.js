@@ -10,8 +10,10 @@ import { selectUser } from "../../../store/selectors/authSelectors";
 import { isPrivileged } from "../../../utilities/permissions";
 import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesGet";
 import { selectAssignableCourses } from "../../../store/selectors/coursesSelectors";
+import { useTranslation } from "react-i18next";
 
 const useSessionsPageController = () => {
+  const { t } = useTranslation("sessions");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const rooms = useSelector(selectAllRooms);
@@ -47,7 +49,7 @@ const useSessionsPageController = () => {
       return;
     }
     dispatch(notify({
-      message: hebrewForError(result.payload, "לא ניתן לפתוח את המפגש"),
+      message: hebrewForError(result.payload, t("notices.cannotOpen")),
       severity: "error",
     }));
   };
@@ -63,7 +65,7 @@ const useSessionsPageController = () => {
     // one yet. Sending the host there would land them on "this session has not
     // started", which is a confusing way to confirm that scheduling worked.
     if (result.payload.state === "scheduled") {
-      dispatch(notify({ message: "המפגש נקבע ויופיע ברשימת המפגשים הקרובים", severity: "success" }));
+      dispatch(notify({ message: t("notices.scheduled"), severity: "success" }));
       return;
     }
     navigate(`/sessions/${result.payload.id}`);

@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { donationsApi } from "../../../api/donationsApi";
 import { hebrewForError } from "../../../utilities/apiError";
 import { loadStripeJs, elementsOptions } from "../../../utilities/stripeJs";
+// Messages are worded when they are set, through i18n.t rather than the hook's
+// t: the payment's callbacks must not be rebuilt for a language switch.
+import i18n from "../../../i18n/i18n";
 
 // Giving a real donation (PRD PAY-1, PAY-2), in three steps:
 //
@@ -60,7 +63,7 @@ export const useDonatePageController = () => {
       setIntent({ donationId: created.donation.id, amountCents, clientSecret: created.clientSecret, publishableKey: created.publishableKey });
       setStep("pay");
     } catch (err) {
-      setError(hebrewForError(err?.response?.data, "לא ניתן להתחיל את התשלום. נסו שוב."));
+      setError(hebrewForError(err?.response?.data, i18n.t("donate:errors.start")));
     } finally {
       setStarting(false);
     }
@@ -79,7 +82,7 @@ export const useDonatePageController = () => {
       elementsRef.current = elements;
       return () => element.destroy();
     } catch {
-      setError("לא ניתן לטעון את טופס התשלום. בדקו את החיבור ונסו שוב.");
+      setError(i18n.t("donate:errors.loadForm"));
       return () => {};
     }
   }, [intent]);
@@ -98,7 +101,7 @@ export const useDonatePageController = () => {
     if (stripeError) {
       // Stripe's own message, already in Hebrew ("הכרטיס נדחה"), and the form
       // stays for another attempt on the same donation.
-      setError(stripeError.message || "התשלום לא עבר. נסו שוב.");
+      setError(stripeError.message || i18n.t("donate:errors.paymentFailed"));
       setPaying(false);
       return;
     }

@@ -7,6 +7,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Tooltip from "@mui/material/Tooltip";
+import { useTranslation } from "react-i18next";
 
 const PRESET_AMOUNTS = [50, 100, 250, 500];
 // The server's floor is ₪1; the form asks for at least ₪10, the smallest gift
@@ -16,6 +17,7 @@ const MIN_AMOUNT = 10;
 // The first step of a donation (PRD PAY-1): how much. The card comes next, in
 // Stripe's own fields — see PaymentStep. `onContinue({ amountCents, type })`.
 const DonateForm = ({ onContinue, starting = false, error = null }) => {
+  const { t } = useTranslation("donate");
   const [amount, setAmount] = useState(100);
   const [customAmount, setCustomAmount] = useState("");
   const [type, setType] = useState("one_time");
@@ -26,22 +28,22 @@ const DonateForm = ({ onContinue, starting = false, error = null }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box>
-        <Typography variant="subtitle2" mb={1}>סוג תרומה</Typography>
+        <Typography variant="subtitle2" mb={1}>{t("form.type")}</Typography>
         {/* "חודשי" stays disabled, and the server refuses it too: a standing
             order needs a Stripe Subscription (PRD PAY-4), and until then
             choosing it would charge once under a monthly label. */}
         <ToggleButtonGroup value={type} exclusive onChange={(_, v) => v && setType(v)} size="small">
-          <ToggleButton value="one_time">חד פעמי</ToggleButton>
-          <Tooltip title="תרומה חודשית תתאפשר בקרוב">
+          <ToggleButton value="one_time">{t("form.oneTime")}</ToggleButton>
+          <Tooltip title={t("form.monthlySoon")}>
             <span>
-              <ToggleButton value="monthly" disabled>חודשי</ToggleButton>
+              <ToggleButton value="monthly" disabled>{t("form.monthly")}</ToggleButton>
             </span>
           </Tooltip>
         </ToggleButtonGroup>
       </Box>
 
       <Box>
-        <Typography variant="subtitle2" mb={1}>סכום (₪)</Typography>
+        <Typography variant="subtitle2" mb={1}>{t("form.amount")}</Typography>
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
           {PRESET_AMOUNTS.map((a) => (
             <Button
@@ -55,13 +57,13 @@ const DonateForm = ({ onContinue, starting = false, error = null }) => {
           ))}
         </Box>
         <TextField
-          label="סכום מותאם"
+          label={t("form.custom")}
           type="number"
           value={customAmount}
           onChange={(e) => { setCustomAmount(e.target.value); setAmount(0); }}
           size="small"
           inputProps={{ min: MIN_AMOUNT }}
-          helperText={customAmount && !valid ? `הסכום המינימלי הוא ₪${MIN_AMOUNT}` : " "}
+          helperText={customAmount && !valid ? t("form.minimum", { min: MIN_AMOUNT }) : " "}
           error={Boolean(customAmount) && !valid}
           sx={{ width: 180 }}
         />
@@ -75,11 +77,11 @@ const DonateForm = ({ onContinue, starting = false, error = null }) => {
         onClick={() => onContinue({ amountCents: Math.round(finalAmount * 100), type })}
         disabled={starting || !valid}
       >
-        {starting ? "מכין את התשלום..." : `המשך לתשלום ₪${valid ? finalAmount : ""}`}
+        {starting ? t("form.preparing") : t("form.continue", { amount: valid ? finalAmount : "" })}
       </Button>
 
       <Typography variant="caption" color="text.secondary">
-        תשלום מאובטח באמצעות Stripe. פרטי הכרטיס מוקלדים ישירות אצל Stripe ואינם עוברים דרכנו.
+        {t("form.secure")}
       </Typography>
     </Box>
   );

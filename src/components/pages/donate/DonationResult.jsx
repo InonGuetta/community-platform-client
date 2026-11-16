@@ -3,10 +3,12 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import { formatAmount, resultText } from "./donationText";
+import { useTranslation } from "react-i18next";
 
 // How a donation ended (PRD PAY-1): thanks, still being checked, or did not go
 // through — said by the row the server just brought in line with Stripe.
 const DonationResult = ({ donation, onAgain }) => {
+  const { t } = useTranslation("donate");
   const text = resultText(donation?.status);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, textAlign: "center" }} data-testid="donation-result">
@@ -17,7 +19,7 @@ const DonationResult = ({ donation, onAgain }) => {
       <Alert severity={text.severity} sx={{ textAlign: "start" }}>{text.body}</Alert>
       {onAgain && (
         <Button variant={donation?.status === "failed" ? "contained" : "outlined"} onClick={onAgain}>
-          {donation?.status === "failed" ? "לנסות שוב" : "תרומה נוספת"}
+          {donation?.status === "failed" ? t("result.retry") : t("result.another")}
         </Button>
       )}
     </Box>

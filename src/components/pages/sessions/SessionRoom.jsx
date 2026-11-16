@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import VideoRoom from "../../features/VideoRoom/VideoRoom";
 import { useSessionRoomController } from "./useSessionRoomController";
+import { useTranslation } from "react-i18next";
 
 // The room, reached by session ID rather than by room token.
 //
@@ -20,6 +21,7 @@ import { useSessionRoomController } from "./useSessionRoomController";
 // drops it.
 
 const SessionRoom = () => {
+  const { t } = useTranslation("sessions");
   const {
     entry,
     handleEnd,
@@ -40,7 +42,7 @@ const SessionRoom = () => {
       <Box sx={{ p: 3, maxWidth: 520, mx: "auto" }}>
         <Alert
           severity="info"
-          action={<Button color="inherit" size="small" onClick={backToSessions}>למפגשים</Button>}
+          action={<Button color="inherit" size="small" onClick={backToSessions}>{t("backToSessions")}</Button>}
         >
           {entry.error}
         </Alert>

@@ -1,1 +1,51 @@
-{}
+{
+  "title": "Apoya a nuestra comunidad",
+  "intro": "Tu donación nos ayuda a crear más contenido y a mantener la plataforma gratuita para los alumnos.",
+  "form": {
+    "type": "Tipo de donación",
+    "oneTime": "Única",
+    "monthly": "Mensual",
+    "monthlySoon": "Las donaciones mensuales estarán disponibles pronto",
+    "amount": "Importe (₪)",
+    "custom": "Importe personalizado",
+    "minimum": "El importe mínimo es de ₪{{min}}",
+    "preparing": "Preparando el pago...",
+    "continue": "Continuar al pago de ₪{{amount}}",
+    "secure": "Pago seguro mediante Stripe. Los datos de tu tarjeta se introducen directamente en Stripe y nunca pasan por nosotros."
+  },
+  "payment": {
+    "of": "Una donación de {{amount}}",
+    "processing": "Procesando...",
+    "pay": "Pagar {{amount}}",
+    "back": "Volver"
+  },
+  "result": {
+    "retry": "Intentarlo de nuevo",
+    "another": "Otra donación",
+    "completed": {
+      "title": "¡Muchas gracias!",
+      "body": "Recibimos tu donación. Te enviaremos un recibo por correo."
+    },
+    "pending": {
+      "title": "Pago en revisión",
+      "body": "El pago aún no se ha confirmado definitivamente. Su estado se actualizará en «Mis donaciones» en cuanto se confirme."
+    },
+    "failed": {
+      "title": "El pago no se realizó",
+      "body": "No se cobró nada. Puedes intentarlo de nuevo, con la misma tarjeta o con otra."
+    }
+  },
+  "mine": {
+    "title": "Mis donaciones"
+  },
+  "status": {
+    "completed": "Completada",
+    "pending": "Pendiente",
+    "failed": "Fallida"
+  },
+  "errors": {
+    "start": "No se pudo iniciar el pago. Inténtalo de nuevo.",
+    "loadForm": "No se pudo cargar el formulario de pago. Comprueba tu conexión e inténtalo de nuevo.",
+    "paymentFailed": "El pago no se realizó. Inténtalo de nuevo."
+  }
+}

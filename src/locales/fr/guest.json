@@ -1,1 +1,13 @@
-{}
+{
+  "signIn": "Connexion",
+  "signUp": "Inscription",
+  "openDocument": "Ouvrir le document",
+  "closedTitle": "Ce cours n'est pas ouvert au public",
+  "closedBody": "Le lien est peut-être erroné, ou l'enseignant a fermé le cours. Les cours de la communauté sont ouverts aux membres inscrits.",
+  "toArchive": "Vers les archives",
+  "about": "À propos du cours",
+  "fullHint": "La page complète du cours comprend aussi un carnet, des signets et une discussion avec l'IA.",
+  "toFull": "Vers la page complète du cours",
+  "joinPitch": "Les membres de la communauté prennent des notes sur le cours, enregistrent des signets et interrogent l'IA à son sujet — et sur des centaines d'autres cours.",
+  "join": "Rejoindre la communauté"
+}

@@ -1,1 +1,48 @@
-{}
+{
+  "retry": "Réessayer",
+  "offline": "Pas de connexion au serveur. Les cours que vous avez téléchargés sont disponibles ici à l'écoute.",
+  "downloading": "Téléchargement… {{progress}}",
+  "cancel": "Annuler le téléchargement",
+  "cancelNamed": "Annuler le téléchargement de {{title}}",
+  "playing": "En cours de lecture",
+  "listen": "Écouter",
+  "listenTo": "Écouter {{title}}",
+  "toLesson": "Vers la page du cours",
+  "toLessonNamed": "Vers la page du cours {{title}}",
+  "remove": "Retirer de l'appareil",
+  "removeNamed": "Retirer {{title}} de l'appareil",
+  "summary_one": "Un cours sur cet appareil · {{storage}}",
+  "summary_other": "{{count}} cours sur cet appareil · {{storage}}",
+  "intro": "Les cours enregistrés sur cet appareil se lisent même sans réseau.",
+  "unsupported": "Ce navigateur ne permet pas d'enregistrer des cours pour l'écoute hors ligne. Essayez un navigateur récent comme Chrome ou Safari.",
+  "emptyTitle": "Vous n'avez encore téléchargé aucun cours",
+  "emptyHow": "Sur la page d'un cours audio ou vidéo, cliquez sur « Télécharger » et choisissez « Enregistrer pour écouter hors ligne ».",
+  "toArchive": "Vers les archives",
+  "removeAll": {
+    "title": "Retirer tous les téléchargements",
+    "confirm": "Tout retirer",
+    "one": "Retirer de l'appareil le cours que vous avez téléchargé ? Vous pourrez le télécharger à nouveau avec une connexion.",
+    "many": "Retirer de l'appareil les {{count}} cours que vous avez téléchargés ? Vous pourrez les télécharger à nouveau avec une connexion."
+  },
+  "audioFromVideo": "Audio tiré d'une vidéo",
+  "savedOn": "Enregistré le {{date}}",
+  "soFar": "{{size}} jusqu'ici",
+  "storageUsed": "Les cours occupent {{size}}",
+  "storageFree": "{{used}} · environ {{free}} encore libres",
+  "player": {
+    "close": "Fermer le lecteur",
+    "missing": "Le fichier de ce cours n'est plus sur cet appareil. Vous pouvez le retirer de la liste et le télécharger à nouveau.",
+    "speed": "Vitesse :",
+    "speedLabel": "Vitesse de lecture"
+  },
+  "removeAllButton": "Tout retirer",
+  "save": {
+    "noRoom": "Il n'y a pas assez de place sur l'appareil. Retirez des cours téléchargés et réessayez.",
+    "busy": "Le serveur prépare d'autres fichiers audio en ce moment. Réessayez dans quelques minutes.",
+    "unavailable": "Ce cours n'est pas disponible au téléchargement.",
+    "failed": "L'enregistrement hors ligne a échoué. Vérifiez votre connexion et réessayez.",
+    "unsupported": "Ce navigateur ne permet pas d'enregistrer des cours pour l'écoute hors ligne.",
+    "saved": "Le cours a été enregistré pour l'écoute hors ligne",
+    "lessonFallback": "Cours"
+  }
+}

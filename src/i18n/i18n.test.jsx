@@ -33,8 +33,10 @@ test("the tab's title follows the language", async () => {
 });
 
 test("a key a language does not have yet falls back to Hebrew", async () => {
+  i18n.addResourceBundle("he", "common", { onlyInHebrew: "רק בעברית" }, true, true);
   await changeLanguage("fr");
-  expect(i18n.t("appName")).toBe("פלטפורמת הקהילה");
+  expect(i18n.t("appName")).toBe("Plateforme communautaire");
+  expect(i18n.t("onlyInHebrew")).toBe("רק בעברית");
 });
 
 test("an unknown language is ignored, not half-applied", async () => {
@@ -91,5 +93,5 @@ test("a component re-renders in the new language and direction", async () => {
   render(<Probe />);
   expect(screen.getByText("he rtl פלטפורמת הקהילה")).toBeInTheDocument();
   await act(() => changeLanguage("es"));
-  expect(screen.getByText("es ltr פלטפורמת הקהילה")).toBeInTheDocument();
+  expect(screen.getByText("es ltr Plataforma comunitaria")).toBeInTheDocument();
 });

@@ -1,1 +1,13 @@
-{}
+{
+  "signIn": "Entrar",
+  "signUp": "Registrarse",
+  "openDocument": "Abrir el documento",
+  "closedTitle": "Esta clase no está abierta al público",
+  "closedBody": "Puede que el enlace sea incorrecto o que el profesor haya cerrado la clase. Las clases de la comunidad están abiertas a los miembros registrados.",
+  "toArchive": "Al archivo",
+  "about": "Sobre la clase",
+  "fullHint": "La página completa de la clase también tiene un cuaderno, marcadores y una conversación con la IA.",
+  "toFull": "A la página completa de la clase",
+  "joinPitch": "Los miembros de la comunidad toman notas sobre la clase, guardan marcadores y le hacen preguntas a la IA, y así con cientos de clases más.",
+  "join": "Unirse a la comunidad"
+}

@@ -1,1 +1,63 @@
-{}
+{
+  "untitled": "(sans titre)",
+  "untitledBare": "Sans titre",
+  "titlePlaceholder": "Titre de la note",
+  "from": "Extrait de : {{title}}",
+  "lessonFallback": "Cours",
+  "bodyPlaceholder": "Écrivez votre note ici... Vous pouvez aussi coller des images et y faire glisser des signets.",
+  "dropHere": "Déposez ici pour insérer un lien vers le cours",
+  "unsaved": "Des modifications ne sont pas enregistrées",
+  "updated": "Dernière mise à jour : {{date}}",
+  "deleteNamed": "Supprimer la note {{title}}",
+  "saveShortcut": "Enregistrer (Ctrl+S)",
+  "save": "Enregistrer",
+  "saved": "Note enregistrée",
+  "noChanges": "Aucune modification à enregistrer",
+  "body": "Corps de la note",
+  "editor": {
+    "deleteImage": "Supprimer l'image",
+    "deleteSource": "Supprimer la source",
+    "imageTooLarge": "L'image est trop grande (plus de {{mb}} Mo). Essayez une image plus petite.",
+    "imageReadFailed": "La lecture de l'image a échoué.",
+    "renameReference": "Renommer la référence",
+    "referenceName": "Nom de la référence",
+    "clearToRemove": "Laissez vide pour retirer le nom de la référence"
+  },
+  "untitledDialog": {
+    "title": "L'onglet n'a pas de nom",
+    "body": "Vous pouvez le nommer maintenant, ou l'enregistrer sans nom.",
+    "name": "Nom de l'onglet",
+    "save": "Enregistrer",
+    "saveAnyway": "Enregistrer quand même"
+  },
+  "toolbar": {
+    "label": "Mise en forme de la note",
+    "fontSize": "Taille du texte",
+    "bold": "Gras",
+    "italic": "Italique",
+    "underline": "Souligné",
+    "strike": "Barré",
+    "textColor": "Couleur du texte",
+    "highlight": "Surlignage",
+    "bullets": "Liste à puces",
+    "numbered": "Liste numérotée",
+    "clear": "Effacer la mise en forme",
+    "pixels": "Taille en pixels",
+    "apply": "Appliquer",
+    "sample": "Abc",
+    "textColorTitle": "Couleur du texte",
+    "highlightTitle": "Couleur de surlignage",
+    "colors": {
+      "default": "Par défaut",
+      "red": "Rouge",
+      "orange": "Orange",
+      "green": "Vert",
+      "blue": "Bleu",
+      "purple": "Violet",
+      "none": "Sans surlignage",
+      "yellow": "Jaune",
+      "lightBlue": "Bleu clair",
+      "pink": "Rose"
+    }
+  }
+}

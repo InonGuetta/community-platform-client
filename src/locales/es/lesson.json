@@ -1,1 +1,265 @@
-{}
+{
+  "published": "Publicado el: ",
+  "draftUploaded": "Borrador · subido el: ",
+  "tabs": {
+    "summary": "Resumen",
+    "chapters": "Capítulos",
+    "transcript": "Transcripción",
+    "notes": "Notas personales",
+    "sessionChat": "Chat de la sesión",
+    "discuss": "Conversación con IA",
+    "transcriptView": "Vista de la transcripción",
+    "follow": "Seguir la reproducción",
+    "fullText": "Texto completo",
+    "fullTextEdit": "Texto completo y edición"
+  },
+  "summary": {
+    "title": "Resumen de IA",
+    "queued": "Esperando en la cola...",
+    "extracting": "Extrayendo el texto del archivo...",
+    "transcribing": "Transcribiendo la grabación...",
+    "analyzing": "Generando el resumen y los puntos clave...",
+    "checkAgain": "Comprobar de nuevo",
+    "stoppedChecking": "Dejamos de comprobar tras una larga espera. Puede que el proceso se haya atascado.",
+    "failed": "No se pudo generar el resumen. Puedes intentarlo de nuevo.",
+    "keyPoints": "Puntos clave",
+    "tags": "Etiquetas",
+    "none_book": "No hay resumen para este contenido",
+    "none_lesson": "Todavía no hay resumen.",
+    "howToBook": "Haz clic en «Generar resumen» para extraer el texto del archivo y resumirlo.",
+    "generate": "Generar resumen",
+    "regenerate": "Volver a generar el resumen"
+  },
+  "chapters": {
+    "title": "Subtítulos de sección según los puntos clave",
+    "generating": "Generando...",
+    "regenerate": "Volver a generar",
+    "generate": "Generar subtítulos de sección",
+    "howTo": "Haz clic en «Generar subtítulos de sección» para dividir la transcripción en secciones según los puntos clave.",
+    "notYet": "Los subtítulos de sección estarán disponibles cuando la transcripción y el resumen estén listos."
+  },
+  "follow": {
+    "estimated": "El tiempo de esta clase es estimado, así que la frase resaltada puede adelantarse o retrasarse unos segundos.",
+    "toPlaying": "A lo que se está reproduciendo"
+  },
+  "aiActions": {
+    "hebrewFixed": "Se corrigió el hebreo",
+    "hebrewFixFailed": "La corrección del hebreo falló",
+    "headingsMade": "Se crearon los subtítulos de sección",
+    "headingsFailed": "No se pudieron crear los subtítulos de sección"
+  },
+  "notes": {
+    "title": "Marcadores y notas",
+    "howToMarkBook": "Para marcar: selecciona la línea en el libro y haz clic en «Guardar»",
+    "addAtTime": "Añadir una nota en el momento actual",
+    "atTime": "en {{time}}",
+    "save": "Guardar",
+    "note": "Nota",
+    "saveNote": "Guardar la nota",
+    "cancelEdit": "Cancelar la edición",
+    "editNote": "Editar la nota",
+    "deleteBookmark": "Eliminar marcador"
+  },
+  "save": {
+    "listName": "Nombre de la lista",
+    "title": "Añadir a una lista de clases",
+    "loadFailed": "No se pudieron cargar las listas. Prueba a abrirlo de nuevo.",
+    "noLists": "Todavía no tienes listas. Puedes crear una aquí.",
+    "update": "Actualizar",
+    "lessons_zero": "Ninguna clase",
+    "lessons_one": "Una clase",
+    "lessons_other": "{{count}} clases",
+    "rename": "Cambiar el nombre de la lista {{title}}",
+    "delete": "Eliminar la lista {{title}}",
+    "create": "Crear",
+    "newList": "Lista nueva",
+    "deleteQuestion": "¿Eliminar la lista <strong>{{title}}</strong>? Las clases siguen guardadas; solo se elimina la lista.",
+    "added": "La clase se añadió a la lista «{{title}}»"
+  },
+  "discussion": {
+    "modes": "Tipo de conversación",
+    "search": "Búsqueda inteligente",
+    "chat": "Conversación con IA",
+    "history": "Historial",
+    "caption": {
+      "search_lesson": "Búsqueda por significado solo dentro de esta clase",
+      "search_book": "Búsqueda por significado solo dentro de este libro",
+      "history_lesson": "Tus conversaciones anteriores sobre esta clase",
+      "history_book": "Tus conversaciones anteriores sobre este libro",
+      "chat_lesson": "Las respuestas se basan solo en esta clase, con referencia a la fuente",
+      "chat_book": "Las respuestas se basan solo en este libro, con referencia a la fuente"
+    },
+    "notReady": {
+      "processing": "La clase todavía se está procesando. Podrás buscar en ella y conversar sobre ella cuando termine el procesamiento.",
+      "error": "El procesamiento de la clase falló, así que todavía no hay texto sobre el que conversar. El profesor puede volver a iniciar el procesamiento.",
+      "empty": "Esta clase todavía no tiene transcripción ni texto, así que no hay nada que buscar ni sobre lo que conversar.",
+      "unavailable": "No pudimos cargar el texto de la clase. Prueba a actualizar la página."
+    },
+    "answerSaved": "La respuesta se guardó en el cuaderno de la clase"
+  },
+  "smartSearch": {
+    "strongMatch": "Coincidencia alta",
+    "playFrom": "Reproducir desde {{place}}",
+    "openAt_book": "Abrir el libro en {{place}}",
+    "openAt_lesson": "Abrir el archivo en {{place}}",
+    "placeholder_book": "¿Qué quieres encontrar en el libro? Por ejemplo: qué se dice sobre el arrepentimiento",
+    "placeholder_lesson": "¿Qué quieres encontrar en la clase? Por ejemplo: qué se dice sobre el arrepentimiento",
+    "label": "Buscar en la clase",
+    "clear": "Borrar la búsqueda",
+    "run": "Buscar",
+    "failed": "La búsqueda falló. Inténtalo de nuevo.",
+    "intro": "La búsqueda encuentra fragmentos por su significado, no solo por las palabras exactas.",
+    "introPlay": " Al hacer clic en un resultado se reproduce desde ese momento.",
+    "introOpen": " Al hacer clic en un resultado se abre la página.",
+    "none": "No se encontraron fragmentos adecuados. Prueba a formularlo de otra manera, o pregunta en el modo «Conversación con IA»."
+  },
+  "history": {
+    "questions_one": "Una pregunta",
+    "questions_other": "{{count}} preguntas",
+    "untitled": "Conversación",
+    "current": "Conversación actual",
+    "delete": "Eliminar la conversación",
+    "deleteNamed": "Eliminar la conversación «{{title}}»",
+    "deleteTitle": "¿Eliminar la conversación?",
+    "deleteBody": "Las preguntas y respuestas de la conversación se eliminarán y no se podrán recuperar. Las respuestas que guardaste en el cuaderno se quedan allí.",
+    "deleteConfirm": "Eliminar",
+    "backToList": "Volver a la lista",
+    "backToChat": "Volver a la conversación",
+    "resume": "Continuar esta conversación",
+    "resumeFailed": "No pudimos continuar la conversación. Inténtalo de nuevo.",
+    "loading": "Cargando la conversación",
+    "openFailed": "No se pudo abrir la conversación.",
+    "previous": "Conversación anterior",
+    "loadingList": "Cargando el historial",
+    "retry": "Intentarlo de nuevo",
+    "listFailed": "No se pudo cargar el historial.",
+    "empty_lesson": "Todavía no hay conversaciones anteriores sobre esta clase. Una conversación aparecerá aquí después de su primera pregunta.",
+    "empty_book": "Todavía no hay conversaciones anteriores sobre este libro. Una conversación aparecerá aquí después de su primera pregunta.",
+    "deleteFailed": "No se pudo eliminar la conversación. Inténtalo de nuevo."
+  },
+  "pdf": {
+    "prev": "Página anterior",
+    "next": "Página siguiente",
+    "pageNumber": "Número de página",
+    "zoomOut": "Alejar",
+    "zoomIn": "Acercar",
+    "fit": "Ajustar al ancho",
+    "cannotShow": "No se puede mostrar el archivo. Puedes abrirlo en una pestaña nueva.",
+    "markPassage": "Guardar un marcador en el fragmento seleccionado",
+    "untilPageEnd": "La selección se guardará hasta el final de la página."
+  },
+  "preview": {
+    "lessonFallback": "Clase",
+    "prev": "Fuente anterior",
+    "next": "Fuente siguiente",
+    "openPage": "Abrir en la página de la clase",
+    "closeTab": "Cerrar la pestaña actual",
+    "closeAll": "Cerrar la ventana y todas sus pestañas",
+    "loadFailed": "No se puede cargar la clase."
+  },
+  "aiTags": {
+    "title": "Etiquetas sugeridas",
+    "approveAll": "Aprobar todas",
+    "dismissAll": "Descartar todas",
+    "request": "Sugerir etiquetas",
+    "none": "No hay sugerencias pendientes. Puedes pedir sugerencias del árbol de etiquetas según el resumen de la clase.",
+    "add": "Añadir a la clase",
+    "addNamed": "Añadir la etiqueta {{name}}",
+    "dismiss": "Descartar",
+    "dismissNamed": "Descartar la etiqueta {{name}}",
+    "requestFailed": "No se pudieron sugerir etiquetas",
+    "noneFound": "No se encontraron etiquetas adecuadas en el árbol",
+    "approveFailed": "No se pudieron añadir las etiquetas",
+    "added_one": "La etiqueta se añadió a la clase",
+    "added_other": "Las etiquetas se añadieron a la clase",
+    "dismissFailed": "No se pudo descartar la sugerencia"
+  },
+  "share": {
+    "title": "Compartir",
+    "mailApp": "Aplicación de correo",
+    "copyLink": "Copiar enlace",
+    "publicLink": "Enlace público: se abre también sin cuenta",
+    "publicHint": "Quien recibe el enlace ve la clase y su resumen, sin el cuaderno ni el chat. El resto del archivo sigue cerrado.",
+    "draftWarning": "La clase es un borrador, así que el enlace público no se abrirá hasta que se publique.",
+    "alreadyPublic": "Esta clase se abre sin cuenta, así que puedes compartirla con cualquiera.",
+    "fromTime": "Compartir desde el momento actual ({{time}})",
+    "copied": "Enlace copiado",
+    "copyManually": "No se puede copiar automáticamente. El enlace: {{url}}",
+    "nowPublic": "La clase ya está abierta para cualquiera que tenga el enlace",
+    "noLongerPublic": "La clase ya no se abre sin cuenta",
+    "publicFailed": "No se pudo cambiar el enlace público"
+  },
+  "sessionChat": {
+    "loading": "Cargando el chat",
+    "failed": "No se pudo cargar el chat de la sesión.",
+    "empty": "No se escribieron mensajes en el chat durante la grabación.",
+    "label": "El chat de la sesión",
+    "intro": "Los mensajes que se escribieron en el chat durante la grabación. Al hacer clic en la hora se reproduce el momento en que se escribieron.",
+    "playFrom": "Reproducir desde {{time}}",
+    "participant": "Participante"
+  },
+  "textViewer": {
+    "newTab": "Abrir en una pestaña nueva",
+    "cannotShow": "Un archivo .{{ext}} no se puede mostrar aquí. Puedes descargarlo desde «Descargar» en la parte inferior del panel.",
+    "cannotShowDoc": "Un archivo .{{ext}} no se puede mostrar aquí. Puedes descargarlo desde «Descargar» en la parte inferior del panel, o guardarlo como .docx y volver a subirlo.",
+    "frameTitle": "Vista del documento"
+  },
+  "actions": {
+    "liked": "Me gusta",
+    "like": "Me gusta",
+    "saved": "Guardado",
+    "save": "Guardar",
+    "addToList": "Añadir a una lista de clases",
+    "download": "Descargar",
+    "share": "Compartir"
+  },
+  "notebook": {
+    "title": "Mi cuaderno para esta clase",
+    "all": "A todo el cuaderno",
+    "newNote": "Nota nueva para la clase",
+    "empty": "Todavía no hay notas para esta clase. Haz clic en «Nota nueva para la clase» para empezar a escribir.",
+    "deleteQuestion": "¿Seguro que quieres eliminar la nota «{{title}}»?",
+    "untitled": "Sin título"
+  },
+  "track": {
+    "now": "Ahora",
+    "nextStarts": "La siguiente clase, «{{title}}», empezará en {{seconds}} segundos",
+    "place": "Clase {{index}} de {{count}} del curso",
+    "next": "Siguiente: {{title}}"
+  },
+  "bookmark": {
+    "save": "Guardar marcador",
+    "marked": "El fragmento marcado",
+    "note": "Nota (opcional)"
+  },
+  "textQuality": {
+    "readable": "Solo alrededor del {{quality}} % del texto extraído del libro es legible, probablemente por un reconocimiento de texto (OCR) defectuoso en el archivo. El resumen, la búsqueda y el chat solo cubren la parte legible.",
+    "howToFix": " Para mejorarlo, sube un PDF con un mejor reconocimiento de texto."
+  },
+  "transcript": {
+    "title": "Transcripción",
+    "status": {
+      "pending": "En espera",
+      "processing": "Transcribiendo",
+      "analyzing": "Resumiendo",
+      "done": "Lista",
+      "error": "Error",
+      "none": "Sin transcripción"
+    },
+    "emptyCanRun": "Todavía no hay transcripción. Haz clic en «Iniciar transcripción» para empezar.",
+    "empty": "Todavía no hay transcripción.",
+    "fixing": "Corrigiendo...",
+    "fixHebrew": "Corregir el hebreo",
+    "running": "En curso...",
+    "run": "Iniciar transcripción",
+    "checkAgain": "Comprobar de nuevo",
+    "stoppedChecking": "Dejamos de comprobar tras una larga espera. Puede que la transcripción se haya atascado.",
+    "readyAnalyzing": "La transcripción está lista. Generando el resumen y los puntos clave...",
+    "transcribingHint": "Transcribiendo el audio con Whisper. Suele tardar de 1 a 3 minutos para una grabación de 30 minutos.",
+    "fixInBackground": "El hebreo se está corrigiendo en segundo plano. El texto se actualizará cuando termine la corrección.",
+    "saved": "Transcripción guardada",
+    "saving": "Guardando...",
+    "save": "Guardar transcripción",
+    "saveFailed": "No se pudo guardar"
+  }
+}

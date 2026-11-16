@@ -1,1 +1,40 @@
-{}
+{
+  "title": "Mi cuenta",
+  "unverified": "Dirección no verificada",
+  "verified": "Dirección verificada",
+  "displayName": "Nombre visible",
+  "save": "Guardar",
+  "password": {
+    "title": "Cambiar la contraseña",
+    "current": "Contraseña actual",
+    "new": "Contraseña nueva",
+    "confirm": "Confirmar la contraseña nueva",
+    "minLength": "Al menos {{n}} caracteres",
+    "mismatch": "Las contraseñas no coinciden",
+    "signsOutOthers": "Cambiar la contraseña cierra la sesión en todos los demás dispositivos conectados a la cuenta.",
+    "submit": "Cambiar la contraseña",
+    "changed": "Contraseña cambiada",
+    "failed": "No se pudo cambiar la contraseña"
+  },
+  "details": {
+    "saved": "Datos guardados",
+    "failed": "No se pudieron guardar los datos"
+  },
+  "email": {
+    "title": "Notificaciones por correo",
+    "intro": "Todas las notificaciones aparecen en la campana de la parte superior de la página. Aquí eliges cuáles llegan también por correo.",
+    "loadFailed": "No se pueden cargar tus preferencias en este momento.",
+    "allOff": "Pediste dejar de recibir todos los correos de la plataforma.",
+    "restore": "Volver a recibir correos",
+    "saveFailed": "No se pudo guardar la preferencia"
+  },
+  "role": {
+    "title": "Solicitud de permiso",
+    "pending": "Tu solicitud de permiso de {{role}} está pendiente de aprobación por un administrador. Hasta entonces, la cuenta conserva sus permisos actuales.",
+    "rejected": "Tu solicitud anterior de permiso de {{role}} no fue aprobada.",
+    "rejectedReason": "Tu solicitud anterior de permiso de {{role}} no fue aprobada. Motivo: {{reason}}",
+    "tryAgainLater": "Podrás enviar una nueva solicitud dentro de siete días.",
+    "current": "Tu permiso actual: {{role}}. Una solicitud de un permiso superior requiere la aprobación de un administrador.",
+    "send": "Enviar solicitud"
+  }
+}

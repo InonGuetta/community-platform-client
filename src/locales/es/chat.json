@@ -1,1 +1,56 @@
-{}
+{
+  "suggestions": [
+    "¿Cuál es la idea principal?",
+    "Resúmelo en tres puntos",
+    "¿Qué fuentes se mencionaron?"
+  ],
+  "archiveSuggestions": [
+    "¿Qué dicen las clases sobre el arrepentimiento?",
+    "¿Qué clases tratan sobre la oración y qué destaca cada una?",
+    "¿Qué se dice sobre el estudio de la Torá?"
+  ],
+  "citation": "Fuente {{n}}, {{place}}",
+  "waiting": {
+    "writing": "Escribiendo una respuesta…",
+    "searching_lesson": "Buscando en la clase…",
+    "searching_book": "Buscando en el libro…",
+    "searching_archive": "Buscando en el archivo…",
+    "reading_lesson": "Leyendo la clase…",
+    "reading_book": "Leyendo el libro…",
+    "reading_archive": "Leyendo el archivo…"
+  },
+  "save": {
+    "saving": "Guardando…",
+    "saved": "Guardado en el cuaderno",
+    "failed": "No se pudo guardar: inténtalo de nuevo",
+    "save": "Guardar en el cuaderno"
+  },
+  "copy": "Copiar la conversación",
+  "quota": {
+    "none": "Has usado hoy tus {{limit}} preguntas. Puedes seguir mañana, y la búsqueda inteligente está disponible ahora mismo.",
+    "one": "Te queda hoy una pregunta de {{limit}}",
+    "many": "Te quedan hoy {{remaining}} preguntas de {{limit}}"
+  },
+  "intro_lesson": "Haz cualquier pregunta sobre la clase. La respuesta se basará solo en lo que se dijo en ella, con una referencia al lugar exacto.",
+  "intro_book": "Haz cualquier pregunta sobre el libro. La respuesta se basará solo en lo que está escrito en él, con una referencia al lugar exacto.",
+  "intro_archive": "Haz una pregunta sobre todas las clases y libros abiertos para ti. La respuesta se basará solo en lo que se dijo en ellos e indicará de qué clase viene cada punto, con un enlace al lugar exacto.",
+  "placeholder_lesson": "Haz una pregunta sobre la clase…",
+  "placeholder_book": "Haz una pregunta sobre el libro…",
+  "placeholder_archive": "Haz una pregunta sobre el archivo…",
+  "loading": "Cargando la conversación",
+  "retry": "Intentarlo de nuevo",
+  "loadFailed": "No se pudo cargar la conversación.",
+  "newChat": "Nueva conversación",
+  "log": "Conversación",
+  "askFailed": "No se recibió respuesta. Prueba a preguntar de nuevo.",
+  "question": "Pregunta",
+  "send": "Enviar",
+  "disclaimer": "Las respuestas las genera una IA y pueden contener errores: haz clic en una fuente para comprobarlo.",
+  "askArchive": {
+    "title": "Pregunta al archivo",
+    "subtitle": "Una pregunta sobre todas las clases, con una fuente exacta para cada afirmación."
+  },
+  "archiveName": "El archivo",
+  "copied": "Conversación copiada",
+  "copyFailed": "No se puede copiar la conversación en este navegador"
+}

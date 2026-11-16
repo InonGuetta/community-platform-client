@@ -1,1 +1,40 @@
-{}
+{
+  "title": "Mon compte",
+  "unverified": "Adresse non vérifiée",
+  "verified": "Adresse vérifiée",
+  "displayName": "Nom affiché",
+  "save": "Enregistrer",
+  "password": {
+    "title": "Changer le mot de passe",
+    "current": "Mot de passe actuel",
+    "new": "Nouveau mot de passe",
+    "confirm": "Confirmer le nouveau mot de passe",
+    "minLength": "Au moins {{n}} caractères",
+    "mismatch": "Les mots de passe ne correspondent pas",
+    "signsOutOthers": "Changer le mot de passe déconnecte tous les autres appareils connectés au compte.",
+    "submit": "Changer le mot de passe",
+    "changed": "Mot de passe modifié",
+    "failed": "Le changement de mot de passe a échoué"
+  },
+  "details": {
+    "saved": "Informations enregistrées",
+    "failed": "L'enregistrement des informations a échoué"
+  },
+  "email": {
+    "title": "Notifications par e-mail",
+    "intro": "Toutes les notifications apparaissent dans la cloche en haut de la page. Ici, vous choisissez celles qui arrivent aussi par e-mail.",
+    "loadFailed": "Vos préférences ne peuvent pas être chargées pour le moment.",
+    "allOff": "Vous avez demandé à ne plus recevoir aucun e-mail de la plateforme.",
+    "restore": "Réactiver les e-mails",
+    "saveFailed": "L'enregistrement de la préférence a échoué"
+  },
+  "role": {
+    "title": "Demande d'autorisation",
+    "pending": "Votre demande d'autorisation {{role}} attend l'approbation d'un administrateur. D'ici là, le compte garde ses autorisations actuelles.",
+    "rejected": "Votre précédente demande d'autorisation {{role}} n'a pas été approuvée.",
+    "rejectedReason": "Votre précédente demande d'autorisation {{role}} n'a pas été approuvée. Motif : {{reason}}",
+    "tryAgainLater": "Vous pourrez soumettre une nouvelle demande après sept jours.",
+    "current": "Votre autorisation actuelle : {{role}}. Une demande d'autorisation supérieure nécessite l'approbation d'un administrateur.",
+    "send": "Envoyer la demande"
+  }
+}

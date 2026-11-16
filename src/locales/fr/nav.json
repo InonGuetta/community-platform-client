@@ -1,1 +1,58 @@
-{}
+{
+  "links": {
+    "archive": "Archives",
+    "ask": "Interroger les archives",
+    "myCourses": "Mes cours",
+    "sessions": "Séances",
+    "donate": "Faire un don",
+    "manageCourses": "Gérer les cours",
+    "users": "Utilisateurs",
+    "admin": "Administration"
+  },
+  "pendingRequests_one": "{{label}}, une demande en attente",
+  "pendingRequests_other": "{{label}}, {{count}} demandes en attente",
+  "personal": "Mon contenu",
+  "shelves": {
+    "notebook": "Mon carnet",
+    "likes": "Contenu que j'ai aimé",
+    "saved": "Contenu enregistré",
+    "continue": "Reprendre",
+    "downloads": "Écoute hors ligne"
+  },
+  "shelfEmpty": {
+    "likes": "Vous n'avez encore rien aimé",
+    "saved": "Vous n'avez encore rien enregistré",
+    "savedAllInLists": "Tout ce que vous avez enregistré est rangé dans les listes ci-dessous",
+    "continue": "Vous n'avez encore commencé aucun cours"
+  },
+  "colorMode": {
+    "toLight": "Mode clair",
+    "toDark": "Mode sombre",
+    "toggle": "Changer le mode d'affichage"
+  },
+  "myAccount": "Mon compte",
+  "drawer": {
+    "open": "Ouvrir le menu personnel",
+    "close": "Fermer le menu personnel",
+    "closePanel": "Fermer le menu",
+    "install": "Installer l'application",
+    "signOut": "Se déconnecter"
+  },
+  "bell": {
+    "title": "Notifications",
+    "unread_one": "Notifications, une non lue",
+    "unread_other": "Notifications, {{count}} non lues",
+    "markAllRead": "Tout marquer comme lu",
+    "empty": "Aucune notification pour l'instant. Un message apparaîtra ici quand le traitement d'un cours sera terminé, et plus encore."
+  },
+  "roleBanner": {
+    "pending": "Votre demande d'autorisation {{role}} attend l'approbation d'un administrateur. D'ici là, le compte fonctionne avec les autorisations d'élève.",
+    "rejected": "Votre demande d'autorisation {{role}} n'a pas été approuvée. Le compte continue de fonctionner normalement avec les autorisations d'élève."
+  },
+  "installHelp": {
+    "title": "Installation sur iPhone ou iPad",
+    "step1": "1. Dans Safari, touchez le bouton de partage <icon/> en bas de l'écran.",
+    "step2": "2. Choisissez « Sur l'écran d'accueil ».",
+    "step3": "3. Touchez « Ajouter ». L'application apparaîtra sur l'écran d'accueil et s'ouvrira sans barre d'adresse."
+  }
+}

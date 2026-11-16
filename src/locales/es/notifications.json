@@ -1,1 +1,88 @@
-{}
+{
+  "categories": {
+    "sessions": {
+      "label": "Sesiones en directo",
+      "help": "Cuando tu profesor programa una sesión, un cuarto de hora antes de que empiece y cuando empieza"
+    },
+    "new_lessons": {
+      "label": "Clases nuevas",
+      "help": "Cuando se publica una clase nueva en uno de tus cursos"
+    },
+    "processing": {
+      "label": "Procesamiento de las clases que subiste",
+      "help": "Cuando la transcripción y el resumen están listos, o cuando el procesamiento falla"
+    },
+    "role_requests": {
+      "label": "Solicitudes de permiso",
+      "help": "Cuando un usuario pide ser profesor o administrador"
+    },
+    "join_requests": {
+      "label": "Solicitudes para unirse a tus cursos",
+      "help": "Cuando alguien introduce el código de acceso de un curso que impartes"
+    },
+    "enrolments": {
+      "label": "Respuestas a solicitudes de acceso",
+      "help": "Cuando el profesor aprueba o rechaza tu solicitud para unirte a un curso"
+    }
+  },
+  "withHost": " con {{name}}",
+  "sessionBody": "«{{title}}»{{host}}",
+  "defaults": {
+    "someone": "Un usuario",
+    "lesson": "La clase",
+    "aLesson": "Clase",
+    "session": "Sesión en directo",
+    "course": "El curso",
+    "aCourse": "un curso"
+  },
+  "types": {
+    "role_request": {
+      "title": "Nueva solicitud de permiso",
+      "body": "Una solicitud de permiso de {{role}} de {{who}}"
+    },
+    "processing_done": {
+      "title": "Procesamiento terminado",
+      "body": "«{{title}}» está lista: la transcripción y el resumen están disponibles"
+    },
+    "processing_error": {
+      "title": "El procesamiento falló",
+      "bodyWithReason": "«{{title}}»: {{reason}}",
+      "body": "«{{title}}». Puedes volver a intentarlo desde la página de la clase"
+    },
+    "session_scheduled": {
+      "title": "Sesión programada",
+      "body": "«{{title}}»{{host}}{{when}}"
+    },
+    "session_reminder": {
+      "title": "La sesión empieza en un cuarto de hora aproximadamente"
+    },
+    "session_starting": {
+      "title": "La sesión ha empezado"
+    },
+    "course_join_request": {
+      "title": "Solicitud para unirse a un curso",
+      "body": "{{who}} pide unirse a «{{course}}»"
+    },
+    "course_join_approved": {
+      "title": "Te aceptaron en el curso",
+      "body": "«{{course}}»: sus clases ya están abiertas para ti"
+    },
+    "course_join_rejected": {
+      "title": "Tu solicitud de acceso no fue aprobada",
+      "body": "«{{course}}»"
+    },
+    "new_lesson": {
+      "title": "Clase nueva en un curso"
+    },
+    "unknown": {
+      "title": "Notificación"
+    }
+  },
+  "age": {
+    "now": "Ahora mismo",
+    "minutes_one": "Hace un minuto",
+    "minutes_other": "Hace {{count}} minutos",
+    "hours_one": "Hace una hora",
+    "hours_other": "Hace {{count}} horas"
+  }
+}

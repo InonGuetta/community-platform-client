@@ -1,1 +1,94 @@
-{}
+{
+  "title": "Archivo multimedia",
+  "upload": "Subir contenido",
+  "tabs": {
+    "archive": "Archivo",
+    "smartSearch": "Búsqueda profunda inteligente"
+  },
+  "results_one": "Un resultado",
+  "results_other": "{{formatted}} resultados",
+  "showing": " · se muestran {{n}}",
+  "sort": {
+    "label": "Ordenar",
+    "newest": "Más recientes",
+    "oldest": "Más antiguos",
+    "title": "Título de la clase (A–Z)",
+    "creator": "Nombre del profesor (A–Z)",
+    "liked": "Más gustados"
+  },
+  "filter": {
+    "toggle": "Filtrar",
+    "search": "Buscar...",
+    "type": "Tipo de contenido",
+    "all": "Todo",
+    "creator": "Profesor / autor",
+    "length": "Duración de la clase",
+    "from": "Subido desde",
+    "to": "Subido hasta",
+    "clearAll": "Borrar todo"
+  },
+  "selected": {
+    "chosenGroup": "Etiquetas elegidas para el filtro",
+    "removedGroup": "Etiquetas sacadas del filtro",
+    "chosenLabel": "Filtrado por:",
+    "removedLabel": "Sin:",
+    "chosenSpoken": "Filtrado por",
+    "removedSpoken": "Sacado del filtro",
+    "tagCount": "{{count}} etiquetas",
+    "remove": "Quitar {{name}} del filtro",
+    "clear": "Borrar las etiquetas"
+  },
+  "tree": {
+    "back": "Atrás",
+    "backToAll": "Volver a todas las etiquetas",
+    "all": "Todas las etiquetas",
+    "search": "Buscar una etiqueta...",
+    "searchLabel": "Buscar una etiqueta",
+    "open": "Abrir {{name}}",
+    "noMatch": "Ninguna etiqueta coincide con «{{term}}»",
+    "empty": "No hay etiquetas en este nivel",
+    "tooMany": "Se muestran {{shown}} de {{total}} etiquetas: conviene acotar la búsqueda",
+    "wholeBranch": "El número incluye toda la rama, también lo que se sacó de ella",
+    "partial": "Elegido en parte: se sacaron algunas categorías de esta rama",
+    "partialSpoken": "Elegido en parte, {{count}} etiquetas",
+    "inside": "Dentro de {{path}}",
+    "mark": {
+      "included": "Elegido · haz clic de nuevo para quitarlo",
+      "inherited": "Incluido a través de la categoría principal elegida · haz clic para sacarlo del filtro",
+      "excluded": "Sacado del filtro · haz clic de nuevo para restablecerlo",
+      "inheritedExcluded": "Fuera del filtro a través de una categoría principal sacada",
+      "contains": "Hay algo elegido dentro de esta categoría"
+    },
+    "spoken": {
+      "included": "Elegido · haz clic para quitarlo",
+      "inherited": "Incluido a través de una categoría principal · haz clic para sacarlo del filtro",
+      "excluded": "Sacado del filtro · haz clic para restablecerlo",
+      "inheritedExcluded": "Fuera del filtro a través de una categoría principal · haz clic para restablecerlo",
+      "contains": "Hay algo elegido dentro · haz clic para elegirlo todo",
+      "none": "No elegido · haz clic para elegirlo"
+    }
+  },
+  "edit": {
+    "detailsTitle": "Editar datos — {{title}}",
+    "currentCourse": "Curso actual",
+    "tagsTitle": "Etiquetas — {{title}}",
+    "tagsHint": "Las etiquetas deciden dónde se encontrará el elemento en los filtros y la búsqueda.",
+    "saving": "Guardando...",
+    "save": "Guardar"
+  },
+  "notices": {
+    "staleTags": "Algunas etiquetas del filtro ya no existen y se quitaron de él",
+    "tagsSaved": "Etiquetas actualizadas",
+    "tagsFailed": "No se pudieron actualizar las etiquetas",
+    "detailsSaved": "Datos de la clase actualizados",
+    "detailsFailed": "No se pudieron actualizar los datos",
+    "published": "El elemento se publicó y es visible para los alumnos",
+    "hidden": "El elemento se ocultó a los alumnos",
+    "publishFailed": "No se pudo actualizar la publicación"
+  },
+  "smartSearch": {
+    "placeholder": "Búsqueda profunda inteligente",
+    "run": "Buscar",
+    "none": "No se encontraron resultados."
+  }
+}

@@ -1,1 +1,40 @@
-{}
+{
+  "title": "Gestion des utilisateurs",
+  "search": "Rechercher des utilisateurs...",
+  "active": "Actif",
+  "inactive": "Inactif",
+  "edit": "Modifier {{name}}",
+  "cannotToggleSelf": "Vous ne pouvez pas modifier votre propre statut",
+  "deactivateHint": "Rendre inactif",
+  "activateHint": "Activer l'utilisateur",
+  "deactivate": "Désactiver {{name}}",
+  "activate": "Activer {{name}}",
+  "delete": "Supprimer {{name}}",
+  "form": {
+    "editTitle": "Modifier l'utilisateur",
+    "createTitle": "Créer un utilisateur",
+    "displayName": "Nom affiché",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "role": "Rôle",
+    "save": "Enregistrer"
+  },
+  "pending": {
+    "title": "En attente d'approbation",
+    "requested": "Demande : {{role}}",
+    "reasonPlaceholder": "Motif (facultatif) — envoyé par e-mail",
+    "sendReject": "Envoyer le refus",
+    "cannotApproveSelf": "Vous ne pouvez pas approuver votre propre demande",
+    "approve": "Approuver",
+    "reject": "Refuser"
+  },
+  "add": "Ajouter un utilisateur",
+  "headers": {
+    "id": "ID",
+    "name": "Nom",
+    "email": "E-mail",
+    "role": "Rôle",
+    "status": "Statut",
+    "actions": "Actions"
+  }
+}

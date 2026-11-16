@@ -1,1 +1,24 @@
-{}
+{
+  "lessons_zero": "Aucun cours",
+  "lessons_one": "Un cours",
+  "lessons_other": "{{count}} cours",
+  "items_zero": "Aucun élément",
+  "items_one": "Un élément",
+  "items_other": "{{count}} éléments",
+  "fullList": "Voir la liste complète",
+  "more": "Plus de cours",
+  "noMore": "Plus aucun cours",
+  "showMore": "Afficher plus de cours de {{title}}",
+  "emptyList": "Elle ne contient aucun cours à afficher.",
+  "lists": {
+    "title": "Listes enregistrées",
+    "loadFailed": "Le chargement des listes a échoué. Essayez d'actualiser la page.",
+    "none": "Vous n'avez pas encore de liste. Vous pouvez en créer une depuis le bouton d'enregistrement sur la page d'un cours."
+  },
+  "list": {
+    "fallbackTitle": "Liste enregistrée",
+    "loadFailed": "Le chargement de la liste a échoué. Elle a peut-être été supprimée.",
+    "empty": "Cette liste ne contient encore aucun cours"
+  },
+  "toArchive": "Vers les archives"
+}

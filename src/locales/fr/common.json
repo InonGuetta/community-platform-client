@@ -1,1 +1,39 @@
-{}
+{
+  "appName": "Plateforme communautaire",
+  "language": {
+    "label": "Langue du site",
+    "change": "Changer de langue"
+  },
+  "actions": {
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "close": "Fermer",
+    "gotIt": "Compris"
+  },
+  "user": {
+    "fallbackName": "Utilisateur"
+  },
+  "search": {
+    "placeholder": "Rechercher..."
+  },
+  "noData": "Rien à afficher",
+  "floatingWindow": {
+    "closeKeepsTabs": "Fermer la fenêtre (vos onglets sont conservés)"
+  },
+  "confirmDelete": {
+    "title": "Confirmer la suppression",
+    "question": "Supprimer {{what}} <strong>{{name}}</strong> ? Cette action est irréversible.",
+    "what": {
+      "media": "le média",
+      "user": "l'utilisateur",
+      "course": "le cours",
+      "item": "l'élément"
+    }
+  },
+  "errorBoundary": {
+    "title": "Un problème est survenu",
+    "body": "Une erreur inattendue s'est produite au chargement de la page. Recharger la page règle généralement le problème.",
+    "reload": "Recharger la page",
+    "toArchive": "Retour aux archives"
+  }
+}

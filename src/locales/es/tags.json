@@ -1,1 +1,61 @@
-{}
+{
+  "label": "Etiquetas",
+  "helper": "Hasta {{max}} etiquetas. Se usan para filtrar y buscar.",
+  "noOptions": "No existe esa etiqueta: puedes añadirla con «Añadir etiqueta»",
+  "placeholder": "Tipo de contenido: busca y elige de la lista",
+  "rootGroup": "Encabezados principales",
+  "topLevel": "Encabezado principal",
+  "root": "Raíz",
+  "propose": {
+    "title": "Añadir una etiqueta nueva",
+    "submit": "Enviar para aprobación",
+    "note": "La etiqueta se enviará al administrador del sistema para su aprobación. Una vez aprobada, entrará en el sistema y se añadirá a esta clase.",
+    "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
+    "name": "Nombre de la etiqueta",
+    "maxLength": "Hasta {{n}} caracteres",
+    "existsHere": "Esta etiqueta ya existe aquí: puedes elegirla de la lista",
+    "existsElsewhere": "Ya existe una etiqueta con este nombre en: {{places}}. Si es la que buscabas, puedes elegirla directamente de la lista de etiquetas.",
+    "whichParent": "¿Bajo qué etiqueta principal?",
+    "parentHint": "Al hacer clic en una etiqueta se abre y se elige como principal. «Raíz»: un encabezado principal nuevo.",
+    "placement": "Dónde irá la etiqueta nueva:",
+    "topLevelPrefix": "Encabezado principal: ",
+    "sendFailed": "No se pudo enviar la etiqueta. Inténtalo de nuevo."
+  },
+  "parent": {
+    "search": "Buscar una etiqueta principal por nombre...",
+    "searchLabel": "Buscar una etiqueta principal",
+    "trail": "Posición en el árbol de etiquetas",
+    "noMatch": "No hay ninguna etiqueta con ese nombre",
+    "noChildren": "No hay etiquetas bajo «{{name}}». La nueva será la primera aquí.",
+    "below": "{{count}} etiquetas debajo"
+  },
+  "proposals": {
+    "add": "Añadir etiqueta",
+    "createHint": "¿No encontraste una etiqueta adecuada? Puedes crear una nueva.",
+    "proposeHint": "¿No encontraste una etiqueta adecuada? Puedes proponer una nueva para que la apruebe el administrador.",
+    "pending": "Pendientes de aprobación por un administrador; se añadirán a la clase cuando se aprueben:",
+    "under": "En: {{place}}",
+    "pendingNamed": "Pendiente de aprobación: {{name}} ({{place}})",
+    "create": "Crear la etiqueta",
+    "adminNote": "Como administrador, la etiqueta se creará de inmediato y se añadirá a esta clase."
+  },
+  "suggest": {
+    "title": "¿De qué trata la clase?",
+    "uploaded": "«{{title}}» se subió correctamente. Las etiquetas deciden dónde se encontrará en los filtros y la búsqueda.",
+    "fromTitle": "Sugerencias a partir del título: haz clic para añadir o quitar:",
+    "suggestion": "Sugerencia: {{name}}",
+    "suggestionWithPath": "Sugerencia: {{name}} ({{path}})",
+    "toSave": "Etiquetas que se guardarán",
+    "canEdit": "Aquí puedes añadir o quitar cualquier etiqueta, incluso las que no se sugirieron.",
+    "noneFromTitle": "No se encontró ninguna sugerencia a partir del título: puedes elegir a mano.",
+    "skip": "Saltar",
+    "save": "Guardar las etiquetas",
+    "reasons": {
+      "titleSays": "El título dice «{{phrase}}»",
+      "nameInTitle": "El nombre «{{name}}» aparece en el título",
+      "closestSubject": "«{{word}}» en el título: el tema más cercano del árbol",
+      "parasha": "y una parashá, por la palabra «פרשת»",
+      "broader": "la más amplia de las dos, porque el título no decía «פרשת»"
+    }
+  }
+}

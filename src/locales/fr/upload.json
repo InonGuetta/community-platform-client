@@ -1,1 +1,20 @@
-{}
+{
+  "title": "Téléverser un média",
+  "chooseFile": "Cliquez pour choisir un fichier",
+  "uploading": "Téléversement... {{progress}} %",
+  "processing": "Traitement sur le serveur...",
+  "uploadingShort": "Téléversement...",
+  "upload": "Téléverser",
+  "fields": {
+    "title": "Titre",
+    "description": "Description",
+    "type": "Type de média",
+    "creatorBlank": "Laissé vide, « {{name}} » sera enregistré",
+    "tagsHelper": "Jusqu'à {{max}} étiquettes. Vous pouvez aussi passer — nous proposerons des étiquettes après le téléversement.",
+    "course": "Cours",
+    "courseHelper": "Sans cours — le contenu est montré à tous les élèves",
+    "noCourse": "Sans cours (bibliothèque générale)"
+  },
+  "tagsSaved": "Étiquettes enregistrées",
+  "tagsFailed": "L'enregistrement des étiquettes a échoué"
+}

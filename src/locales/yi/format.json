@@ -1,1 +1,94 @@
-{}
+{
+  "_draft": "טיוטה — וואַרט אויף אַ קאָנטראָל פֿון אַ ייִדיש־רעדער",
+  "roles": {
+    "student": "תּלמיד",
+    "lecturer": "לעקטאָר",
+    "admin": "אַדמיניסטראַטאָר"
+  },
+  "mediaTypes": {
+    "video": "ווידעאָ",
+    "audio": "קול",
+    "text": "לייענען"
+  },
+  "creatorLabel": {
+    "video": "נאָמען פֿונעם לעקטאָר",
+    "audio": "נאָמען פֿונעם לעקטאָר",
+    "text": "נאָמען פֿונעם מחבר"
+  },
+  "creatorPrefix": {
+    "video": "לעקטאָר",
+    "audio": "לעקטאָר",
+    "text": "מחבר"
+  },
+  "creatorNone": "אַלגעמיין",
+  "sessionTypes": {
+    "1on1": "איינער אויף איינעם",
+    "group": "גרופּע",
+    "webinar": "וועבינאַר"
+  },
+  "countNone": "קיין {{many}}",
+  "duration": {
+    "short": "0–15 מינוט",
+    "medium": "15–30 מינוט",
+    "long": "30–60 מינוט",
+    "xlong": "איבער 60 מינוט",
+    "seconds": "{{n}} סעק׳",
+    "minutes": "{{n}} מינ׳",
+    "hours": "{{h}} שעה",
+    "hoursMinutes": "{{h}} שעה {{m}} מינ׳"
+  },
+  "place": {
+    "page": "ז׳ {{page}}",
+    "atTime": "בײַ {{time}}",
+    "orphaned": "דער אָרט איז מער נישט צוטריטלעך",
+    "inText": "אויף אַן אָרט אינעם טעקסט",
+    "orphanedShort": "נישט צוטריטלעך",
+    "inTextShort": "אינעם טעקסט",
+    "chunk": "שטיק {{n}}"
+  },
+  "track": {
+    "oneDone": "דער שיעור איז געענדיקט",
+    "allDone": "אַלע {{total}} שיעורים זענען געענדיקט",
+    "progress": "{{completed}} פֿון {{total}} שיעורים געענדיקט"
+  },
+  "notesExport": {
+    "untitled": "(אָן אַ טיטל)",
+    "from": " — פֿון: {{title}}",
+    "untitledNote": "נאָטיץ אָן אַ טיטל",
+    "notebook": "מײַן העפֿט",
+    "notebookDated": "מײַן העפֿט - {{date}}"
+  },
+  "csv": {
+    "name": "נאָמען",
+    "email": "אימייל",
+    "enrolledAt": "דאַטע פֿון פֿאַרשרײַבן",
+    "active": "אַקטיוו",
+    "yes": "יאָ",
+    "no": "ניין",
+    "students": "תּלמידים",
+    "studentsFile": "תּלמידים - {{course}}",
+    "completed": "געענדיקט",
+    "started": "אָנגעהויבן",
+    "lastActivity": "לעצטע אַקטיוויטעט",
+    "progress": "פֿאָרשריט",
+    "progressFile": "פֿאָרשריט - {{course}}",
+    "statusDone": "געענדיקט",
+    "statusStarted": "אָנגעהויבן"
+  },
+  "discussion": {
+    "source": "מקור {{n}}",
+    "question": "שאלה:",
+    "answer": "תּשובֿה:",
+    "title": "שמועס מיט AI — {{title}}",
+    "sources": "מקורים: {{list}}"
+  },
+  "noteSource": {
+    "pageSuffix": " · ז׳ {{page}}",
+    "lessonFallback": "שיעור",
+    "generalReference": "אַלגעמיינער אָנווײַז",
+    "image": "[בילד]"
+  },
+  "timing": {
+    "estimated": "די צײַטן זענען אָפּגעשאַצט: דער שיעור איז טראַנסקריבירט געוואָרן איידער מע האָט אָפּגעהיט אַ פּינקטלעכע צײַט פֿאַר יעדן זאַץ."
+  }
+}

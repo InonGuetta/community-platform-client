@@ -24,5 +24,67 @@
       "label": "תשובות לבקשות הצטרפות",
       "help": "כשהמרצה מאשר או דוחה את הבקשה שלך להצטרף לקורס"
     }
+  },
+  "withHost": " עם {{name}}",
+  "sessionBody": "\"{{title}}\"{{host}}",
+  "defaults": {
+    "someone": "משתמש",
+    "lesson": "השיעור",
+    "aLesson": "שיעור",
+    "session": "מפגש חי",
+    "course": "הקורס",
+    "aCourse": "קורס"
+  },
+  "types": {
+    "role_request": {
+      "title": "בקשת הרשאה חדשה",
+      "body": "בקשה להרשאת {{role}} מאת {{who}}"
+    },
+    "processing_done": {
+      "title": "העיבוד הסתיים",
+      "body": "\"{{title}}\" מוכן: התמלול והסיכום זמינים"
+    },
+    "processing_error": {
+      "title": "העיבוד נכשל",
+      "bodyWithReason": "\"{{title}}\": {{reason}}",
+      "body": "\"{{title}}\". אפשר לנסות שוב מעמוד השיעור"
+    },
+    "session_scheduled": {
+      "title": "נקבע מפגש",
+      "body": "\"{{title}}\"{{host}}{{when}}"
+    },
+    "session_reminder": {
+      "title": "המפגש מתחיל בעוד כרבע שעה"
+    },
+    "session_starting": {
+      "title": "המפגש התחיל"
+    },
+    "course_join_request": {
+      "title": "בקשת הצטרפות לקורס",
+      "body": "{{who}} מבקש להצטרף ל\"{{course}}\""
+    },
+    "course_join_approved": {
+      "title": "התקבלת לקורס",
+      "body": "\"{{course}}\": השיעורים פתוחים לך עכשיו"
+    },
+    "course_join_rejected": {
+      "title": "הבקשה להצטרף לא אושרה",
+      "body": "\"{{course}}\""
+    },
+    "new_lesson": {
+      "title": "שיעור חדש בקורס"
+    },
+    "unknown": {
+      "title": "התראה"
+    }
+  },
+  "age": {
+    "now": "עכשיו",
+    "minutes_one": "לפני דקה",
+    "minutes_two": "לפני {{count}} דקות",
+    "minutes_other": "לפני {{count}} דקות",
+    "hours_one": "לפני שעה",
+    "hours_two": "לפני שעתיים",
+    "hours_other": "לפני {{count}} שעות"
   }
 }

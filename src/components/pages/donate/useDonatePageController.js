@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { donationsApi } from "../../../api/donationsApi";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { loadStripeJs, elementsOptions } from "../../../utilities/stripeJs";
 // Messages are worded when they are set, through i18n.t rather than the hook's
 // t: the payment's callbacks must not be rebuilt for a language switch.
@@ -63,7 +63,7 @@ export const useDonatePageController = () => {
       setIntent({ donationId: created.donation.id, amountCents, clientSecret: created.clientSecret, publishableKey: created.publishableKey });
       setStep("pay");
     } catch (err) {
-      setError(hebrewForError(err?.response?.data, i18n.t("donate:errors.start")));
+      setError(messageForError(err?.response?.data, i18n.t("donate:errors.start")));
     } finally {
       setStarting(false);
     }

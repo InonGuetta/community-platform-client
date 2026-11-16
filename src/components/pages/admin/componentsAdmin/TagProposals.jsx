@@ -45,7 +45,7 @@ const TagProposals = () => {
     try {
       await work();
     } catch (err) {
-      setRowError({ id: proposal.id, message: err?.hebrew || t("tags.actionFailed") });
+      setRowError({ id: proposal.id, message: err?.userMessage || t("tags.actionFailed") });
     } finally {
       setBusyId(null);
     }

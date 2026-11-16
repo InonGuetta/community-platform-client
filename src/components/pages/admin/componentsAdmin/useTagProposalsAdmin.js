@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminApi } from "../../../../api/adminApi";
 import { mediaApi } from "../../../../api/mediaApi";
-import { hebrewForError, rejectionOf } from "../../../../utilities/apiError";
+import { messageForError, rejectionOf } from "../../../../utilities/apiError";
 import { useTranslation } from "react-i18next";
 
 // The admin's queue of new tags, and the two decisions on it.
@@ -23,7 +23,7 @@ export const useTagProposalsAdmin = () => {
       setTree(nodes);
       setError(null);
     } catch (err) {
-      setError(hebrewForError(rejectionOf(err), t("tags.loadFailed")));
+      setError(messageForError(rejectionOf(err), t("tags.loadFailed")));
     }
   }, [t]);
 
@@ -40,7 +40,7 @@ export const useTagProposalsAdmin = () => {
       return result;
     } catch (err) {
       await load();
-      throw { hebrew: hebrewForError(rejectionOf(err), fallback) };
+      throw { userMessage: messageForError(rejectionOf(err), fallback) };
     }
   };
 

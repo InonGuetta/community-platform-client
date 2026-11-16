@@ -10,7 +10,7 @@ import { selectAssignableCourses } from "../../../store/selectors/coursesSelecto
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { lecturerIdFor } from "./lessonFields";
 import { selectUploadProgress } from "../../../store/selectors/uiSelectors";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { useTranslation } from "react-i18next";
 
 // What the upload dialog does — what it loads when it opens, the form it
@@ -165,7 +165,7 @@ export const useUploadMedia = ({ open }) => {
       notify(
         result.meta.requestStatus === "fulfilled"
           ? { message: t("tagsSaved"), severity: "success" }
-          : { message: hebrewForError(result.payload, t("tagsFailed")), severity: "error" }
+          : { message: messageForError(result.payload, t("tagsFailed")), severity: "error" }
       )
     );
     if (result.meta.requestStatus === "fulfilled") handleSkipTags();

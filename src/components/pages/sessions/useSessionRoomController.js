@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { joinSession } from "../../../store/slicesAndThunks/sessionsSlice/sessionsPost";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 // Messages are worded when they are set, through i18n.t rather than the hook's
 // t: joining the room must not re-run for a language switch.
 import i18n from "../../../i18n/i18n";
@@ -37,7 +37,7 @@ export const useSessionRoomController = () => {
           status: "refused",
           roomToken: null,
           session: null,
-          error: hebrewForError(result.payload, i18n.t("sessions:notices.cannotJoin")),
+          error: messageForError(result.payload, i18n.t("sessions:notices.cannotJoin")),
         });
       }
     });

@@ -9,7 +9,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import { register } from "../../../store/slicesAndThunks/authSlice/authPost";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { emailProblem } from "../../../utilities/emailShape";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -53,7 +53,7 @@ const SignUp = () => {
 
   return (
     <AuthLayout title={t("signUp.title")}>
-      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{hebrewForError(error, t("signUp.failed"))}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{messageForError(error, t("signUp.failed"))}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
         {/* Exclusive by construction — ToggleButtonGroup with `exclusive`, so

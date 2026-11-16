@@ -8,7 +8,7 @@ import { SOCKET_EVENTS, SOCKET_LIFECYCLE } from "../../../utilities/socketEvents
 import { logger } from "../../../utilities/logger";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { sessionsApi } from "../../../api/sessionsApi";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { createAudioMix, createPartUploader, createRecorder, pickRecordingType } from "./sessionRecorder";
 // Messages are worded when they are set, through i18n.t rather than the hook's
 // t: the room's effects must never re-run for a language switch — that would drop the camera and the socket.
@@ -404,7 +404,7 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
     } catch (err) {
       logger.error("[VideoRoom] could not start recording:", err?.message);
       setRecorderStatus(null);
-      setRecordNotice({ severity: "error", text: hebrewForError(err, i18n.t("sessions:recording.cannotStart")) });
+      setRecordNotice({ severity: "error", text: messageForError(err, i18n.t("sessions:recording.cannotStart")) });
     }
   }, [sessionId, recorderStatus]);
 

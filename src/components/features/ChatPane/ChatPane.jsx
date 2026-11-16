@@ -16,7 +16,7 @@ import NoteAddIcon from "@mui/icons-material/NoteAddOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { statuses } from "../../../utilities/constant";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { placeOf, canOpenPlace, openPlace } from "../../../utilities/discussionPlace";
 import { canSaveAnswer, SAVE_STATES } from "../../../utilities/discussionNote";
 import { useTranslation } from "react-i18next";
@@ -260,7 +260,7 @@ const ChatPane = ({
         severity="error"
         action={<Button color="inherit" size="small" onClick={chat.retryLoad}>{t("retry")}</Button>}
       >
-        {hebrewForError(chat.loadError, t("loadFailed"))}
+        {messageForError(chat.loadError, t("loadFailed"))}
       </Alert>
     );
   }
@@ -322,7 +322,7 @@ const ChatPane = ({
 
       {chat.askError && (
         <Alert severity="error" onClose={chat.dismissAskError}>
-          {hebrewForError(chat.askError, t("askFailed"))}
+          {messageForError(chat.askError, t("askFailed"))}
         </Alert>
       )}
 

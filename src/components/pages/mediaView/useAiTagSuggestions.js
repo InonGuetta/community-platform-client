@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { mediaApi } from "../../../api/mediaApi";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { useTranslation } from "react-i18next";
 
 // Tags the LLM proposed for this lesson (PRD ARCH-4), for whoever may tag it:
@@ -35,7 +35,7 @@ const useAiTagSuggestions = ({ mediaId, enabled, onTagged }) => {
       setSuggestions(rows);
       after?.(rows);
     } catch (err) {
-      dispatch(notify({ message: hebrewForError(err?.response?.data, failure), severity: "error" }));
+      dispatch(notify({ message: messageForError(err?.response?.data, failure), severity: "error" }));
     } finally {
       setStatus("ready");
     }

@@ -20,7 +20,7 @@ import { creatorPath } from "../../../utilities/creatorPage";
 import { toggleType, pressAllTypes } from "./componentsArchive/typeSelection";
 import { readSort, DEFAULT_SORT } from "./componentsArchive/sortOptions";
 import { readDuration, durationParams, lengthApplies } from "../../../utilities/durationOptions";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import {
   buildTagRelations,
   normalizeSelection,
@@ -338,7 +338,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
       notify(
         ok
           ? { message: t("notices.tagsSaved"), severity: "success" }
-          : { message: hebrewForError(result.payload, t("notices.tagsFailed")), severity: "error" }
+          : { message: messageForError(result.payload, t("notices.tagsFailed")), severity: "error" }
       )
     );
     if (!ok) return;
@@ -371,7 +371,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
       notify(
         ok
           ? { message: t("notices.detailsSaved"), severity: "success" }
-          : { message: hebrewForError(result.payload, t("notices.detailsFailed")), severity: "error" }
+          : { message: messageForError(result.payload, t("notices.detailsFailed")), severity: "error" }
       )
     );
     if (!ok) return;
@@ -398,7 +398,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
       notify(
         ok
           ? { message: next ? t("notices.published") : t("notices.hidden"), severity: "success" }
-          : { message: hebrewForError(result.payload, t("notices.publishFailed")), severity: "error" }
+          : { message: messageForError(result.payload, t("notices.publishFailed")), severity: "error" }
       )
     );
   };

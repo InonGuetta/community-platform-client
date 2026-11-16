@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { verifyEmail } from "../../../store/slicesAndThunks/authSlice/authPost";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import i18n from "../../../i18n/i18n";
 
 // What the verification link does: spends its single-use token once, and
@@ -32,7 +32,7 @@ export const useVerifyEmail = () => {
       setState(
         result.meta.requestStatus === "fulfilled"
           ? { status: "ok", message: null }
-          : { status: "error", message: hebrewForError(result.payload, i18n.t("auth:verify.failed")) }
+          : { status: "error", message: messageForError(result.payload, i18n.t("auth:verify.failed")) }
       );
     });
   }, [dispatch, token]);

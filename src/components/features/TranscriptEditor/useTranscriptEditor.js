@@ -4,7 +4,7 @@ import { updateTranscript, triggerTranscriptPipeline, fixHebrewTranscript } from
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
 import { transcriptToText } from "../../../utilities/transcriptText";
 import { isAiActionBusy, aiActionOutcome } from "../../../utilities/aiActionState";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { useTranslation } from "react-i18next";
 
 // What the transcript editor does — the text being edited, kept in step with
@@ -67,7 +67,7 @@ export const useTranscriptEditor = ({ transcript, mediaId, canEdit = false }) =>
     setSaveFeedback(
       result.meta.requestStatus === "fulfilled"
         ? "saved"
-        : hebrewForError(result.payload, t("transcript.saveFailed"))
+        : messageForError(result.payload, t("transcript.saveFailed"))
     );
   };
 

@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchMyCourses, fetchMyJoinRequests } from "../../../store/slicesAndThunks/coursesSlice/coursesGet";
 import { joinCourseByCode } from "../../../store/slicesAndThunks/coursesSlice/coursesPost";
 import { cancelJoinRequest } from "../../../store/slicesAndThunks/coursesSlice/coursesDelete";
-import { ERROR_CODES, hebrewForError } from "../../../utilities/apiError";
+import { ERROR_CODES, messageForError } from "../../../utilities/apiError";
 import { statuses } from "../../../utilities/constant";
 import { selectMyCourses, selectMyCoursesStatus, selectMyJoinRequests } from "../../../store/selectors/coursesSelectors";
 import { useTranslation } from "react-i18next";
@@ -68,7 +68,7 @@ export const useMyCoursesPageController = () => {
       dispatch(fetchMyJoinRequests());
       return;
     }
-    setJoinError(hebrewForError(result.payload, t("join.failed")));
+    setJoinError(messageForError(result.payload, t("join.failed")));
     // Enrolled after all (by the lecturer, or in another tab): make sure the
     // list shows the course the message just said they are in.
     if (result.payload?.code === ERROR_CODES.ALREADY_ENROLLED) dispatch(fetchMyCourses());

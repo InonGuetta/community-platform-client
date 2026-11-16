@@ -82,7 +82,7 @@ const ProposeTagDialog = ({
     } catch (err) {
       // The caller turns the rejection into Hebrew; anything it could not name
       // still gets a sentence rather than nothing.
-      setError(err?.hebrew || t("propose.saveFailed"));
+      setError(err?.userMessage || t("propose.saveFailed"));
     } finally {
       setSubmitting(false);
     }

@@ -4,7 +4,7 @@ import { selectUser } from "../../../store/selectors/authSelectors";
 import { updateProfile } from "../../../store/slicesAndThunks/authSlice/authPut";
 import { changePassword } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { useTranslation } from "react-i18next";
 
 // What the profile page does — the profile edit and the password change, and
@@ -46,7 +46,7 @@ export const useProfilePageController = () => {
     dispatch(notify(
       result.meta.requestStatus === "fulfilled"
         ? { message: t("details.saved"), severity: "success" }
-        : { message: hebrewForError(result.payload, t("details.failed")), severity: "error" }
+        : { message: messageForError(result.payload, t("details.failed")), severity: "error" }
     ));
   };
 
@@ -69,7 +69,7 @@ export const useProfilePageController = () => {
     }
     // Shown inline rather than as a toast: it is almost always "the current
     // password is wrong", which is about the field directly above it.
-    setPasswordError(hebrewForError(result.payload, t("password.failed")));
+    setPasswordError(messageForError(result.payload, t("password.failed")));
   };
 
   return {

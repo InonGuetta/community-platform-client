@@ -9,7 +9,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import { login } from "../../../store/slicesAndThunks/authSlice/authPost";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import AuthLayout from "./AuthLayout";
 import { EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, dividerSx } from "./authShared";
 import SocialSignIn from "./SocialSignIn";
@@ -35,7 +35,7 @@ const SignIn = () => {
 
   return (
     <AuthLayout title={t("signIn.title")}>
-      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{hebrewForError(error, t("signIn.failed"))}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{messageForError(error, t("signIn.failed"))}</Alert>}
       {!error && oauthError && <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>{oauthError}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>

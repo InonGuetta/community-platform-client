@@ -14,7 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { statuses } from "../../../../../utilities/constant";
-import { hebrewForError } from "../../../../../utilities/apiError";
+import { messageForError } from "../../../../../utilities/apiError";
 import { headlineSegments } from "../../../../../utilities/searchHeadline";
 import { placeOf, canOpenPlace, openPlace } from "../../../../../utilities/discussionPlace";
 import { useTranslation } from "react-i18next";
@@ -139,7 +139,7 @@ const SmartSearchPane = ({ search, isText = false, onSeek, onOpenPage }) => {
       </Box>
 
       {search.status === statuses.failed && (
-        <Alert severity="error">{hebrewForError(search.error, t("smartSearch.failed"))}</Alert>
+        <Alert severity="error">{messageForError(search.error, t("smartSearch.failed"))}</Alert>
       )}
 
       {search.status === statuses.idle && (

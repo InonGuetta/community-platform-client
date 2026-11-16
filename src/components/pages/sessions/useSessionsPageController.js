@@ -5,7 +5,7 @@ import { fetchActiveSessions, fetchUpcomingSessions } from "../../../store/slice
 import { createSession, startSession } from "../../../store/slicesAndThunks/sessionsSlice/sessionsPost";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { selectAllRooms, selectSessionsStatus, selectUpcomingSessions } from "../../../store/selectors/sessionsSelectors";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { isPrivileged } from "../../../utilities/permissions";
 import { fetchAllCourses } from "../../../store/slicesAndThunks/coursesSlice/coursesGet";
@@ -49,7 +49,7 @@ const useSessionsPageController = () => {
       return;
     }
     dispatch(notify({
-      message: hebrewForError(result.payload, t("notices.cannotOpen")),
+      message: messageForError(result.payload, t("notices.cannotOpen")),
       severity: "error",
     }));
   };

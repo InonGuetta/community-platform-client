@@ -1,6 +1,7 @@
 import { test, expect, describe } from "vitest";
 import { notificationMiddleware } from "./notificationMiddleware";
-import { ERROR_CODES, ERROR_CODE_HE, rejectionOf } from "../../utilities/apiError";
+import { ERROR_CODES, rejectionOf } from "../../utilities/apiError";
+import errors from "../../locales/he/errors.json";
 
 // The Hebrew a user sees is chosen by the error CODE. It used to be chosen by
 // matching the server's English message character for character, and the whole
@@ -127,7 +128,7 @@ test("success toasts still fire for curated mutations", () => {
 // carries the "edit both together" warning for the half a test cannot reach.
 test("every translated key is a code this client actually knows", () => {
   const known = new Set(Object.values(ERROR_CODES));
-  const unknown = Object.keys(ERROR_CODE_HE).filter((code) => !known.has(code));
+  const unknown = Object.keys(errors.codes).filter((code) => !known.has(code));
   expect(unknown).toEqual([]);
 });
 

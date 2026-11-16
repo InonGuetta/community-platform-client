@@ -112,7 +112,7 @@ describe("the name", () => {
 });
 
 it("shows the reason in place when the server refuses", async () => {
-  const onSubmit = vi.fn().mockRejectedValue({ hebrew: "התגית כבר קיימת במקום הזה" });
+  const onSubmit = vi.fn().mockRejectedValue({ userMessage: "התגית כבר קיימת במקום הזה" });
   render(<ProposeTagDialog open nodes={TREE} onSubmit={onSubmit} onClose={vi.fn()} />);
   const user = userEvent.setup();
   await user.type(screen.getByLabelText("שם התגית"), "חדש");

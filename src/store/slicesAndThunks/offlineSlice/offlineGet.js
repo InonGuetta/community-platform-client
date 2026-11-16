@@ -11,6 +11,7 @@ import {
 } from "../../../utilities/offlineStore";
 import { notify } from "../snackbarSlice";
 import { offlineProgress } from "./offlineSlice";
+import i18n from "../../../i18n/i18n";
 
 // Lessons kept for listening with no network (PRD MOB-2). The storage itself is
 // utilities/offlineStore.js; these thunks put it in the store so the download
@@ -45,10 +46,10 @@ const worthReporting = (last, received, total) => {
 };
 
 const failureMessage = (err) => {
-  if (isQuotaError(err)) return "אין מספיק מקום במכשיר. מחקו שיעורים שהורדתם ונסו שוב.";
-  if (err?.status === 429) return "השרת עסוק כרגע בהכנת קבצי שמע אחרים. נסו שוב בעוד כמה דקות.";
-  if (err?.status === 403 || err?.status === 404) return "השיעור הזה לא זמין להורדה.";
-  return "ההורדה להאזנה נכשלה. בדקו את החיבור ונסו שוב.";
+  if (isQuotaError(err)) return i18n.t("downloads:save.noRoom");
+  if (err?.status === 429) return i18n.t("downloads:save.busy");
+  if (err?.status === 403 || err?.status === 404) return i18n.t("downloads:save.unavailable");
+  return i18n.t("downloads:save.failed");
 };
 
 // Downloads one lesson and keeps it. A cancelled download ends quietly — the
@@ -57,7 +58,7 @@ export const saveForOffline = createAsyncThunk(
   "offline/save",
   async (media, { dispatch, rejectWithValue }) => {
     if (!offlineSupported()) {
-      dispatch(notify({ message: "הדפדפן הזה לא מאפשר לשמור שיעורים להאזנה בלי רשת.", severity: "warning" }));
+      dispatch(notify({ message: i18n.t("downloads:save.unsupported"), severity: "warning" }));
       return rejectWithValue({ code: "UNSUPPORTED" });
     }
     const controller = new AbortController();
@@ -76,7 +77,7 @@ export const saveForOffline = createAsyncThunk(
         },
       });
       const items = await storeOffline(media, blob);
-      dispatch(notify({ message: "השיעור נשמר להאזנה בלי רשת", severity: "success" }));
+      dispatch(notify({ message: i18n.t("downloads:save.saved"), severity: "success" }));
       return items;
     } catch (err) {
       if (err?.name === "AbortError") return rejectWithValue({ code: "ABORTED" });

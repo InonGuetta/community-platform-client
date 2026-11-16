@@ -18,7 +18,7 @@ import DirectionalIcon from "../../../../../components/features/DirectionalIcon/
 import ChatIcon from "@mui/icons-material/ChatOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import { statuses } from "../../../../../utilities/constant";
-import { hebrewForError } from "../../../../../utilities/apiError";
+import { messageForError } from "../../../../../utilities/apiError";
 import { formatDate } from "../../../../../utilities/formatDate";
 import { MessageBubble, placeOpener, answerSaver, CopyConversationButton } from "../../../../features/ChatPane/ChatPane";
 import { useTranslation } from "react-i18next";
@@ -135,7 +135,7 @@ const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
 
       {viewing.resumeError && (
         <Alert severity="error">
-          {hebrewForError(viewing.resumeError, t("history.resumeFailed"))}
+          {messageForError(viewing.resumeError, t("history.resumeFailed"))}
         </Alert>
       )}
 
@@ -145,7 +145,7 @@ const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
         </Box>
       )}
       {viewing.status === statuses.failed && (
-        <Alert severity="error">{hebrewForError(viewing.error, t("history.openFailed"))}</Alert>
+        <Alert severity="error">{messageForError(viewing.error, t("history.openFailed"))}</Alert>
       )}
       {viewing.status === statuses.succeeded && (
         <Box
@@ -186,7 +186,7 @@ const HistoryPane = ({ history, notebook = null, isText = false, onSeek, onOpenP
   if (history.status === statuses.failed) {
     return (
       <Alert severity="error" action={<Button color="inherit" size="small" onClick={history.retry}>{t("history.retry")}</Button>}>
-        {hebrewForError(history.error, t("history.listFailed"))}
+        {messageForError(history.error, t("history.listFailed"))}
       </Alert>
     );
   }
@@ -202,7 +202,7 @@ const HistoryPane = ({ history, notebook = null, isText = false, onSeek, onOpenP
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
       {history.deleteError && (
-        <Alert severity="error">{hebrewForError(history.deleteError, t("history.deleteFailed"))}</Alert>
+        <Alert severity="error">{messageForError(history.deleteError, t("history.deleteFailed"))}</Alert>
       )}
       {history.items.map((item) => (
         <ConversationRow

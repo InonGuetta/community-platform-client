@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { coursesApi } from "../../../api/coursesApi";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
+import { useTranslation } from "react-i18next";
 
 // One course as a track (PRD CRS-1, CRS-2): its lessons in order with the
 // reader's progress, the lesson to carry on from, and — for its lecturer —
@@ -12,6 +13,7 @@ import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 // it is read fresh each time the page opens, since progress moves whenever a
 // lesson is listened to anywhere.
 export const useCourseTrackPageController = () => {
+  const { t } = useTranslation("courses");
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -40,9 +42,9 @@ export const useCourseTrackPageController = () => {
       await coursesApi.reorderLessons(previous.course.id, orderedIds);
     } catch {
       setState((s) => ({ ...s, data: previous }));
-      dispatch(notify({ message: "שמירת סדר השיעורים נכשלה. הסדר הקודם הוחזר.", severity: "error" }));
+      dispatch(notify({ message: t("track.reorderFailed"), severity: "error" }));
     }
-  }, [state.data, dispatch]);
+  }, [state.data, dispatch, t]);
 
   const data = state.data;
   const next = data?.summary?.nextId ? data.lessons.find((l) => l.id === data.summary.nextId) : null;

@@ -18,6 +18,7 @@ import CourseReport from "./componentsCourses/CourseReport";
 import { useDragReorder, dropIndicatorSx } from "../../../utilities/useDragReorder";
 import { lessonStatus, progressText, progressPercent } from "../../../utilities/courseTrack";
 import { formatTime } from "../../../utilities/formatTime";
+import { useTranslation } from "react-i18next";
 
 // A course as a track (PRD CRS-1, CRS-2): its lessons in the lecturer's order,
 // how far this reader has got, and where to carry on. The course's lecturer
@@ -26,17 +27,19 @@ import { formatTime } from "../../../utilities/formatTime";
 const LESSON_DRAG_MIME = "application/x-community-lesson";
 
 const STATUS = {
-  done: { Icon: CheckCircleIcon, color: "success.main", label: "הושלם" },
-  started: { Icon: TimelapseIcon, color: "warning.main", label: "התחלת" },
-  new: { Icon: RadioButtonUncheckedIcon, color: "text.disabled", label: "עוד לא" },
-  book: { Icon: MenuBookOutlinedIcon, color: "primary.main", label: "לקריאה" },
+  done: { Icon: CheckCircleIcon, color: "success.main" },
+  started: { Icon: TimelapseIcon, color: "warning.main" },
+  new: { Icon: RadioButtonUncheckedIcon, color: "text.disabled" },
+  book: { Icon: MenuBookOutlinedIcon, color: "primary.main" },
 };
 
 const LessonRow = ({ lesson, index, canArrange, drag, onOpen }) => {
+  const { t } = useTranslation("courses");
   const status = lessonStatus(lesson);
-  const { Icon, color, label } = STATUS[status];
+  const { Icon, color } = STATUS[status];
+  const label = t(`track.status.${status}`);
   const detail = [
-    status === "started" && lesson.last_position_seconds > 0 && `הגעת ל-${formatTime(lesson.last_position_seconds)}`,
+    status === "started" && lesson.last_position_seconds > 0 && t("track.reached", { time: formatTime(lesson.last_position_seconds) }),
     lesson.duration_seconds > 0 && formatTime(lesson.duration_seconds),
   ].filter(Boolean).join(" · ");
 
@@ -45,7 +48,7 @@ const LessonRow = ({ lesson, index, canArrange, drag, onOpen }) => {
       variant="outlined"
       {...(canArrange && { ...drag.itemProps(lesson.id), ...drag.keyProps(lesson.id) })}
       tabIndex={canArrange ? 0 : undefined}
-      aria-label={canArrange ? `${index}. ${lesson.title} — אפשר לגרור, או להזיז בחצים` : undefined}
+      aria-label={canArrange ? t("track.dragHint", { index, title: lesson.title }) : undefined}
       sx={{
         display: "flex", alignItems: "center", gap: 1.5, p: 1.5, borderRadius: 2,
         opacity: drag?.isDragging(lesson.id) ? 0.4 : 1,
@@ -69,12 +72,13 @@ const LessonRow = ({ lesson, index, canArrange, drag, onOpen }) => {
         </Typography>
         {detail && <Typography variant="body2" color="text.secondary">{detail}</Typography>}
       </Box>
-      {lesson.is_published === false && <Chip label="טיוטה" size="small" />}
+      {lesson.is_published === false && <Chip label={t("track.draft")} size="small" />}
     </Paper>
   );
 };
 
 const CourseTrackPage = () => {
+  const { t } = useTranslation("courses");
   const c = useCourseTrackPageController();
   const drag = useDragReorder({
     ids: c.lessons.map((l) => l.id),
@@ -91,14 +95,14 @@ const CourseTrackPage = () => {
     <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
       <Box sx={{ maxWidth: 860, mx: "auto", p: { xs: 2, sm: 3 } }}>
         <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={c.goToMyCourses} sx={{ mb: 2 }}>
-          הקורסים שלי
+          {t("track.myCourses")}
         </Button>
 
         {c.status === "failed" ? (
           <Alert severity={c.forbidden ? "info" : "error"}>
             {c.forbidden
-              ? "השיעורים של הקורס הזה פתוחים לתלמידים הרשומים אליו. יש לך קוד מהמרצה? אפשר להצטרף ב״הקורסים שלי״."
-              : "לא ניתן לטעון את הקורס כרגע."}
+              ? t("track.forbidden")
+              : t("track.loadFailed")}
           </Alert>
         ) : (
           <>
@@ -116,13 +120,13 @@ const CourseTrackPage = () => {
                     <LinearProgress
                       variant="determinate"
                       value={progressPercent(c.summary)}
-                      aria-label="התקדמות בקורס"
+                      aria-label={t("track.progress")}
                       sx={{ mt: 1, height: 8, borderRadius: 4 }}
                     />
                   </Box>
                   {c.next && (
                     <Button variant="contained" endIcon={<PlayArrowRoundedIcon />} onClick={() => c.openLesson(c.next.id)}>
-                      {c.summary.completed > 0 || c.next.last_position_seconds > 0 ? "להמשיך" : "להתחיל"}: {c.next.title}
+                      {t(c.summary.completed > 0 || c.next.last_position_seconds > 0 ? "track.continue" : "track.start", { title: c.next.title })}
                     </Button>
                   )}
                 </Box>
@@ -131,12 +135,12 @@ const CourseTrackPage = () => {
 
             {c.canArrange && c.lessons.length > 1 && (
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                גררו שיעור כדי לשנות את הסדר, או סמנו אותו והזיזו בחצים. התלמידים רואים את הקורס בסדר הזה.
+                {t("track.arrangeHint")}
               </Typography>
             )}
 
             {c.lessons.length === 0 ? (
-              <Typography color="text.secondary">עדיין אין שיעורים בקורס.</Typography>
+              <Typography color="text.secondary">{t("track.empty")}</Typography>
             ) : (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                 {c.lessons.map((lesson, i) => (

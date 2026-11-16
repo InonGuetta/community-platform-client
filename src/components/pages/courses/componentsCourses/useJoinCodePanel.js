@@ -6,6 +6,7 @@ import { removeJoinCode } from "../../../../store/slicesAndThunks/coursesSlice/c
 import { notify } from "../../../../store/slicesAndThunks/snackbarSlice";
 import { ERROR_CODES } from "../../../../utilities/apiError";
 import { selectJoinRequestsFor } from "../../../../store/selectors/coursesSelectors";
+import { useTranslation } from "react-i18next";
 
 // The lecturer's half of joining a course by its code (PRD ROST-9): the code,
 // the link that carries it, and the people waiting for an answer. Rendered in a
@@ -27,6 +28,7 @@ const copy = async (text) => {
 };
 
 const useJoinCodePanel = (course) => {
+  const { t } = useTranslation("courses");
   const dispatch = useDispatch();
   const requests = useSelector(selectJoinRequestsFor(course.id));
   const [busy, setBusy] = useState(false);
@@ -47,11 +49,13 @@ const useJoinCodePanel = (course) => {
     }
   };
 
-  const copyAndSay = async (text, what) => {
+  // `doneKey` names what was copied in a whole sentence — "the code was
+  // copied", "the link was copied" — rather than a noun glued to a verb.
+  const copyAndSay = async (text, doneKey) => {
     const ok = await copy(text);
     dispatch(notify(ok
-      ? { message: `${what} הועתק`, severity: "success" }
-      : { message: "ההעתקה לא הצליחה. אפשר לסמן ולהעתיק ידנית.", severity: "warning" }));
+      ? { message: t(doneKey), severity: "success" }
+      : { message: t("joinCode.copyFailed"), severity: "warning" }));
   };
 
   const decide = async (requestId, approve) => {
@@ -74,8 +78,8 @@ const useJoinCodePanel = (course) => {
     cancelReplace: () => setConfirmReplace(false),
     replaceCode: () => { setConfirmReplace(false); return run(createJoinCode(course.id)); },
     removeCode: () => run(removeJoinCode(course.id)),
-    copyCode: () => copyAndSay(course.join_code, "הקוד"),
-    copyLink: () => copyAndSay(joinLink(course.join_code), "הקישור"),
+    copyCode: () => copyAndSay(course.join_code, "joinCode.codeCopied"),
+    copyLink: () => copyAndSay(joinLink(course.join_code), "joinCode.linkCopied"),
     approve: (requestId) => decide(requestId, true),
     reject: (requestId) => decide(requestId, false),
   };

@@ -3,6 +3,7 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
+import { useTranslation } from "react-i18next";
 
 // "Who learns with me" — every distinct person enrolled in any course this
 // lecturer teaches.
@@ -16,11 +17,13 @@ import Divider from "@mui/material/Divider";
 // three course chips. Ungrouped it would read as a roster of thirty for a
 // lecturer who teaches ten people.
 
-const MyStudents = ({ students = [] }) => (
+const MyStudents = ({ students = [] }) => {
+  const { t } = useTranslation("courses");
+  return (
   <Paper variant="outlined" sx={{ p: 2 }}>
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
       <Typography variant="subtitle1" fontWeight={700}>
-        התלמידים שלי
+        {t("myStudents.title")}
       </Typography>
       {students.length > 0 && <Chip label={students.length} size="small" color="info" />}
     </Box>
@@ -29,7 +32,7 @@ const MyStudents = ({ students = [] }) => (
       // Distinguishes "nobody yet" from "still loading" by saying what to do
       // next rather than describing the emptiness.
       <Typography variant="body2" color="text.secondary">
-        אין עדיין תלמידים רשומים לקורסים שלך. ניתן לצרף תלמידים מתוך כל קורס למטה.
+        {t("myStudents.empty")}
       </Typography>
     ) : (
       <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -63,13 +66,14 @@ const MyStudents = ({ students = [] }) => (
                 ))}
               </Box>
 
-              {!student.is_active && <Chip label="לא פעיל" size="small" />}
+              {!student.is_active && <Chip label={t("inactive")} size="small" />}
             </Box>
           </Box>
         ))}
       </Box>
     )}
   </Paper>
-);
+  );
+};
 
 export default MyStudents;

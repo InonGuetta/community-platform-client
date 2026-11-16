@@ -113,7 +113,9 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
         // Read-only while the Hebrew correction runs: it will replace this text
         // when it finishes, and typing in the meantime would be thrown away.
         InputProps={{ readOnly: !canEdit || isAiActionBusy(fixStatus) }}
-        inputProps={{ dir: "auto" }}
+        // Each line in the direction of its own words (the transcript is
+        // content): a line opening with a Latin name stays right to left.
+        sx={{ "& textarea": { unicodeBidi: "plaintext", textAlign: "start" } }}
         helperText={isAiActionBusy(fixStatus) ? "העברית מתוקנת ברקע. הטקסט יתעדכן כשהתיקון יסתיים." : undefined}
       />
 

@@ -11,7 +11,7 @@ import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
 import LanguageIcon from "@mui/icons-material/Language";
 import { useLanguage } from "../../i18n/useLanguage";
-import { useDirection } from "../../i18n/useDirection";
+import { useDirection, menuOrigins } from "../../i18n/useDirection";
 import { useChooseLanguage } from "./useAccountLanguage";
 
 // Where a person picks the interface's language: the bar, the drawer, the
@@ -34,8 +34,7 @@ const LanguageMenu = ({ anchor, onClose }) => {
       anchorEl={anchor}
       open={Boolean(anchor)}
       onClose={onClose}
-      anchorOrigin={{ vertical: "bottom", horizontal: start }}
-      transformOrigin={{ vertical: "top", horizontal: start }}
+      {...menuOrigins(start)}
     >
       {languages.map(({ code, name, dir }) => (
         <MenuItem

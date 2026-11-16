@@ -5,7 +5,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { PERSONAL_SHELVES } from "../personalShelves";
 import { barSurfaceSx, navLabelSx, navMenuItemSx, navMenuListSx } from "./navStyles";
-import { useDirection } from "../../../i18n/useDirection";
+import { useDirection, menuOrigins } from "../../../i18n/useDirection";
 
 // "תוכן אישי": the personal shelves (personalShelves.js) in a panel that
 // hangs off the bar as a second row of its tabs. Opened from NavLinksBar.
@@ -16,8 +16,7 @@ const PersonalMenu = ({ personalAnchor, setPersonalAnchor, pathname }) => {
     anchorEl={personalAnchor}
     open={Boolean(personalAnchor)}
     onClose={() => setPersonalAnchor(null)}
-    anchorOrigin={{ vertical: "bottom", horizontal: start }}
-    transformOrigin={{ vertical: "top", horizontal: start }}
+    {...menuOrigins(start)}
     // MenuListProps rather than slotProps.list: this is the prop Menu has
     // always forwarded to its MenuList, and the layout below is the whole
     // point of the panel — not something to leave riding on a slot name.

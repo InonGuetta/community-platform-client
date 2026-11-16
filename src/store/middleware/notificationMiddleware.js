@@ -68,6 +68,11 @@ const ERROR_MESSAGES = {
   // Unlike the success side, every save failure is worth saying out loud: the
   // reducers roll the optimistic change back, so without a toast the button
   // simply un-presses itself and the user is left guessing.
+  // The interface language: the strings could not be fetched (offline, or a
+  // new deploy replaced them), or the account could not save the choice — in
+  // which case the next device and the mail would still use the old one.
+  "language/choose": "לא ניתן להחליף את השפה כרגע",
+  "language/save": "השפה הוחלפה, אך לא נשמרה בחשבון",
   "saves/add": "השמירה נכשלה",
   "saves/remove": "ביטול השמירה נכשל",
   "saves/fetchPlaylists": "טעינת הרשימות נכשלה",

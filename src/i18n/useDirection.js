@@ -11,6 +11,15 @@ import { useLanguage } from "./useLanguage";
 export const sidesOf = (direction) =>
   direction === "rtl" ? { start: "right", end: "left" } : { start: "left", end: "right" };
 
+// A Menu's or Popover's anchorOrigin + transformOrigin: hanging from the
+// bottom of its button ("down") or rising from its top ("up"), lined up on
+// `side` — usually `start` or `end` from useDirection. One helper, so every
+// menu in the app opens the same way in both directions.
+export const menuOrigins = (side, grow = "down") =>
+  grow === "up"
+    ? { anchorOrigin: { vertical: "top", horizontal: side }, transformOrigin: { vertical: "bottom", horizontal: side } }
+    : { anchorOrigin: { vertical: "bottom", horizontal: side }, transformOrigin: { vertical: "top", horizontal: side } };
+
 export const useDirection = () => {
   const { direction } = useLanguage();
   return { direction, rtl: direction === "rtl", ...sidesOf(direction) };

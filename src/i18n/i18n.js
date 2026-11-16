@@ -27,7 +27,7 @@ const STORAGE_KEY = "language";
 
 // localStorage can throw (blocked site data, an older private mode) and does
 // not exist under Node — a preference must never be what stops the app.
-export const readStoredLanguage = () => {
+const readStoredLanguage = () => {
   try {
     return localStorage.getItem(STORAGE_KEY);
   } catch {
@@ -93,16 +93,64 @@ const switchTo = async (code) => {
   await i18next.changeLanguage(code);
 };
 
-// The one way a person changes the language. An unknown code is ignored rather
-// than half-applied.
+// Switches the interface and remembers the language in this browser, so the
+// next visit opens in it before anyone has signed in. An unknown code is
+// ignored rather than half-applied. Rejects when the language's strings cannot
+// be fetched (offline, or a chunk a new deploy replaced) — the caller says so.
+//
+// Saving it to an ACCOUNT is not done here: src/i18n knows nothing of the
+// store. That is chooseLanguage (store), which every switcher calls.
 export const changeLanguage = async (code) => {
   if (!isSupportedLanguage(code)) return;
   await switchTo(code);
   storeLanguage(code);
 };
 
-// At start-up: the remembered or guessed language, without remembering a
-// guess — only a choice the person made is stored.
-export const startLanguage = () => switchTo(initialLanguage());
+// ── A choice made before signing in ─────────────────────────────────────────
+//
+// localStorage says what language this BROWSER was last in — written when a
+// person picks one and also when an account's language is adopted — so it
+// cannot tell "a guest chose French" from "the last person signed in here
+// reads French". This marker can: it is written only when someone picks a
+// language while signed out, lives in sessionStorage (this tab, this visit),
+// and is consumed by the first sign-in that follows, which saves it to the
+// account. A second person signing in later on the same computer finds none.
+const GUEST_CHOICE_KEY = "languageChosenSignedOut";
+
+export const markGuestChoice = (code) => {
+  try {
+    sessionStorage.setItem(GUEST_CHOICE_KEY, code);
+  } catch {
+    // Not kept — signing in will simply use the account's language.
+  }
+};
+
+export const takeGuestChoice = () => {
+  try {
+    const code = sessionStorage.getItem(GUEST_CHOICE_KEY);
+    sessionStorage.removeItem(GUEST_CHOICE_KEY);
+    return code;
+  } catch {
+    return null;
+  }
+};
+
+// ── Start-up ────────────────────────────────────────────────────────────────
+
+let ready = Promise.resolve();
+
+// The remembered or guessed language, without remembering a guess. Never
+// rejects: a language that cannot be loaded leaves Hebrew on screen, and
+// onError (main.jsx: captureError) hears about it.
+export const startLanguage = ({ onError } = {}) => {
+  ready = switchTo(initialLanguage()).catch((err) => onError?.(err));
+  return ready;
+};
+
+// Settles once start-up has finished switching (or failed to). Anything that
+// compares the account's language with the one on screen waits for this, or it
+// would compare against Hebrew while the stored language is still loading —
+// and the start-up switch, landing afterwards, would undo its decision.
+export const whenLanguageReady = () => ready;
 
 export default i18next;

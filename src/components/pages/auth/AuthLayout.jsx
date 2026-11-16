@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { useMemo } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { buildTheme } from "../../../theme/theme";
 import { useLanguage } from "../../../i18n/useLanguage";
@@ -11,10 +10,14 @@ import LanguageSwitcher from "../../layout/LanguageSwitcher";
 // Auth is a branded, always-light landing built on hardcoded light styling.
 // Forcing the light theme here keeps it consistent even when the user has dark
 // mode enabled elsewhere (e.g. MUI's own Alert/inputs won't render dark on the
-// light glass card). Rebuilt only when the language's direction changes.
+// light glass card). One per direction, each built the first time it is
+// needed and kept, so moving between the auth pages builds nothing.
+const lightThemes = {};
+const lightThemeFor = (direction) => (lightThemes[direction] ??= buildTheme("light", direction));
+
 const AuthLayout = ({ title, children }) => {
   const { direction } = useLanguage();
-  const lightTheme = useMemo(() => buildTheme("light", direction), [direction]);
+  const lightTheme = lightThemeFor(direction);
   return (
   <ThemeProvider theme={lightTheme}>
   <Box sx={{

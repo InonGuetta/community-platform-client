@@ -17,7 +17,7 @@ import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog
 import { playlistTitleMaxLength } from "../../../../utilities/constant";
 import { countLabel } from "../../../../utilities/countLabel";
 import { useSaveMenu } from "./useSaveMenu";
-import { useDirection } from "../../../../i18n/useDirection";
+import { useDirection, menuOrigins } from "../../../../i18n/useDirection";
 
 // Which of the user's own lists this lecture is filed in, and the way to make a
 // new one. The general save is NOT here — that is the button this menu hangs off
@@ -30,11 +30,6 @@ import { useDirection } from "../../../../i18n/useDirection";
 
 // Anchored to a button at the BOTTOM of a panel, so the menu has to grow upwards
 // or it opens off-screen.
-// …aligned to the side the button's line starts on (useDirection).
-const originsFor = (start) => ({
-  anchorOrigin: { vertical: "top", horizontal: start },
-  transformOrigin: { vertical: "bottom", horizontal: start },
-});
 
 // MenuItem inherits a physical `text-align: left` from MUI, and this app runs
 // RTL without the stylis flip plugin, so the label drifts away from its icon.
@@ -111,7 +106,7 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
         anchorEl={anchorEl}
         open={open}
         onClose={onClose}
-        {...originsFor(start)}
+        {...menuOrigins(start, "up")}
         slotProps={{ paper: { sx: { minWidth: 290, maxWidth: 360 } } }}
       >
         <Typography

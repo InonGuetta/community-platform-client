@@ -115,11 +115,15 @@ const authSlice = createSlice({
         state.user = action.payload;
       })
 
-      // Only the language is taken from the answer: the row PATCH returns does
-      // not carry the role-request fields the banner reads, and this change
-      // cannot have touched them.
-      .addCase(saveLocale.fulfilled, (state, action) => {
-        if (state.user) state.user.locale = action.payload.locale;
+      // The language is taken from the REQUEST, the moment it is sent — not
+      // from the answer: two quick choices can be answered out of order, and
+      // the later answer would otherwise put the earlier language back (and
+      // the sync in useAccountLanguage would then adopt it). Only the language
+      // changes; the row PATCH returns lacks the role-request fields. A failed
+      // save is a toast (language/save); the next "who am I" brings the
+      // account's real value back.
+      .addCase(saveLocale.pending, (state, action) => {
+        if (state.user) state.user.locale = action.meta.arg;
       })
 
       .addCase(fetchMe.pending, (state, action) => {

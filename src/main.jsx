@@ -9,12 +9,13 @@ import { store } from "./store/store";
 import ErrorBoundary from "./components/features/ErrorBoundary/ErrorBoundary";
 import App from "./App";
 import { registerServiceWorker } from "./utilities/serviceWorker";
-import { initMonitoring } from "./utilities/monitoring";
+import { initMonitoring, captureError } from "./utilities/monitoring";
 import { startLanguage } from "./i18n/i18n";
 
 // The interface's language: Hebrew renders at once, and a remembered or
-// browser language replaces it as soon as its strings have loaded.
-startLanguage();
+// browser language replaces it as soon as its strings have loaded. If they
+// cannot be fetched, Hebrew stays and the failure is reported.
+startLanguage({ onError: (err) => captureError(err, { tags: { area: "language" } }) });
 
 // External error reporting (PRD NFR-1) — only in a build with VITE_SENTRY_DSN,
 // and then loaded on the side, without holding up the first render.

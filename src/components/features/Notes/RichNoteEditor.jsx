@@ -481,7 +481,6 @@ const RichNoteEditor = forwardRef(({
       <Box
         ref={editorRef}
         component="div"
-        dir="auto"
         contentEditable
         suppressContentEditableWarning
         role="textbox"
@@ -524,6 +523,11 @@ const RichNoteEditor = forwardRef(({
           p: 2, borderRadius: 1, overflowY: "auto",
           border: "1px solid", borderColor: "divider",
           outline: "none", lineHeight: 1.7,
+          // The note is content, and each of its paragraphs reads in the
+          // direction of its own words: a Hebrew line after one that opens with
+          // "Rashi" is still right to left. dir="auto" on the box would decide
+          // the whole note from its first letter instead.
+          "&, & > *": { unicodeBidi: "plaintext", textAlign: "start" },
           "&:hover": { borderColor: "text.primary" },
           // The brand ring the rest of the app uses on a focused control, as a
           // literal rather than currentColor — which is the TEXT colour here and

@@ -70,9 +70,15 @@ const Navbar = () => {
           color="primary"
           component={Link}
           to="/archive"
+          // The name is as long as the language makes it — "Plateforme
+          // communautaire" is twice "פלטפורמת הקהילה" — so on a phone it gives
+          // way, ending in an ellipsis, rather than pushing the avatar and the
+          // menu button off the edge.
+          noWrap
           sx={{
-            marginInlineStart: 3,
-            flexShrink: 0,
+            marginInlineStart: { xs: 1, sm: 3 },
+            flexShrink: { xs: 1, md: 0 },
+            minWidth: 0,
             letterSpacing: 0.2,
             // On mobile the brand grows to push the compact avatar to the far
             // edge; on desktop it stays natural width so the links row fills.
@@ -142,7 +148,7 @@ const Navbar = () => {
               >
                 {avatarInitial(user)}
               </Avatar>
-              <Typography variant="body2" fontWeight={600} color="primary.main" sx={{ display: { xs: "none", sm: "block" } }}>
+              <Typography variant="body2" fontWeight={600} color="primary.main" noWrap dir="auto" sx={{ display: { xs: "none", lg: "block" }, maxWidth: 140 }}>
                 {user?.display_name}
               </Typography>
             </Box>

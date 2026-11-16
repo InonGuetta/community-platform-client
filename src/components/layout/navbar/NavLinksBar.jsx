@@ -11,7 +11,11 @@ import { useTranslation } from "react-i18next";
 const NavLinksBar = ({ links, pathname, personalActive, personalAnchor, setPersonalAnchor, pendingRoleRequests }) => {
   const { t } = useTranslation("nav");
   return (
-  <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0, flexGrow: 1, alignSelf: "stretch" }}>
+  // minWidth 0 and overflowX: the row is as wide as its language makes it —
+  // French and Spanish labels run half again as long as Hebrew — and when it
+  // does not fit, IT scrolls, rather than pushing the bell, the language and
+  // the account off the edge of the bar.
+  <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0, flexGrow: 1, alignSelf: "stretch", minWidth: 0, overflowX: "auto", scrollbarWidth: "none" }}>
     {/* Leads the row, where the personal tabs it replaces used to sit.
         Highlighted whenever ANY of the shelves behind it is the open page,
         so the bar still says where you are once the menu is closed. */}

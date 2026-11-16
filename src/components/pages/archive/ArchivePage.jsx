@@ -24,8 +24,10 @@ const ArchivePage = () => {
   return (
     <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
       {/* Main content */}
-      <Box sx={{ flexGrow: 1, p: 3 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
+        {/* Wraps: the title and the button are as long as the language makes
+            them, and side by side they were wider than a phone in French. */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2, mb: 3 }}>
           <Typography variant="h4" fontWeight={800} color="primary">{t("title")}</Typography>
           {canUpload && (
             <Button variant="contained" startIcon={<UploadIcon />} onClick={archive.handleOpenUpload}
@@ -40,7 +42,10 @@ const ArchivePage = () => {
           )}
         </Box>
 
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
+        {/* Scrollable: a tab's label is as long as its language makes it
+            ("Recherche approfondie intelligente"), and fixed tabs wider than a
+            phone widen the whole page with them. */}
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons={false} sx={{ mb: 3 }}>
           <Tab label={t("tabs.archive")} />
           <Tab label={t("tabs.smartSearch")} />
         </Tabs>

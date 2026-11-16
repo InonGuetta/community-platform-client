@@ -71,6 +71,9 @@ const AiUsagePanel = () => {
       {report.byPurpose.length === 0 ? (
         <Typography variant="body2" color="text.secondary">{t("ai.unused")}</Typography>
       ) : (
+        <Box sx={{ overflowX: "auto" }}>
+        {/* Its own horizontal scroll, like the pipeline's tables: on a phone the
+            columns are wider than the screen, and longer in French and Spanish. */}
         <Table size="small" aria-label={t("ai.tableLabel")}>
           <TableHead>
             <TableRow>
@@ -91,6 +94,7 @@ const AiUsagePanel = () => {
             ))}
           </TableBody>
         </Table>
+        </Box>
       )}
     </Box>
   );

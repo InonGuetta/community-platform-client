@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../../store/slicesAndThunks/snackbarSlice";
+import { useTranslation } from "react-i18next";
 
 // What the share dialog does — the link it shares, and each way of sending
 // it — so that ShareDialog.jsx is layout only. See ShareDialog.jsx for which
@@ -23,6 +24,7 @@ const buildShareUrl = (seconds, path) => {
  *   currentTime?: number, canShareTime?: boolean, publicLink?: any }} props
  */
 export const useShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime = false, publicLink = null }) => {
+  const { t } = useTranslation("lesson");
   const dispatch = useDispatch();
   const [withTime, setWithTime] = useState(false);
 
@@ -74,10 +76,10 @@ export const useShareDialog = ({ open, onClose, title, path, currentTime = 0, ca
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(url);
-      dispatch(notify({ message: "הקישור הועתק", severity: "success" }));
+      dispatch(notify({ message: t("share.copied"), severity: "success" }));
       onClose();
     } catch {
-      dispatch(notify({ message: `לא ניתן להעתיק אוטומטית. הקישור: ${url}`, severity: "warning" }));
+      dispatch(notify({ message: t("share.copyManually", { url }), severity: "warning" }));
     }
   };
 

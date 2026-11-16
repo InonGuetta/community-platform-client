@@ -7,31 +7,26 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import { isAiActionBusy } from "../../../utilities/aiActionState";
 import { useTranscriptEditor } from "./useTranscriptEditor";
+import { useTranslation } from "react-i18next";
 
 const STATUS_COLOR = { pending: "default", processing: "warning", analyzing: "info", done: "success", error: "error" };
-const STATUS_LABEL_HE = {
-  pending: "בהמתנה",
-  processing: "מתמלל",
-  analyzing: "מסכם",
-  done: "מוכן",
-  error: "שגיאה",
-};
+// The statuses the chip has words for (transcript.status.<status>).
+const STATUSES = Object.keys(STATUS_COLOR);
 
 const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled = false, onRetryPolling }) => {
+  const { t } = useTranslation("lesson");
   const {
     editedText, setEditedText, saving, triggering, saveFeedback, setSaveFeedback,
     status, fixStatus, fixing, isProcessing, hasContent, handleSave, handleTrigger, handleFixHebrew,
   } = useTranscriptEditor({ transcript, mediaId, canEdit });
 
-  const statusLabel = STATUS_LABEL_HE[status] || "אין תמלול";
-  const placeholder = canEdit
-    ? "אין עדיין תמלול. לחץ 'הפעל תמלול' כדי להתחיל."
-    : "אין עדיין תמלול.";
+  const statusLabel = t(STATUSES.includes(status) ? `transcript.status.${status}` : "transcript.status.none");
+  const placeholder = canEdit ? t("transcript.emptyCanRun") : t("transcript.empty");
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="subtitle1" fontWeight={600}>תמלול</Typography>
+        <Typography variant="subtitle1" fontWeight={600}>{t("transcript.title")}</Typography>
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           <Chip
             label={isProcessing ? `${statusLabel}...` : statusLabel}
@@ -47,7 +42,7 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
                 disabled={fixing || isProcessing || !hasContent}
                 startIcon={fixing ? <CircularProgress size={14} /> : null}
               >
-                {fixing ? "מתקן..." : "תקן עברית"}
+                {fixing ? t("transcript.fixing") : t("transcript.fixHebrew")}
               </Button>
               <Button
                 size="small"
@@ -56,7 +51,7 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
                 disabled={triggering || isProcessing}
                 startIcon={triggering || isProcessing ? <CircularProgress size={14} /> : null}
               >
-                {isProcessing ? "רץ..." : "הפעל תמלול"}
+                {isProcessing ? t("transcript.running") : t("transcript.run")}
               </Button>
             </>
           )}
@@ -73,12 +68,12 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
           action={
             onRetryPolling && (
               <Button color="inherit" size="small" onClick={onRetryPolling}>
-                בדוק שוב
+                {t("transcript.checkAgain")}
               </Button>
             )
           }
         >
-          הפסקנו לבדוק אחרי המתנה ארוכה. ייתכן שהתמלול נתקע.
+          {t("transcript.stoppedChecking")}
         </Alert>
       )}
 
@@ -88,7 +83,7 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.5, color: "text.secondary" }}>
           <CircularProgress size={18} />
           <Typography variant="body2">
-            התמלול מוכן. מפיק סיכום ונקודות מפתח...
+            {t("transcript.readyAnalyzing")}
           </Typography>
         </Box>
       )}
@@ -97,7 +92,7 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.5, color: "text.secondary" }}>
           <CircularProgress size={18} />
           <Typography variant="body2">
-            מתמלל את השמע באמצעות Whisper. בדרך כלל לוקח 1–3 דקות להקלטה של 30 דקות.
+            {t("transcript.transcribingHint")}
           </Typography>
         </Box>
       )}
@@ -116,13 +111,13 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
         // Each line in the direction of its own words (the transcript is
         // content): a line opening with a Latin name stays right to left.
         sx={{ "& textarea": { unicodeBidi: "plaintext", textAlign: "start" } }}
-        helperText={isAiActionBusy(fixStatus) ? "העברית מתוקנת ברקע. הטקסט יתעדכן כשהתיקון יסתיים." : undefined}
+        helperText={isAiActionBusy(fixStatus) ? t("transcript.fixInBackground") : undefined}
       />
 
       {canEdit && (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1, alignSelf: "flex-end", alignItems: "flex-end" }}>
           {saveFeedback === "saved" && (
-            <Alert severity="success" sx={{ width: "100%" }}>התמלול נשמר בהצלחה</Alert>
+            <Alert severity="success" sx={{ width: "100%" }}>{t("transcript.saved")}</Alert>
           )}
           {saveFeedback && saveFeedback !== "saved" && (
             <Alert severity="error" sx={{ width: "100%" }}>{saveFeedback}</Alert>
@@ -132,7 +127,7 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
             onClick={handleSave}
             disabled={saving || !editedText}
           >
-            {saving ? "שומר..." : "שמור תמלול"}
+            {saving ? t("transcript.saving") : t("transcript.save")}
           </Button>
         </Box>
       )}

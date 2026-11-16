@@ -3,11 +3,13 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import ForumIcon from "@mui/icons-material/ForumOutlined";
 import ChatPane from "../../features/ChatPane/ChatPane";
-import useAskArchivePageController, { ARCHIVE_WORDS, ARCHIVE_SUGGESTIONS } from "./useAskArchivePageController";
+import { useTranslation } from "react-i18next";
+import useAskArchivePageController, { archiveSuggestions } from "./useAskArchivePageController";
 
-// "שאל את הארכיון" (PRD ASK-2): one question over every lesson the reader may
+// "Ask the archive" (PRD ASK-2): one question over every lesson the reader may
 // see, answered with each part cited to its own lesson.
 const AskArchivePage = () => {
+  const { t } = useTranslation("chat");
   const c = useAskArchivePageController();
   return (
     <Box sx={{ p: { xs: 1.5, sm: 3 }, display: "flex", justifyContent: "center" }}>
@@ -28,13 +30,13 @@ const AskArchivePage = () => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <ForumIcon color="primary" />
           <Box>
-            <Typography variant="h5" component="h1" fontWeight={700}>שאל את הארכיון</Typography>
+            <Typography variant="h5" component="h1" fontWeight={700}>{t("askArchive.title")}</Typography>
             <Typography variant="body2" color="text.secondary">
-              שאלה אחת על כל השיעורים — עם מקור מדויק לכל טענה.
+              {t("askArchive.subtitle")}
             </Typography>
           </Box>
         </Box>
-        <ChatPane chat={c.chat} opener={c.opener} words={ARCHIVE_WORDS} suggestedQuestions={ARCHIVE_SUGGESTIONS} />
+        <ChatPane chat={c.chat} opener={c.opener} subject="archive" suggestedQuestions={archiveSuggestions()} />
       </Paper>
     </Box>
   );

@@ -16,6 +16,7 @@ import usePublicLink from "../usePublicLink";
 // it fills have to look like the same thing, and two independent imports stayed
 // matched only for as long as nobody changed one of them.
 import { likeIcons, saveIcons, LIKE_COLOUR, SAVE_COLOUR } from "../../../layout/personalShelves";
+import { useTranslation } from "react-i18next";
 
 // The like / save / download / share row, and the overlays behind it.
 //
@@ -147,6 +148,7 @@ const MediaActionsBar = ({
   isSaved = false,
   onToggleSave,
 }) => {
+  const { t } = useTranslation("lesson");
   const [shareOpen, setShareOpen] = useState(false);
   // A lesson its manager made public is shared by its public link (PRD COM-3b).
   const publicLink = usePublicLink(media);
@@ -179,7 +181,7 @@ const MediaActionsBar = ({
           endIcon={isLiked ? <likeIcons.on /> : <likeIcons.off />}
           sx={{ ...pillButtonSx, ...(isLiked && likedSx) }}
         >
-          {isLiked ? "אהבתי" : "לייק"}
+          {isLiked ? t("actions.liked") : t("actions.like")}
         </Button>
 
         {/* Saving is two actions that belong together, so they share one pill
@@ -195,16 +197,16 @@ const MediaActionsBar = ({
             endIcon={isSaved ? <saveIcons.on /> : <saveIcons.off />}
             sx={saveMainSx()}
           >
-            {isSaved ? "נשמר" : "שמירה"}
+            {isSaved ? t("actions.saved") : t("actions.save")}
           </Button>
           {/* A hairline between the halves, so it is visible that the caret is
               its own target and a click there will not toggle the save. */}
           <Divider orientation="vertical" flexItem sx={{ borderColor: "inherit", opacity: 0.5 }} />
-          <Tooltip title="הוספה לרשימת שיעורים">
+          <Tooltip title={t("actions.addToList")}>
             <IconButton
               onClick={(e) => setSaveAnchor(e.currentTarget)}
               aria-haspopup="menu"
-              aria-label="הוספה לרשימת שיעורים"
+              aria-label={t("actions.addToList")}
               sx={{ borderRadius: 0, px: 0.5, color: "inherit" }}
             >
               <ExpandLessIcon />
@@ -219,7 +221,7 @@ const MediaActionsBar = ({
           endIcon={<FileDownloadOutlinedIcon />}
           sx={pillButtonSx}
         >
-          הורדה
+          {t("actions.download")}
         </Button>
         <Button
           onClick={() => setShareOpen(true)}
@@ -227,7 +229,7 @@ const MediaActionsBar = ({
           endIcon={<ShareOutlinedIcon />}
           sx={pillButtonSx}
         >
-          שיתוף
+          {t("actions.share")}
         </Button>
       </Box>
 

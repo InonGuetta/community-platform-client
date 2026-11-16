@@ -2,7 +2,7 @@
 import { test, expect, describe, vi } from "vitest";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ChatPane, { suggestionsFor, FIXED_SUGGESTIONS } from "./ChatPane";
+import ChatPane, { suggestionsFor, fixedSuggestions } from "./ChatPane";
 
 // The chat is presentation only: `chat` is what useAIDiscussionController
 // hands it, so every state is a different object here.
@@ -300,8 +300,8 @@ describe("starting questions", () => {
   });
 
   test("falls back to the fixed three for a lesson that has none yet", () => {
-    expect(suggestionsFor(null)).toEqual(FIXED_SUGGESTIONS);
-    expect(suggestionsFor([])).toEqual(FIXED_SUGGESTIONS);
+    expect(suggestionsFor(null)).toEqual(fixedSuggestions());
+    expect(suggestionsFor([])).toEqual(fixedSuggestions());
     expect(suggestionsFor(["א?"])).toEqual(["א?"]);
   });
 });

@@ -5,11 +5,13 @@ import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import { Link as RouterLink } from "react-router-dom";
 import DirectionalIcon from "../../../../components/features/DirectionalIcon/DirectionalIcon";
+import { useTranslation } from "react-i18next";
 
 // Under the player, for a lesson that is part of a course (PRD CRS-1, CRS-3):
 // where it stands in the track, a way to the lesson after it, and the countdown
 // to that lesson when this one ends. See useCourseTrackForLesson.
 const CourseTrackBar = ({ track }) => {
+  const { t } = useTranslation(["lesson", "common"]);
   if (!track?.inTrack) return null;
   const { place, next, countdown } = track;
 
@@ -21,24 +23,24 @@ const CourseTrackBar = ({ track }) => {
           sx={{ mb: 1 }}
           action={
             <Box sx={{ display: "flex", gap: 1 }}>
-              <Button color="inherit" size="small" onClick={track.goNext}>עכשיו</Button>
-              <Button color="inherit" size="small" onClick={track.stopCountdown}>ביטול</Button>
+              <Button color="inherit" size="small" onClick={track.goNext}>{t("track.now")}</Button>
+              <Button color="inherit" size="small" onClick={track.stopCountdown}>{t("common:actions.cancel")}</Button>
             </Box>
           }
         >
-          השיעור הבא, &quot;{next.title}&quot;, יתחיל בעוד {countdown} שניות
+          {t("track.nextStarts", { title: next.title, seconds: countdown })}
         </Alert>
       )}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-          שיעור {place.index} מתוך {place.count} בקורס{" "}
+          {t("track.place", { index: place.index, count: place.count })}{" "}
           <Link component={RouterLink} to={track.trackHref} fontWeight={600} underline="hover">
             {track.courseTitle}
           </Link>
         </Typography>
         {next && (
           <Button size="small" variant="outlined" endIcon={<DirectionalIcon toward="forward" />} onClick={track.goNext}>
-            הבא: {next.title}
+            {t("track.next", { title: next.title })}
           </Button>
         )}
       </Box>

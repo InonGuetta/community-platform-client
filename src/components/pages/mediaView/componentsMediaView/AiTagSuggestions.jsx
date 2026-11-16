@@ -9,6 +9,7 @@ import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import useAiTagSuggestions from "../useAiTagSuggestions";
+import { useTranslation } from "react-i18next";
 
 // "תגיות מוצעות" (PRD ARCH-4) at the foot of the summary, for whoever may tag
 // the lesson: what the model proposed after reading the summary, each with its
@@ -16,6 +17,7 @@ import useAiTagSuggestions from "../useAiTagSuggestions";
 // all together. With nothing waiting, a way to ask — for a lesson processed
 // before proposals existed.
 const AiTagSuggestions = ({ mediaId, onTagged, canRequest = true }) => {
+  const { t } = useTranslation("lesson");
   const s = useAiTagSuggestions({ mediaId, enabled: true, onTagged });
   if (s.loading) return null;
   const ids = s.suggestions.map((t) => t.id);
@@ -24,22 +26,22 @@ const AiTagSuggestions = ({ mediaId, onTagged, canRequest = true }) => {
     <Paper variant="outlined" sx={{ p: 1.5, mt: 2, borderRadius: 2, borderStyle: "dashed" }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: s.suggestions.length ? 1 : 0, flexWrap: "wrap" }}>
         <AutoAwesomeOutlinedIcon fontSize="small" color="secondary" />
-        <Typography fontWeight={700} sx={{ flex: 1 }}>תגיות מוצעות</Typography>
+        <Typography fontWeight={700} sx={{ flex: 1 }}>{t("aiTags.title")}</Typography>
         {s.working && <CircularProgress size={18} />}
         {s.suggestions.length > 1 && (
           <>
-            <Button size="small" disabled={s.working} onClick={() => s.approve(ids)}>אישור הכל</Button>
-            <Button size="small" color="inherit" disabled={s.working} onClick={() => s.dismiss(null)}>דחיית הכל</Button>
+            <Button size="small" disabled={s.working} onClick={() => s.approve(ids)}>{t("aiTags.approveAll")}</Button>
+            <Button size="small" color="inherit" disabled={s.working} onClick={() => s.dismiss(null)}>{t("aiTags.dismissAll")}</Button>
           </>
         )}
         {s.suggestions.length === 0 && canRequest && (
-          <Button size="small" variant="outlined" disabled={s.working} onClick={s.request}>הצעת תגיות</Button>
+          <Button size="small" variant="outlined" disabled={s.working} onClick={s.request}>{t("aiTags.request")}</Button>
         )}
       </Box>
 
       {s.suggestions.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
-          אין הצעות שממתינות. אפשר לבקש הצעות מתוך עץ התגיות לפי הסיכום של השיעור.
+          {t("aiTags.none")}
         </Typography>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
@@ -52,16 +54,16 @@ const AiTagSuggestions = ({ mediaId, onTagged, canRequest = true }) => {
                   {tag.reason}
                 </Typography>
               </Box>
-              <Tooltip title="הוספה לשיעור">
+              <Tooltip title={t("aiTags.add")}>
                 <span>
-                  <IconButton size="small" color="success" disabled={s.working} onClick={() => s.approve([tag.id])} aria-label={`הוספת התגית ${tag.name}`}>
+                  <IconButton size="small" color="success" disabled={s.working} onClick={() => s.approve([tag.id])} aria-label={t("aiTags.addNamed", { name: tag.name })}>
                     <CheckIcon fontSize="small" />
                   </IconButton>
                 </span>
               </Tooltip>
-              <Tooltip title="דחייה">
+              <Tooltip title={t("aiTags.dismiss")}>
                 <span>
-                  <IconButton size="small" disabled={s.working} onClick={() => s.dismiss([tag.id])} aria-label={`דחיית התגית ${tag.name}`}>
+                  <IconButton size="small" disabled={s.working} onClick={() => s.dismiss([tag.id])} aria-label={t("aiTags.dismissNamed", { name: tag.name })}>
                     <CloseIcon fontSize="small" />
                   </IconButton>
                 </span>

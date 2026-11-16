@@ -6,6 +6,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import { mediaApi } from "../../../../api/mediaApi";
 import { formatTime } from "../../../../utilities/formatTime";
+import { useTranslation } from "react-i18next";
 
 // "צ'אט המפגש" (PRD REC-3): the chat of the live session this lesson was
 // recorded in — only what was written while recording, by those whose voice
@@ -27,34 +28,35 @@ export const useSessionChat = (mediaId) => {
 };
 
 const SessionChatPanel = ({ mediaId, onSeek }) => {
+  const { t } = useTranslation("lesson");
   const { status, messages } = useSessionChat(mediaId);
 
   if (status === "loading") {
-    return <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}><CircularProgress size={24} aria-label="טוען את הצ'אט" /></Box>;
+    return <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}><CircularProgress size={24} aria-label={t("sessionChat.loading")} /></Box>;
   }
-  if (status === "failed") return <Alert severity="error">{"טעינת הצ'אט מהמפגש נכשלה."}</Alert>;
+  if (status === "failed") return <Alert severity="error">{t("sessionChat.failed")}</Alert>;
   if (messages.length === 0) {
-    return <Typography variant="body2" color="text.secondary">{"לא נכתבו הודעות בצ'אט בזמן ההקלטה."}</Typography>;
+    return <Typography variant="body2" color="text.secondary">{t("sessionChat.empty")}</Typography>;
   }
 
   return (
-    <Box component="ol" sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 1.25 }} aria-label="הצ'אט מהמפגש">
+    <Box component="ol" sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 1.25 }} aria-label={t("sessionChat.label")}>
       <Typography variant="caption" color="text.secondary" component="li">
-        {"ההודעות שנכתבו בצ'אט בזמן ההקלטה. לחיצה על הזמן מנגנת את הרגע שבו נכתבו."}
+        {t("sessionChat.intro")}
       </Typography>
       {messages.map((m, i) => (
         <Box component="li" key={i} sx={{ display: "flex", gap: 1.25, alignItems: "baseline" }}>
           {typeof m.offset === "number" && onSeek ? (
             <ButtonBase
               onClick={() => onSeek(m.offset)}
-              aria-label={`נגן מ־${formatTime(m.offset)}`}
+              aria-label={t("sessionChat.playFrom", { time: formatTime(m.offset) })}
               sx={{ fontSize: "0.75rem", fontWeight: 700, color: "primary.main", borderRadius: 1, px: 0.5, flexShrink: 0, fontVariantNumeric: "tabular-nums" }}
             >
               {formatTime(m.offset)}
             </ButtonBase>
           ) : null}
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" fontWeight={700} color="text.secondary">{m.name || "משתתף"}</Typography>
+            <Typography variant="caption" fontWeight={700} color="text.secondary">{m.name || t("sessionChat.participant")}</Typography>
             {/* Plain text, never markup: it is what a participant typed. */}
             <Typography variant="body2" dir="auto" sx={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{m.text}</Typography>
           </Box>

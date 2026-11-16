@@ -135,10 +135,10 @@ const useAIDiscussionController = ({ mediaId, transcript, media }) => {
   const copyConversation = useCallback(async (messages) => {
     try {
       await navigator.clipboard.writeText(conversationText(messages, { mediaTitle: media?.title }));
-      dispatch(notify({ message: i18n.t("lesson:discussion.copied"), severity: "success" }));
+      dispatch(notify({ message: i18n.t("chat:copied"), severity: "success" }));
       return true;
     } catch {
-      dispatch(notify({ message: i18n.t("lesson:discussion.copyFailed"), severity: "warning" }));
+      dispatch(notify({ message: i18n.t("chat:copyFailed"), severity: "warning" }));
       return false;
     }
   }, [dispatch, media?.title]);

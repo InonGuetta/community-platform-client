@@ -41,5 +41,20 @@
     "transcriptFile": "תמלול",
     "noTranscript": "אין תמלול זמין לפריט זה.",
     "pdfFailed": "יצירת ה-PDF נכשלה. נסה שוב."
+  },
+  "player": {
+    "pause": "השהיה",
+    "play": "נגינה",
+    "position": "מיקום בשיעור",
+    "unmute": "ביטול השתקה",
+    "mute": "השתקה",
+    "volume": "עוצמת שמע",
+    "hideCaptions": "הסתרת הכתוביות",
+    "showCaptions": "הצגת כתוביות",
+    "captions": "כתוביות",
+    "settings": "הגדרות",
+    "settingsLabel": "הגדרות נגן",
+    "speed": "מהירות הפעלה",
+    "lessonFallback": "שיעור"
   }
 }

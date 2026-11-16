@@ -10,6 +10,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import FitScreenIcon from "@mui/icons-material/FitScreen";
+import { useTranslation } from "react-i18next";
 
 // The part of the browser's toolbar we chose to rebuild.
 //
@@ -51,6 +52,7 @@ export const clampZoom = (value) =>
   Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round(value * 100) / 100));
 
 const PdfToolbar = ({ page, pages, onPage, zoom, onZoom, onFit }) => {
+  const { t } = useTranslation("lesson");
   // The box holds a draft while it is being typed into, so that clearing it to
   // type a new number does not immediately jump to page 1.
   const [draft, setDraft] = useState(String(page));
@@ -70,16 +72,16 @@ const PdfToolbar = ({ page, pages, onPage, zoom, onZoom, onFit }) => {
         bgcolor: "background.paper", borderRadius: 2, boxShadow: 1,
       }}
     >
-      <Tooltip describeChild title="העמוד הקודם">
+      <Tooltip describeChild title={t("pdf.prev")}>
         <span>
-          <IconButton size="small" onClick={() => onPage(page - 1)} disabled={page <= 1} aria-label="העמוד הקודם">
+          <IconButton size="small" onClick={() => onPage(page - 1)} disabled={page <= 1} aria-label={t("pdf.prev")}>
             <KeyboardArrowUpIcon fontSize="small" />
           </IconButton>
         </span>
       </Tooltip>
-      <Tooltip describeChild title="העמוד הבא">
+      <Tooltip describeChild title={t("pdf.next")}>
         <span>
-          <IconButton size="small" onClick={() => onPage(page + 1)} disabled={page >= pages} aria-label="העמוד הבא">
+          <IconButton size="small" onClick={() => onPage(page + 1)} disabled={page >= pages} aria-label={t("pdf.next")}>
             <KeyboardArrowDownIcon fontSize="small" />
           </IconButton>
         </span>
@@ -98,7 +100,7 @@ const PdfToolbar = ({ page, pages, onPage, zoom, onZoom, onFit }) => {
           if (e.key === "Escape") setDraft(String(page));
         }}
         inputProps={{
-          "aria-label": "מספר עמוד",
+          "aria-label": t("pdf.pageNumber"),
           inputMode: "numeric",
           style: { textAlign: "center", padding: 0 },
         }}
@@ -110,13 +112,13 @@ const PdfToolbar = ({ page, pages, onPage, zoom, onZoom, onFit }) => {
 
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-      <Tooltip describeChild title="הקטנה">
+      <Tooltip describeChild title={t("pdf.zoomOut")}>
         <span>
           <IconButton
             size="small"
             onClick={() => onZoom(clampZoom(zoom - ZOOM_STEP))}
             disabled={zoom <= MIN_ZOOM}
-            aria-label="הקטנה"
+            aria-label={t("pdf.zoomOut")}
           >
             <RemoveIcon fontSize="small" />
           </IconButton>
@@ -129,21 +131,21 @@ const PdfToolbar = ({ page, pages, onPage, zoom, onZoom, onFit }) => {
       >
         {Math.round(zoom * 100)}%
       </Typography>
-      <Tooltip describeChild title="הגדלה">
+      <Tooltip describeChild title={t("pdf.zoomIn")}>
         <span>
           <IconButton
             size="small"
             onClick={() => onZoom(clampZoom(zoom + ZOOM_STEP))}
             disabled={zoom >= MAX_ZOOM}
-            aria-label="הגדלה"
+            aria-label={t("pdf.zoomIn")}
           >
             <AddIcon fontSize="small" />
           </IconButton>
         </span>
       </Tooltip>
-      <Tooltip describeChild title="התאמה לרוחב">
+      <Tooltip describeChild title={t("pdf.fit")}>
         <span>
-          <IconButton size="small" onClick={onFit} disabled={zoom === 1} aria-label="התאמה לרוחב">
+          <IconButton size="small" onClick={onFit} disabled={zoom === 1} aria-label={t("pdf.fit")}>
             <FitScreenIcon fontSize="small" />
           </IconButton>
         </span>

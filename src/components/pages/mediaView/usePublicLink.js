@@ -5,6 +5,7 @@ import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { canManageMedia } from "../../../utilities/permissions";
 import { publicApi } from "../../../api/publicApi";
+import { useTranslation } from "react-i18next";
 
 // Opening one lesson to anyone with the link (PRD COM-3b; decided 2026-11-05:
 // the archive stays closed, and a lesson's manager may make that lesson public).
@@ -13,6 +14,7 @@ import { publicApi } from "../../../api/publicApi";
 // it is, and — for whoever manages it — the switch. A guest sees it only while
 // it is also published, so the switch says so rather than pretending.
 const usePublicLink = (media) => {
+  const { t } = useTranslation("lesson");
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const [busy, setBusy] = useState(false);
@@ -25,8 +27,8 @@ const usePublicLink = (media) => {
     setBusy(false);
     dispatch(notify(
       result.meta.requestStatus === "fulfilled"
-        ? { message: next ? "השיעור פתוח עכשיו לכל מי שיש לו את הקישור" : "השיעור כבר לא פתוח בלי חשבון", severity: "success" }
-        : { message: "שינוי הקישור הציבורי נכשל", severity: "error" }
+        ? { message: next ? t("share.nowPublic") : t("share.noLongerPublic"), severity: "success" }
+        : { message: t("share.publicFailed"), severity: "error" }
     ));
   };
 

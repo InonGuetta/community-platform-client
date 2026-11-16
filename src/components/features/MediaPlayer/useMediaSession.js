@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { defaultCreatorName } from "../../../utilities/constant";
+import i18n from "../../../i18n/i18n";
 
 // Playing in the background, and from the lock screen (PRD MOB-3).
 //
@@ -25,9 +26,9 @@ const ARTWORK = [
 // What the lock screen says. The lecturer only when there is one — "כללי" is
 // the archive's word for "not recorded", not a name to show on a phone.
 export const mediaSessionMetadata = (media) => ({
-  title: media?.title || "שיעור",
+  title: media?.title || i18n.t("media:player.lessonFallback"),
   artist: media?.creator_name && media.creator_name !== defaultCreatorName ? media.creator_name : "",
-  album: media?.course_title || "פלטפורמת הקהילה",
+  album: media?.course_title || i18n.t("common:appName"),
   artwork: media?.thumbnail_url ? [{ src: media.thumbnail_url }, ...ARTWORK] : ARTWORK,
 });
 

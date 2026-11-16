@@ -18,6 +18,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DialogTitle from "../../../features/Dialogs/DialogTitle";
 import DialogContent from "../../../features/Dialogs/DialogContent";
 import { formatTime } from "../../../../utilities/formatTime";
+import { useTranslation } from "react-i18next";
 
 // MUI's ListItemButton carries a physical `text-align: left`, and this app runs
 // RTL without the stylis flip plugin — so the label would sit at the far left of
@@ -33,6 +34,7 @@ const rowSx = { borderRadius: 1, textAlign: "start" };
 // switch. Without it (or for a lesson that is not public) the link is the
 // lesson's own page, which asks a stranger to sign in.
 const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime = false, publicLink = null }) => {
+  const { t } = useTranslation("lesson");
   const {
     withTime, setWithTime, sharingPublic, offerTime,
     handleWhatsApp, handleGmail, handleMailApp, handleCopy,
@@ -40,7 +42,7 @@ const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle onClose={onClose}>שיתוף</DialogTitle>
+      <DialogTitle onClose={onClose}>{t("share.title")}</DialogTitle>
       <DialogContent>
         <List disablePadding>
           <ListItemButton onClick={handleWhatsApp} sx={rowSx}>
@@ -53,11 +55,11 @@ const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime
           </ListItemButton>
           <ListItemButton onClick={handleMailApp} sx={rowSx}>
             <ListItemIcon sx={{ minWidth: 40 }}><ForwardToInboxOutlinedIcon /></ListItemIcon>
-            <ListItemText primary="אפליקציית מייל" />
+            <ListItemText primary={t("share.mailApp")} />
           </ListItemButton>
           <ListItemButton onClick={handleCopy} sx={rowSx}>
             <ListItemIcon sx={{ minWidth: 40 }}><ContentCopyIcon /></ListItemIcon>
-            <ListItemText primary="העתקת קישור" />
+            <ListItemText primary={t("share.copyLink")} />
           </ListItemButton>
         </List>
 
@@ -75,21 +77,21 @@ const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime
               label={
                 <span>
                   <PublicIcon fontSize="small" sx={{ verticalAlign: "middle", marginInlineEnd: 0.5 }} />
-                  קישור ציבורי: פתוח גם בלי חשבון
+                  {t("share.publicLink")}
                 </span>
               }
             />
             <Typography variant="caption" color="text.secondary" component="p">
-              מי שמקבל את הקישור רואה את השיעור ואת הסיכום שלו, בלי המחברת ובלי הצ׳אט. שאר הארכיון נשאר סגור.
+              {t("share.publicHint")}
             </Typography>
             {publicLink.isPublic && !publicLink.isPublished && (
-              <Alert severity="warning" sx={{ mt: 1 }}>השיעור הוא טיוטה, ולכן הקישור הציבורי לא ייפתח עד שיפורסם.</Alert>
+              <Alert severity="warning" sx={{ mt: 1 }}>{t("share.draftWarning")}</Alert>
             )}
           </>
         )}
         {sharingPublic && !publicLink?.canManage && (
           <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
-            השיעור הזה פתוח גם בלי חשבון, אז אפשר לשתף אותו עם כל אחד.
+            {t("share.alreadyPublic")}
           </Typography>
         )}
 
@@ -97,7 +99,7 @@ const ShareDialog = ({ open, onClose, title, path, currentTime = 0, canShareTime
           <FormControlLabel
             sx={{ mt: 1 }}
             control={<Checkbox size="small" checked={withTime} onChange={(e) => setWithTime(e.target.checked)} />}
-            label={`שתף מהזמן הנוכחי (${formatTime(currentTime)})`}
+            label={t("share.fromTime", { time: formatTime(currentTime) })}
           />
         )}
       </DialogContent>

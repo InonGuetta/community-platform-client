@@ -7,6 +7,7 @@ import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import { useTranslation } from "react-i18next";
 
 // The note asked for after a bookmark is placed, and before anything is stored.
 //
@@ -35,8 +36,9 @@ const BookmarkNotePanel = ({
   onCancel,
   saving = false,
   notice = null,
-  label = "שמירת סימנייה",
+  label,
 }) => {
+  const { t } = useTranslation(["lesson", "common"]);
   const ref = useRef(null);
 
   // The panel is rendered below a reading area capped at 70vh, so on a long
@@ -51,7 +53,7 @@ const BookmarkNotePanel = ({
     <Paper
       ref={ref}
       elevation={6}
-      aria-label={label}
+      aria-label={label ?? t("bookmark.save")}
       sx={{
         mt: 1, p: 1.5, display: "flex", flexDirection: "column", gap: 1,
         position: "sticky", bottom: 8, zIndex: 2,
@@ -66,13 +68,13 @@ const BookmarkNotePanel = ({
         color="text.secondary"
         sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
       >
-        {quote ? `„${quote}”` : "הקטע שסומן"}
+        {quote ? `„${quote}”` : t("bookmark.marked")}
       </Typography>
 
       {notice && <Alert severity="info" sx={{ py: 0 }}>{notice}</Alert>}
 
       <TextField
-        label="הערה (לא חובה)"
+        label={t("bookmark.note")}
         value={note}
         onChange={(e) => onNoteChange(e.target.value)}
         size="small"
@@ -85,7 +87,7 @@ const BookmarkNotePanel = ({
       />
 
       <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-        <Button onClick={onCancel} size="small" disabled={saving}>ביטול</Button>
+        <Button onClick={onCancel} size="small" disabled={saving}>{t("common:actions.cancel")}</Button>
         <Button
           onClick={onSave}
           size="small"
@@ -93,7 +95,7 @@ const BookmarkNotePanel = ({
           disabled={saving}
           startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <BookmarkIcon />}
         >
-          שמירת סימנייה
+          {t("bookmark.save")}
         </Button>
       </Box>
     </Paper>

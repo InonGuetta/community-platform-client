@@ -27,6 +27,7 @@ import { useDownloadItems } from "../DownloadMenu/downloadOptions";
 import { mediaTypeAccents } from "../../../utilities/constant";
 import { formatTime } from "../../../utilities/formatTime";
 import { useDirection, menuOrigins } from "../../../i18n/useDirection";
+import { useTranslation } from "react-i18next";
 
 const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
 
@@ -97,6 +98,7 @@ const PlayerControls = ({
   // PRD MOB-5. The button is there only when the lesson has captions to show.
   captionsAvailable = false, captionsOn = false, onToggleCaptions,
 }) => {
+  const { t } = useTranslation("media");
   // The settings menu sits outside the sliders' forced-ltr theme, so it
   // follows the interface: it opens from the side its button's line starts on.
   const { start } = useDirection();
@@ -173,7 +175,7 @@ const PlayerControls = ({
       <IconButton
         onClick={onTogglePlay}
         size="small"
-        aria-label={playing ? "השהיה" : "נגינה"}
+        aria-label={playing ? t("player.pause") : t("player.play")}
         sx={{ color: BAR_INK, flexShrink: 0 }}
       >
         {playing ? <PauseIcon /> : <PlayArrowIcon />}
@@ -200,7 +202,7 @@ const PlayerControls = ({
           max={duration || 0}
           onChange={(_, v) => onSeek(v)}
           onChangeCommitted={(_, v) => onSeekCommit(v)}
-          aria-label="מיקום בשיעור"
+          aria-label={t("player.position")}
           getAriaValueText={(v) => formatTime(v)}
           size="small"
           sx={{
@@ -225,7 +227,7 @@ const PlayerControls = ({
           <IconButton
             onClick={onToggleMute}
             size="small"
-            aria-label={silent ? "ביטול השתקה" : "השתקה"}
+            aria-label={silent ? t("player.unmute") : t("player.mute")}
             aria-pressed={silent}
             sx={{ color: BAR_INK }}
           >
@@ -267,7 +269,7 @@ const PlayerControls = ({
                 step={0.01}
                 onChange={(_, v) => onVolumeChange(v)}
                 onPointerDown={() => setDraggingVolume(true)}
-                aria-label="עוצמת שמע"
+                aria-label={t("player.volume")}
                 getAriaValueText={(v) => `${Math.round(v * 100)}%`}
                 size="small"
                 sx={{
@@ -284,11 +286,11 @@ const PlayerControls = ({
       </ThemeProvider>
 
       {captionsAvailable && (
-        <Tooltip title={captionsOn ? "הסתרת הכתוביות" : "הצגת כתוביות"}>
+        <Tooltip title={captionsOn ? t("player.hideCaptions") : t("player.showCaptions")}>
           <IconButton
             onClick={onToggleCaptions}
             size="small"
-            aria-label="כתוביות"
+            aria-label={t("player.captions")}
             aria-pressed={captionsOn}
             sx={{ color: BAR_INK, flexShrink: 0 }}
           >
@@ -297,11 +299,11 @@ const PlayerControls = ({
         </Tooltip>
       )}
 
-      <Tooltip title="הגדרות">
+      <Tooltip title={t("player.settings")}>
         <IconButton
           onClick={(e) => setMenuAnchor(e.currentTarget)}
           size="small"
-          aria-label="הגדרות נגן"
+          aria-label={t("player.settingsLabel")}
           aria-haspopup="menu"
           sx={{ color: BAR_INK, flexShrink: 0 }}
         >
@@ -319,7 +321,7 @@ const PlayerControls = ({
         <MenuItem disabled sx={{ opacity: "1 !important" }}>
           <ListItemIcon><SpeedIcon fontSize="small" /></ListItemIcon>
           <ListItemText
-            primary="מהירות הפעלה"
+            primary={t("player.speed")}
             primaryTypographyProps={{ variant: "caption", fontWeight: 700 }}
             sx={{ textAlign: "start" }}
           />

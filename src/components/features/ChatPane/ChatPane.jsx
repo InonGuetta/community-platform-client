@@ -19,11 +19,14 @@ import { statuses } from "../../../utilities/constant";
 import { hebrewForError } from "../../../utilities/apiError";
 import { placeOf, canOpenPlace, openPlace } from "../../../utilities/discussionPlace";
 import { canSaveAnswer, SAVE_STATES } from "../../../utilities/discussionNote";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../i18n/i18n";
 
 // The conversation with the AI — about one lesson, in the lesson page's
 // "דיון עם AI" tab, or about the whole archive, on /ask. Presentation only:
 // `chat` is what useAIDiscussionController or useAskArchivePageController
-// hands it, and `words` carries the wording that differs between the two.
+// hands it, and `subject` — "lesson", "book" or "archive" — picks the
+// sentences that differ between them (the "chat" namespace, by context).
 //
 // Every answer is grounded in the lesson's own passages and cites them as [n].
 // Those markers become small buttons inside the text, and the passages are
@@ -38,11 +41,7 @@ const MAX_QUESTION_CHARS = 1000;
 // These fixed three are the fallback: a lesson's own questions, written from
 // its summary after processing (PRD ASK-7, migration 045), come first — they
 // are about THIS lesson rather than the same three on every lesson.
-export const FIXED_SUGGESTIONS = [
-  "מה הנקודה המרכזית?",
-  "סכם בשלוש נקודות",
-  "אילו מקורות הוזכרו?",
-];
+export const fixedSuggestions = () => i18n.t("chat:suggestions", { returnObjects: true });
 
 // The answer's text, with each [n] turned into a button for passage n. A
 // marker with no citation behind it stays the plain text it is — the server
@@ -62,7 +61,7 @@ const AnswerText = ({ content, citations, onOpen }) => {
           component={openable ? "button" : "span"}
           type={openable ? "button" : undefined}
           onClick={openable ? () => onOpen.go(place) : undefined}
-          aria-label={openable ? `מקור ${n}, ${place.label}` : undefined}
+          aria-label={openable ? i18n.t("chat:citation", { n, place: place.label }) : undefined}
           sx={{
             display: "inline-flex",
             alignItems: "center",
@@ -91,10 +90,9 @@ const AnswerText = ({ content, citations, onOpen }) => {
 // The "thinking" line, by the step the server says the answer is at. Before
 // it has said anything, the general line; finding the passages is the slow
 // part of a long lesson, so that one is named.
-const waitingLabel = (stage, inSource) => {
-  if (stage === "writing") return "כותב תשובה…";
-  if (stage === "searching") return `מחפש קטעים ${inSource}…`;
-  return `מעיין ${inSource}…`;
+const waitingLabel = (t, stage, subject) => {
+  if (stage === "writing") return t("waiting.writing");
+  return t(stage === "searching" ? "waiting.searching" : "waiting.reading", { context: subject });
 };
 
 const Sources = ({ citations, onOpen }) => (
@@ -117,15 +115,17 @@ const Sources = ({ citations, onOpen }) => (
   </Box>
 );
 
-// "שמור למחברת" under an answer. Saved once, it says so and stays pressed for
-// this visit; a failure says so and can be pressed again.
-const SAVE_LABELS = {
-  [SAVE_STATES.saving]: "שומר…",
-  [SAVE_STATES.saved]: "נשמר במחברת",
-  [SAVE_STATES.failed]: "השמירה נכשלה — נסה שוב",
+// "Save to notebook" under an answer. Saved once, it says so and stays pressed
+// for this visit; a failure says so and can be pressed again.
+const SAVE_KEYS = {
+  [SAVE_STATES.saving]: "save.saving",
+  [SAVE_STATES.saved]: "save.saved",
+  [SAVE_STATES.failed]: "save.failed",
 };
 
-const SaveAnswerButton = ({ state, onSave }) => (
+const SaveAnswerButton = ({ state, onSave }) => {
+  const { t } = useTranslation("chat");
+  return (
   <Button
     size="small"
     onClick={onSave}
@@ -134,9 +134,10 @@ const SaveAnswerButton = ({ state, onSave }) => (
     startIcon={state === SAVE_STATES.saved ? <CheckIcon /> : <NoteAddIcon />}
     sx={{ mt: 0.5, px: 0.5, minWidth: 0 }}
   >
-    {SAVE_LABELS[state] ?? "שמור למחברת"}
+    {t(SAVE_KEYS[state] ?? "save.save")}
   </Button>
-);
+  );
+};
 
 // The save button for each answer in `messages` that can be saved — what a
 // pane hands MessageBubble. Shared with the history mode.
@@ -145,14 +146,14 @@ export const answerSaver = (notebook, messages) => (message) =>
     ? { state: notebook.saved[message.id], onSave: () => notebook.save(messages, message.id) }
     : null;
 
-// "העתק שיחה": ONE button for the whole conversation, beside "שיחה חדשה" —
+// "Copy conversation": ONE button for the whole conversation, beside "שיחה חדשה" —
 // not one under every answer, which would double the buttons in a thread
 // that already has a save button and sources under each. Shared with the
 // history mode, where it copies the conversation open there.
 export const CopyConversationButton = ({ onCopy, disabled = false }) =>
   onCopy ? (
     <Button size="small" startIcon={<ContentCopyIcon />} onClick={onCopy} disabled={disabled}>
-      העתק שיחה
+      {i18n.t("chat:copy")}
     </Button>
   ) : null;
 
@@ -199,32 +200,23 @@ export const placeOpener = ({ onSeek, onOpenPage }) => ({
 const FEW_LEFT = 5;
 
 export const quotaLabel = ({ limit, remaining }) => {
-  if (remaining <= 0) return `ניצלת היום את כל ${limit} השאלות. אפשר להמשיך מחר — והחיפוש החכם זמין גם עכשיו.`;
-  if (remaining === 1) return `נשארה לך היום שאלה אחת מתוך ${limit}`;
-  return `נשארו לך היום ${remaining} שאלות מתוך ${limit}`;
+  if (remaining <= 0) return i18n.t("chat:quota.none", { limit });
+  if (remaining === 1) return i18n.t("chat:quota.one", { limit });
+  return i18n.t("chat:quota.many", { remaining, limit });
 };
 
 // The lesson's questions when it has any, the fixed ones otherwise.
 export const suggestionsFor = (questions) =>
-  Array.isArray(questions) && questions.length > 0 ? questions : FIXED_SUGGESTIONS;
-
-// What the pane calls what it is discussing. Two forms, because Hebrew merges
-// the preposition with the article: "ב" + "השיעור" is "בשיעור", never
-// "בהשיעור". The archive page passes its own (AskArchivePage).
-export const lessonWords = (isText) => {
-  const source = isText ? "הספר" : "השיעור";
-  return {
-    source,
-    inSource: isText ? "בספר" : "בשיעור",
-    intro: `אפשר לשאול כל שאלה על ${source}. התשובה תתבסס רק על מה שנאמר בו, עם הפניה למקום המדויק.`,
-  };
-};
+  Array.isArray(questions) && questions.length > 0 ? questions : fixedSuggestions();
 
 const ChatPane = ({
   chat, notebook = null, isText = false, onSeek, onOpenPage, suggestedQuestions = null,
-  // The archive page opens a citation in its own lesson, and says "הארכיון".
-  opener = null, words = null,
+  // The archive page opens a citation in its own lesson, and is about the
+  // archive: subject "archive". Otherwise the subject follows isText.
+  opener = null, subject: givenSubject = null,
 }) => {
+  const { t } = useTranslation("chat");
+  const subject = givenSubject ?? (isText ? "book" : "lesson");
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);
   const onOpen = opener ?? placeOpener({ onSeek, onOpenPage });
@@ -257,7 +249,7 @@ const ChatPane = ({
   if (chat.loadStatus === statuses.loading || chat.loadStatus === statuses.idle) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <CircularProgress size={24} aria-label="טוען את השיחה" />
+        <CircularProgress size={24} aria-label={t("loading")} />
       </Box>
     );
   }
@@ -266,9 +258,9 @@ const ChatPane = ({
     return (
       <Alert
         severity="error"
-        action={<Button color="inherit" size="small" onClick={chat.retryLoad}>נסה שוב</Button>}
+        action={<Button color="inherit" size="small" onClick={chat.retryLoad}>{t("retry")}</Button>}
       >
-        {hebrewForError(chat.loadError, "טעינת השיחה נכשלה.")}
+        {hebrewForError(chat.loadError, t("loadFailed"))}
       </Alert>
     );
   }
@@ -277,7 +269,6 @@ const ChatPane = ({
   // Once the first piece of the answer is on screen it is its own progress
   // indicator; the "thinking" line is only for the wait before it.
   const answerArriving = chat.messages.some((m) => m.streaming && m.content);
-  const { source, inSource, intro } = words ?? lessonWords(isText);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 1 }}>
@@ -294,7 +285,7 @@ const ChatPane = ({
             onClick={chat.startNew}
             disabled={chat.asking}
           >
-            שיחה חדשה
+            {t("newChat")}
           </Button>
         </Box>
       )}
@@ -302,13 +293,13 @@ const ChatPane = ({
       <Box
         role="log"
         aria-live="polite"
-        aria-label="השיחה"
+        aria-label={t("log")}
         sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, py: 0.5 }}
       >
         {empty && (
           <Box data-testid="chat-empty">
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-              {intro}
+              {t("intro", { context: subject })}
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               {suggestionsFor(suggestedQuestions).map((s) => (
@@ -323,7 +314,7 @@ const ChatPane = ({
         {chat.asking && !answerArriving && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }} data-testid="chat-thinking">
             <CircularProgress size={16} />
-            <Typography variant="body2">{waitingLabel(chat.askStage, inSource)}</Typography>
+            <Typography variant="body2">{waitingLabel(t, chat.askStage, subject)}</Typography>
           </Box>
         )}
         <div ref={endRef} />
@@ -331,7 +322,7 @@ const ChatPane = ({
 
       {chat.askError && (
         <Alert severity="error" onClose={chat.dismissAskError}>
-          {hebrewForError(chat.askError, "לא התקבלה תשובה. נסה לשאול שוב.")}
+          {hebrewForError(chat.askError, t("askFailed"))}
         </Alert>
       )}
 
@@ -358,14 +349,14 @@ const ChatPane = ({
           value={draft}
           onChange={(e) => setDraft(e.target.value.slice(0, MAX_QUESTION_CHARS))}
           onKeyDown={onKeyDown}
-          placeholder={`שאל שאלה על ${source}…`}
-          inputProps={{ "aria-label": "שאלה", maxLength: MAX_QUESTION_CHARS }}
+          placeholder={t("placeholder", { context: subject })}
+          inputProps={{ "aria-label": t("question"), maxLength: MAX_QUESTION_CHARS }}
         />
         <IconButton
           type="submit"
           color="primary"
           disabled={!draft.trim() || chat.asking}
-          aria-label="שלח"
+          aria-label={t("send")}
           // The icon points right; in a right-to-left page "send" points left.
           sx={{ "& svg": { transform: "scaleX(-1)" } }}
         >
@@ -385,7 +376,7 @@ const ChatPane = ({
       )}
 
       <Typography variant="caption" color="text.disabled" sx={{ textAlign: "center" }}>
-        התשובות נוצרות על ידי AI ועלולות לטעות — לחצו על מקור כדי לבדוק.
+        {t("disclaimer")}
       </Typography>
     </Box>
   );

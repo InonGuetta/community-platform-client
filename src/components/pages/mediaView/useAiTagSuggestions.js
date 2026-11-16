@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { mediaApi } from "../../../api/mediaApi";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { hebrewForError } from "../../../utilities/apiError";
+import { useTranslation } from "react-i18next";
 
 // Tags the LLM proposed for this lesson (PRD ARCH-4), for whoever may tag it:
 // what is waiting, asking for proposals now, and accepting or dismissing them.
@@ -11,6 +12,7 @@ import { hebrewForError } from "../../../utilities/apiError";
 // `onTagged` — the lesson's tags changed, and the page shows them, so the
 // lesson is read again.
 const useAiTagSuggestions = ({ mediaId, enabled, onTagged }) => {
+  const { t } = useTranslation("lesson");
   const dispatch = useDispatch();
   const [suggestions, setSuggestions] = useState([]);
   const [status, setStatus] = useState("idle");
@@ -44,15 +46,15 @@ const useAiTagSuggestions = ({ mediaId, enabled, onTagged }) => {
     loading: status === "loading",
     working: status === "working",
     request: () =>
-      run(() => mediaApi.requestAiTagSuggestions(mediaId), "הצעת התגיות נכשלה", (rows) => {
-        if (rows.length === 0) dispatch(notify({ message: "לא נמצאו תגיות מתאימות מהעץ", severity: "info" }));
+      run(() => mediaApi.requestAiTagSuggestions(mediaId), t("aiTags.requestFailed"), (rows) => {
+        if (rows.length === 0) dispatch(notify({ message: t("aiTags.noneFound"), severity: "info" }));
       }),
     approve: (tagIds) =>
-      run(() => mediaApi.approveAiTagSuggestions(mediaId, tagIds), "הוספת התגיות נכשלה", () => {
-        dispatch(notify({ message: tagIds.length === 1 ? "התגית נוספה לשיעור" : "התגיות נוספו לשיעור", severity: "success" }));
+      run(() => mediaApi.approveAiTagSuggestions(mediaId, tagIds), t("aiTags.approveFailed"), () => {
+        dispatch(notify({ message: t("aiTags.added", { count: tagIds.length }), severity: "success" }));
         onTagged?.();
       }),
-    dismiss: (tagIds) => run(() => mediaApi.dismissAiTagSuggestions(mediaId, tagIds), "דחיית ההצעה נכשלה"),
+    dismiss: (tagIds) => run(() => mediaApi.dismissAiTagSuggestions(mediaId, tagIds), t("aiTags.dismissFailed")),
   };
 };
 

@@ -12,6 +12,7 @@ import { usePdfFit } from "./usePdfFit";
 import { usePdfMarkSelection } from "./usePdfMarkSelection";
 import { usePdfJump } from "./usePdfJump";
 import { pageMarksFor } from "../../../../utilities/bookmarks";
+import { useTranslation } from "react-i18next";
 
 // Rendering the original PDF ourselves, instead of handing it to the browser.
 //
@@ -62,6 +63,7 @@ const PdfViewer = ({
   // had no way to learn it, and could only ever open the book at page 1.
   onPageChange,
 }) => {
+  const { t } = useTranslation("lesson");
   const containerRef = useRef(null);
   const { pdf, error, pageSize } = usePdfDocument({ media, onStatusChange });
   const { page, setPage, goToPage, observe } = usePdfPageTracking({ containerRef, pdf, onPageChange });
@@ -74,7 +76,7 @@ const PdfViewer = ({
   if (error) {
     return (
       <Alert severity="error">
-        לא ניתן להציג את הקובץ. אפשר לפתוח אותו בכרטיסייה חדשה.
+        {t("pdf.cannotShow")}
       </Alert>
     );
   }
@@ -127,14 +129,14 @@ const PdfViewer = ({
 
       {pending && (
         <BookmarkNotePanel
-          label="שמירת סימנייה על הקטע המסומן"
+          label={t("pdf.markPassage")}
           quote={pending.text}
           note={note}
           onNoteChange={setNote}
           onSave={save}
           onCancel={dismiss}
           saving={saving}
-          notice={pending.truncated ? "הסימון יישמר עד סוף העמוד." : null}
+          notice={pending.truncated ? t("pdf.untilPageEnd") : null}
         />
       )}
     </Box>

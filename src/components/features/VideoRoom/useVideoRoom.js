@@ -213,11 +213,13 @@ export const useVideoRoom = ({ roomToken, onEnd, sessionId = null }) => {
     on(SOCKET_EVENTS.SESSION_ENDED, () => onEndRef.current?.());
     on(SOCKET_EVENTS.JOIN_ERROR, ({ message }) => {
       logger.warn(`[VideoRoom] join refused: ${message}`);
-      setRoomError(message || i18n.t("sessions:notices.cannotJoin"));
+      // The server's message is English prose for the log above; the screen
+      // says its own.
+      setRoomError(i18n.t("sessions:notices.cannotJoin"));
     });
     on(SOCKET_EVENTS.SESSION_ERROR, ({ message }) => {
       logger.warn(`[VideoRoom] session error: ${message}`);
-      setRoomError(message || i18n.t("sessions:notices.actionFailed"));
+      setRoomError(i18n.t("sessions:notices.actionFailed"));
     });
 
     // Media first, then connect: an offer must not arrive before we know

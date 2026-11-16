@@ -58,7 +58,7 @@ const AiUsagePanel = () => {
           </Typography>
           {progress.percent >= 100 && (
             <Alert severity="error" sx={{ mt: 1 }}>
-              {t("ai.capReached")}.
+              {t("ai.capReached")}
             </Alert>
           )}
         </Box>

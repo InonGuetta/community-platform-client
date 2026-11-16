@@ -9,6 +9,7 @@ import {
 } from "./noteFootnotes";
 import { formatDate, formatShortDate } from "./formatDate";
 import i18n from "../i18n/i18n";
+import { directionOf } from "../i18n/languages";
 
 // Exporting a run of notes, as a PDF or as a Word document.
 //
@@ -127,10 +128,12 @@ export const downloadNotesWord = async (notes, { title: named, sources = SOURCE_
   }).join("<br>");
 
   // The office namespaces are what make Word treat this as its own document
-  // rather than as a web page it happens to be able to read. dir=rtl and the
-  // charset are what keep the Hebrew the right way round and unmangled.
+  // rather than as a web page it happens to be able to read. lang and dir follow
+  // the interface (its headings and dates are in that language); each note's
+  // own text keeps its direction from its words. The charset keeps it unmangled.
+  const lng = i18n.language;
   const html = `<!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="he" dir="rtl">
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="${lng}" dir="${directionOf(lng)}">
 <head>
 <meta charset="utf-8">
 <title>${escape(title)}</title>

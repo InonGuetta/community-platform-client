@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { donationsApi } from "../../../api/donationsApi";
 import { messageForError } from "../../../utilities/apiError";
-import { loadStripeJs, elementsOptions } from "../../../utilities/stripeJs";
+import { loadStripeJs, elementsOptions, stripeLocale } from "../../../utilities/stripeJs";
 // Messages are worded when they are set, through i18n.t rather than the hook's
 // t: the payment's callbacks must not be rebuilt for a language switch.
 import i18n from "../../../i18n/i18n";
@@ -74,7 +74,7 @@ export const useDonatePageController = () => {
     if (!intent || !container) return () => {};
     try {
       const Stripe = await loadStripeJs();
-      const stripe = Stripe(intent.publishableKey, { locale: "he" });
+      const stripe = Stripe(intent.publishableKey, { locale: stripeLocale() });
       const elements = stripe.elements(elementsOptions(intent.clientSecret, theme));
       const element = elements.create("payment", { layout: "tabs" });
       element.mount(container);

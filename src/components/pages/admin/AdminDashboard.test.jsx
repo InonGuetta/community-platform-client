@@ -48,10 +48,13 @@ describe("the overview", () => {
     expect(overview).toHaveBeenCalledTimes(1);
   });
 
-  test("a failed load is said out loud, in the server's words", async () => {
-    overview.mockRejectedValue({ response: { data: { message: "אין הרשאה" } } });
+  // The words for the error's code — never the server's own message, which is
+  // English prose written for a log.
+  test("a failed load is said out loud, in the words for its code", async () => {
+    overview.mockRejectedValue({ response: { data: { message: "Forbidden", code: "FORBIDDEN" } } });
     renderDashboard();
-    expect(await screen.findByText("אין הרשאה — הנתונים המוצגים עשויים להיות לא מעודכנים.")).toBeInTheDocument();
+    expect(await screen.findByText("אין לך הרשאה לפעולה זו — הנתונים המוצגים עשויים להיות לא מעודכנים.")).toBeInTheDocument();
+    expect(screen.queryByText(/Forbidden/)).not.toBeInTheDocument();
   });
 
   test("…or in its own when the server gave none", async () => {

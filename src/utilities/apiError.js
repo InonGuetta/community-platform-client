@@ -141,7 +141,5 @@ export const rejectionOf = (err, fallback) => ({
 // NEVER returns the server's English `message`. That message is a developer's
 // log line, and letting it through is how "Invalid credentials" ended up on
 // screen in a Hebrew, right-to-left application.
-export const messageForError = (rejection, fallback) => {
-  const key = `errors:codes.${rejection?.code}`;
-  return rejection?.code && i18n.exists(key) ? i18n.t(key) : fallback;
-};
+export const messageForError = (rejection, fallback) =>
+  (rejection?.code && i18n.t(`errors:codes.${rejection.code}`, { defaultValue: "" })) || fallback;

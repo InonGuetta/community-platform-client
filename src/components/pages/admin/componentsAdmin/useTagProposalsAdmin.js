@@ -3,6 +3,7 @@ import { adminApi } from "../../../../api/adminApi";
 import { mediaApi } from "../../../../api/mediaApi";
 import { messageForError, rejectionOf } from "../../../../utilities/apiError";
 import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n/i18n";
 
 // The admin's queue of new tags, and the two decisions on it.
 //
@@ -23,9 +24,10 @@ export const useTagProposalsAdmin = () => {
       setTree(nodes);
       setError(null);
     } catch (err) {
-      setError(messageForError(rejectionOf(err), t("tags.loadFailed")));
+      // i18n.t, not the hook's t: a language switch must not re-run the load.
+      setError(messageForError(rejectionOf(err), i18n.t("admin:tags.loadFailed")));
     }
-  }, [t]);
+  }, []);
 
   useEffect(() => {
     load();

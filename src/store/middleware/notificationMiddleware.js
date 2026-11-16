@@ -37,11 +37,10 @@ export const notificationMiddleware = (store) => (next) => (action) => {
   const type = action?.type;
   if (typeof type === "string") {
     if (type.endsWith("/fulfilled")) {
-      const key = SUCCESS + baseType(type);
-      if (i18n.exists(key)) store.dispatch(notify({ message: i18n.t(key), severity: "success" }));
+      const message = i18n.t(SUCCESS + baseType(type), { defaultValue: "" });
+      if (message) store.dispatch(notify({ message, severity: "success" }));
     } else if (type.endsWith("/rejected")) {
-      const key = FAILURE + baseType(type);
-      const fallback = i18n.exists(key) ? i18n.t(key) : null;
+      const fallback = i18n.t(FAILURE + baseType(type), { defaultValue: "" });
       // Only curated actions surface an error toast (benign rejections stay quiet).
       if (fallback) {
         // Prefer the words for the specific reason so the user knows what to

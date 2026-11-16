@@ -19,6 +19,7 @@ import { decisionCount } from "../../../../utilities/tagStates";
 import { ALL_TYPES, isAllTypes, isTypePressed } from "./typeSelection";
 import { SORT_OPTIONS, DEFAULT_SORT } from "./sortOptions";
 import { DURATION_OPTIONS } from "../../../../utilities/durationOptions";
+import { creatorDisplayName } from "../../../../utilities/creatorPage";
 import { useTranslation } from "react-i18next";
 
 // The archive's filters.
@@ -290,7 +291,7 @@ const FilterBar = ({
             >
               <MenuItem value="">{t("filter.all")}</MenuItem>
               {knownCreators.map((name) => (
-                <MenuItem key={name} value={name}>{name}</MenuItem>
+                <MenuItem key={name} value={name}>{creatorDisplayName(name)}</MenuItem>
               ))}
             </TextField>
           )}

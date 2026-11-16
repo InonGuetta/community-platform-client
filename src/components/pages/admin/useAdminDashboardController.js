@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminApi } from "../../../api/adminApi";
+import { messageForError, rejectionOf } from "../../../utilities/apiError";
 import { useTranslation } from "react-i18next";
 
 // What the admin dashboard does — its overview, loaded on arrival and every 30
@@ -41,7 +42,7 @@ export const useAdminDashboardController = () => {
       // with no data, the health panel renders "unavailable" for both Postgres
       // and Redis — so a request that merely failed looks exactly like an
       // outage, and sends an admin off investigating a database that is fine.
-      setError(err.response?.data?.message || t("loadFailed"));
+      setError(messageForError(rejectionOf(err), t("loadFailed")));
     }
     setLoading(false);
   };

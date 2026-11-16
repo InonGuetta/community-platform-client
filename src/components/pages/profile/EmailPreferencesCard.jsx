@@ -7,6 +7,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import useEmailPreferences from "./useEmailPreferences";
+import { categoryLabel, categoryHelp } from "../../../utilities/notificationCategories";
 import { useTranslation } from "react-i18next";
 
 // "התראות במייל" (PRD NOTIF-6). The bell is not here: it is the record of what
@@ -15,12 +16,6 @@ import { useTranslation } from "react-i18next";
 //
 // Keyed by the server's category names; a category the server adds before this
 // client knows it is still shown, under its key, rather than hidden.
-// The words live in the "notifications" namespace (categories.<key>), which
-// the unsubscribe page reads too, so the two cannot name a category differently.
-const categoryText = (t, key) => ({
-  label: t(`notifications:categories.${key}.label`, { defaultValue: key }),
-  help: t(`notifications:categories.${key}.help`, { defaultValue: "" }),
-});
 
 const EmailPreferencesCard = () => {
   const { t } = useTranslation(["profile", "notifications"]);
@@ -51,7 +46,7 @@ const EmailPreferencesCard = () => {
         {status === "ready" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, opacity: allOff ? 0.5 : 1 }}>
             {categories.map(({ key, email }) => {
-              const text = categoryText(t, key);
+              const text = { label: categoryLabel(key), help: categoryHelp(key) };
               // A category that is off reads faded, so what is on stands out.
               const on = email && !allOff;
               return (

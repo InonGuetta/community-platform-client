@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 // Stripe.js, loaded on the donate page only (PRD PAY-1).
 //
 // Stripe requires the library to be loaded from js.stripe.com itself — never
@@ -36,10 +37,13 @@ export const loadStripeJs = (doc = typeof document !== "undefined" ? document : 
 export const resetStripeJsLoader = () => { loading = null; };
 
 // Stripe's own fields, made to look like the app's — the colours of the theme,
-// right to left, in Hebrew.
+// in the interface's language.
+const STRIPE_LOCALES = { he: "he", yi: "he", en: "en", fr: "fr", es: "es" };
+export const stripeLocale = () => STRIPE_LOCALES[i18n.language] ?? "he";
+
 export const elementsOptions = (clientSecret, theme) => ({
   clientSecret,
-  locale: "he",
+  locale: stripeLocale(),
   appearance: {
     theme: theme?.palette?.mode === "dark" ? "night" : "stripe",
     variables: {

@@ -7,6 +7,7 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import AuthLayout from "./AuthLayout";
 import { notificationsApi } from "../../../api/notificationsApi";
+import { categoryLabel } from "../../../utilities/notificationCategories";
 import { useTranslation } from "react-i18next";
 
 // Where the "stop this kind of mail" link at the foot of every notification mail
@@ -19,11 +20,6 @@ import { useTranslation } from "react-i18next";
 // Unlike VerifyEmail it does NOT act on arrival. It asks. The mail links here
 // rather than to the API so that nothing happens on a bare GET, and a page that
 // unsubscribed the moment it rendered would only move that problem one step.
-
-// What each category is called: the same names as the profile's switches,
-// from the one place both read ("notifications" namespace, categories.*).
-const categoryName = (t, category) =>
-  category && t(`notifications:categories.${category}.label`, { defaultValue: "" });
 
 // The category the link names, read from the token's payload so the question
 // can say what it is about. Display only: nothing is trusted from it, and a
@@ -41,7 +37,8 @@ const Unsubscribe = () => {
   const [params] = useSearchParams();
   const token = params.get("token") ?? "";
   const { t } = useTranslation(["auth", "notifications"]);
-  const named = categoryName(t, categoryInToken(token));
+  const category = categoryInToken(token);
+  const named = category ? categoryLabel(category) : null;
   const [state, setState] = useState({ status: token ? "asking" : "error", done: null });
 
   const handleUnsubscribe = async (all) => {
@@ -74,7 +71,7 @@ const Unsubscribe = () => {
           <Alert severity="success">
             {state.done === "all"
               ? t("unsubscribe.doneAll")
-              : t("unsubscribe.doneOne", { category: categoryName(t, state.done) || t("unsubscribe.thisKind") })}
+              : t("unsubscribe.doneOne", { category: (state.done ? categoryLabel(state.done) : t("unsubscribe.thisKind")) })}
           </Alert>
           <Typography variant="body2" color="text.secondary">
             {t("unsubscribe.doneHint")}

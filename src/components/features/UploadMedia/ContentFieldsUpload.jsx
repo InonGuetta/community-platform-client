@@ -11,6 +11,7 @@ import {
   MAX_TAGS,
 } from "../../../utilities/constant";
 import { useTranslation } from "react-i18next";
+import { creatorDisplayName } from "../../../utilities/creatorPage";
 
 // `courses` may be empty — no courses defined yet, or a student somehow reaching
 // this — in which case the field is hidden rather than shown with one useless
@@ -72,6 +73,7 @@ const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [
     <Autocomplete
       freeSolo
       options={knownCreators}
+      getOptionLabel={(option) => creatorDisplayName(option)}
       value={values.creatorName}
       onChange={(_, next) => onChange("creatorName", next ?? "")}
       onInputChange={(_, next) => onChange("creatorName", next)}

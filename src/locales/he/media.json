@@ -1,0 +1,45 @@
+{
+  "card": {
+    "draft": "טיוטה",
+    "public": "ציבורי",
+    "download": "הורדה",
+    "publishedHint": "מוצג לתלמידים — לחץ כדי להסתיר",
+    "draftHint": "טיוטה — לחץ כדי לפרסם לתלמידים",
+    "hide": "הסתרה מתלמידים",
+    "publish": "פרסום לתלמידים",
+    "editDetails": "עריכת פרטים",
+    "editDetailsOf": "עריכת הפרטים של {{title}}",
+    "editTags": "עריכת תגיות",
+    "editTagsOf": "עריכת תגיות של {{title}}",
+    "delete": "מחיקה",
+    "allByCreator": "לכל השיעורים של {{name}}",
+    "length": "אורך: {{length}}",
+    "likes_one": "אחד אהב",
+    "likes_two": "{{count}} אהבו",
+    "likes_other": "{{count}} אהבו"
+  },
+  "grid": {
+    "empty": "לא נמצאה מדיה",
+    "noMatches": "לא נמצאו תוצאות מתאימות",
+    "loadingMore": "טוען...",
+    "loadMore": "טעינת עוד"
+  },
+  "download": {
+    "audio": "הורדת שמע",
+    "video": "הורדת וידאו",
+    "text": "הורדת המסמך",
+    "audioOnly": "הורדת שמע בלבד",
+    "availableOffline": "זמין בלי רשת",
+    "toOfflineShelf": "להורדות להאזנה",
+    "savingOffline": "שומר להאזנה…",
+    "savingOfflinePercent": "שומר להאזנה… {{percent}}%",
+    "saveOffline": "שמירה להאזנה בלי רשת",
+    "captionsFile": "כתוביות",
+    "captions": "הורדת כתוביות (VTT)",
+    "preparingPdf": "מכין PDF...",
+    "transcriptPdf": "הורדת תמלול (PDF)",
+    "transcriptFile": "תמלול",
+    "noTranscript": "אין תמלול זמין לפריט זה.",
+    "pdfFailed": "יצירת ה-PDF נכשלה. נסה שוב."
+  }
+}

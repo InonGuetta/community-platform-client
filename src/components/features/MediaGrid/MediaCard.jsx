@@ -27,6 +27,8 @@ import { canManageMedia } from "../../../utilities/permissions";
 // header says why: a shelf and the control that fills it have to look like one
 // thing, and two independent imports stay matched only until one is changed.
 import { likeIcons } from "../../layout/personalShelves";
+import { useTranslation } from "react-i18next";
+import { creatorDisplayName } from "../../../utilities/creatorPage";
 
 const LikeIcon = likeIcons.on;
 
@@ -86,6 +88,7 @@ const CornerBracket = ({ accent, placement }) => {
 // `onOpenCreator` makes the lecturer's name a way to their page (PRD ATTR-10).
 // Absent on that page itself, where the name would lead back to where you are.
 const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails, onOpenCreator }) => {
+  const { t } = useTranslation("media");
   // Recordings only: a book's duration is always null, and lengthLabel says so.
   const length = item.media_type === "text" ? null : lengthLabel(item.duration_seconds);
   const isVideo = item.media_type === "video";
@@ -222,7 +225,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           their upload isn't in anyone else's archive yet. */}
       {canManage && !isPublished && (
         <Chip
-          label="טיוטה"
+          label={t("card.draft")}
           size="small"
           sx={{ position: "absolute", top: 42, insetInlineEnd: 8, fontWeight: 700, bgcolor: "rgba(0,0,0,0.65)", color: "#fff" }}
           onClick={(e) => e.stopPropagation()}
@@ -232,7 +235,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           it, so a lesson is never public without its owner seeing that it is. */}
       {canManage && isPublished && item.is_public && (
         <Chip
-          label="ציבורי"
+          label={t("card.public")}
           size="small"
           color="secondary"
           sx={{ position: "absolute", top: 42, insetInlineEnd: 8, fontWeight: 700 }}
@@ -244,7 +247,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
       <Box sx={{ position: "absolute", top: 6, insetInlineStart: 6, display: "flex", gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
         <IconButton
           onClick={(e) => setDownloadAnchor(e.currentTarget)}
-          aria-label="הורדה"
+          aria-label={t("card.download")}
           aria-haspopup="menu"
           size="small"
           sx={actionButtonSx}
@@ -252,14 +255,14 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           <FileDownloadIcon fontSize="small" />
         </IconButton>
         {canManage && (
-          <Tooltip title={isPublished ? "מוצג לתלמידים — לחץ כדי להסתיר" : "טיוטה — לחץ כדי לפרסם לתלמידים"}>
+          <Tooltip title={isPublished ? t("card.publishedHint") : t("card.draftHint")}>
             {/* span: a disabled IconButton fires no events, so the Tooltip needs
                 a wrapper that still does. */}
             <span>
               <IconButton
                 size="small"
                 color={isPublished ? "success" : "default"}
-                aria-label={isPublished ? "הסתרה מתלמידים" : "פרסום לתלמידים"}
+                aria-label={isPublished ? t("card.hide") : t("card.publish")}
                 onClick={handleTogglePublish}
                 disabled={publishing}
                 sx={actionButtonSx}
@@ -270,10 +273,10 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           </Tooltip>
         )}
         {canManage && onEditDetails && (
-          <Tooltip title="עריכת פרטים">
+          <Tooltip title={t("card.editDetails")}>
             <IconButton
               size="small"
-              aria-label={`עריכת הפרטים של ${item.title}`}
+              aria-label={t("card.editDetailsOf", { title: item.title })}
               onClick={(e) => { e.stopPropagation(); onEditDetails(item); }}
               sx={actionButtonSx}
             >
@@ -282,10 +285,10 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           </Tooltip>
         )}
         {canManage && onEditTags && (
-          <Tooltip title="עריכת תגיות">
+          <Tooltip title={t("card.editTags")}>
             <IconButton
               size="small"
-              aria-label={`עריכת תגיות של ${item.title}`}
+              aria-label={t("card.editTagsOf", { title: item.title })}
               onClick={(e) => { e.stopPropagation(); onEditTags(item); }}
               sx={actionButtonSx}
             >
@@ -297,7 +300,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           <IconButton
             size="small"
             color="error"
-            aria-label="מחיקה"
+            aria-label={t("card.delete")}
             onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
             sx={actionButtonSx}
           >
@@ -343,13 +346,13 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
               the first belongs on a card. */}
           {item.creator_name && (
             <Chip
-              label={`${creatorPrefixes[item.media_type] || creatorPrefixes.video}: ${item.creator_name}`}
+              label={`${creatorPrefixes[item.media_type] || creatorPrefixes.video}: ${creatorDisplayName(item.creator_name)}`}
               size="small"
               variant="outlined"
               // Clickable only where there is a page: "כללי" is nobody.
               {...(onOpenCreator && hasCreatorPage(item.creator_name) && {
                 clickable: true,
-                "aria-label": `לכל השיעורים של ${item.creator_name}`,
+                "aria-label": t("card.allByCreator", { name: item.creator_name }),
                 // The card is itself a button that opens the lesson.
                 onClick: (e) => { e.stopPropagation(); onOpenCreator(item.creator_name); },
               })}
@@ -364,13 +367,13 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
               label={length}
               size="small"
               variant="outlined"
-              aria-label={`אורך: ${length}`}
+              aria-label={t("card.length", { length })}
             />
           )}
           {item.like_count > 0 && (
             <Box
               sx={{ display: "flex", alignItems: "center", gap: 0.25, marginInlineStart: "auto", color: "text.secondary" }}
-              aria-label={`${item.like_count} אהבו`}
+              aria-label={t("card.likes", { count: item.like_count })}
             >
               <LikeIcon sx={{ fontSize: 15 }} />
               <Typography variant="caption" fontWeight={700}>{item.like_count}</Typography>

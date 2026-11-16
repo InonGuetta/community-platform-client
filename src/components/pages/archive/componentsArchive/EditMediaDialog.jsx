@@ -6,6 +6,7 @@ import DialogContent from "../../../features/Dialogs/DialogContent";
 import DialogActions from "../../../features/Dialogs/DialogActions";
 import ContentFieldsUpload from "../../../features/UploadMedia/ContentFieldsUpload";
 import { fieldsFromItem } from "../../../features/UploadMedia/lessonFields";
+import { useTranslation } from "react-i18next";
 
 // Editing a lesson's details after the upload: title, description, the name it
 // is credited to, and the course it is filed in.
@@ -27,6 +28,7 @@ import { fieldsFromItem } from "../../../features/UploadMedia/lessonFields";
 const EMPTY = [];
 
 const EditMediaDialog = ({ item, courses = EMPTY, knownCreators = EMPTY, onClose, onSave }) => {
+  const { t } = useTranslation(["archive", "common"]);
   const [fields, setFields] = useState(() => fieldsFromItem(item));
   const [saving, setSaving] = useState(false);
 
@@ -37,8 +39,8 @@ const EditMediaDialog = ({ item, courses = EMPTY, knownCreators = EMPTY, onClose
   const courseOptions = useMemo(() => {
     const current = item.course_id;
     if (!current || courses.some((c) => Number(c.id) === Number(current))) return courses;
-    return [...courses, { id: current, title: item.course_title || "הקורס הנוכחי" }];
-  }, [courses, item.course_id, item.course_title]);
+    return [...courses, { id: current, title: item.course_title || t("edit.currentCourse") }];
+  }, [courses, item.course_id, item.course_title, t]);
 
   const handleFieldChange = (key, value) => setFields((prev) => ({ ...prev, [key]: value }));
 
@@ -56,7 +58,7 @@ const EditMediaDialog = ({ item, courses = EMPTY, knownCreators = EMPTY, onClose
 
   return (
     <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle onClose={handleClose}>עריכת פרטים — {item.title}</DialogTitle>
+      <DialogTitle onClose={handleClose}>{t("edit.detailsTitle", { title: item.title })}</DialogTitle>
       <DialogContent>
         <ContentFieldsUpload
           values={fields}
@@ -67,11 +69,11 @@ const EditMediaDialog = ({ item, courses = EMPTY, knownCreators = EMPTY, onClose
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} variant="outlined" disabled={saving}>ביטול</Button>
+        <Button onClick={handleClose} variant="outlined" disabled={saving}>{t("common:actions.cancel")}</Button>
         {/* The server refuses an empty title; disabling says so before the
             round trip rather than after it. */}
         <Button onClick={handleSave} variant="contained" disabled={saving || !fields.title.trim()}>
-          {saving ? "שומר..." : "שמירה"}
+          {saving ? t("edit.saving") : t("edit.save")}
         </Button>
       </DialogActions>
     </Dialog>

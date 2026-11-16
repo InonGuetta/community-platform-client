@@ -19,6 +19,7 @@ import { decisionCount } from "../../../../utilities/tagStates";
 import { ALL_TYPES, isAllTypes, isTypePressed } from "./typeSelection";
 import { SORT_OPTIONS, DEFAULT_SORT } from "./sortOptions";
 import { DURATION_OPTIONS } from "../../../../utilities/durationOptions";
+import { useTranslation } from "react-i18next";
 
 // The archive's filters.
 //
@@ -75,6 +76,7 @@ const FilterBar = ({
   onDateFilter,
   onClearAll,
 }) => {
+  const { t } = useTranslation("archive");
   const [open, setOpen] = useState(false);
 
   // Everything inside the panel is counted, the type toggle included — it lives
@@ -125,7 +127,7 @@ const FilterBar = ({
             aria-expanded={open}
             sx={{ borderRadius: "10px" }}
           >
-            סינון
+            {t("filter.toggle")}
           </Button>
         </Badge>
 
@@ -146,7 +148,7 @@ const FilterBar = ({
           <TextField
             select
             size="small"
-            label="מיון"
+            label={t("sort.label")}
             value={sortOrder}
             onChange={(e) => onSortChange?.(e.target.value)}
             sx={(theme) => ({
@@ -164,7 +166,7 @@ const FilterBar = ({
           </TextField>
           <SearchBar
             onSearch={onSearch}
-            placeholder="חיפוש..."
+            placeholder={t("filter.search")}
             sx={(theme) => ({
               "& .MuiOutlinedInput-root": {
                 borderRadius: "10px",
@@ -219,7 +221,7 @@ const FilterBar = ({
                   whiteSpace: "nowrap",
                 }}
               >
-                סוג תוכן
+                {t("filter.type")}
               </Typography>
               <ToggleButtonGroup
                 aria-labelledby="archive-type-filter-label"
@@ -265,10 +267,10 @@ const FilterBar = ({
                   };
                 }}
               >
-                <ToggleButton value={ALL} onClick={onPressAllTypes}>הכל</ToggleButton>
-                {ALL_TYPES.map((t) => (
-                  <ToggleButton key={t} value={t} onClick={() => onToggleType(t)}>
-                    {mediaTypeLabels[t]}
+                <ToggleButton value={ALL} onClick={onPressAllTypes}>{t("filter.all")}</ToggleButton>
+                {ALL_TYPES.map((type) => (
+                  <ToggleButton key={type} value={type} onClick={() => onToggleType(type)}>
+                    {mediaTypeLabels[type]}
                   </ToggleButton>
                 ))}
               </ToggleButtonGroup>
@@ -283,10 +285,10 @@ const FilterBar = ({
               size="small"
               value={creatorFilter}
               onChange={(e) => onCreatorFilter(e.target.value)}
-              label="מרצה / מחבר"
+              label={t("filter.creator")}
               sx={fieldSx}
             >
-              <MenuItem value="">הכל</MenuItem>
+              <MenuItem value="">{t("filter.all")}</MenuItem>
               {knownCreators.map((name) => (
                 <MenuItem key={name} value={name}>{name}</MenuItem>
               ))}
@@ -302,10 +304,10 @@ const FilterBar = ({
               size="small"
               value={durationRange}
               onChange={(e) => onDurationFilter?.(e.target.value)}
-              label="אורך השיעור"
+              label={t("filter.length")}
               sx={fieldSx}
             >
-              <MenuItem value="">הכל</MenuItem>
+              <MenuItem value="">{t("filter.all")}</MenuItem>
               {DURATION_OPTIONS.map((option) => (
                 <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
               ))}
@@ -320,7 +322,7 @@ const FilterBar = ({
           <TextField
             type="date"
             size="small"
-            label="הועלה מ־"
+            label={t("filter.from")}
             value={uploadedAfter}
             onChange={(e) => onDateFilter("uploadedAfter", e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
@@ -329,7 +331,7 @@ const FilterBar = ({
           <TextField
             type="date"
             size="small"
-            label="הועלה עד"
+            label={t("filter.to")}
             value={uploadedBefore}
             onChange={(e) => onDateFilter("uploadedBefore", e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
@@ -340,7 +342,7 @@ const FilterBar = ({
               not open with a disabled control in it. */}
           {activeCount > 0 && (
             <Button size="small" onClick={onClearAll} sx={{ alignSelf: "center" }}>
-              ניקוי הכל
+              {t("filter.clearAll")}
             </Button>
           )}
 

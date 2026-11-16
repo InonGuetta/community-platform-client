@@ -10,11 +10,13 @@ import UploadMedia from "../../features/UploadMedia/UploadMedia";
 import SmartSearch from "../../features/SmartSearch/SmartSearch";
 import useArchivePageController from "./useArchivePageController";
 import { useArchiveUpload } from "./useArchiveUpload";
+import { useTranslation } from "react-i18next";
 
 // The filters, the cards and their dialogs are ArchiveBrowser, shared with a
 // lecturer's page (PRD ATTR-10). What is only the archive's is here: the
 // upload button, the smart-search tab and the picture beside them.
 const ArchivePage = () => {
+  const { t } = useTranslation("archive");
   const archive = useArchivePageController();
   const { user, isUploadOpen, canUpload } = useArchiveUpload();
   const [tab, setTab] = useState(0);
@@ -24,7 +26,7 @@ const ArchivePage = () => {
       {/* Main content */}
       <Box sx={{ flexGrow: 1, p: 3 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-          <Typography variant="h4" fontWeight={800} color="primary">ארכיון מדיה</Typography>
+          <Typography variant="h4" fontWeight={800} color="primary">{t("title")}</Typography>
           {canUpload && (
             <Button variant="contained" startIcon={<UploadIcon />} onClick={archive.handleOpenUpload}
               sx={{
@@ -33,14 +35,14 @@ const ArchivePage = () => {
                 borderRadius: 2, fontWeight: 700, px: 3, boxShadow: "0 3px 10px rgba(21,151,187,0.35)",
               }}
             >
-              העלאת מדיה
+              {t("upload")}
             </Button>
           )}
         </Box>
 
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
-          <Tab label="ארכיון" />
-          <Tab label="חיפוש עומק חכם" />
+          <Tab label={t("tabs.archive")} />
+          <Tab label={t("tabs.smartSearch")} />
         </Tabs>
 
         {tab === 0 && (

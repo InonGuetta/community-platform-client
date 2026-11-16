@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import BlockIcon from "@mui/icons-material/Block";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { buildTagRelations, countUnder } from "../../../../utilities/tagStates";
+import { useTranslation } from "react-i18next";
 
 // The tags currently being filtered by, all of them, in one row.
 //
@@ -36,6 +37,7 @@ import { buildTagRelations, countUnder } from "../../../../utilities/tagStates";
 // person would otherwise have to work out from two rows of chips.
 
 const SelectedTags = ({ nodes = [], selectedIds = [], excludedIds = [], onRemove, onClear }) => {
+  const { t } = useTranslation("archive");
   const { chosen, removed } = useMemo(() => {
     const relations = buildTagRelations(nodes);
     const selection = { includedIds: selectedIds, excludedIds };
@@ -76,10 +78,10 @@ const SelectedTags = ({ nodes = [], selectedIds = [], excludedIds = [], onRemove
       // opposite things were read out as the same bare tag name, distinguished
       // only by a colour and the row they happened to be on.
       aria-label={[
-        out ? "הוצא מהסינון" : "מסונן לפי",
+        out ? t("selected.removedSpoken") : t("selected.chosenSpoken"),
         node.path ? `${node.path} ←` : "",
         node.name,
-        node.count > 1 ? `${node.count} תגיות` : "",
+        node.count > 1 ? t("selected.tagCount", { count: node.count }) : "",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -89,7 +91,7 @@ const SelectedTags = ({ nodes = [], selectedIds = [], excludedIds = [], onRemove
       onDelete={() => onRemove(node.id)}
       // Without this the × is announced as "cancel", which says what the icon is
       // rather than what it does to which tag.
-      deleteIcon={<CancelIcon titleAccess={`הסרת ${node.name} מהסינון`} />}
+      deleteIcon={<CancelIcon titleAccess={t("selected.remove", { name: node.name })} />}
       label={
         <Box component="span" sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.5 }}>
           {out && <BlockIcon sx={{ fontSize: 13, alignSelf: "center" }} />}
@@ -103,7 +105,7 @@ const SelectedTags = ({ nodes = [], selectedIds = [], excludedIds = [], onRemove
               itself, and "(1)" beside every parasha is noise. */}
           {node.count > 1 && (
             <Box component="span" sx={{ opacity: 0.75, fontSize: "0.7rem" }}>
-              ({node.count} תגיות)
+              ({t("selected.tagCount", { count: node.count })})
             </Box>
           )}
         </Box>
@@ -117,11 +119,11 @@ const SelectedTags = ({ nodes = [], selectedIds = [], excludedIds = [], onRemove
       {chosen.length > 0 && (
         <Box
           role="group"
-          aria-label="תגיות שנבחרו לסינון"
+          aria-label={t("selected.chosenGroup")}
           sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.75 }}
         >
           <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>
-            מסונן לפי:
+            {t("selected.chosenLabel")}
           </Typography>
           {chosen.map((node) => chipFor(node, { out: false }))}
         </Box>
@@ -130,11 +132,11 @@ const SelectedTags = ({ nodes = [], selectedIds = [], excludedIds = [], onRemove
       {removed.length > 0 && (
         <Box
           role="group"
-          aria-label="תגיות שהוצאו מהסינון"
+          aria-label={t("selected.removedGroup")}
           sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.75 }}
         >
           <Typography variant="caption" sx={{ color: "error.main", fontWeight: 700 }}>
-            ללא:
+            {t("selected.removedLabel")}
           </Typography>
           {removed.map((node) => chipFor(node, { out: true }))}
         </Box>
@@ -144,7 +146,7 @@ const SelectedTags = ({ nodes = [], selectedIds = [], excludedIds = [], onRemove
           second control beside it would be two ways to do one thing. */}
       {chosen.length + removed.length > 1 && (
         <Box>
-          <Chip size="small" variant="outlined" label="ניקוי התגיות" onClick={onClear} />
+          <Chip size="small" variant="outlined" label={t("selected.clear")} onClick={onClear} />
         </Box>
       )}
     </Box>

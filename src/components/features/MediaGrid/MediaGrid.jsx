@@ -5,6 +5,7 @@ import useLoadMoreTrigger from "./useLoadMoreTrigger";
 import MediaCard from "./MediaCard";
 import NoDataDialog from "../NoDataDialog/NoDataDialog";
 import { statuses } from "../../../utilities/constant";
+import { useTranslation } from "react-i18next";
 
 const SKELETON_COUNT = 6;
 
@@ -47,9 +48,10 @@ const MediaCardSkeleton = () => (
 // of them and gets the whole list it already had.
 const MediaGrid = ({
   items, status, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails, onOpenCreator,
-  emptyActionLabel, onEmptyAction, filtered = false, emptyMessage = "לא נמצאה מדיה",
+  emptyActionLabel, onEmptyAction, filtered = false, emptyMessage,
   hasMore = false, loadingMore = false, onLoadMore,
 }) => {
+  const { t } = useTranslation("media");
   // Before the early returns: a hook must run on every render.
   const loadMoreRef = useLoadMoreTrigger(onLoadMore, { enabled: Boolean(onLoadMore && hasMore) });
 
@@ -72,9 +74,9 @@ const MediaGrid = ({
     // archive: uploading won't surface results, so the CTA is shown only when the
     // archive is genuinely empty (no active filter).
     return filtered ? (
-      <NoDataDialog message="לא נמצאו תוצאות מתאימות" />
+      <NoDataDialog message={t("grid.noMatches")} />
     ) : (
-      <NoDataDialog message={emptyMessage} actionLabel={emptyActionLabel} onAction={onEmptyAction} />
+      <NoDataDialog message={emptyMessage ?? t("grid.empty")} actionLabel={emptyActionLabel} onAction={onEmptyAction} />
     );
   }
 
@@ -100,7 +102,7 @@ const MediaGrid = ({
         // through the page with a keyboard rather than a wheel.
         <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
           <Button variant="outlined" onClick={onLoadMore} disabled={loadingMore}>
-            {loadingMore ? "טוען..." : "טעינת עוד"}
+            {loadingMore ? t("grid.loadingMore") : t("grid.loadMore")}
           </Button>
         </Box>
       )}

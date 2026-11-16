@@ -206,7 +206,7 @@ const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) =
           both can reach its own sandbox attribute and remove it. */}
       <Box
         component="iframe"
-        src={mediaApi.streamUrl(mediaId)}
+        src={mediaApi.documentFrameUrl(mediaId)}
         {...(SANDBOXED_FORMATS[media?.file_ext] === false
           ? {}
           : { sandbox: "allow-scripts" })}

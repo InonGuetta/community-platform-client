@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 import axiosInstance from "../utilities/axiosInstance";
 
 // Only the REST half of live sessions. Everything that happens once a room is
@@ -31,7 +32,8 @@ export const sessionsApi = {
   // NOTIF-3. A plain URL rather than a request, like mediaApi.downloadUrl: the
   // browser downloads it itself (the cookie goes along, same origin), and hands
   // the .ics to whatever calendar the reader uses.
-  calendarUrl: (id) => `/api/sessions/${id}/calendar.ics`,
+  // ?lang= words the file's own labels ("מארח: …") in the reader's language.
+  calendarUrl: (id) => `/api/sessions/${id}/calendar.ics?lang=${i18n.language}`,
 
   // ── Recording (PRD REC-1), host only ──
   // The host's browser records and sends the recording in numbered parts while

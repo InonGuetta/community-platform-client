@@ -1,4 +1,5 @@
 import axiosInstance from "../utilities/axiosInstance";
+import i18n from "../i18n/i18n";
 
 // Absolute paths, for the URLs the BROWSER fetches rather than axios: a
 // <video src>, an <a download>, a ReactPlayer url. Those cannot go through
@@ -95,6 +96,9 @@ export const mediaApi = {
 
   // ── URLs handed to the browser, not fetched here ──────────────────────────
   streamUrl: (id) => `${API_ROOT}/media/${id}/stream`,
+  // The same bytes for the document frame, which on a failure shows a page the
+  // server words — in the language named here (server lib/i18n.js).
+  documentFrameUrl: (id) => `${API_ROOT}/media/${id}/stream?lang=${i18n.language}`,
   downloadUrl: (id) => `${API_ROOT}/media/${id}/download`,
 
   // Video only: the server strips the video track and returns an MP3. Nothing is

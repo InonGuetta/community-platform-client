@@ -60,6 +60,17 @@ test("the remembered choice is the first language; then the browser's; then Hebr
   }
 });
 
+test("a link's ?lang is a hint for a browser with no choice of its own", () => {
+  window.history.replaceState(null, "", "/unsubscribe?token=x&lang=yi");
+  try {
+    expect(initialLanguage()).toBe("yi");
+    localStorage.setItem("language", "fr");
+    expect(initialLanguage()).toBe("fr");
+  } finally {
+    window.history.replaceState(null, "", "/");
+  }
+});
+
 test("a guessed language at start-up is applied but not remembered", async () => {
   Object.defineProperty(navigator, "languages", { value: ["en-GB"], configurable: true });
   try {

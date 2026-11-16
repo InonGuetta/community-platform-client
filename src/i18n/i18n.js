@@ -43,10 +43,23 @@ const storeLanguage = (code) => {
   }
 };
 
-// A returning visitor's choice, else the browser's, else Hebrew.
+// ?lang= on the address a visitor arrived by — the unsubscribe link in a mail
+// carries the recipient's language. A hint for a browser with no remembered
+// choice, never an override of one, and never remembered itself.
+const urlLanguage = () => {
+  try {
+    return new URLSearchParams(window.location.search).get("lang");
+  } catch {
+    return null;
+  }
+};
+
+// A returning visitor's choice, else the link's, else the browser's, else Hebrew.
 export const initialLanguage = () => {
   const stored = readStoredLanguage();
   if (isSupportedLanguage(stored)) return stored;
+  const linked = typeof window === "undefined" ? null : urlLanguage();
+  if (isSupportedLanguage(linked)) return linked;
   const browser = typeof navigator === "undefined" ? [] : navigator.languages ?? [navigator.language];
   return matchBrowserLanguage(browser) ?? DEFAULT_LANGUAGE;
 };

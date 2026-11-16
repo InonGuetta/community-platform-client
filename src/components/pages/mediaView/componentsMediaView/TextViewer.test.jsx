@@ -67,7 +67,7 @@ describe("which of the two paths a format takes", () => {
 
   test("plain text does too", () => {
     render(<TextViewer media={{ ...PDF, file_ext: "txt" }} />);
-    expect(frame().getAttribute("src")).toBe("/api/media/9/stream");
+    expect(frame().getAttribute("src")).toBe("/api/media/9/stream?lang=he");
     expect(frame().getAttribute("sandbox")).toBe("allow-scripts");
   });
 

@@ -15,7 +15,7 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import DialogTitle from "../../../features/Dialogs/DialogTitle";
 import DialogContent from "../../../features/Dialogs/DialogContent";
 import DialogActions from "../../../features/Dialogs/DialogActions";
-import { formatHebrewDateTime } from "../../../../utilities/formatDate";
+import { formatDateTime } from "../../../../utilities/formatDate";
 
 // What broke, and the one button that does something about it.
 //
@@ -107,7 +107,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
                   <TableCell><Chip size="small" label={job.queue} /></TableCell>
                   <TableCell>{job.mediaId ?? "—"}</TableCell>
                   <TableCell sx={{ maxWidth: 380, wordBreak: "break-word" }}>{job.reason || "—"}</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>{formatHebrewDateTime(job.failedAt, "—")}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>{formatDateTime(job.failedAt, "—")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

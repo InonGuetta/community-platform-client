@@ -17,7 +17,7 @@ import ProposeTagDialog from "../../../features/TagPicker/ProposeTagDialog";
 import { pathOf } from "../../../features/TagPicker/tagOptions";
 import { buildTagRelations } from "../../../../utilities/tagStates";
 import { useTagProposalsAdmin } from "./useTagProposalsAdmin";
-import { formatShortHebrewDate } from "../../../../utilities/formatDate";
+import { formatShortDate } from "../../../../utilities/formatDate";
 
 // New tags lecturers asked for, waiting for an admin.
 //
@@ -88,7 +88,7 @@ const TagProposals = () => {
                 תחת: {placeOf(proposal.parent_id)}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                הוצעה על ידי {proposal.proposed_by_name || "משתמש שנמחק"} · {formatShortHebrewDate(proposal.created_at)}
+                הוצעה על ידי {proposal.proposed_by_name || "משתמש שנמחק"} · {formatShortDate(proposal.created_at)}
               </Typography>
               {proposal.media.length > 0 && (
                 <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>

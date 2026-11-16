@@ -9,7 +9,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import KeyIcon from "@mui/icons-material/VpnKeyOutlined";
 import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useJoinCodePanel from "./useJoinCodePanel";
-import { formatHebrewDate } from "../../../../utilities/formatDate";
+import { formatDate } from "../../../../utilities/formatDate";
 
 // "הצטרפות בקוד" in a course's panel (PRD ROST-9). See useJoinCodePanel.
 
@@ -18,7 +18,7 @@ const RequestRow = ({ request, busy, onApprove, onReject }) => (
     <Box sx={{ flex: 1, minWidth: 160 }}>
       <Typography fontWeight={600}>{request.display_name || request.email}</Typography>
       <Typography variant="body2" color="text.secondary">
-        {request.display_name ? `${request.email} · ` : ""}ביקש ב-{formatHebrewDate(request.created_at)}
+        {request.display_name ? `${request.email} · ` : ""}ביקש ב-{formatDate(request.created_at)}
       </Typography>
     </Box>
     <Button size="small" variant="contained" color="success" disabled={busy} onClick={() => onApprove(request.id)}>

@@ -1,4 +1,5 @@
 import { defaultCreatorName } from "./constant";
+import i18n from "../i18n/i18n";
 
 // A lecturer's page (PRD ATTR-10): /creators/<name>. One place that spells the
 // path, for the route, the cards and the lesson page.
@@ -11,7 +12,13 @@ export const CREATOR_ROUTE = "/creators/:name";
 
 export const creatorPath = (name) => `/creators/${encodeURIComponent(name)}`;
 
-// "כללי" is the archive's word for "nobody was named" — not a person, so not a
+// The stored "nobody was named" (defaultCreatorName) is not a person, so not a
 // page, and not a link.
 export const hasCreatorPage = (name) =>
   typeof name === "string" && name.trim() !== "" && name.trim() !== defaultCreatorName;
+
+// A creator as a screen shows it: a name as written, and the stored "nobody"
+// worded in the interface's language. Content stays as it is; the sentinel is
+// the system's own word, so it is translated.
+export const creatorDisplayName = (name) =>
+  !name || name.trim() === defaultCreatorName ? i18n.t("format:creatorNone") : name;

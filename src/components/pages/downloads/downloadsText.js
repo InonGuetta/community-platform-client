@@ -1,6 +1,6 @@
 import { defaultCreatorName } from "../../../utilities/constant";
 import { formatTime } from "../../../utilities/formatTime";
-import { formatHebrewDate } from "../../../utilities/formatDate";
+import { formatDate } from "../../../utilities/formatDate";
 import { formatBytes, percentOf } from "../../../utilities/offlineStore";
 
 // The words on the downloads page (PRD MOB-2), kept apart from the layout so
@@ -20,7 +20,7 @@ export const lessonDetails = (item) =>
     item?.media_type === "video" ? "שמע מתוך וידאו" : null,
     item?.duration_seconds > 0 ? formatTime(item.duration_seconds) : null,
     item?.size ? formatBytes(item.size) : null,
-    item?.savedAt ? `נשמר ${formatHebrewDate(item.savedAt)}` : null,
+    item?.savedAt ? `נשמר ${formatDate(item.savedAt)}` : null,
   ].filter(Boolean).join(" · ");
 
 // "45%" when the size is known, "12 MB" so far when it is not.

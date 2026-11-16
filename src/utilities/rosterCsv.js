@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 // A course's roster as a CSV file a lecturer can open in Excel.
 //
 // Built here from the roster the page already holds — GET /courses/:id/students
@@ -9,7 +10,8 @@
 // as "×©×œ×•×". The BOM is the whole fix; LibreOffice and Google Sheets ignore it.
 export const CSV_BOM = "﻿";
 
-const HEADERS = ["שם", "אימייל", "תאריך רישום", "פעיל"];
+// Read when the file is made, so it is in the language of that moment.
+const headers = () => ["name", "email", "enrolledAt", "active"].map((key) => i18n.t(`format:csv.${key}`));
 
 // A cell that starts with one of these is run as a FORMULA when the file is
 // opened — and a display name is something any user typed. "=HYPERLINK(...)" as
@@ -40,8 +42,8 @@ export const isoDate = (value) => {
 // The download's name. Characters Windows refuses in a file name are dropped
 // rather than replaced — a course called "גמרא: פרק א" becomes "גמרא פרק א".
 export const rosterFileName = (courseTitle) => {
-  const base = `תלמידים - ${courseTitle || ""}`.replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, " ").trim();
-  return `${base.replace(/ -$/, "") || "תלמידים"}.csv`;
+  const base = i18n.t("format:csv.studentsFile", { course: courseTitle || "" }).replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, " ").trim();
+  return `${base.replace(/ -$/, "") || i18n.t("format:csv.students")}.csv`;
 };
 
 // CRLF between rows — what the RFC says, and what Excel on Windows expects.
@@ -49,8 +51,8 @@ export const rosterFileName = (courseTitle) => {
 // test can compare.
 export const rosterCsv = (students) =>
   [
-    HEADERS,
-    ...students.map((s) => [s.display_name, s.email, isoDate(s.enrolled_at), s.is_active === false ? "לא" : "כן"]),
+    headers(),
+    ...students.map((s) => [s.display_name, s.email, isoDate(s.enrolled_at), s.is_active === false ? i18n.t("format:csv.no") : i18n.t("format:csv.yes")]),
   ]
     .map((row) => row.map(csvCell).join(","))
     .join("\r\n");

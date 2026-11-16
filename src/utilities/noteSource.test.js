@@ -2,7 +2,7 @@
 import { test, expect, describe } from "vitest";
 import {
   bookmarkDragPayload, sourceFootnoteLabel, sourceChipHtml, sourceFromChip, isNoteAboutMedia,
-  renameSourceChip, GENERAL_REFERENCE_LABEL, MAX_CHIP_NOTE,
+  renameSourceChip, generalReferenceLabel, MAX_CHIP_NOTE,
   appendToReferences, hasWrittenText, referencesBlockHtml, REFERENCES_SELECTOR,
   bookmarkNames, syncChipNames,
 } from "./noteSource";
@@ -112,13 +112,13 @@ describe("renaming a chip", () => {
 
   test("a new note's reference starts as the general one", () => {
     const chip = chipFrom(sourceChipHtml({
-      mediaId: 49, timestampSeconds: 125, mediaTitle: "שיחה", note: GENERAL_REFERENCE_LABEL,
+      mediaId: 49, timestampSeconds: 125, mediaTitle: "שיחה", note: generalReferenceLabel(),
     }));
     expect(sourceFromChip(chip)).toMatchObject({ mediaId: 49, timestampSeconds: 125, note: "הפנייה כללית" });
   });
 
   test("replaces the name in both the attribute and the visible line", () => {
-    const chip = chipFrom(sourceChipHtml({ mediaId: 49, pageNumber: 14, mediaTitle: "תורה תמימה", note: GENERAL_REFERENCE_LABEL }));
+    const chip = chipFrom(sourceChipHtml({ mediaId: 49, pageNumber: 14, mediaTitle: "תורה תמימה", note: generalReferenceLabel() }));
     expect(renameSourceChip(chip, "  פירוש רש״י  ")).toBe(true);
     expect(chip.getAttribute("data-note")).toBe("פירוש רש״י");
     expect(chip.querySelector('span[data-chip-line="note"]').textContent).toBe("פירוש רש״י");

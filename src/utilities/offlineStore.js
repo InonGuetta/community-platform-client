@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 // Lessons kept on this device for listening with no network (PRD MOB-2).
 //
 // Two stores, each holding what it is good at:
@@ -63,7 +64,7 @@ export const writeIndex = (index, storage = defaultStorage()) => {
 // of saving. Copied rather than looked up later, because later is offline.
 export const offlineEntry = (media, size, now = Date.now()) => ({
   id: media.id,
-  title: media.title || "שיעור",
+  title: media.title || i18n.t("format:noteSource.lessonFallback"),
   creator_name: media.creator_name ?? null,
   course_title: media.course_title ?? null,
   media_type: media.media_type,

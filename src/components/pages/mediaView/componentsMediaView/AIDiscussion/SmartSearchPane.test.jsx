@@ -98,7 +98,7 @@ describe("opening a hit", () => {
   test("a page of a book opens the reader there", async () => {
     const onOpenPage = vi.fn();
     render(<SmartSearchPane search={search({ status: "succeeded", results: [bookHit] })} isText onOpenPage={onOpenPage} />);
-    await userEvent.click(screen.getByRole("button", { name: /עמ' 47/ }));
+    await userEvent.click(screen.getByRole("button", { name: /עמ׳ 47/ }));
     expect(onOpenPage).toHaveBeenCalledWith(47);
   });
 

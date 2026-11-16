@@ -81,7 +81,7 @@ describe("one conversation", () => {
     const onOpenPage = vi.fn();
     render(<HistoryPane history={history({ viewing: opened(3) })} isText onOpenPage={onOpenPage} />);
     expect(screen.getAllByTestId(/message-/)).toHaveLength(2);
-    await userEvent.click(screen.getByRole("button", { name: "מקור 1, עמ' 66" }));
+    await userEvent.click(screen.getByRole("button", { name: "מקור 1, עמ׳ 66" }));
     expect(onOpenPage).toHaveBeenCalledWith(66);
   });
 

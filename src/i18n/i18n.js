@@ -106,6 +106,23 @@ export const changeLanguage = async (code) => {
   storeLanguage(code);
 };
 
+// ── Formatting in the current language ──────────────────────────────────────
+
+// The locale Intl formats dates and numbers in. Yiddish data is thin in some
+// browsers, so Hebrew is its fallback (Intl takes the first it supports).
+const INTL_LOCALES = { he: "he-IL", yi: ["yi", "he-IL"], en: "en", fr: "fr", es: "es" };
+export const intlLocale = () => INTL_LOCALES[i18next.language] ?? INTL_LOCALES[DEFAULT_LANGUAGE];
+
+// An object whose values are translated when READ, not when built: `labels.x`
+// is t(`${prefix}.x`) in whatever language is current at that moment. For the
+// label maps that module constants hand out (roleLabels[role]), so their many
+// readers keep their shape and still follow a language change.
+export const translatedLabels = (prefix, keys) =>
+  Object.defineProperties(
+    {},
+    Object.fromEntries(keys.map((key) => [key, { enumerable: true, get: () => i18next.t(`${prefix}.${key}`) }]))
+  );
+
 // ── A choice made before signing in ─────────────────────────────────────────
 //
 // localStorage says what language this BROWSER was last in — written when a

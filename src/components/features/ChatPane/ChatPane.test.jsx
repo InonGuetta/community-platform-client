@@ -145,7 +145,7 @@ describe("citations", () => {
   test("in a book, a citation opens its page", async () => {
     const onOpenPage = vi.fn();
     render(<ChatPane chat={chat({ messages: [question, bookAnswer] })} isText onOpenPage={onOpenPage} />);
-    await userEvent.click(screen.getByRole("button", { name: "מקור 1, עמ' 47" }));
+    await userEvent.click(screen.getByRole("button", { name: "מקור 1, עמ׳ 47" }));
     expect(onOpenPage).toHaveBeenCalledWith(47);
   });
 

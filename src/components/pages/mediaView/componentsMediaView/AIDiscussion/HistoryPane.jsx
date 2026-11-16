@@ -19,7 +19,7 @@ import ChatIcon from "@mui/icons-material/ChatOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import { statuses } from "../../../../../utilities/constant";
 import { hebrewForError } from "../../../../../utilities/apiError";
-import { formatHebrewDate } from "../../../../../utilities/formatDate";
+import { formatDate } from "../../../../../utilities/formatDate";
 import { MessageBubble, placeOpener, answerSaver, CopyConversationButton } from "../../../../features/ChatPane/ChatPane";
 
 // The reader's earlier conversations on THIS lesson. Presentation only:
@@ -50,7 +50,7 @@ const ConversationRow = ({ item, current, onOpen, onDelete, deleting }) => (
       </Typography>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         <Typography variant="caption" color="text.secondary">
-          {formatHebrewDate(item.updated_at)} · {questionsLabel(item.questions)}
+          {formatDate(item.updated_at)} · {questionsLabel(item.questions)}
         </Typography>
         {current && <Chip size="small" color="primary" variant="outlined" label="השיחה הנוכחית" />}
       </Box>

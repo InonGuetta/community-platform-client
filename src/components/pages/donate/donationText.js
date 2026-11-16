@@ -1,4 +1,4 @@
-import { formatHebrewDate } from "../../../utilities/formatDate";
+import { formatDate } from "../../../utilities/formatDate";
 
 // The words of the donate page (PRD PAY-1, PAY-2), apart from its layout.
 
@@ -19,7 +19,7 @@ export const STATUS_TEXT = {
 
 export const statusOf = (status) => STATUS_TEXT[status] ?? { label: status, color: "default" };
 
-export const donationLine = (d) => `${formatAmount(d.amount_cents, d.currency)} · ${formatHebrewDate(d.created_at)}`;
+export const donationLine = (d) => `${formatAmount(d.amount_cents, d.currency)} · ${formatDate(d.created_at)}`;
 
 // What the result screen says, by how the payment ended.
 export const RESULT_TEXT = {

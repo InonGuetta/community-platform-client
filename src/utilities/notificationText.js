@@ -1,4 +1,4 @@
-import { formatHebrewDate } from "./formatDate";
+import { formatDate } from "./formatDate";
 
 // How a notification reads in the bell, and where clicking it goes.
 //
@@ -114,5 +114,5 @@ export const notificationAge = (createdAt, now = Date.now()) => {
   if (minutes < 60) return minutes === 1 ? "לפני דקה" : `לפני ${minutes} דקות`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return hours === 1 ? "לפני שעה" : `לפני ${hours} שעות`;
-  return formatHebrewDate(createdAt);
+  return formatDate(createdAt);
 };

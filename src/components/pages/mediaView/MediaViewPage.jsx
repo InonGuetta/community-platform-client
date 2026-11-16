@@ -22,7 +22,7 @@ import { creatorPrefixes } from "../../../utilities/constant";
 import { creatorPath, hasCreatorPage } from "../../../utilities/creatorPage";
 import Link from "@mui/material/Link";
 import { Link as RouterLink } from "react-router-dom";
-import { formatHebrewDate } from "../../../utilities/formatDate";
+import { formatDate } from "../../../utilities/formatDate";
 
 // Presentation only. Everything that dispatches, selects or derives from server
 // data lives in useMediaViewPageController — see its header for where that line
@@ -196,7 +196,7 @@ const MediaViewPage = () => {
               publication date. A draft says so rather than claiming to be
               published, since the people who can see one are exactly the
               people who know it is not. */}
-          {formatHebrewDate(media.created_at) && (
+          {formatDate(media.created_at) && (
             <Typography
               variant="body2"
               color="text.secondary"
@@ -206,7 +206,7 @@ const MediaViewPage = () => {
               sx={{ mt: 1, textAlign: "start" }}
             >
               {media.is_published === false ? "טיוטה · הועלה בתאריך: " : "פורסם בתאריך: "}
-              {formatHebrewDate(media.created_at)}
+              {formatDate(media.created_at)}
             </Typography>
           )}
           {/* Its place in its course, and the way on (PRD CRS-1, CRS-3). Also

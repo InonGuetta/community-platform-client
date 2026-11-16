@@ -7,7 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { formatHebrewDate } from "../../../../utilities/formatDate";
+import { formatDate } from "../../../../utilities/formatDate";
 import { formatTime } from "../../../../utilities/formatTime";
 import { useCourseReport } from "./useCourseReport";
 
@@ -93,7 +93,7 @@ const CourseReport = ({ courseId, courseTitle }) => {
                   <Box component="th" scope="row" sx={nameCellSx}>
                     <Typography fontWeight={600} noWrap title={student.email}>{student.display_name || student.email}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {student.lastActivity ? `פעיל לאחרונה ${formatHebrewDate(student.lastActivity)}` : "עוד לא האזין"}
+                      {student.lastActivity ? `פעיל לאחרונה ${formatDate(student.lastActivity)}` : "עוד לא האזין"}
                     </Typography>
                   </Box>
                   <Box component="td" sx={{ ...cellSx, fontWeight: 700 }} data-testid={`report-total-${student.id}`}>

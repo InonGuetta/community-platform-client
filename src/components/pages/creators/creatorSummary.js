@@ -1,4 +1,4 @@
-import { formatHebrewDate } from "../../../utilities/formatDate";
+import { formatDate } from "../../../utilities/formatDate";
 
 // The line under a lecturer's name (PRD ATTR-10), kept apart from the layout so
 // it can be tested without rendering it:
@@ -33,7 +33,7 @@ export const creatorSummary = (p) => {
   else if (byKind.length === 1) parts[0] = byKind[0];
   const length = recordedLength(p.total_seconds);
   if (length) parts.push(length);
-  const latest = formatHebrewDate(p.latest_at);
+  const latest = formatDate(p.latest_at);
   if (latest) parts.push(`אחרון: ${latest}`);
   return parts.join(" · ");
 };

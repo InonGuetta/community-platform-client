@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 // A note's body is a small fragment of HTML — the toolbar in the notebook's
 // header writes bold, colours, highlights and lists into it.
 //
@@ -232,7 +233,7 @@ export const fragmentToPlainText = (fragment) => {
   // An image has no words, but it is not nothing either: without a stand-in, a
   // note that is one screenshot reads as an empty note everywhere text is shown
   // — in the list preview, in the search index and in the export.
-  for (const image of fragment.querySelectorAll("img")) image.replaceWith("[תמונה]");
+  for (const image of fragment.querySelectorAll("img")) image.replaceWith(i18n.t("format:noteSource.image"));
   // A line break IS the text here: without this, two lines come back joined
   // into one word and the preview reads as nonsense.
   for (const br of fragment.querySelectorAll("br")) br.replaceWith("\n");

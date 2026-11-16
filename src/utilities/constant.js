@@ -1,3 +1,5 @@
+import { translatedLabels } from "../i18n/i18n";
+
 export const roles = { student: "student", lecturer: "lecturer", admin: "admin" };
 export const statuses = { idle: "idle", loading: "loading", succeeded: "succeeded", failed: "failed" };
 export const mediaTypes = { video: "video", audio: "audio", text: "text" };
@@ -12,10 +14,11 @@ export const sessionTypes = { oneOnOne: "1on1", group: "group", webinar: "webina
 // simply stop happening, and everyone opening the archive would pay for it.
 export const pdfStates = { loading: "loading", ready: "ready", error: "error" };
 
-// Hebrew display labels, keyed by the raw stored value (media_type / role /
-// session_type). Display-only — nothing persists or filters by these labels, so
-// the single source of truth here can't drift across components.
-export const mediaTypeLabels = { video: "וידאו", audio: "שמע", text: "קריאה" };
+// Display labels, keyed by the raw stored value (media_type / role /
+// session_type), in the interface's language: each value is translated when
+// it is read (translatedLabels, the "format" namespace), so `mediaTypeLabels[t]`
+// is always current. Display-only — nothing persists or filters by these.
+export const mediaTypeLabels = translatedLabels("format:mediaTypes", Object.values(mediaTypes));
 
 // The accent each media type is identified by across the app — the archive
 // card's corner brackets and type chip, and the notebook's bookmark headers.
@@ -57,16 +60,18 @@ export const playlistTitleMaxLength = 120;
 //
 // Two columns would have meant a "which one do I read?" branch in every query,
 // every card and every filter, for what is a single fact.
-export const creatorLabels = { video: "שם המרצה", audio: "שם המרצה", text: "שם המחבר" };
+export const creatorLabels = translatedLabels("format:creatorLabel", Object.values(mediaTypes));
 
 // The same fact, worded for a card or a heading rather than a form field.
-export const creatorPrefixes = { video: "מרצה", audio: "מרצה", text: "מחבר" };
+export const creatorPrefixes = translatedLabels("format:creatorPrefix", Object.values(mediaTypes));
 
-// What the server stores when nobody said. Mirrors DEFAULT_CREATOR in the
-// server's servicesMedia.js — the two repositories share no code, so this is a
-// copy, and it is display-only: the client never WRITES this value, it only
-// recognises it. The upload form leaves the field blank and lets the server
-// decide, so a drift here cannot produce a wrong row.
+// What the server STORES when nobody said — a value in the data, not a word of
+// the interface, so it is Hebrew in every language and is never shown as-is
+// (creatorDisplayName in creatorPage.js words it). Mirrors DEFAULT_CREATOR in
+// the server's servicesMedia.js and migration 020's column default — the
+// repositories share no code, so this is a copy. The client never WRITES it,
+// only recognises it: the upload form leaves the field blank and lets the
+// server decide, so a drift here cannot produce a wrong row.
 export const defaultCreatorName = "כללי";
 
 // Mirrors CREATOR_NAME_MAX in the server's servicesMedia.js and VARCHAR(120) in
@@ -80,8 +85,8 @@ export const creatorNameMaxLength = 120;
 // item tagged with everything is findable under nothing.
 export const MAX_TAGS = 8;
 
-export const roleLabels = { student: "תלמיד", lecturer: "מרצה", admin: "מנהל" };
-export const sessionTypeLabels = { "1on1": "אחד על אחד", group: "קבוצה", webinar: "וובינר" };
+export const roleLabels = translatedLabels("format:roles", Object.values(roles));
+export const sessionTypeLabels = translatedLabels("format:sessionTypes", Object.values(sessionTypes));
 
 // Below this share (percent) of readable text, a book's page says that the
 // search and the "דיון עם AI" chat cover only part of it. The server measures

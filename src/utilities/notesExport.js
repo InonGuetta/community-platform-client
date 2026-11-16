@@ -7,7 +7,8 @@ import {
   wordFootnoteList,
   SOURCE_STYLES,
 } from "./noteFootnotes";
-import { formatHebrewDate } from "./formatDate";
+import { formatDate, formatShortDate } from "./formatDate";
+import i18n from "../i18n/i18n";
 
 // Exporting a run of notes, as a PDF or as a Word document.
 //
@@ -30,9 +31,9 @@ import { formatHebrewDate } from "./formatDate";
 // written from a lecture — which lecture, because that is often the only thing
 // that identifies an untitled note.
 const headingFor = (note) => {
-  const title = note.title?.trim() || "(ללא כותרת)";
-  const source = note.media_title ? ` — מתוך: ${note.media_title}` : "";
-  const date = formatHebrewDate(note.updated_at);
+  const title = note.title?.trim() || i18n.t("format:notesExport.untitled");
+  const source = note.media_title ? i18n.t("format:notesExport.from", { title: note.media_title }) : "";
+  const date = formatDate(note.updated_at);
   return `${title}${source}${date ? ` (${date})` : ""}`;
 };
 
@@ -48,11 +49,11 @@ const headingFor = (note) => {
 const documentNames = (notes, named) => {
   const custom = named?.trim();
   const single = !custom && notes.length === 1 ? notes[0] : null;
-  const title = custom || (single ? (single.title?.trim() || "הערה ללא כותרת") : "המחברת שלי");
+  const title = custom || (single ? (single.title?.trim() || i18n.t("format:notesExport.untitledNote")) : i18n.t("format:notesExport.notebook"));
   return {
     single,
     title,
-    base: custom || (single ? title : `המחברת שלי - ${new Date().toLocaleDateString("he-IL")}`),
+    base: custom || (single ? title : i18n.t("format:notesExport.notebookDated", { date: formatShortDate(new Date()) })),
   };
 };
 
@@ -87,7 +88,7 @@ export const downloadNotesPdf = async (notes, { title: named, sources = SOURCE_S
     // without sources has none to print. The writer takes an empty map as "this
     // document has no footnotes", which is exactly right for both.
     footnotes: sources === SOURCE_STYLES.footnotes ? registry.labels() : {},
-    filename: `${safeFileBaseName(base, "המחברת שלי")}.pdf`,
+    filename: `${safeFileBaseName(base, i18n.t("format:notesExport.notebook"))}.pdf`,
   });
 };
 
@@ -171,7 +172,7 @@ ${wordFootnoteList(registry, sources)}
   // codepage and every Hebrew letter arrives as mojibake.
   saveBlob(
     new Blob(["﻿", html], { type: "application/msword;charset=utf-8" }),
-    `${safeFileBaseName(base, "המחברת שלי")}.doc`
+    `${safeFileBaseName(base, i18n.t("format:notesExport.notebook"))}.doc`
   );
 };
 

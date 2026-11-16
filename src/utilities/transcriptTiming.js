@@ -1,4 +1,5 @@
 import { transcriptToText } from "./transcriptText";
+import i18n from "../i18n/i18n";
 
 // When each sentence of a recording is said (PRD MOB-5, MOB-6) — for captions
 // over the player and for the transcript that scrolls with it.
@@ -150,7 +151,7 @@ const vttTime = (seconds) => {
 export const toVtt = (cues, { precise = true } = {}) => {
   const header = precise
     ? "WEBVTT\n\n"
-    : "WEBVTT\n\nNOTE\nהזמנים משוערים: השיעור תומלל לפני שנשמר תזמון מדויק לכל משפט.\n\n";
+    : `WEBVTT\n\nNOTE\n${i18n.t("format:timing.estimated")}\n\n`;
   const body = cues
     .map((cue, i) => {
       const next = cues[i + 1];

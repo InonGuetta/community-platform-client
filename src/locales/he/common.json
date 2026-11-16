@@ -3,5 +3,37 @@
   "language": {
     "label": "שפת האתר",
     "change": "שינוי שפה"
+  },
+  "actions": {
+    "cancel": "ביטול",
+    "delete": "מחיקה",
+    "close": "סגירת החלון",
+    "gotIt": "הבנתי"
+  },
+  "user": {
+    "fallbackName": "משתמש"
+  },
+  "search": {
+    "placeholder": "חיפוש..."
+  },
+  "noData": "אין נתונים להצגה",
+  "floatingWindow": {
+    "closeKeepsTabs": "סגירת החלון (הכרטיסיות נשמרות)"
+  },
+  "confirmDelete": {
+    "title": "אישור מחיקה",
+    "question": "האם למחוק {{what}} <strong>{{name}}</strong>? לא ניתן לבטל פעולה זו.",
+    "what": {
+      "media": "את פריט המדיה",
+      "user": "את המשתמש",
+      "course": "את הקורס",
+      "item": "את הפריט"
+    }
+  },
+  "errorBoundary": {
+    "title": "משהו השתבש",
+    "body": "אירעה שגיאה בלתי צפויה בטעינת הדף. רענון הדף בדרך כלל פותר את הבעיה.",
+    "reload": "רענון הדף",
+    "toArchive": "חזרה לארכיון"
   }
 }

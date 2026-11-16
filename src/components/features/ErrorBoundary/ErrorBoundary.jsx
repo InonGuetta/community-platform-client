@@ -109,16 +109,16 @@ class ErrorBoundary extends Component {
     return (
       <div dir={directionOf(i18n.language)} style={styles.page}>
         <div style={styles.card}>
-          <h1 style={styles.title}>משהו השתבש</h1>
+          <h1 style={styles.title}>{i18n.t("errorBoundary.title")}</h1>
           <p style={styles.text}>
-            אירעה שגיאה בלתי צפויה בטעינת הדף. רענון הדף בדרך כלל פותר את הבעיה.
+            {i18n.t("errorBoundary.body")}
           </p>
           <div style={styles.actions}>
             <button type="button" style={styles.button} onClick={this.handleReload}>
-              רענון הדף
+              {i18n.t("errorBoundary.reload")}
             </button>
             <button type="button" style={styles.secondaryButton} onClick={this.handleGoHome}>
-              חזרה לארכיון
+              {i18n.t("errorBoundary.toArchive")}
             </button>
           </div>
           {import.meta.env.DEV && (

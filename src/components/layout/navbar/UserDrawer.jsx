@@ -21,6 +21,7 @@ import { avatarInitial } from "./useAccount";
 import NavLinkLabel from "./NavLinkLabel";
 import LanguageSwitcher from "../LanguageSwitcher";
 import { useDirection } from "../../../i18n/useDirection";
+import { useTranslation } from "react-i18next";
 
 // The personal drawer is confined to the left-image column so it opens *over*
 // the image only. These match the archive left-image geometry (ArchivePage):
@@ -49,6 +50,7 @@ const UserDrawer = ({
   drawerOpen, setDrawerOpen, user, role, pathname, links, pendingRoleRequests, installer, handleLogout,
 }) => {
   const { end } = useDirection();
+  const { t } = useTranslation(["nav", "common"]);
   return (
   <Drawer
     anchor={end}
@@ -77,7 +79,7 @@ const UserDrawer = ({
       {/* Close button — the panel's top corner where a line starts. */}
       <IconButton
         onClick={() => setDrawerOpen(false)}
-        aria-label="סגירת התפריט"
+        aria-label={t("drawer.closePanel")}
         sx={{ position: "absolute", top: 8, insetInlineStart: 8, color: "error.main", zIndex: 1 }}
       >
         <CloseIcon sx={{ fontSize: 38 }} />
@@ -89,7 +91,7 @@ const UserDrawer = ({
           {avatarInitial(user)}
         </Avatar>
         <Typography fontWeight={800} color="primary.main" noWrap sx={{ maxWidth: "100%" }}>
-          {user?.display_name || "משתמש"}
+          {user?.display_name || t("common:user.fallbackName")}
         </Typography>
       </Box>
 
@@ -103,7 +105,7 @@ const UserDrawer = ({
         )}
         <ListItem>
           <BadgeOutlinedIcon fontSize="small" sx={{ color: "primary.main", marginInlineEnd: 1 }} />
-          <ListItemText primary={roleLabels[role] || "משתמש"} primaryTypographyProps={{ variant: "body2", color: "text.secondary" }} />
+          <ListItemText primary={roleLabels[role] || t("common:user.fallbackName")} primaryTypographyProps={{ variant: "body2", color: "text.secondary" }} />
         </ListItem>
       </List>
 
@@ -114,7 +116,7 @@ const UserDrawer = ({
           personal collections rather than places to browse, and they are the
           same three the top bar's "תוכן אישי" dropdown offers. */}
       <List>
-        {PERSONAL_SHELVES.map(({ label, path, Icon, iconColour }) => (
+        {PERSONAL_SHELVES.map(({ labelKey, path, Icon, iconColour }) => (
           <ListItem key={path} disablePadding>
             {/* Navigation does NOT close the drawer — it stays open until the
                 user explicitly closes it with the X button (or Esc). */}
@@ -123,7 +125,7 @@ const UserDrawer = ({
                   shelf's own colour, so the list still reads as one column of
                   links rather than as two of them in different inks. */}
               <Icon fontSize="small" sx={{ color: iconColour || "primary.main", marginInlineEnd: 1 }} />
-              <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 800, color: "primary.main" }} />
+              <ListItemText primary={t(labelKey)} primaryTypographyProps={{ fontWeight: 800, color: "primary.main" }} />
             </ListItemButton>
           </ListItem>
         ))}
@@ -135,7 +137,7 @@ const UserDrawer = ({
           personalShelves.js only, so nothing here can be a second copy. */}
       <List>
         {links.map((link) => (
-          <ListItem key={link.label} disablePadding>
+          <ListItem key={link.to} disablePadding>
             <ListItemButton
               component={Link}
               to={link.to}
@@ -158,13 +160,13 @@ const UserDrawer = ({
           <ListItem disablePadding>
             <ListItemButton onClick={() => { setDrawerOpen(false); installer.install(); }}>
               <ListItemIcon sx={{ minWidth: 36, color: "primary.main" }}><InstallMobileIcon /></ListItemIcon>
-              <ListItemText primary="התקנת האפליקציה" primaryTypographyProps={{ fontWeight: 700, color: "primary.main" }} />
+              <ListItemText primary={t("drawer.install")} primaryTypographyProps={{ fontWeight: 700, color: "primary.main" }} />
             </ListItemButton>
           </ListItem>
         )}
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
-            <ListItemText primary="התנתקות" primaryTypographyProps={{ fontWeight: 700, color: "error.main" }} />
+            <ListItemText primary={t("drawer.signOut")} primaryTypographyProps={{ fontWeight: 700, color: "error.main" }} />
           </ListItemButton>
         </ListItem>
       </List>

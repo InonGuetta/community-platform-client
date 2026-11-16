@@ -6,11 +6,13 @@ import ListItemText from "@mui/material/ListItemText";
 import { PERSONAL_SHELVES } from "../personalShelves";
 import { barSurfaceSx, navLabelSx, navMenuItemSx, navMenuListSx } from "./navStyles";
 import { useDirection, menuOrigins } from "../../../i18n/useDirection";
+import { useTranslation } from "react-i18next";
 
 // "תוכן אישי": the personal shelves (personalShelves.js) in a panel that
 // hangs off the bar as a second row of its tabs. Opened from NavLinksBar.
 const PersonalMenu = ({ personalAnchor, setPersonalAnchor, pathname }) => {
   const { start } = useDirection();
+  const { t } = useTranslation("nav");
   return (
   <Menu
     anchorEl={personalAnchor}
@@ -37,7 +39,7 @@ const PersonalMenu = ({ personalAnchor, setPersonalAnchor, pathname }) => {
       },
     }}
   >
-    {PERSONAL_SHELVES.map(({ label, path, Icon, iconColour }) => (
+    {PERSONAL_SHELVES.map(({ labelKey, path, Icon, iconColour }) => (
       <MenuItem
         key={path}
         component={Link}
@@ -57,7 +59,7 @@ const PersonalMenu = ({ personalAnchor, setPersonalAnchor, pathname }) => {
             ListItemText renders its own Typography, whose body1 size would
             otherwise override anything inherited from the MenuItem. */}
         <ListItemText
-          primary={label}
+          primary={t(labelKey)}
           primaryTypographyProps={navLabelSx}
           sx={{ my: 0, flex: "0 0 auto" }}
         />

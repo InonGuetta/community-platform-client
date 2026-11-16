@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import { useTranslation } from "react-i18next";
 
 // REG-11: the admin's "משתמשים" link carries how many role requests are
 // waiting behind it, from the same poll as the bell. Only that link, only when
@@ -7,14 +8,17 @@ import Box from "@mui/material/Box";
 // An inline pill after the word rather than a Badge over it: a Badge is
 // positioned against the corner of what it wraps, and on a text link in this
 // bar it landed across the label itself.
-const NavLinkLabel = ({ link, pendingRoleRequests }) =>
-  link.to === "/users" && pendingRoleRequests > 0 ? (
+// A link carries a key into the "nav" namespace (navLinks.js), not words.
+const NavLinkLabel = ({ link, pendingRoleRequests }) => {
+  const { t } = useTranslation("nav");
+  const label = t(link.labelKey);
+  return link.to === "/users" && pendingRoleRequests > 0 ? (
     <Box
       component="span"
-      aria-label={`${link.label}, ${pendingRoleRequests} בקשות ממתינות`}
+      aria-label={t("pendingRequests", { label, count: pendingRoleRequests })}
       sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}
     >
-      {link.label}
+      {label}
       <Box
         component="span"
         aria-hidden
@@ -28,7 +32,8 @@ const NavLinkLabel = ({ link, pendingRoleRequests }) =>
       </Box>
     </Box>
   ) : (
-    link.label
+    label
   );
+};
 
 export default NavLinkLabel;

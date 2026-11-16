@@ -45,13 +45,13 @@ export const SAVE_COLOUR = "personal.main";
 // is a screen of its own with notes, sources and a floating player, not a list.
 export const NOTEBOOK_SHELF = {
   path: "/notebook",
-  label: "המחברת שלי",
+  labelKey: "shelves.notebook",
   Icon: MenuBookIcon,
 };
 
 export const LIKES_SHELF = {
   path: "/likes",
-  label: "התוכן שאהבתי",
+  labelKey: "shelves.likes",
   Icon: likeIcons.on,
   // Only the two shelves whose icons double as buttons on a lecture take a
   // colour, and it is the one that button lights up in — the green thumbs-up in
@@ -63,19 +63,19 @@ export const LIKES_SHELF = {
   collection: {
     fetch: fetchLikedMedia,
     selectSlice: (state) => state.likes,
-    emptyMessage: "עדיין לא סימנת תוכן בלייק",
+    emptyKey: "shelfEmpty.likes",
   },
 };
 
 export const SAVED_SHELF = {
   path: "/saved",
-  label: "תוכן שמור",
+  labelKey: "shelves.saved",
   Icon: saveIcons.on,
   iconColour: SAVE_COLOUR,
   collection: {
     fetch: fetchSavedMedia,
     selectSlice: (state) => state.saves,
-    emptyMessage: "עדיין לא שמרת תוכן",
+    emptyKey: "shelfEmpty.saved",
     // Saving is two things at once — filing a lecture in a list also saves it
     // generally (see the server's addToPlaylist) — so an unfiltered grid showed
     // every filed lecture loose at the top AND again inside its list. The top of
@@ -84,7 +84,7 @@ export const SAVED_SHELF = {
     filterItems: (item) => !item.in_list,
     // Reached only when there ARE saved items and every one of them sits in a
     // list. "עדיין לא שמרת תוכן" would be a plain untruth there.
-    emptyFilteredMessage: "כל מה ששמרת מסודר ברשימות שלמטה",
+    emptyFilteredKey: "shelfEmpty.savedAllInLists",
     showsLists: true,
   },
 };
@@ -101,17 +101,17 @@ export const SAVED_LIST_ROUTE = savedListPath(":playlistId");
 // position was only ever read back to resume a single item; nothing had ever
 // looked across them.
 //
-// No `filterItems` and no `emptyFilteredMessage`: the server already excludes
+// No `filterItems` and no `emptyFilteredKey`: the server already excludes
 // positions of zero and anything the caller may no longer see, so what arrives
 // is exactly what belongs on the shelf.
 export const CONTINUE_SHELF = {
   path: "/continue",
-  label: "המשך צפייה",
+  labelKey: "shelves.continue",
   Icon: HistoryIcon,
   collection: {
     fetch: fetchContinueWatching,
     selectSlice: (state) => state.media.continueWatching,
-    emptyMessage: "עדיין לא התחלת לצפות בשיעור",
+    emptyKey: "shelfEmpty.continue",
   },
 };
 
@@ -120,7 +120,7 @@ export const CONTINUE_SHELF = {
 // from a thunk that asks the server — which is the whole point of it.
 export const DOWNLOADS_SHELF = {
   path: "/downloads",
-  label: "הורדות להאזנה",
+  labelKey: "shelves.downloads",
   Icon: DownloadForOfflineIcon,
 };
 

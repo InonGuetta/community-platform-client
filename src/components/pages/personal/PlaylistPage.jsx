@@ -6,6 +6,7 @@ import DirectionalIcon from "../../../components/features/DirectionalIcon/Direct
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import { countLabel } from "../../../utilities/countLabel";
 import { SAVED_SHELF } from "../../layout/personalShelves";
+import { useTranslation } from "react-i18next";
 import { usePlaylistPageController } from "./usePlaylistPageController";
 
 // One saved list, opened from the cards on the saved-content page.
@@ -29,19 +30,19 @@ const PlaylistPage = () => {
     status,
     user,
   } = usePlaylistPageController();
+  const { t } = useTranslation("nav");
 
   return (
     <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
       <Box sx={{ flexGrow: 1, p: 3 }}>
-        {/* Forward-pointing arrow, because back is to the RIGHT in Hebrew — the
-            app does not flip MUI's physical icons, so the direction has to be
-            chosen rather than inherited. */}
+        {/* "Back" by meaning: DirectionalIcon points it right in Hebrew and
+            left in English. */}
         <Button
           onClick={() => navigate(SAVED_SHELF.path)}
           startIcon={<DirectionalIcon toward="back" />}
           sx={{ mb: 2, "& .MuiButton-startIcon": { marginInlineEnd: -0.25, marginInlineStart: 0.75 } }}
         >
-          {SAVED_SHELF.label}
+          {t(SAVED_SHELF.labelKey)}
         </Button>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>

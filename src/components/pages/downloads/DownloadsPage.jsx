@@ -17,6 +17,7 @@ import OfflinePlayer from "./OfflinePlayer";
 import { useDownloadsPageController } from "./useDownloadsPageController";
 import { lessonByline, lessonDetails, progressLabel, storageLine } from "./downloadsText";
 import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
+import { useTranslation } from "react-i18next";
 import { countLabel } from "../../../utilities/countLabel";
 import { percentOf } from "../../../utilities/offlineStore";
 
@@ -112,7 +113,8 @@ const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
 
 const DownloadsPage = () => {
   const c = useDownloadsPageController();
-  const { Icon } = DOWNLOADS_SHELF;
+  const { Icon, labelKey } = DOWNLOADS_SHELF;
+  const { t } = useTranslation("nav");
   const empty = c.loaded && c.items.length === 0 && c.downloading.length === 0;
 
   return (
@@ -121,7 +123,7 @@ const DownloadsPage = () => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
           <Icon color="primary" sx={{ fontSize: 34 }} />
           <Typography variant="h4" fontWeight={800} color="primary" sx={{ flex: 1 }}>
-            {DOWNLOADS_SHELF.label}
+            {t(labelKey)}
           </Typography>
           {c.items.length > 0 && (
             <Button color="error" onClick={c.askClear} endIcon={<DeleteOutlineIcon />}>מחיקת הכל</Button>

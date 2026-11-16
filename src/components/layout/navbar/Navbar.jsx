@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -32,6 +33,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user, role, signOut } = useAccount();
+  const { t } = useTranslation(["nav", "common"]);
 
   const links = getLinksByRole(role);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -78,7 +80,7 @@ const Navbar = () => {
             textDecoration: "none",
           }}
         >
-          פלטפורמת הקהילה
+          {t("common:appName")}
         </Typography>
 
         {/* Inline links — desktop only. */}
@@ -114,10 +116,10 @@ const Navbar = () => {
         </Box>
 
         {/* Light/dark toggle — always visible. */}
-        <Tooltip title={mode === "dark" ? "מצב בהיר" : "מצב כהה"}>
+        <Tooltip title={mode === "dark" ? t("colorMode.toLight") : t("colorMode.toDark")}>
           <IconButton
             onClick={toggleColorMode}
-            aria-label="החלפת מצב תצוגה"
+            aria-label={t("colorMode.toggle")}
             sx={{ color: "primary.main" }}
           >
             {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
@@ -128,7 +130,7 @@ const Navbar = () => {
             the account page: it is where a user looks for their own settings,
             and it costs no room in a bar that is already full. */}
         <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 1.5 }}>
-          <Tooltip title="החשבון שלי">
+          <Tooltip title={t("myAccount")}>
             <Box
               component={Link}
               to="/profile"
@@ -159,7 +161,7 @@ const Navbar = () => {
             exactly like the panel's X button. */}
         <IconButton
           onClick={() => setDrawerOpen((prev) => !prev)}
-          aria-label={drawerOpen ? "סגירת תפריט אישי" : "פתיחת תפריט אישי"}
+          aria-label={drawerOpen ? t("drawer.close") : t("drawer.open")}
           aria-expanded={drawerOpen}
           sx={{ color: "primary.main", marginInlineEnd: { md: 1 } }}
         >

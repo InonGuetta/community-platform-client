@@ -1,1 +1,77 @@
-{}
+{
+  "title": "My notebook",
+  "newNote": "New note",
+  "noNotes": "No notes yet. Create a new note to begin.",
+  "noMatchingNotes": "No notes match the search.",
+  "noMatchingNotesShort": "No matching notes found.",
+  "bookmarks": {
+    "title": "My bookmarks",
+    "dragHint": "Drag into a note",
+    "none": "No bookmarks yet. Mark points in lessons and they will appear here.",
+    "noMatch": "No matching bookmarks found."
+  },
+  "index": {
+    "search": "Search the notebook...",
+    "searchLabel": "Search the notebook",
+    "selectAll": "Select all the notes shown",
+    "selected": "{{count}} selected",
+    "multiSelect": "Select several",
+    "deleteSelected": "Delete the selected",
+    "selectNote": "Select the note {{title}}",
+    "notSaved": "Not saved"
+  },
+  "export": {
+    "button": "Export",
+    "selectedTooltip": "Export the {{count}} selected notes",
+    "allTooltip": "Export all the notes shown",
+    "selectedCount": "{{count}} selected notes",
+    "allCount": "All the notes shown ({{count}})",
+    "pdf": "Export to PDF",
+    "pdfHint": "Text only, without formatting or images",
+    "word": "Export to Word",
+    "wordHint": "With the formatting and images",
+    "split": "Split into several notebooks…",
+    "splitHint": "Choose how many files, and what goes into each",
+    "summaryFiles": "{{files}} files · {{format}}",
+    "summaryNotes": "{{notes}} notes · {{format}}",
+    "filesCreated": "{{n}} files created",
+    "failed": "The export failed. Please try again.",
+    "exporting": "Exporting...",
+    "sources": {
+      "title": "How should sources be included?",
+      "footnotes": "Sources at the bottom of the page",
+      "footnotesHint": "A small number in the text, with the full source printed at the bottom of the page it appears on",
+      "inline": "Sources within the text",
+      "inlineHint": "Each source is numbered and stays where it is, with the content as it appears in the tab",
+      "none": "Export with no sources at all",
+      "noneHint": "Only your own writing, without the references to lessons"
+    },
+    "splitDialog": {
+      "title": "Split the export into several notebooks",
+      "bookName": "Notebook {{n}}",
+      "howMany": "How many notebooks",
+      "format": "Export format",
+      "dragHint": "↔ Drag a note between notebooks, or up and down within one",
+      "fileName": "File name ({{count}} notes)",
+      "dropHere": "Drop here",
+      "empty": "Empty — drag notes here, or no file will be created for it",
+      "moveUp": "Move up",
+      "moveUpNamed": "Move {{title}} up",
+      "moveDown": "Move down",
+      "moveDownNamed": "Move {{title}} down",
+      "bookOf": "The notebook for {{title}}",
+      "totals": "{{files}} files · {{notes}} notes",
+      "run": "Export {{n}} files"
+    }
+  },
+  "delete": {
+    "one": "Are you sure you want to delete the note \"{{title}}\"?",
+    "many": "Are you sure you want to delete {{count}} notes? This cannot be undone."
+  },
+  "notices": {
+    "stillLoading": "The note is still loading. Try again in a moment.",
+    "noneChosen": "No note is chosen. Click inside a note and then save.",
+    "clearSearchToReorder": "Clear the search to reorder the notes",
+    "needTwoToReorder": "You need at least two notes to reorder"
+  }
+}

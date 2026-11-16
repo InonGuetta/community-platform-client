@@ -1,1 +1,59 @@
-{}
+{
+  "card": {
+    "draft": "Draft",
+    "public": "Public",
+    "download": "Download",
+    "publishedHint": "Shown to students — click to hide",
+    "draftHint": "Draft — click to publish to students",
+    "hide": "Hide from students",
+    "publish": "Publish to students",
+    "editDetails": "Edit details",
+    "editDetailsOf": "Edit the details of {{title}}",
+    "editTags": "Edit tags",
+    "editTagsOf": "Edit the tags of {{title}}",
+    "delete": "Delete",
+    "allByCreator": "All lessons by {{name}}",
+    "length": "Length: {{length}}",
+    "likes_one": "One like",
+    "likes_other": "{{count}} likes"
+  },
+  "grid": {
+    "empty": "No media found",
+    "noMatches": "No matching results",
+    "loadingMore": "Loading...",
+    "loadMore": "Load more"
+  },
+  "download": {
+    "audio": "Download audio",
+    "video": "Download video",
+    "text": "Download the document",
+    "audioOnly": "Download audio only",
+    "availableOffline": "Available offline",
+    "toOfflineShelf": "To offline listening",
+    "savingOffline": "Saving for offline…",
+    "savingOfflinePercent": "Saving for offline… {{percent}}%",
+    "saveOffline": "Save for offline listening",
+    "captionsFile": "captions",
+    "captions": "Download captions (VTT)",
+    "preparingPdf": "Preparing PDF...",
+    "transcriptPdf": "Download transcript (PDF)",
+    "transcriptFile": "transcript",
+    "noTranscript": "No transcript is available for this item.",
+    "pdfFailed": "Creating the PDF failed. Please try again."
+  },
+  "player": {
+    "pause": "Pause",
+    "play": "Play",
+    "position": "Position in the lesson",
+    "unmute": "Unmute",
+    "mute": "Mute",
+    "volume": "Volume",
+    "hideCaptions": "Hide captions",
+    "showCaptions": "Show captions",
+    "captions": "Captions",
+    "settings": "Settings",
+    "settingsLabel": "Player settings",
+    "speed": "Playback speed",
+    "lessonFallback": "Lesson"
+  }
+}

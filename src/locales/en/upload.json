@@ -1,1 +1,20 @@
-{}
+{
+  "title": "Upload media",
+  "chooseFile": "Click to choose a file",
+  "uploading": "Uploading... {{progress}}%",
+  "processing": "Processing on the server...",
+  "uploadingShort": "Uploading...",
+  "upload": "Upload",
+  "fields": {
+    "title": "Title",
+    "description": "Description",
+    "type": "Media type",
+    "creatorBlank": "If left empty, \"{{name}}\" will be recorded",
+    "tagsHelper": "Up to {{max}} tags. You can also skip this — we'll suggest tags after the upload.",
+    "course": "Course",
+    "courseHelper": "No course — the content is shown to every student",
+    "noCourse": "No course (general library)"
+  },
+  "tagsSaved": "Tags saved",
+  "tagsFailed": "Saving the tags failed"
+}

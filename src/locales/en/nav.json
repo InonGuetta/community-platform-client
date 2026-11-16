@@ -1,1 +1,58 @@
-{}
+{
+  "links": {
+    "archive": "Archive",
+    "ask": "Ask the archive",
+    "myCourses": "My courses",
+    "sessions": "Sessions",
+    "donate": "Donate",
+    "manageCourses": "Manage courses",
+    "users": "Users",
+    "admin": "Admin"
+  },
+  "pendingRequests_one": "{{label}}, one request waiting",
+  "pendingRequests_other": "{{label}}, {{count}} requests waiting",
+  "personal": "My content",
+  "shelves": {
+    "notebook": "My notebook",
+    "likes": "Content I liked",
+    "saved": "Saved content",
+    "continue": "Continue watching",
+    "downloads": "Offline listening"
+  },
+  "shelfEmpty": {
+    "likes": "You haven't liked anything yet",
+    "saved": "You haven't saved anything yet",
+    "savedAllInLists": "Everything you saved is organised in the lists below",
+    "continue": "You haven't started watching a lesson yet"
+  },
+  "colorMode": {
+    "toLight": "Light mode",
+    "toDark": "Dark mode",
+    "toggle": "Switch display mode"
+  },
+  "myAccount": "My account",
+  "drawer": {
+    "open": "Open personal menu",
+    "close": "Close personal menu",
+    "closePanel": "Close the menu",
+    "install": "Install the app",
+    "signOut": "Sign out"
+  },
+  "bell": {
+    "title": "Notifications",
+    "unread_one": "Notifications, one unread",
+    "unread_other": "Notifications, {{count}} unread",
+    "markAllRead": "Mark all as read",
+    "empty": "No notifications yet. A message will appear here when a lesson finishes processing, and more."
+  },
+  "roleBanner": {
+    "pending": "Your request for {{role}} permissions is awaiting an admin's approval. Until then the account works with student permissions.",
+    "rejected": "Your request for {{role}} permissions was not approved. The account keeps working as usual with student permissions."
+  },
+  "installHelp": {
+    "title": "Installing on iPhone or iPad",
+    "step1": "1. In Safari, tap the share button <icon/> at the bottom of the screen.",
+    "step2": "2. Choose \"Add to Home Screen\".",
+    "step3": "3. Tap \"Add\". The app will appear on your home screen and open without the address bar."
+  }
+}

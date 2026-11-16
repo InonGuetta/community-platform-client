@@ -1,1 +1,40 @@
-{}
+{
+  "title": "My account",
+  "unverified": "Address not verified",
+  "verified": "Verified address",
+  "displayName": "Display name",
+  "save": "Save",
+  "password": {
+    "title": "Change password",
+    "current": "Current password",
+    "new": "New password",
+    "confirm": "Confirm new password",
+    "minLength": "At least {{n}} characters",
+    "mismatch": "The passwords do not match",
+    "signsOutOthers": "Changing your password signs out every other device signed in to the account.",
+    "submit": "Change password",
+    "changed": "Password changed",
+    "failed": "Changing the password failed"
+  },
+  "details": {
+    "saved": "Details saved",
+    "failed": "Saving the details failed"
+  },
+  "email": {
+    "title": "Email notifications",
+    "intro": "Every notification appears in the bell at the top of the page. Here you choose which ones also arrive by email.",
+    "loadFailed": "Your preferences cannot be loaded right now.",
+    "allOff": "You asked to stop all email from the platform.",
+    "restore": "Turn email back on",
+    "saveFailed": "Saving the preference failed"
+  },
+  "role": {
+    "title": "Permission request",
+    "pending": "Your request for {{role}} permissions is awaiting an admin's approval. Until then the account keeps its current permissions.",
+    "rejected": "Your previous request for {{role}} permissions was not approved.",
+    "rejectedReason": "Your previous request for {{role}} permissions was not approved. Reason: {{reason}}",
+    "tryAgainLater": "You can submit a new request after seven days.",
+    "current": "Your current permission: {{role}}. A request for a higher permission needs an admin's approval.",
+    "send": "Send request"
+  }
+}

@@ -1,1 +1,48 @@
-{}
+{
+  "retry": "Try again",
+  "offline": "No connection to the server. The lessons you downloaded are available here to listen to.",
+  "downloading": "Downloading… {{progress}}",
+  "cancel": "Cancel the download",
+  "cancelNamed": "Cancel the download of {{title}}",
+  "playing": "Now playing",
+  "listen": "Listen",
+  "listenTo": "Listen to {{title}}",
+  "toLesson": "To the lesson page",
+  "toLessonNamed": "To the lesson page of {{title}}",
+  "remove": "Remove from this device",
+  "removeNamed": "Remove {{title}} from this device",
+  "summary_one": "One lesson on this device · {{storage}}",
+  "summary_other": "{{count}} lessons on this device · {{storage}}",
+  "intro": "Lessons saved on this device play even without a network.",
+  "unsupported": "This browser cannot save lessons for offline listening. Try an up-to-date browser such as Chrome or Safari.",
+  "emptyTitle": "You haven't downloaded any lessons yet",
+  "emptyHow": "On the page of an audio or video lesson, click \"Download\" and choose \"Save for offline listening\".",
+  "toArchive": "To the archive",
+  "removeAll": {
+    "title": "Remove all downloads",
+    "confirm": "Remove all",
+    "one": "Remove the lesson you downloaded from this device? You can download it again when you have a network.",
+    "many": "Remove all {{count}} lessons you downloaded from this device? You can download them again when you have a network."
+  },
+  "audioFromVideo": "Audio from video",
+  "savedOn": "Saved {{date}}",
+  "soFar": "{{size}} so far",
+  "storageUsed": "The lessons take up {{size}}",
+  "storageFree": "{{used}} · about {{free}} still free",
+  "player": {
+    "close": "Close the player",
+    "missing": "This lesson's file is no longer on this device. You can remove it from the list and download it again.",
+    "speed": "Speed:",
+    "speedLabel": "Playback speed"
+  },
+  "removeAllButton": "Remove all",
+  "save": {
+    "noRoom": "There is not enough room on this device. Remove lessons you downloaded and try again.",
+    "busy": "The server is busy preparing other audio files right now. Try again in a few minutes.",
+    "unavailable": "This lesson is not available for download.",
+    "failed": "Saving for offline listening failed. Check your connection and try again.",
+    "unsupported": "This browser cannot save lessons for offline listening.",
+    "saved": "The lesson was saved for offline listening",
+    "lessonFallback": "Lesson"
+  }
+}

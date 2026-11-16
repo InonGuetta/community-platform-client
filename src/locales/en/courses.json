@@ -1,1 +1,130 @@
-{}
+{
+  "title": "Courses",
+  "newCourse": "New course",
+  "editCourse": "Edit course",
+  "tabs": {
+    "mine": "My courses",
+    "all": "All courses"
+  },
+  "noneDefined": "No courses have been set up yet",
+  "noneOwn": "You don't have courses of your own yet. Other lecturers' courses are under \"All courses\".",
+  "inactive": "Inactive",
+  "noLecturer": "No lecturer",
+  "students_one": "One student",
+  "students_other": "{{count}} students",
+  "lessons_zero": "No lessons",
+  "lessons_one": "One lesson",
+  "lessons_other": "{{count}} lessons",
+  "viewOnly": "View only",
+  "joinRequests_one": "One join request",
+  "joinRequests_other": "{{count}} join requests",
+  "edit": "Edit",
+  "delete": "Delete",
+  "pageManage": "Course page: lesson order and who listened to what",
+  "page": "Course page",
+  "rosterPrivate": "The student list is visible only to the course's lecturer.",
+  "unenroll": {
+    "title": "Remove from the course",
+    "confirm": "Remove",
+    "question": "Remove <strong>{{student}}</strong> from the course <strong>{{course}}</strong>? Access to the course's lessons will be blocked immediately. You can enrol them again at any time."
+  },
+  "form": {
+    "name": "Course name",
+    "description": "Description",
+    "lecturer": "Lecturer in charge",
+    "save": "Save"
+  },
+  "report": {
+    "doneOf": "{{title}}: completed",
+    "done": "Completed",
+    "reachedOf": "{{title}}: reached {{time}}",
+    "started": "Started, reached {{time}}",
+    "notYet": "Not yet",
+    "title": "Who listened to what",
+    "export": "Export to CSV",
+    "loadFailed": "The report cannot be loaded right now.",
+    "noStudents": "No students are enrolled in the course yet.",
+    "noRecordings": "The course has no recordings whose listening can be tracked.",
+    "tableLabel": "Students' progress in the course",
+    "student": "Student",
+    "completed": "Completed",
+    "lessonCompletedBy": "{{title}} · completed by {{completed}} of {{total}}",
+    "lessonLabel": "Lesson {{n}}: {{title}}",
+    "lastActive": "Last active {{date}}",
+    "neverListened": "Hasn't listened yet",
+    "exportFailed": "Exporting the report failed"
+  },
+  "roster": {
+    "typeMore": "Type at least two letters to search",
+    "noUsers": "No users found",
+    "search": "Search for a user to add to the course",
+    "add": "Add",
+    "export": "Export to CSV",
+    "empty": "No students are enrolled in this course."
+  },
+  "joinCode": {
+    "requestedOn": "Asked on {{date}}",
+    "approve": "Approve",
+    "reject": "Refuse",
+    "title": "Joining by code",
+    "copy": "Copy the code",
+    "newCode": "New code",
+    "remove": "Turn off joining by code",
+    "howItWorks": "Whoever enters the code sends a request, and joins the course only after you approve it.",
+    "pitch": "With a code, students can ask to join the course themselves, and you approve each request.",
+    "create": "Create a code",
+    "pending_one": "One request waiting",
+    "pending_other": "{{count}} requests waiting",
+    "replaceConfirm": "Create a new code",
+    "replaceWarning": "The current code will stop working immediately, even for those who already have it. Requests already sent remain.",
+    "codeCopied": "Code copied",
+    "linkCopied": "Link copied",
+    "copyFailed": "Copying did not work. You can select it and copy it by hand.",
+    "copyLink": "Copy the join link"
+  },
+  "join": {
+    "title": "Join a course",
+    "sent": "Your request to join the course <strong>{{course}}</strong> was sent. The course will appear here once the request is approved.",
+    "sentTo": "Your request to join the course <strong>{{course}}</strong> was sent to {{lecturer}}. The course will appear here once the request is approved.",
+    "intro": "Enter the code you received from the lecturer. The request will be sent to them for approval.",
+    "code": "Join code",
+    "close": "Close",
+    "sending": "Sending…",
+    "send": "Send request",
+    "failed": "Sending failed. Please try again."
+  },
+  "myStudents": {
+    "title": "My students",
+    "empty": "No students are enrolled in your courses yet. You can add students from any course below."
+  },
+  "track": {
+    "status": {
+      "done": "Completed",
+      "started": "Started",
+      "new": "Not yet",
+      "book": "To read"
+    },
+    "reached": "You reached {{time}}",
+    "dragHint": "{{index}}. {{title}} — drag it, or move it with the arrows",
+    "draft": "Draft",
+    "myCourses": "My courses",
+    "forbidden": "This course's lessons are open to the students enrolled in it. Have a code from the lecturer? You can join under \"My courses\".",
+    "loadFailed": "The course cannot be loaded right now.",
+    "progress": "Progress in the course",
+    "continue": "Continue: {{title}}",
+    "start": "Start: {{title}}",
+    "arrangeHint": "Drag a lesson to change the order, or select it and move it with the arrows. Students see the course in this order.",
+    "empty": "There are no lessons in the course yet.",
+    "reorderFailed": "Saving the lesson order failed. The previous order was restored."
+  },
+  "mine": {
+    "title": "My courses",
+    "count_zero": "No courses",
+    "count_one": "One course",
+    "count_other": "{{count}} courses",
+    "awaiting": "Awaiting the lecturer's approval",
+    "cancelRequest": "Cancel the request",
+    "none": "You haven't been added to any course yet. Received a code from the lecturer? You can join with it.",
+    "join": "Join a course"
+  }
+}

@@ -33,8 +33,8 @@ const TREE = [
 ];
 
 const SUGGESTIONS = [
-  { id: 15, name: "ויחי", path: 'תנ"ך ← תורה ← בראשית', reason: 'השם "ויחי" מופיע בכותרת' },
-  { id: 220, name: "חיזוק כללי", path: "", reason: '"חיזוק" בכותרת — הנושא הקרוב ביותר בעץ' },
+  { id: 15, name: "ויחי", path: 'תנ"ך ← תורה ← בראשית', reason: { key: "nameInTitle", params: { name: "ויחי" }, qualifier: "broader" } },
+  { id: 220, name: "חיזוק כללי", path: "", reason: { key: "closestSubject", params: { word: "חיזוק" } } },
 ];
 
 const ITEM = { id: 7, title: "פרשת ויחי — שיעור חיזוק" };
@@ -68,7 +68,7 @@ describe("what it offers", () => {
   // visible gets rejected by somebody who can see why it was made.
   it("shows why each suggestion was made", () => {
     draw();
-    expect(screen.getByText(/השם "ויחי" מופיע בכותרת/)).toBeDefined();
+    expect(screen.getByText('השם "ויחי" מופיע בכותרת — הרחב מבין השניים, כי הכותרת לא אמרה "פרשת"')).toBeDefined();
     expect(screen.getByText(/"חיזוק" בכותרת/)).toBeDefined();
   });
 

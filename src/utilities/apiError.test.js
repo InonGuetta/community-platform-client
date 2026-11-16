@@ -83,7 +83,9 @@ describe("messageForError", () => {
   test("every translated value is actually Hebrew, not a leftover English string", () => {
     // A Hebrew character must appear in each; an entry accidentally left in
     // English would otherwise sit there looking translated.
-    for (const [code, text] of Object.entries(errors.codes)) {
+    // Rendered, not raw: INVALID_EMAIL's value only nests auth:emailShape.
+    for (const code of Object.keys(errors.codes)) {
+      const text = messageForError({ code, params: { reason: "noAt" } }, "");
       expect(text, `${code} is not Hebrew`).toMatch(/[֐-׿]/);
     }
   });

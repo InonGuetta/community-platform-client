@@ -1,4 +1,5 @@
 import { formatDate } from "./formatDate";
+import { processingReasonText } from "./processingReason";
 
 // How a notification reads in the bell, and where clicking it goes.
 //
@@ -47,14 +48,16 @@ export const describeNotification = (notification) => {
         body: `"${payload.title || "השיעור"}" מוכן: התמלול והסיכום זמינים`,
         href: payload.mediaId ? `/media/${payload.mediaId}` : null,
       };
-    case "processing_error":
+    case "processing_error": {
+      const reason = processingReasonText(payload.reason);
       return {
         title: "העיבוד נכשל",
-        body: payload.reason
-          ? `"${payload.title || "השיעור"}": ${payload.reason}`
+        body: reason
+          ? `"${payload.title || "השיעור"}": ${reason}`
           : `"${payload.title || "השיעור"}". אפשר לנסות שוב מעמוד השיעור`,
         href: payload.mediaId ? `/media/${payload.mediaId}` : null,
       };
+    }
     case "session_scheduled":
       return {
         title: "נקבע מפגש",

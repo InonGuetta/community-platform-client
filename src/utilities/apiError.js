@@ -64,6 +64,14 @@ export const ERROR_CODES = {
   TAG_EXISTS: "TAG_EXISTS",
   TAG_PARENT_NOT_FOUND: "TAG_PARENT_NOT_FOUND",
   TAG_PROPOSAL_DECIDED: "TAG_PROPOSAL_DECIDED",
+  TAG_PROPOSAL_NOT_FOUND: "TAG_PROPOSAL_NOT_FOUND",
+  TAG_NAME_REQUIRED: "TAG_NAME_REQUIRED",
+  TAG_TOO_LONG: "TAG_TOO_LONG",
+  TAG_LIMIT: "TAG_LIMIT",
+  TAG_LIMIT_WITH_PENDING: "TAG_LIMIT_WITH_PENDING",
+  TAG_NOT_APPROVED: "TAG_NOT_APPROVED",
+  TAG_PARENT_INVALID: "TAG_PARENT_INVALID",
+  INVALID_EMAIL: "INVALID_EMAIL",
 
   // The transcript pipeline.
   NO_TRANSCRIPT_TEXT: "NO_TRANSCRIPT_TEXT",
@@ -72,6 +80,10 @@ export const ERROR_CODES = {
   UNSUPPORTED_TEXT_FORMAT: "UNSUPPORTED_TEXT_FORMAT",
   UNVIEWABLE_TEXT_FORMAT: "UNVIEWABLE_TEXT_FORMAT",
   DOCUMENT_UNREADABLE: "DOCUMENT_UNREADABLE",
+  OLD_DOC_FORMAT: "OLD_DOC_FORMAT",
+  DOCUMENT_SCANNED: "DOCUMENT_SCANNED",
+  DOCUMENT_TOO_SHORT: "DOCUMENT_TOO_SHORT",
+  DOCUMENT_NO_TEXT: "DOCUMENT_NO_TEXT",
   ALREADY_QUEUED: "ALREADY_QUEUED",
   ALREADY_RUNNING: "ALREADY_RUNNING",
   // The monthly AI budget (server services/servicesAiUsage.js).
@@ -110,13 +122,14 @@ export const ERROR_CODES = {
 // dropped the code — so the code existed on the wire and was thrown away one
 // layer before anything could use it.
 //
-// The shape is `{ message, code }`, and both halves have a job: `code` is what
-// the notification middleware translates, `message` is the English fallback for
-// the cases with no code (a thunk's own default, an unrecognised failure) and is
-// what the slices store in `state.error` for the inline auth alerts.
+// The shape is `{ message, code, params }`: `code` is what the notification
+// middleware translates, `params` the facts its sentence needs ({ max: 20 }),
+// `message` the English fallback for the cases with no code (a thunk's own
+// default, an unrecognised failure) and what the slices store in `state.error`.
 export const rejectionOf = (err, fallback) => ({
   message: err?.response?.data?.message || fallback,
   code: err?.response?.data?.code,
+  ...(err?.response?.data?.params && { params: err.response.data.params }),
 });
 
 // ── The words ───────────────────────────────────────────────────────────────
@@ -142,4 +155,4 @@ export const rejectionOf = (err, fallback) => ({
 // log line, and letting it through is how "Invalid credentials" ended up on
 // screen in a Hebrew, right-to-left application.
 export const messageForError = (rejection, fallback) =>
-  (rejection?.code && i18n.t(`errors:codes.${rejection.code}`, { defaultValue: "" })) || fallback;
+  (rejection?.code && i18n.t(`errors:codes.${rejection.code}`, { ...rejection.params, defaultValue: "" })) || fallback;

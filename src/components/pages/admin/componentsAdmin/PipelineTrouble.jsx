@@ -16,6 +16,7 @@ import DialogTitle from "../../../features/Dialogs/DialogTitle";
 import DialogContent from "../../../features/Dialogs/DialogContent";
 import DialogActions from "../../../features/Dialogs/DialogActions";
 import { formatDateTime } from "../../../../utilities/formatDate";
+import { processingReasonText } from "../../../../utilities/processingReason";
 import { useTranslation } from "react-i18next";
 
 // What broke, and the one button that does something about it.
@@ -141,7 +142,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
                   <TableCell>
                     <Chip size="small" color={item.status === "error" ? "error" : "default"} label={item.status ?? t("pipeline.neverRun")} />
                   </TableCell>
-                  <TableCell sx={{ maxWidth: 320, wordBreak: "break-word" }}>{item.error_message || "—"}</TableCell>
+                  <TableCell sx={{ maxWidth: 320, wordBreak: "break-word" }}>{processingReasonText(item.error_message, item.error_message ? t("pipeline.reasonUnknown") : "—")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -56,6 +56,14 @@ const SuggestTagsDialog = ({
   onSave,
 }) => {
   const { t } = useTranslation("tags");
+  // The server sends a key and its facts (lib/tagSuggestions.js); a qualifier
+  // says how a name found twice in the tree was resolved.
+  const reasonText = (reason) =>
+    reason?.key
+      ? [t(`suggest.reasons.${reason.key}`, reason.params), reason.qualifier && t(`suggest.reasons.${reason.qualifier}`)]
+          .filter(Boolean)
+          .join(" — ")
+      : "";
   const [chosen, setChosen] = useState([]);
   // Tags an admin created from this dialog. The tree in `nodes` was fetched
   // before they existed, and the picker can only show a tag it has a node for.
@@ -148,7 +156,7 @@ const SuggestTagsDialog = ({
                   {/* The reason, in the open. These are guesses from a title, and
                       one that cannot be checked is one nobody should accept. */}
                   <Typography variant="caption" color="text.secondary">
-                    {suggestion.reason}
+                    {reasonText(suggestion.reason)}
                   </Typography>
                 </Box>
               ))}

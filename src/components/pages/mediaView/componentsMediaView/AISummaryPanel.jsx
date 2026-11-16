@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import TextQualityNotice from "./TextQualityNotice";
+import { processingReasonText } from "../../../../utilities/processingReason";
 import { useTranslation } from "react-i18next";
 
 // The panel used to render `null` whenever there was no summary — which was
@@ -123,12 +124,13 @@ const AISummaryPanel = ({
         </Alert>
       )}
 
-      {/* error_message carries the reason the worker recorded. For a document it
+      {/* error_message carries the reason the worker recorded, as a code worded
+          here in the reader's language (utilities/processingReason.js). For a document it
           is usually something the lecturer can act on ("this file is a scan"),
           which is exactly the difference between a dead end and a next step. */}
       {showFailure && (
         <Alert severity="error">
-          {transcript?.error_message || t("summary.failed")}
+          {processingReasonText(transcript?.error_message, t("summary.failed"))}
         </Alert>
       )}
 

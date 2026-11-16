@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { resetPassword } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { hebrewForError } from "../../../utilities/apiError";
+import i18n from "../../../i18n/i18n";
 
 // What the reset link does: the token it carries, the new password typed
 // twice, and the reset itself — so that ResetPassword.jsx is layout only.
@@ -31,7 +32,7 @@ export const useResetPassword = () => {
       return;
     }
     // Keyed on the code, never on the server's English prose — see apiError.js.
-    setError(hebrewForError(result.payload, "איפוס הסיסמה נכשל. נסה שוב."));
+    setError(hebrewForError(result.payload, i18n.t("auth:reset.failed")));
   };
 
   return { token, password, setPassword, confirm, setConfirm, show, setShow, error, busy, handleSubmit };

@@ -1,4 +1,5 @@
 import { useSearchParams } from "react-router-dom";
+import i18n from "../../../i18n/i18n";
 
 // The server sends a failed provider sign-in back to /sign-in?error=<provider>_<why>
 // — there is no JSON body to read on a redirect, so the reason travels in the
@@ -12,11 +13,11 @@ export const oauthErrorText = (code) => {
   const [, provider, why] = match;
   const name = PROVIDER_NAMES[provider];
   if (why === "unavailable") {
-    return `ההתחברות עם ${name} עדיין לא הוגדרה באתר. אפשר להתחבר בדרך אחרת.`;
+    return i18n.t("auth:social.unavailable", { name });
   }
   return name
-    ? `ההתחברות עם ${name} לא הצליחה. אפשר לנסות שוב או להתחבר בדרך אחרת.`
-    : "ההתחברות לא הצליחה. אפשר לנסות שוב או להתחבר בדרך אחרת.";
+    ? i18n.t("auth:social.failedWith", { name })
+    : i18n.t("auth:social.failed");
 };
 
 export const useOAuthError = () => {

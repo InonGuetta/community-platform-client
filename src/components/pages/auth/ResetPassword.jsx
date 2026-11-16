@@ -11,6 +11,7 @@ import Link from "@mui/material/Link";
 import AuthLayout from "./AuthLayout";
 import { useResetPassword } from "./useResetPassword";
 import { floatingLabelSx, inputBaseSx, submitButtonSx, EyeIcon, EyeCrossedIcon } from "./authShared";
+import { useTranslation } from "react-i18next";
 
 // The other half of the reset, opened from the link in the message. The token
 // arrives in the query string and is the only credential involved — there is no
@@ -23,17 +24,18 @@ import { floatingLabelSx, inputBaseSx, submitButtonSx, EyeIcon, EyeCrossedIcon }
 const MIN_PASSWORD_LENGTH = 8; // mirrors MIN_PASSWORD_LENGTH in servicesAuth.js
 
 const ResetPassword = () => {
+  const { t } = useTranslation("auth");
   const { token, password, setPassword, confirm, setConfirm, show, setShow, error, busy, handleSubmit } = useResetPassword();
 
   // A link with no token at all is a broken link, and saying so beats a form
   // that collects a password and then fails on submit.
   if (!token) {
     return (
-      <AuthLayout title="קישור לא תקין">
+      <AuthLayout title={t("reset.badLinkTitle")}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Alert severity="error">הקישור חסר או פגום.</Alert>
+          <Alert severity="error">{t("reset.badLink")}</Alert>
           <Link component={RouterLink} to="/forgot-password" underline="hover">
-            בקשת קישור חדש
+            {t("reset.requestNew")}
           </Link>
         </Box>
       </AuthLayout>
@@ -44,12 +46,12 @@ const ResetPassword = () => {
   const tooShort = password.length > 0 && password.length < MIN_PASSWORD_LENGTH;
 
   return (
-    <AuthLayout title="בחירת סיסמה חדשה">
+    <AuthLayout title={t("reset.title")}>
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         {error && <Alert severity="error">{error}</Alert>}
 
         <TextField
-          label="סיסמה חדשה"
+          label={t("fields.newPassword")}
           type={show ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -58,13 +60,13 @@ const ResetPassword = () => {
           variant="standard"
           fullWidth
           error={tooShort}
-          helperText={tooShort ? `לפחות ${MIN_PASSWORD_LENGTH} תווים` : " "}
+          helperText={tooShort ? t("fields.minLength", { n: MIN_PASSWORD_LENGTH }) : " "}
           sx={floatingLabelSx}
           InputProps={{
             ...inputBaseSx,
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton onClick={() => setShow((v) => !v)} edge="end" aria-label="הצג סיסמה">
+                <IconButton onClick={() => setShow((v) => !v)} edge="end" aria-label={show ? t("fields.hidePassword") : t("fields.showPassword")}>
                   {show ? <EyeCrossedIcon /> : <EyeIcon />}
                 </IconButton>
               </InputAdornment>
@@ -76,7 +78,7 @@ const ResetPassword = () => {
             cannot check by signing in with it afterwards — a typo here locks
             them out again and the only way back is another email. */}
         <TextField
-          label="אימות סיסמה"
+          label={t("fields.confirmPassword")}
           type={show ? "text" : "password"}
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
@@ -84,7 +86,7 @@ const ResetPassword = () => {
           variant="standard"
           fullWidth
           error={mismatch}
-          helperText={mismatch ? "הסיסמאות אינן תואמות" : " "}
+          helperText={mismatch ? t("fields.mismatch") : " "}
           sx={floatingLabelSx}
           InputProps={inputBaseSx}
         />
@@ -94,11 +96,11 @@ const ResetPassword = () => {
           disabled={busy || mismatch || tooShort || password.length === 0 || confirm.length === 0}
           sx={submitButtonSx}
         >
-          {busy ? <CircularProgress size={20} /> : "שמור והתחבר"}
+          {busy ? <CircularProgress size={20} /> : t("reset.save")}
         </Button>
 
         <Typography variant="caption" color="text.secondary" textAlign="center">
-          שמירת סיסמה חדשה מנתקת כל מכשיר אחר שמחובר לחשבון.
+          {t("reset.signsOutOthers")}
         </Typography>
       </Box>
     </AuthLayout>

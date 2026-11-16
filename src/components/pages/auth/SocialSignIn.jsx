@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { authApi } from "../../../api/authApi";
 import { GoogleIcon, AppleIcon, LinkedInIcon, socialButtonSx } from "./authShared";
+import { useTranslation } from "react-i18next";
 
 // "Continue with a provider", for the sign-in and sign-up screens alike — the
 // provider decides whether the account is new, so the two screens differ only
@@ -36,18 +37,21 @@ const buttonSx = {
   },
 };
 
-/** @param {{ verb: string }} props  "התחבר" or "הירשם" */
-const SocialSignIn = ({ verb }) => (
+/** @param {{ mode: "signIn" | "signUp" }} props */
+const SocialSignIn = ({ mode }) => {
+  const { t } = useTranslation("auth");
+  return (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
     {PROVIDERS.map(({ name, url, Icon }) => (
       <Button key={name} variant="outlined" fullWidth startIcon={<Icon />}
         onClick={() => { window.location.href = url; }}
         sx={buttonSx}
       >
-        {verb} באמצעות {name}
+        {t(`social.${mode}`, { name })}
       </Button>
     ))}
   </Box>
-);
+  );
+};
 
 export default SocialSignIn;

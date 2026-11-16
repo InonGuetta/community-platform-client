@@ -14,6 +14,7 @@ import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import NoteToolbar from "../../../features/Notes/NoteToolbar";
+import { useTranslation } from "react-i18next";
 
 // The notebook's header: the title, the formatting strip for the note being
 // edited, the export menu and "new note". Layout only — every value and
@@ -30,9 +31,11 @@ const NotebookHeader = ({
   selectedCount,
   setExportAnchor,
   setSplitOpen,
-}) => (
+}) => {
+  const { t } = useTranslation("notebook");
+  return (
   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, flexWrap: "wrap", flexShrink: 0 }}>
-    <Typography variant="h4" fontWeight={800} color="primary">המחברת שלי</Typography>
+    <Typography variant="h4" fontWeight={800} color="primary">{t("title")}</Typography>
 
     <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", minWidth: 300 }}>
       <NoteToolbar
@@ -51,7 +54,7 @@ const NotebookHeader = ({
     {/* Export sits next to "new note" rather than down in the list with the
         tick boxes: it acts on the notebook, like the button beside it, and
         the two formats are a choice worth showing by name. */}
-    <Tooltip title={selectedCount > 0 ? `ייצוא ${selectedCount} ההערות שנבחרו` : "ייצוא כל ההערות המוצגות"}>
+    <Tooltip title={selectedCount > 0 ? t("export.selectedTooltip", { count: selectedCount }) : t("export.allTooltip")}>
       <span>
         <Button
           variant="outlined"
@@ -61,7 +64,7 @@ const NotebookHeader = ({
           aria-haspopup="menu"
           sx={{ borderRadius: 2, fontWeight: 700, px: 2.5 }}
         >
-          ייצוא
+          {t("export.button")}
         </Button>
       </span>
     </Tooltip>
@@ -70,7 +73,7 @@ const NotebookHeader = ({
       {/* Named so the user knows what is about to be written before it is
           written — the count, and which of the two documents it will be. */}
       <Typography variant="caption" color="text.secondary" sx={{ px: 2, py: 0.5, display: "block" }}>
-        {selectedCount > 0 ? `${selectedCount} הערות שנבחרו` : `כל ההערות המוצגות (${notesToExport.length})`}
+        {selectedCount > 0 ? t("export.selectedCount", { count: selectedCount }) : t("export.allCount", { count: notesToExport.length })}
       </Typography>
 
       {/* Three rows and nothing else. What happens to the SOURCES is asked
@@ -79,11 +82,11 @@ const NotebookHeader = ({
           read past on the way to the button everybody came for. */}
       <MenuItem onClick={() => askSources({ format: "pdf" })} sx={{ textAlign: "start" }}>
         <ListItemIcon><PictureAsPdfOutlinedIcon fontSize="small" /></ListItemIcon>
-        <ListItemText primary="ייצוא ל-PDF" secondary="טקסט בלבד, ללא עיצוב ותמונות" />
+        <ListItemText primary={t("export.pdf")} secondary={t("export.pdfHint")} />
       </MenuItem>
       <MenuItem onClick={() => askSources({ format: "word" })} sx={{ textAlign: "start" }}>
         <ListItemIcon><DescriptionOutlinedIcon fontSize="small" /></ListItemIcon>
-        <ListItemText primary="ייצוא ל-Word" secondary="עם העיצוב והתמונות" />
+        <ListItemText primary={t("export.word")} secondary={t("export.wordHint")} />
       </MenuItem>
 
       {/* Offered only when there is something to divide. An array rather
@@ -93,7 +96,7 @@ const NotebookHeader = ({
         <Divider key="split-divider" />,
         <MenuItem key="split" onClick={() => { setExportAnchor(null); setSplitOpen(true); }} sx={{ textAlign: "start" }}>
           <ListItemIcon><CallSplitIcon fontSize="small" /></ListItemIcon>
-          <ListItemText primary="פיצול למספר מחברות…" secondary="לבחור כמה קבצים, ומה נכנס לכל אחד" />
+          <ListItemText primary={t("export.split")} secondary={t("export.splitHint")} />
         </MenuItem>,
       ]}
     </Menu>
@@ -105,9 +108,10 @@ const NotebookHeader = ({
         borderRadius: 2, fontWeight: 700, px: 3, boxShadow: "0 3px 10px rgba(21,151,187,0.35)",
       }}
     >
-      הערה חדשה
+      {t("newNote")}
     </Button>
   </Box>
-);
+  );
+};
 
 export default NotebookHeader;

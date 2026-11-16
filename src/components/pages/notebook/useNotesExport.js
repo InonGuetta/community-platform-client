@@ -5,6 +5,7 @@ import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { syncChipNames } from "../../../utilities/noteSource";
 import { downloadNotesPdf, downloadNotesWord, downloadNotebooks } from "../../../utilities/notesExport";
 import { SOURCE_STYLES } from "../../../utilities/noteFootnotes";
+import { useTranslation } from "react-i18next";
 
 // Exporting the notebook: which notes, the one question asked before writing
 // (ExportSourcesDialog), and the files — one, or one per notebook when split.
@@ -12,6 +13,7 @@ import { SOURCE_STYLES } from "../../../utilities/noteFootnotes";
  * @param {{ filtered: any[], selectedIds: Set<number>, names: Map<number, string> }} args
  */
 export const useNotesExport = ({ filtered, selectedIds, names }) => {
+  const { t } = useTranslation("notebook");
   const dispatch = useDispatch();
   const [exporting, setExporting] = useState(false);
   const [exportAnchor, setExportAnchor] = useState(null);
@@ -102,13 +104,13 @@ export const useNotesExport = ({ filtered, selectedIds, names }) => {
         const written = await downloadNotebooks(ready, (bookNotes, options) =>
           write(bookNotes, { ...options, sources }));
         setSplitOpen(false);
-        dispatch(notify({ message: `נוצרו ${written} קבצים`, severity: "success" }));
+        dispatch(notify({ message: t("export.filesCreated", { n: written }), severity: "success" }));
       } else {
         await write(await withBodies(notesToExport), { sources });
       }
       setPendingExport(null);
     } catch {
-      dispatch(notify({ message: "הייצוא נכשל. נסה שוב.", severity: "error" }));
+      dispatch(notify({ message: t("export.failed"), severity: "error" }));
     } finally {
       setExporting(false);
     }

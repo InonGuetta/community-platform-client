@@ -10,6 +10,8 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { statuses, mediaTypeLabels, mediaTypeAccents, listRowSx } from "../../../../utilities/constant";
 import { BOOKMARK_DRAG_MIME, bookmarkDragPayload } from "../../../../utilities/noteSource";
 import { placeShortLabel, bookmarkLines } from "../../../../utilities/bookmarks";
+import { useTranslation } from "react-i18next";
+import { useDirection } from "../../../../i18n/useDirection";
 
 // "הסימניות שלי" under the index: every bookmark the user has, grouped by
 // lesson. A row opens its source in the floating window, and is dragged into
@@ -20,13 +22,17 @@ const BookmarksSidebar = ({
   bookmarks,
   bookmarksStatus,
   openSource,
-}) => (
+}) => {
+  const { t } = useTranslation("notebook");
+  // The hook points toward the notes beside the list: left in Hebrew, right in English.
+  const { rtl } = useDirection();
+  return (
   <>
     <Divider />
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1, maxHeight: "45%", minHeight: 120 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <BookmarkIcon fontSize="small" color="primary" sx={{ flexShrink: 0 }} />
-        <Typography variant="subtitle2" fontWeight={700} sx={{ flexShrink: 0 }}>הסימניות שלי</Typography>
+        <Typography variant="subtitle2" fontWeight={700} sx={{ flexShrink: 0 }}>{t("bookmarks.title")}</Typography>
         {bookmarks.length > 0 && (
           <Chip size="small" label={bookmarks.length} sx={{ height: 18, fontSize: "0.65rem", flexShrink: 0 }} />
         )}
@@ -37,7 +43,7 @@ const BookmarksSidebar = ({
             out, because the heading and the count are what the panel is. */}
         {bookmarks.length > 0 && (
           <Typography variant="caption" color="text.secondary" noWrap sx={{ marginInlineEnd: "auto", minWidth: 0 }}>
-            גרור אל תוך הערה ↩
+            {t("bookmarks.dragHint")} {rtl ? "↩" : "↪"}
           </Typography>
         )}
       </Box>
@@ -47,8 +53,8 @@ const BookmarksSidebar = ({
       ) : bookmarkGroups.length === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 3 }}>
           {bookmarks.length === 0
-            ? "עדיין אין סימניות. סמן נקודות בשיעורים והן יופיעו כאן."
-            : "לא נמצאו סימניות תואמות."}
+            ? t("bookmarks.none")
+            : t("bookmarks.noMatch")}
         </Typography>
       ) : (
         <Box sx={{ overflowY: "auto" }}>
@@ -67,7 +73,7 @@ const BookmarksSidebar = ({
                 title={group.mediaTitle}
               >
                 <Typography variant="caption" fontWeight={800} sx={{ flexShrink: 0 }}>
-                  {mediaTypeLabels[group.mediaType] || "שיעור"}
+                  {mediaTypeLabels[group.mediaType] || t("notes:lessonFallback")}
                 </Typography>
                 <Box sx={{ width: "1px", alignSelf: "stretch", bgcolor: "rgba(255,255,255,0.55)", flexShrink: 0 }} />
                 {/* Wrapped rather than cut off. A lecture's real name is
@@ -165,6 +171,7 @@ const BookmarksSidebar = ({
       )}
     </Box>
   </>
-);
+  );
+};
 
 export default BookmarksSidebar;

@@ -1,0 +1,63 @@
+{
+  "untitled": "(ללא כותרת)",
+  "untitledBare": "ללא כותרת",
+  "titlePlaceholder": "כותרת ההערה",
+  "from": "מתוך: {{title}}",
+  "lessonFallback": "שיעור",
+  "bodyPlaceholder": "כתוב כאן את ההערה שלך... אפשר גם להדביק תמונות ולגרור לכאן סימניות.",
+  "dropHere": "שחרר כאן כדי לשבץ קישור לשיעור",
+  "unsaved": "יש שינויים שלא נשמרו",
+  "updated": "עודכן לאחרונה: {{date}}",
+  "deleteNamed": "מחיקת ההערה {{title}}",
+  "saveShortcut": "שמירה (Ctrl+S)",
+  "save": "שמירה",
+  "saved": "ההערה נשמרה",
+  "noChanges": "אין שינויים לשמירה",
+  "body": "גוף ההערה",
+  "editor": {
+    "deleteImage": "מחיקת התמונה",
+    "deleteSource": "מחיקת המקור",
+    "imageTooLarge": "התמונה גדולה מדי (מעל {{mb}}MB). נסה תמונה קטנה יותר.",
+    "imageReadFailed": "קריאת התמונה נכשלה.",
+    "renameReference": "שינוי שם ההפניה",
+    "referenceName": "שם ההפניה",
+    "clearToRemove": "השאר ריק כדי להסיר את השם מההפניה"
+  },
+  "untitledDialog": {
+    "title": "לא צוין שם לכרטיסייה",
+    "body": "אפשר לתת לה שם עכשיו, או לשמור אותה בלי שם.",
+    "name": "שם הכרטיסייה",
+    "save": "שמור",
+    "saveAnyway": "שמור בכל זאת"
+  },
+  "toolbar": {
+    "label": "עיצוב ההערה",
+    "fontSize": "גודל הטקסט",
+    "bold": "מודגש",
+    "italic": "נטוי",
+    "underline": "קו תחתון",
+    "strike": "קו חוצה",
+    "textColor": "צבע טקסט",
+    "highlight": "הדגשה",
+    "bullets": "רשימת תבליטים",
+    "numbered": "רשימה ממוספרת",
+    "clear": "ניקוי עיצוב",
+    "pixels": "גודל בפיקסלים",
+    "apply": "החל",
+    "sample": "אבג",
+    "textColorTitle": "צבע הטקסט",
+    "highlightTitle": "צבע ההדגשה",
+    "colors": {
+      "default": "ברירת מחדל",
+      "red": "אדום",
+      "orange": "כתום",
+      "green": "ירוק",
+      "blue": "כחול",
+      "purple": "סגול",
+      "none": "ללא הדגשה",
+      "yellow": "צהוב",
+      "lightBlue": "תכלת",
+      "pink": "ורוד"
+    }
+  }
+}

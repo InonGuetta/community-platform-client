@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import { useTranslation } from "react-i18next";
 
 // Asked when a card is saved without a title.
 //
@@ -17,6 +18,7 @@ import Button from "@mui/material/Button";
 //
 // `onSave` receives the trimmed name, or "" for "save it untitled anyway".
 const UntitledNoteDialog = ({ open, onCancel, onSave }) => {
+  const { t } = useTranslation(["notes", "common"]);
   const [name, setName] = useState("");
 
   // Every opening starts empty: a name typed into the last dialog and then
@@ -30,16 +32,16 @@ const UntitledNoteDialog = ({ open, onCancel, onSave }) => {
 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="xs">
-      <DialogTitle>לא צוין שם לכרטיסייה</DialogTitle>
+      <DialogTitle>{t("untitledDialog.title")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          אפשר לתת לה שם עכשיו, או לשמור אותה בלי שם.
+          {t("untitledDialog.body")}
         </Typography>
         <TextField
           autoFocus
           fullWidth
           margin="dense"
-          label="שם הכרטיסייה"
+          label={t("untitledDialog.name")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => {
@@ -51,9 +53,9 @@ const UntitledNoteDialog = ({ open, onCancel, onSave }) => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onCancel}>ביטול</Button>
+        <Button onClick={onCancel}>{t("common:actions.cancel")}</Button>
         <Button variant="contained" onClick={save}>
-          {trimmed ? "שמור" : "שמור בכל זאת"}
+          {trimmed ? t("untitledDialog.save") : t("untitledDialog.saveAnyway")}
         </Button>
       </DialogActions>
     </Dialog>

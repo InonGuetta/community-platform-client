@@ -20,6 +20,7 @@ import DialogTitle from "../../../features/Dialogs/DialogTitle";
 import DialogContent from "../../../features/Dialogs/DialogContent";
 import DialogActions from "../../../features/Dialogs/DialogActions";
 import { dropIndicatorSx, hasDragType } from "../../../../utilities/useDragReorder";
+import { useTranslation } from "react-i18next";
 
 // Splitting an export across several documents.
 //
@@ -46,9 +47,11 @@ const MAX_NOTEBOOKS = 10;
 // user's notebook in the database.
 const PLAN_DRAG_MIME = "application/x-community-export-note";
 
-const noteLabel = (note) => note?.title?.trim() || "(ללא כותרת)";
+// Words a note by its title, or "untitled" — `t` from the dialog.
+const noteLabel = (t, note) => note?.title?.trim() || t("notes:untitled");
 
 const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
+  const { t } = useTranslation(["notebook", "notes", "common"]);
   const [format, setFormat] = useState("word");
   const [books, setBooks] = useState([]);
 
@@ -71,9 +74,12 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
   useEffect(() => {
     if (!open) return;
     setBooks([
-      { name: "מחברת 1", noteIds: selectionKey ? selectionKey.split(",").map(Number) : [] },
-      { name: "מחברת 2", noteIds: [] },
+      { name: t("export.splitDialog.bookName", { n: 1 }), noteIds: selectionKey ? selectionKey.split(",").map(Number) : [] },
+      { name: t("export.splitDialog.bookName", { n: 2 }), noteIds: [] },
     ]);
+    // `t` stays out: a language switch is not a new set of notes, and must not
+    // wipe a plan the user is arranging (the books keep the names they got).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, selectionKey]);
 
   const byId = useMemo(() => new Map(notes.map((note) => [note.id, note])), [notes]);
@@ -117,7 +123,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
       return [
         ...prev,
         ...Array.from({ length: count - prev.length }, (_, i) => ({
-          name: `מחברת ${prev.length + i + 1}`,
+          name: t("export.splitDialog.bookName", { n: prev.length + i + 1 }),
           noteIds: [],
         })),
       ];
@@ -130,7 +136,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
 
   const plan = books
     .map((book, index) => ({
-      name: book.name.trim() || `מחברת ${index + 1}`,
+      name: book.name.trim() || t("export.splitDialog.bookName", { n: index + 1 }),
       notes: book.noteIds.map((id) => byId.get(id)).filter(Boolean),
     }))
     .filter((book) => book.notes.length > 0);
@@ -196,7 +202,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
 
   return (
     <Dialog open={open} onClose={exporting ? undefined : onClose} maxWidth="lg" fullWidth>
-      <DialogTitle onClose={exporting ? undefined : onClose}>פיצול הייצוא למספר מחברות</DialogTitle>
+      <DialogTitle onClose={exporting ? undefined : onClose}>{t("export.splitDialog.title")}</DialogTitle>
 
       <DialogContent sx={{ pt: 3 }}>
         {/* The controls, all of them together at the start of the line.
@@ -212,7 +218,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
           <TextField
             select
             size="small"
-            label="כמה מחברות"
+            label={t("export.splitDialog.howMany")}
             value={books.length || 2}
             onChange={(e) => setCount(Number(e.target.value))}
             sx={{ minWidth: 150 }}
@@ -231,7 +237,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
               last button: PDF was drawn as three sides of a box with its left
               edge missing. Ungrouped, each button owns a complete border in
               both directions, and the pair still reads as two choices. */}
-          <Box role="group" aria-label="פורמט הייצוא" sx={{ display: "flex", gap: 0.75 }}>
+          <Box role="group" aria-label={t("export.splitDialog.format")} sx={{ display: "flex", gap: 0.75 }}>
             <ToggleButton
               value="word"
               size="small"
@@ -255,13 +261,13 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
           {/* The two formats are not the same document and the difference is
               worth knowing BEFORE choosing — see utilities/notesExport.js. */}
           <Typography variant="caption" color="text.secondary">
-            {format === "word" ? "עם העיצוב והתמונות" : "טקסט בלבד, ללא עיצוב ותמונות"}
+            {format === "word" ? t("export.wordHint") : t("export.pdfHint")}
           </Typography>
         </Box>
 
         {/* Next to what it describes, rather than in the header. */}
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
-          ↔ גרור הערה בין המחברות, או למעלה ולמטה בתוך מחברת
+          {t("export.splitDialog.dragHint")}
         </Typography>
 
         <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "repeat(auto-fit, minmax(340px, 1fr))" } }}>
@@ -288,7 +294,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
                 variant="standard"
                 // The name is also the file name, so this is the one field in
                 // the dialog whose value the user will see again afterwards.
-                label={`שם הקובץ (${book.noteIds.length} הערות)`}
+                label={t("export.splitDialog.fileName", { count: book.noteIds.length })}
                 InputProps={{ sx: { fontWeight: 700 } }}
               />
 
@@ -298,7 +304,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
                   color={overBook === bookIndex ? "primary.main" : "text.secondary"}
                   sx={{ py: 3, textAlign: "center" }}
                 >
-                  {overBook === bookIndex ? "שחרר כאן" : "ריקה — גרור לכאן הערות, או שלא ייווצר עבורה קובץ"}
+                  {overBook === bookIndex ? t("export.splitDialog.dropHere") : t("export.splitDialog.empty")}
                 </Typography>
               ) : book.noteIds.map((noteId, position) => (
                 <Box
@@ -325,22 +331,22 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
                     variant="body2"
                     sx={{ flexGrow: 1, minWidth: 0, py: 0.75, wordBreak: "break-word" }}
                   >
-                    {noteLabel(byId.get(noteId))}
+                    {noteLabel(t, byId.get(noteId))}
                   </Typography>
 
                   <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-                    <Tooltip title="הזזה למעלה">
+                    <Tooltip title={t("export.splitDialog.moveUp")}>
                       <span>
                         <IconButton size="small" disabled={position === 0} onClick={() => move(bookIndex, noteId, -1)}
-                          aria-label={`הזזת ${noteLabel(byId.get(noteId))} למעלה`}>
+                          aria-label={t("export.splitDialog.moveUpNamed", { title: noteLabel(t, byId.get(noteId)) })}>
                           <KeyboardArrowUpIcon fontSize="small" />
                         </IconButton>
                       </span>
                     </Tooltip>
-                    <Tooltip title="הזזה למטה">
+                    <Tooltip title={t("export.splitDialog.moveDown")}>
                       <span>
                         <IconButton size="small" disabled={position === book.noteIds.length - 1} onClick={() => move(bookIndex, noteId, 1)}
-                          aria-label={`הזזת ${noteLabel(byId.get(noteId))} למטה`}>
+                          aria-label={t("export.splitDialog.moveDownNamed", { title: noteLabel(t, byId.get(noteId)) })}>
                           <KeyboardArrowDownIcon fontSize="small" />
                         </IconButton>
                       </span>
@@ -353,7 +359,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
                       value={bookIndex}
                       onChange={(e) => relocate(noteId, Number(e.target.value), null)}
                       sx={{ width: 56 }}
-                      inputProps={{ "aria-label": `המחברת של ${noteLabel(byId.get(noteId))}` }}
+                      inputProps={{ "aria-label": t("export.splitDialog.bookOf", { title: noteLabel(t, byId.get(noteId)) }) }}
                     >
                       {books.map((_, index) => (
                         <MenuItem key={index} value={index}>{index + 1}</MenuItem>
@@ -369,16 +375,16 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
 
       <DialogActions>
         <Typography variant="caption" color="text.secondary" sx={{ marginInlineStart: "auto" }}>
-          {`${plan.length} קבצים · ${notes.length} הערות`}
+          {t("export.splitDialog.totals", { files: plan.length, notes: notes.length })}
         </Typography>
-        <Button onClick={onClose} variant="outlined" disabled={exporting}>ביטול</Button>
+        <Button onClick={onClose} variant="outlined" disabled={exporting}>{t("common:actions.cancel")}</Button>
         <Button
           onClick={() => onExport(plan, format)}
           variant="contained"
           disabled={exporting || plan.length === 0}
           startIcon={exporting ? <CircularProgress size={18} /> : null}
         >
-          {exporting ? "מייצא..." : `ייצוא ${plan.length} קבצים`}
+          {exporting ? t("export.exporting") : t("export.splitDialog.run", { n: plan.length })}
         </Button>
       </DialogActions>
     </Dialog>

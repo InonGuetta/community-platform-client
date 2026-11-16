@@ -11,18 +11,21 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import useAiUsage from "./useAiUsage";
 import { purposeLabel, formatUsd, formatUsage, capProgress } from "./aiUsageFormat";
+import { useTranslation } from "react-i18next";
+import { formatNumber } from "../../../../utilities/formatDate";
 
 // "עלות AI החודש" (PRD ADM-1, NFR-3): what OpenAI has cost this month, against
 // the cap, and what it was spent on. An estimate — the usage OpenAI reported,
 // at list price — and said so, because the invoice is the real number.
 const AiUsagePanel = () => {
+  const { t } = useTranslation("admin");
   const { report, status, reload } = useAiUsage();
 
   if (status === "loading" && !report) {
     return <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}><CircularProgress size={28} /></Box>;
   }
   if (status === "failed" && !report) {
-    return <Alert severity="error" action={<Button color="inherit" size="small" onClick={reload}>נסה שוב</Button>}>לא ניתן לטעון את נתוני העלות.</Alert>;
+    return <Alert severity="error" action={<Button color="inherit" size="small" onClick={reload}>{t("ai.retry")}</Button>}>{t("ai.loadFailed")}</Alert>;
   }
 
   const progress = capProgress(report.spentUsd, report.capUsd);
@@ -30,14 +33,14 @@ const AiUsagePanel = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 2, flexWrap: "wrap" }}>
-        <Typography variant="h6" fontWeight={700}>עלות AI החודש</Typography>
-        <Button size="small" onClick={reload} disabled={status === "loading"}>רענון</Button>
+        <Typography variant="h6" fontWeight={700}>{t("ai.title")}</Typography>
+        <Button size="small" onClick={reload} disabled={status === "loading"}>{t("ai.refresh")}</Button>
       </Box>
 
       <Box>
         <Typography variant="h4" fontWeight={800} component="p">{formatUsd(report.spentUsd)}</Typography>
         <Typography variant="caption" color="text.secondary">
-          הערכה לפי השימוש שדיווח OpenAI ומחירון רשמי. החשבונית היא המספר הסופי.
+          {t("ai.estimate")}
         </Typography>
       </Box>
 
@@ -48,33 +51,33 @@ const AiUsagePanel = () => {
             value={progress.percent}
             color={progress.severity}
             sx={{ height: 8, borderRadius: 4 }}
-            aria-label={`${Math.round(progress.percent)}% מהתקרה החודשית`}
+            aria-label={t("ai.ofCapLabel", { percent: Math.round(progress.percent) })}
           />
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
-            {`מתוך תקרה של ${formatUsd(report.capUsd)} · ${Math.round(progress.percent)}%`}
+            {t("ai.ofCap", { cap: formatUsd(report.capUsd), percent: Math.round(progress.percent) })}
           </Typography>
           {progress.percent >= 100 && (
             <Alert severity="error" sx={{ mt: 1 }}>
-              התקרה החודשית הושגה. עיבוד חדש (תמלול, סיכום, תיקון עברית, כותרות) חסום עד החודש הבא. הצ׳אט ממשיך לעבוד.
+              {t("ai.capReached")}.
             </Alert>
           )}
         </Box>
       ) : (
         <Typography variant="body2" color="text.secondary">
-          לא הוגדרה תקרה חודשית. אפשר להגדיר אותה במשתנה AI_MONTHLY_CAP_USD בקובץ ‎.env של השרת.
+          {t("ai.noCap")}
         </Typography>
       )}
 
       {report.byPurpose.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">החודש עוד לא היה שימוש ב‑AI.</Typography>
+        <Typography variant="body2" color="text.secondary">{t("ai.unused")}</Typography>
       ) : (
-        <Table size="small" aria-label="עלות לפי סוג">
+        <Table size="small" aria-label={t("ai.tableLabel")}>
           <TableHead>
             <TableRow>
-              <TableCell>סוג</TableCell>
-              <TableCell>שימוש</TableCell>
-              <TableCell align="left">קריאות</TableCell>
-              <TableCell align="left">עלות</TableCell>
+              <TableCell>{t("ai.kind")}</TableCell>
+              <TableCell>{t("ai.usage")}</TableCell>
+              <TableCell sx={{ textAlign: "end" }}>{t("ai.calls")}</TableCell>
+              <TableCell sx={{ textAlign: "end" }}>{t("ai.cost")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -82,8 +85,8 @@ const AiUsagePanel = () => {
               <TableRow key={row.purpose}>
                 <TableCell>{purposeLabel(row.purpose)}</TableCell>
                 <TableCell>{formatUsage(row)}</TableCell>
-                <TableCell align="left">{row.calls.toLocaleString("he-IL")}</TableCell>
-                <TableCell align="left">{formatUsd(row.cost_usd)}</TableCell>
+                <TableCell sx={{ textAlign: "end" }}>{formatNumber(row.calls)}</TableCell>
+                <TableCell sx={{ textAlign: "end" }}>{formatUsd(row.cost_usd)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

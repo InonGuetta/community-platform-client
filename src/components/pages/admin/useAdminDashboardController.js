@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminApi } from "../../../api/adminApi";
+import { useTranslation } from "react-i18next";
 
 // What the admin dashboard does — its overview, loaded on arrival and every 30
 // seconds, and the reconcile sweep — so that AdminDashboard.jsx is layout only.
@@ -8,6 +9,7 @@ import { adminApi } from "../../../api/adminApi";
 // they are thrown away when the page is left. See "Where state lives" in
 // CLAUDE.md.
 export const useAdminDashboardController = () => {
+  const { t } = useTranslation("admin");
   const [stats, setStats] = useState(null);
   const [queueStatus, setQueueStatus] = useState(null);
   const [health, setHealth] = useState(null);
@@ -36,10 +38,10 @@ export const useAdminDashboardController = () => {
       setError(null);
     } catch (err) {
       // This used to be swallowed entirely, which was worse than it sounds:
-      // with no data, the health panel renders "לא זמין" for both Postgres
+      // with no data, the health panel renders "unavailable" for both Postgres
       // and Redis — so a request that merely failed looks exactly like an
       // outage, and sends an admin off investigating a database that is fine.
-      setError(err.response?.data?.message || "לא ניתן לטעון את נתוני הניהול");
+      setError(err.response?.data?.message || t("loadFailed"));
     }
     setLoading(false);
   };

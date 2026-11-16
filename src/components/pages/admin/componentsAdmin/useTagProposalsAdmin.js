@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { adminApi } from "../../../../api/adminApi";
 import { mediaApi } from "../../../../api/mediaApi";
 import { hebrewForError, rejectionOf } from "../../../../utilities/apiError";
+import { useTranslation } from "react-i18next";
 
 // The admin's queue of new tags, and the two decisions on it.
 //
@@ -9,6 +10,7 @@ import { hebrewForError, rejectionOf } from "../../../../utilities/apiError";
 // id: the path shown ("מעגל השנה ← מעגל השנה לפי שבתות") is drawn from the tree,
 // the same way the lecturer saw it when choosing.
 export const useTagProposalsAdmin = () => {
+  const { t } = useTranslation("admin");
   const [proposals, setProposals] = useState(null);
   const [tree, setTree] = useState([]);
   const [error, setError] = useState(null);
@@ -21,9 +23,9 @@ export const useTagProposalsAdmin = () => {
       setTree(nodes);
       setError(null);
     } catch (err) {
-      setError(hebrewForError(rejectionOf(err), "לא ניתן לטעון את התגיות שממתינות לאישור"));
+      setError(hebrewForError(rejectionOf(err), t("tags.loadFailed")));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -46,17 +48,18 @@ export const useTagProposalsAdmin = () => {
     decide(async () => {
       const result = await adminApi.approveTagProposal(proposal.id, changes);
       setNotice(
-        `התגית «${result.name}» אושרה ונכנסה למערכת` +
-          (result.tagged_count > 0 ? ` ונוספה ל-${result.tagged_count} שיעורים.` : ".")
+        result.tagged_count > 0
+          ? t("tags.approvedTagged", { name: result.name, count: result.tagged_count })
+          : t("tags.approved", { name: result.name })
       );
       return result;
-    }, "האישור נכשל. נסה שוב.");
+    }, t("tags.approveFailed"));
 
   const reject = (proposal, reason) =>
     decide(async () => {
       await adminApi.rejectTagProposal(proposal.id, reason);
-      setNotice(`ההצעה «${proposal.name}» נדחתה.`);
-    }, "הדחייה נכשלה. נסה שוב.");
+      setNotice(t("tags.rejected", { name: proposal.name }));
+    }, t("tags.rejectFailed"));
 
   return { proposals, tree, error, notice, clearNotice: () => setNotice(null), approve, reject };
 };

@@ -12,10 +12,12 @@ import DonationsLedger from "./componentsAdmin/DonationsLedger";
 import TagProposals from "./componentsAdmin/TagProposals";
 import AiUsagePanel from "./componentsAdmin/AiUsagePanel";
 import { useAdminDashboardController } from "./useAdminDashboardController";
+import { useTranslation } from "react-i18next";
 
 // Layout only: what the dashboard loads, when, and the reconcile sweep are
 // useAdminDashboardController's.
 const AdminDashboard = () => {
+  const { t } = useTranslation("admin");
   const {
     stats, queueStatus, health, trouble, donations, loading, error, handleReconcile,
   } = useAdminDashboardController();
@@ -26,11 +28,11 @@ const AdminDashboard = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" fontWeight={700} mb={3}>לוח בקרה ניהולי</Typography>
+      <Typography variant="h5" fontWeight={700} mb={3}>{t("title")}</Typography>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {error} — הנתונים המוצגים עשויים להיות לא מעודכנים.
+          {t("stale", { error })}
         </Alert>
       )}
 

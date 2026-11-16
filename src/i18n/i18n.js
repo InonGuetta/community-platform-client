@@ -52,11 +52,14 @@ export const initialLanguage = () => {
 };
 
 // <html lang dir> follows the language, so the browser, screen readers and
-// every CSS logical property agree with the theme on which way is "start".
+// every CSS logical property agree with the theme on which way is "start" —
+// and so does the tab's title. (index.html starts in Hebrew, rtl, as the
+// default; the PWA manifest is a static file and stays Hebrew.)
 const applyToDocument = (code) => {
   if (typeof document === "undefined") return;
   document.documentElement.lang = code;
   document.documentElement.dir = directionOf(code);
+  document.title = i18next.t("common:appName", { lng: code });
 };
 
 const loaded = new Set([DEFAULT_LANGUAGE]);

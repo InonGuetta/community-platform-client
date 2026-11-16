@@ -23,6 +23,15 @@ test("switching language sets <html lang dir> and remembers the choice", async (
   expect(document.documentElement.dir).toBe("rtl");
 });
 
+test("the tab's title follows the language", async () => {
+  i18n.addResourceBundle("en", "common", { appName: "Community Platform" }, true, true);
+  await changeLanguage("en");
+  expect(document.title).toBe("Community Platform");
+  await changeLanguage("he");
+  expect(document.title).toBe("פלטפורמת הקהילה");
+  i18n.removeResourceBundle("en", "common");
+});
+
 test("a key a language does not have yet falls back to Hebrew", async () => {
   await changeLanguage("fr");
   expect(i18n.t("appName")).toBe("פלטפורמת הקהילה");

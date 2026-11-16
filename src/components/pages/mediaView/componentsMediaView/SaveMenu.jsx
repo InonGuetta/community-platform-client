@@ -15,9 +15,9 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import { playlistTitleMaxLength } from "../../../../utilities/constant";
-import { countLabel } from "../../../../utilities/countLabel";
 import { useSaveMenu } from "./useSaveMenu";
 import { useDirection, menuOrigins } from "../../../../i18n/useDirection";
+import { useTranslation, Trans } from "react-i18next";
 
 // Which of the user's own lists this lecture is filed in, and the way to make a
 // new one. The general save is NOT here — that is the button this menu hangs off
@@ -60,7 +60,9 @@ const rowActionSx = (hoverColour) => ({
  * keeps typing a name from jumping the selection around the menu — and what
  * lets Escape mean "abandon this edit" instead of closing the whole menu.
  */
-const TitleField = ({ value, onChange, onSubmit, onCancel, actionLabel }) => (
+const TitleField = ({ value, onChange, onSubmit, onCancel, actionLabel }) => {
+  const { t } = useTranslation("lesson");
+  return (
   <Box
     sx={{ display: "flex", gap: 1, px: 1.5, py: 1 }}
     onKeyDown={(e) => e.stopPropagation()}
@@ -69,7 +71,7 @@ const TitleField = ({ value, onChange, onSubmit, onCancel, actionLabel }) => (
       autoFocus
       size="small"
       fullWidth
-      placeholder="שם הרשימה"
+      placeholder={t("save.listName")}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={(e) => {
@@ -89,11 +91,13 @@ const TitleField = ({ value, onChange, onSubmit, onCancel, actionLabel }) => (
       {actionLabel}
     </Button>
   </Box>
-);
+  );
+};
 
 // Layout only: what the menu loads and does is useSaveMenu's.
 const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
   const { start } = useDirection();
+  const { t } = useTranslation(["lesson"]);
   const {
     playlists, showsThisMedia, failed, loading,
     newTitle, setNewTitle, creating, setCreating, editing, setEditing, pendingDelete, setPendingDelete,
@@ -114,7 +118,7 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
           color="text.secondary"
           sx={{ display: "block", px: 2, pt: 0.5, pb: 1 }}
         >
-          הוספה לרשימת שיעורים
+          {t("save.title")}
         </Typography>
 
         {loading && (
@@ -125,13 +129,13 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
 
         {failed && (
           <Typography variant="body2" color="error" sx={{ px: 2, pb: 1.5 }}>
-            טעינת הרשימות נכשלה. נסה לפתוח שוב.
+            {t("save.loadFailed")}
           </Typography>
         )}
 
         {showsThisMedia && playlists.length === 0 && (
           <Typography variant="body2" color="text.secondary" sx={{ px: 2, pb: 1.5 }}>
-            עדיין אין לך רשימות. אפשר ליצור אחת כאן.
+            {t("save.noLists")}
           </Typography>
         )}
 
@@ -146,7 +150,7 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
               onChange={(title) => setEditing({ ...editing, title })}
               onSubmit={handleRename}
               onCancel={() => setEditing(null)}
-              actionLabel="עדכון"
+              actionLabel={t("save.update")}
             />
           ) : (
           <MenuItem key={playlist.id} onClick={() => toggle(playlist)} sx={itemSx}>
@@ -165,14 +169,14 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
             </ListItemIcon>
             <ListItemText
               primary={playlist.title}
-              secondary={countLabel(playlist.item_count, "שיעור אחד", "שיעורים")}
+              secondary={t("save.lessons", { count: Number(playlist.item_count) || 0 })}
               slotProps={{ primary: { noWrap: true } }}
             />
             {/* stopPropagation on both, or acting on a list would first tick
                 it — the row itself is the toggle. */}
             <IconButton
               size="small"
-              aria-label={`שינוי שם הרשימה ${playlist.title}`}
+              aria-label={t("save.rename", { title: playlist.title })}
               onClick={(e) => { e.stopPropagation(); setEditing({ id: playlist.id, title: playlist.title }); }}
               sx={{ marginInlineEnd: -0.5, ...rowActionSx("primary.main") }}
             >
@@ -180,7 +184,7 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
             </IconButton>
             <IconButton
               size="small"
-              aria-label={`מחיקת הרשימה ${playlist.title}`}
+              aria-label={t("save.delete", { title: playlist.title })}
               onClick={(e) => { e.stopPropagation(); setPendingDelete(playlist); }}
               sx={rowActionSx("error.main")}
             >
@@ -202,12 +206,12 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
             onChange={setNewTitle}
             onSubmit={handleCreate}
             onCancel={() => { setCreating(false); setNewTitle(""); }}
-            actionLabel="יצירה"
+            actionLabel={t("save.create")}
           />
         ) : (
           <MenuItem onClick={() => setCreating(true)} sx={itemSx}>
             <ListItemIcon sx={{ minWidth: 36 }}><AddIcon fontSize="small" /></ListItemIcon>
-            <ListItemText primary="רשימה חדשה" />
+            <ListItemText primary={t("save.newList")} />
           </MenuItem>
         )}
       </Menu>
@@ -220,10 +224,7 @@ const SaveMenu = ({ anchorEl, open, onClose, mediaId }) => {
         onConfirm={confirmDelete}
         itemName={pendingDelete?.title}
         message={
-          <>
-            האם למחוק את הרשימה <strong>{pendingDelete?.title}</strong>? השיעורים עצמם יישארו
-            שמורים, רק הרשימה תימחק.
-          </>
+          <Trans t={t} i18nKey="save.deleteQuestion" values={{ title: pendingDelete?.title }} components={{ strong: <strong /> }} />
         }
       />
     </>

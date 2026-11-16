@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import { formatTime } from "../../../../utilities/formatTime";
+import { useTranslation } from "react-i18next";
 
 const ChaptersPanel = ({
   keyPointHeadings = [],
@@ -15,6 +16,7 @@ const ChaptersPanel = ({
   generating = false,
   onGenerate,
 }) => {
+  const { t } = useTranslation("lesson");
   const hasHeadings = keyPointHeadings.length > 0;
 
   // Nothing to show and no one allowed to generate — render nothing.
@@ -23,7 +25,7 @@ const ChaptersPanel = ({
   return (
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-        <Typography variant="subtitle1" fontWeight={600}>כותרות משנה לפי נקודות מפתח</Typography>
+        <Typography variant="subtitle1" fontWeight={600}>{t("chapters.title")}</Typography>
         {canEdit && (
           <Button
             size="small"
@@ -32,7 +34,7 @@ const ChaptersPanel = ({
             disabled={generating || !canGenerate}
             startIcon={generating ? <CircularProgress size={14} /> : null}
           >
-            {generating ? "מייצר..." : hasHeadings ? "צור מחדש" : "צור כותרות משנה"}
+            {generating ? t("chapters.generating") : hasHeadings ? t("chapters.regenerate") : t("chapters.generate")}
           </Button>
         )}
       </Box>
@@ -52,8 +54,8 @@ const ChaptersPanel = ({
       ) : (
         <Typography variant="body2" color="text.secondary">
           {canGenerate
-            ? "לחץ 'צור כותרות משנה' כדי לחלק את התמלול לכותרות לפי נקודות המפתח."
-            : "כותרות משנה יהיו זמינות לאחר שהתמלול והסיכום מוכנים."}
+            ? t("chapters.howTo")
+            : t("chapters.notYet")}
         </Typography>
       )}
     </Box>

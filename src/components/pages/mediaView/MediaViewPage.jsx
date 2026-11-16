@@ -23,6 +23,8 @@ import { creatorPath, hasCreatorPage } from "../../../utilities/creatorPage";
 import Link from "@mui/material/Link";
 import { Link as RouterLink } from "react-router-dom";
 import { formatDate } from "../../../utilities/formatDate";
+import { useTranslation } from "react-i18next";
+import { creatorDisplayName } from "../../../utilities/creatorPage";
 
 // Presentation only. Everything that dispatches, selects or derives from server
 // data lives in useMediaViewPageController — see its header for where that line
@@ -33,6 +35,7 @@ import { formatDate } from "../../../utilities/formatDate";
 // like, download, share, and the overlays they open — is MediaActionsBar, shared
 // with the notebook's source preview so the two cannot drift apart.
 const MediaViewPage = () => {
+  const { t } = useTranslation("lesson");
   const controller = useMediaViewPageController();
   const {
     media, bookmarks, transcript,
@@ -143,7 +146,7 @@ const MediaViewPage = () => {
                 {media.creator_name}
               </Link>
             ) : (
-              media.creator_name
+              creatorDisplayName(media.creator_name)
             )}
           </Typography>
         )}
@@ -205,7 +208,7 @@ const MediaViewPage = () => {
               // under the start of the player, where the title above it begins.
               sx={{ mt: 1, textAlign: "start" }}
             >
-              {media.is_published === false ? "טיוטה · הועלה בתאריך: " : "פורסם בתאריך: "}
+              {media.is_published === false ? t("draftUploaded") : t("published")}
               {formatDate(media.created_at)}
             </Typography>
           )}

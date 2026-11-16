@@ -8,6 +8,7 @@ import SmartSearchPane from "./SmartSearchPane";
 import ChatPane from "../../../../features/ChatPane/ChatPane";
 import HistoryPane from "./HistoryPane";
 import TextQualityNotice from "../TextQualityNotice";
+import { useTranslation } from "react-i18next";
 
 // The "דיון עם AI" tab: three ways into THIS lesson, side by side.
 //
@@ -26,22 +27,19 @@ import TextQualityNotice from "../TextQualityNotice";
 
 // Said instead of the panes while there is nothing to discuss. Each names what
 // the student can do, which differs: wait, ask the lecturer, or nothing at all.
-const NOT_READY = {
-  processing: { severity: "info", text: "השיעור עדיין בעיבוד. אפשר יהיה לחפש בו ולשוחח עליו כשהעיבוד יסתיים." },
-  error: { severity: "warning", text: "עיבוד השיעור נכשל, ולכן אין עדיין טקסט לדון בו. המרצה יכול להפעיל את העיבוד מחדש." },
-  empty: { severity: "info", text: "לשיעור הזה עדיין אין תמלול או טקסט, ולכן אין על מה לחפש או לשוחח." },
-  unavailable: { severity: "warning", text: "לא הצלחנו לטעון את טקסט השיעור. נסה לרענן את העמוד." },
-};
+// The words are discussion.notReady.<readiness>.
+const NOT_READY_SEVERITY = { processing: "info", error: "warning", empty: "info", unavailable: "warning" };
 
 // The line under the switch: what the chosen mode covers.
-const caption = (mode, isText) => {
-  const source = isText ? "הספר" : "השיעור";
-  if (mode === DISCUSSION_MODES.search) return `חיפוש לפי משמעות בתוך ${source} הזה בלבד`;
-  if (mode === DISCUSSION_MODES.history) return `השיחות הקודמות שלך על ${source} הזה`;
-  return `התשובות מבוססות על ${source} הזה בלבד, עם הפניה למקור`;
+// A whole sentence per mode and per kind of source (context: lesson | book),
+// so no translation has to glue "the book" into a sentence built for a lesson.
+const caption = (t, mode, isText) => {
+  const key = mode === DISCUSSION_MODES.search ? "search" : mode === DISCUSSION_MODES.history ? "history" : "chat";
+  return t(`discussion.caption.${key}`, { context: isText ? "book" : "lesson" });
 };
 
 const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek, onOpenPage }) => {
+  const { t } = useTranslation("lesson");
   const { mode, setMode, readiness, search, chat, history, notebook } = useAIDiscussionController({ mediaId, transcript, media });
 
   return (
@@ -55,7 +53,7 @@ const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek,
         // An exclusive group reports null when the active button is pressed
         // again; that is not a mode, so it is ignored rather than stored.
         onChange={(_, next) => next && setMode(next)}
-        aria-label="סוג הדיון"
+        aria-label={t("discussion.modes")}
         // MUI joins grouped buttons with margin-left: -1px, which assumes
         // left-to-right. In this right-to-left page that pushed the second
         // button 1px past the panel's edge and gave the tab a horizontal
@@ -72,23 +70,23 @@ const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek,
           "& .MuiToggleButton-root": { lineHeight: 1.3, px: 1 },
         }}
       >
-        {/* In this order in the DOM, and so right to left on the screen: the
-            history sits to the LEFT of the discussion, where it was asked. */}
-        <ToggleButton value={DISCUSSION_MODES.search}>חיפוש חכם</ToggleButton>
-        <ToggleButton value={DISCUSSION_MODES.chat}>דיון עם בינה מלאכותית</ToggleButton>
-        <ToggleButton value={DISCUSSION_MODES.history}>היסטוריה</ToggleButton>
+        {/* In this order in the DOM, and so in reading order on the screen:
+            the history sits after the discussion, where it was asked. */}
+        <ToggleButton value={DISCUSSION_MODES.search}>{t("discussion.search")}</ToggleButton>
+        <ToggleButton value={DISCUSSION_MODES.chat}>{t("discussion.chat")}</ToggleButton>
+        <ToggleButton value={DISCUSSION_MODES.history}>{t("discussion.history")}</ToggleButton>
       </ToggleButtonGroup>
 
       {readiness !== "ready" ? (
-        <Alert severity={NOT_READY[readiness].severity} data-testid="discussion-not-ready">
-          {NOT_READY[readiness].text}
+        <Alert severity={NOT_READY_SEVERITY[readiness]} data-testid="discussion-not-ready">
+          {t(`discussion.notReady.${readiness}`)}
         </Alert>
       ) : (
         <>
           {/* The search and the chat know only what reads — said where they
               are used, not only on the summary tab. */}
           {isText && <TextQualityNotice quality={transcript?.text_quality} />}
-          <Typography variant="caption" color="text.secondary">{caption(mode, isText)}</Typography>
+          <Typography variant="caption" color="text.secondary">{caption(t, mode, isText)}</Typography>
           {mode === DISCUSSION_MODES.search && (
             <SmartSearchPane search={search} isText={isText} onSeek={onSeek} onOpenPage={onOpenPage} />
           )}

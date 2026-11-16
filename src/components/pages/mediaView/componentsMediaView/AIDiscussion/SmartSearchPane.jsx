@@ -17,6 +17,7 @@ import { statuses } from "../../../../../utilities/constant";
 import { hebrewForError } from "../../../../../utilities/apiError";
 import { headlineSegments } from "../../../../../utilities/searchHeadline";
 import { placeOf, canOpenPlace, openPlace } from "../../../../../utilities/discussionPlace";
+import { useTranslation } from "react-i18next";
 
 // Smart search inside ONE lesson: passages, ranked by meaning, nothing
 // generated. A hit opens where it is — the player seeks to a moment in a
@@ -36,6 +37,7 @@ const MAX_QUERY_CHARS = 300;
 const STRONG = 0.7;
 
 const ResultCard = ({ hit, isText, onSeek, onOpenPage }) => {
+  const { t } = useTranslation("lesson");
   const place = placeOf(hit);
   const openable = canOpenPlace(place, { onSeek, onOpenPage });
   const strong = Number(hit.similarity) >= STRONG;
@@ -53,7 +55,7 @@ const ResultCard = ({ hit, isText, onSeek, onOpenPage }) => {
         />
         {strong && (
           <Typography variant="caption" color="success.main" fontWeight={600}>
-            התאמה גבוהה
+            {t("smartSearch.strongMatch")}
           </Typography>
         )}
       </Box>
@@ -81,7 +83,7 @@ const ResultCard = ({ hit, isText, onSeek, onOpenPage }) => {
       {openable ? (
         <ButtonBase
           onClick={() => openPlace(place, { onSeek, onOpenPage })}
-          aria-label={place.kind === "time" ? `נגן מ־${place.label}` : `פתח ב${isText ? "ספר" : "קובץ"} ב${place.label}`}
+          aria-label={place.kind === "time" ? t("smartSearch.playFrom", { place: place.label }) : t("smartSearch.openAt", { place: place.label, context: isText ? "book" : "lesson" })}
           sx={{ width: "100%", display: "block", "&:hover": { bgcolor: "action.hover" } }}
         >
           {body}
@@ -94,6 +96,7 @@ const ResultCard = ({ hit, isText, onSeek, onOpenPage }) => {
 const SmartSearchPane = ({ search, isText = false, onSeek, onOpenPage }) => {
   // What is typed, before it is searched. Seeded from the last search so coming
   // back to the tab shows the query that produced the list under it.
+  const { t } = useTranslation("lesson");
   const [value, setValue] = useState(search.query ?? "");
   const loading = search.status === statuses.loading;
 
@@ -116,17 +119,17 @@ const SmartSearchPane = ({ search, isText = false, onSeek, onOpenPage }) => {
           size="small"
           value={value}
           onChange={(e) => setValue(e.target.value.slice(0, MAX_QUERY_CHARS))}
-          placeholder={`מה תרצה למצוא ב${isText ? "ספר" : "שיעור"}? למשל: מה נאמר על תשובה`}
-          inputProps={{ "aria-label": "חיפוש בשיעור", maxLength: MAX_QUERY_CHARS }}
+          placeholder={t("smartSearch.placeholder", { context: isText ? "book" : "lesson" })}
+          inputProps={{ "aria-label": t("smartSearch.label"), maxLength: MAX_QUERY_CHARS }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
                 {value && !loading && (
-                  <IconButton size="small" onClick={clear} aria-label="נקה חיפוש">
+                  <IconButton size="small" onClick={clear} aria-label={t("smartSearch.clear")}>
                     <CloseIcon fontSize="small" />
                   </IconButton>
                 )}
-                <IconButton size="small" type="submit" disabled={!value.trim() || loading} aria-label="חפש">
+                <IconButton size="small" type="submit" disabled={!value.trim() || loading} aria-label={t("smartSearch.run")}>
                   {loading ? <CircularProgress size={18} /> : <SearchIcon fontSize="small" />}
                 </IconButton>
               </InputAdornment>
@@ -136,19 +139,19 @@ const SmartSearchPane = ({ search, isText = false, onSeek, onOpenPage }) => {
       </Box>
 
       {search.status === statuses.failed && (
-        <Alert severity="error">{hebrewForError(search.error, "החיפוש נכשל. נסה שוב.")}</Alert>
+        <Alert severity="error">{hebrewForError(search.error, t("smartSearch.failed"))}</Alert>
       )}
 
       {search.status === statuses.idle && (
         <Typography variant="body2" color="text.secondary">
-          החיפוש מוצא קטעים לפי משמעות, לא רק לפי מילים מדויקות.
-          {(onSeek || onOpenPage) && ` לחיצה על תוצאה ${onSeek ? "תנגן מאותו רגע" : "תפתח את העמוד"}.`}
+          {t("smartSearch.intro")}
+          {(onSeek || onOpenPage) && t(onSeek ? "smartSearch.introPlay" : "smartSearch.introOpen")}
         </Typography>
       )}
 
       {search.status === statuses.succeeded && search.results.length === 0 && (
         <Typography variant="body2" color="text.secondary" data-testid="search-empty">
-          לא נמצאו קטעים מתאימים. אפשר לנסות לנסח אחרת, או לשאול במצב &quot;דיון עם בינה מלאכותית&quot;.
+          {t("smartSearch.none")}
         </Typography>
       )}
 

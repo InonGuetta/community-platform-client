@@ -11,9 +11,9 @@ import Tooltip from "@mui/material/Tooltip";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import { statuses } from "../../../utilities/constant";
-import { countLabel } from "../../../utilities/countLabel";
 import { savedListPath } from "../../layout/personalShelves";
 import { usePlaylistsSection } from "./usePlaylistsSection";
+import { useTranslation } from "react-i18next";
 
 // How many more the arrow reveals each time.
 //
@@ -40,6 +40,7 @@ const PER_ROW = 3;
 // lecture a user filed should look and behave exactly as it does where they
 // found it — same menu, same badges, same click.
 const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
+  const { t } = useTranslation("personal");
   const items = playlist.items || [];
 
   // How many cards are open, for THIS list. Per shelf and not per page: two
@@ -70,14 +71,14 @@ const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
         <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5, flexWrap: "wrap", minWidth: 0 }}>
           <Typography variant="subtitle1" fontWeight={800} dir="auto">{playlist.title}</Typography>
           <Typography variant="body2" color="text.secondary">
-            {countLabel(playlist.item_count, "שיעור אחד", "שיעורים")}
+            {t("lessons", { count: Number(playlist.item_count) || 0 })}
           </Typography>
           {/* Offered only when there is something here it cannot show. A link to
               "the whole list" beside a list that is already whole is a question
               the reader has to answer for nothing. */}
           {beyondWhatArrived && (
             <Button size="small" onClick={onOpenList} sx={{ textTransform: "none" }}>
-              לרשימה המלאה
+              {t("fullList")}
             </Button>
           )}
         </Box>
@@ -86,12 +87,12 @@ const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
             card that arrived is open. The span keeps the Tooltip working on a
             disabled button, which fires no pointer events of its own. */}
         {items.length > PER_ROW && (
-          <Tooltip title={hasMore ? "עוד שיעורים" : "אין עוד שיעורים"}>
+          <Tooltip title={hasMore ? t("more") : t("noMore")}>
             <span>
               <IconButton
                 onClick={showMore}
                 disabled={!hasMore}
-                aria-label={`הצג עוד שיעורים מתוך ${playlist.title}`}
+                aria-label={t("showMore", { title: playlist.title })}
               >
                 <KeyboardArrowDownRoundedIcon />
               </IconButton>
@@ -105,7 +106,7 @@ const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
         // see — the server applies the same visibility rule here as everywhere.
         // Both are "nothing to show you", and neither is an error.
         <Typography variant="body2" color="text.disabled">
-          אין בה שיעורים להצגה.
+          {t("emptyList")}
         </Typography>
       ) : (
         <MediaGrid items={shown} status={statuses.succeeded} onView={onView} user={user} />
@@ -116,17 +117,18 @@ const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
 
 // Layout only: what the section loads is usePlaylistsSection's.
 const PlaylistsSection = () => {
+  const { t } = useTranslation("personal");
   const navigate = useNavigate();
   const { playlists, status, user, loading } = usePlaylistsSection();
 
   return (
     <Box sx={{ mt: 5 }}>
       <Typography variant="h6" fontWeight={800} color="primary" sx={{ mb: 2 }}>
-        רשימות שמורות
+        {t("lists.title")}
       </Typography>
 
       {status === statuses.failed ? (
-        <Alert severity="error">טעינת הרשימות נכשלה. נסה לרענן את העמוד.</Alert>
+        <Alert severity="error">{t("lists.loadFailed")}</Alert>
       ) : loading ? (
         <Grid container spacing={3}>
           {Array.from({ length: PER_ROW }).map((_, i) => (
@@ -137,7 +139,7 @@ const PlaylistsSection = () => {
         </Grid>
       ) : playlists.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
-          עדיין אין לך רשימות. אפשר ליצור רשימה מתוך כפתור השמירה שבעמוד השיעור.
+          {t("lists.none")}
         </Typography>
       ) : (
         playlists.map((playlist) => (

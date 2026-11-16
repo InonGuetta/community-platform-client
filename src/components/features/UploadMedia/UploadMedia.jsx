@@ -10,9 +10,11 @@ import DialogActions from "../Dialogs/DialogActions";
 import ContentFieldsUpload from "./ContentFieldsUpload";
 import SuggestTagsDialog from "../TagPicker/SuggestTagsDialog";
 import { useUploadMedia } from "./useUploadMedia";
+import { useTranslation } from "react-i18next";
 
 // Layout only: what the dialog loads, sends and asks afterwards is useUploadMedia's.
 const UploadMedia = ({ open }) => {
+  const { t } = useTranslation(["upload", "common"]);
   const {
     progress, courses, knownCreators, knownTags, file, fields, uploading,
     justUploaded, suggestions, savingTags,
@@ -23,7 +25,7 @@ const UploadMedia = ({ open }) => {
   return (
     <>
     <Dialog open={open} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-      <DialogTitle onClose={handleClose}>העלאת מדיה</DialogTitle>
+      <DialogTitle onClose={handleClose}>{t("title")}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Box
@@ -36,7 +38,7 @@ const UploadMedia = ({ open }) => {
           >
             <CloudUploadIcon sx={{ fontSize: 40, color: "grey.500", mb: 1 }} />
             <Typography color="text.secondary">
-              {file ? file.name : "לחץ לבחירת קובץ"}
+              {file ? file.name : t("chooseFile")}
             </Typography>
             <input
               id="media-file-input"
@@ -63,17 +65,17 @@ const UploadMedia = ({ open }) => {
               />
               <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
                 {progress > 0 && progress < 100
-                  ? `מעלה... ${progress}%`
-                  : "מעבד בשרת..."}
+                  ? t("uploading", { progress })
+                  : t("processing")}
               </Typography>
             </Box>
           )}
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} variant="outlined" disabled={uploading}>ביטול</Button>
+        <Button onClick={handleClose} variant="outlined" disabled={uploading}>{t("common:actions.cancel")}</Button>
         <Button onClick={handleSubmit} variant="contained" disabled={uploading || !file}>
-          {uploading ? "מעלה..." : "העלאה"}
+          {uploading ? t("uploadingShort") : t("upload")}
         </Button>
       </DialogActions>
     </Dialog>

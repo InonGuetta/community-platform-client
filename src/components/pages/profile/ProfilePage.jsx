@@ -15,6 +15,7 @@ import RoleRequestCard from "./RoleRequestCard";
 import EmailPreferencesCard from "./EmailPreferencesCard";
 import LanguageSwitcher from "../../layout/LanguageSwitcher";
 import { useProfilePageController, MIN_PASSWORD_LENGTH } from "./useProfilePageController";
+import { useTranslation } from "react-i18next";
 
 // The user's own account, which nobody could edit before this — an admin could
 // change anyone's display name and nobody could change their own.
@@ -26,6 +27,7 @@ import { useProfilePageController, MIN_PASSWORD_LENGTH } from "./useProfilePageC
 // other.
 
 const ProfilePage = () => {
+  const { t } = useTranslation("profile");
   const {
     confirm,
     currentPassword,
@@ -52,7 +54,7 @@ const ProfilePage = () => {
       {/* The title and the cards share one centred column, so the heading sits
           over the cards rather than at the page's edge. */}
       <Box sx={{ maxWidth: 640, mx: "auto" }}>
-      <Typography variant="h4" fontWeight={800} color="primary" sx={{ mb: 3 }}>החשבון שלי</Typography>
+      <Typography variant="h4" fontWeight={800} color="primary" sx={{ mb: 3 }}>{t("title")}</Typography>
 
       <Box sx={{ display: "grid", gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
@@ -69,9 +71,9 @@ const ProfilePage = () => {
                 <Box sx={{ display: "flex", gap: 0.5, mt: 0.5, flexWrap: "wrap" }}>
                   <Chip size="small" label={roleLabels[user.role] ?? user.role} />
                   {user.email_verified ? (
-                    <Chip size="small" color="success" variant="outlined" icon={<VerifiedIcon />} label="כתובת מאומתת" />
+                    <Chip size="small" color="success" variant="outlined" icon={<VerifiedIcon />} label={t("verified")} />
                   ) : (
-                    <Chip size="small" color="warning" variant="outlined" label="כתובת לא אומתה" />
+                    <Chip size="small" color="warning" variant="outlined" label={t("unverified")} />
                   )}
                 </Box>
               </Box>
@@ -80,7 +82,7 @@ const ProfilePage = () => {
             <Divider />
 
             <TextField
-              label="שם תצוגה"
+              label={t("displayName")}
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               fullWidth
@@ -94,7 +96,7 @@ const ProfilePage = () => {
               disabled={!nameChanged || savingProfile}
               sx={{ alignSelf: "flex-start", borderRadius: 2, fontWeight: 700 }}
             >
-              {savingProfile ? <CircularProgress size={20} /> : "שמירה"}
+              {savingProfile ? <CircularProgress size={20} /> : t("save")}
             </Button>
           </CardContent>
         </Card>
@@ -117,12 +119,12 @@ const ProfilePage = () => {
 
         <Card sx={{ borderRadius: 2 }}>
           <CardContent component="form" onSubmit={handleChangePassword} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography variant="h6" fontWeight={700}>שינוי סיסמה</Typography>
+            <Typography variant="h6" fontWeight={700}>{t("password.title")}</Typography>
 
             {passwordError && <Alert severity="error">{passwordError}</Alert>}
 
             <TextField
-              label="הסיסמה הנוכחית"
+              label={t("password.current")}
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -130,28 +132,28 @@ const ProfilePage = () => {
               fullWidth
             />
             <TextField
-              label="סיסמה חדשה"
+              label={t("password.new")}
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               autoComplete="new-password"
               fullWidth
               error={passwordTooShort}
-              helperText={passwordTooShort ? `לפחות ${MIN_PASSWORD_LENGTH} תווים` : " "}
+              helperText={passwordTooShort ? t("password.minLength", { n: MIN_PASSWORD_LENGTH }) : " "}
             />
             <TextField
-              label="אימות סיסמה חדשה"
+              label={t("password.confirm")}
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               autoComplete="new-password"
               fullWidth
               error={passwordMismatch}
-              helperText={passwordMismatch ? "הסיסמאות אינן תואמות" : " "}
+              helperText={passwordMismatch ? t("password.mismatch") : " "}
             />
 
             <Typography variant="caption" color="text.secondary">
-              שינוי הסיסמה מנתק כל מכשיר אחר שמחובר לחשבון.
+              {t("password.signsOutOthers")}
             </Typography>
 
             <Button
@@ -163,7 +165,7 @@ const ProfilePage = () => {
               }
               sx={{ alignSelf: "flex-start", borderRadius: 2, fontWeight: 700 }}
             >
-              {savingPassword ? <CircularProgress size={20} /> : "שינוי סיסמה"}
+              {savingPassword ? <CircularProgress size={20} /> : t("password.submit")}
             </Button>
           </CardContent>
         </Card>

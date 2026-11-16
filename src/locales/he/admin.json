@@ -115,5 +115,10 @@
     "approveFailed": "האישור נכשל. נסה שוב.",
     "rejected": "ההצעה «{{name}}» נדחתה.",
     "rejectFailed": "הדחייה נכשלה. נסה שוב."
+  },
+  "stats": {
+    "activeUsers": "משתמשים פעילים",
+    "totalMedia": "סה״כ מדיה",
+    "totalDonations": "סה״כ תרומות"
   }
 }

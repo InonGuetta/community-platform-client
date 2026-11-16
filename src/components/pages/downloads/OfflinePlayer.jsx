@@ -9,11 +9,13 @@ import Alert from "@mui/material/Alert";
 import CloseIcon from "@mui/icons-material/Close";
 import { useOfflinePlayer, PLAYBACK_RATES } from "./useOfflinePlayer";
 import { lessonByline } from "./downloadsText";
+import { useTranslation } from "react-i18next";
 
 // The player on the downloads page: the browser's own audio controls, which
 // every phone already knows how to use, plus the speeds a lecture is usually
 // heard at. See useOfflinePlayer for where it plays from.
 const OfflinePlayer = ({ item, onClose }) => {
+  const { t } = useTranslation("downloads");
   const { audioRef, src, missing, rate, changeRate, audioProps } = useOfflinePlayer(item);
   const byline = lessonByline(item);
 
@@ -24,13 +26,13 @@ const OfflinePlayer = ({ item, onClose }) => {
           <Typography variant="subtitle1" fontWeight={700} noWrap dir="auto" title={item.title}>{item.title}</Typography>
           {byline && <Typography variant="body2" color="text.secondary" noWrap>{byline}</Typography>}
         </Box>
-        <Tooltip title="סגירת הנגן">
-          <IconButton onClick={onClose} size="small" aria-label="סגירת הנגן"><CloseIcon /></IconButton>
+        <Tooltip title={t("player.close")}>
+          <IconButton onClick={onClose} size="small" aria-label={t("player.close")}><CloseIcon /></IconButton>
         </Tooltip>
       </Box>
 
       {missing ? (
-        <Alert severity="warning">הקובץ של השיעור הזה כבר לא נמצא במכשיר. אפשר למחוק אותו מהרשימה ולהוריד שוב.</Alert>
+        <Alert severity="warning">{t("player.missing")}</Alert>
       ) : (
         <>
           {/* LTR: the timeline runs left to right in every player, Hebrew page or not. */}
@@ -45,13 +47,13 @@ const OfflinePlayer = ({ item, onClose }) => {
             {...audioProps}
           />
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1, flexWrap: "wrap" }}>
-            <Typography variant="body2" color="text.secondary">מהירות:</Typography>
+            <Typography variant="body2" color="text.secondary">{t("player.speed")}</Typography>
             <ToggleButtonGroup
               size="small"
               exclusive
               value={rate}
               onChange={(_, next) => next && changeRate(next)}
-              aria-label="מהירות נגינה"
+              aria-label={t("player.speedLabel")}
             >
               {PLAYBACK_RATES.map((value) => (
                 <ToggleButton key={value} value={value} sx={{ px: 1.25, py: 0.25 }}>

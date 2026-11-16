@@ -11,6 +11,7 @@ import { selectUser } from "../../../store/selectors/authSelectors";
 import { lecturerIdFor } from "./lessonFields";
 import { selectUploadProgress } from "../../../store/selectors/uiSelectors";
 import { hebrewForError } from "../../../utilities/apiError";
+import { useTranslation } from "react-i18next";
 
 // What the upload dialog does — what it loads when it opens, the form it
 // sends, and the tag question after an untagged upload — so that
@@ -25,6 +26,7 @@ const EMPTY_FIELDS = { title: "", description: "", mediaType: "video", courseId:
  * @param {{ open: boolean }} props
  */
 export const useUploadMedia = ({ open }) => {
+  const { t } = useTranslation("upload");
   const dispatch = useDispatch();
   const progress = useSelector(selectUploadProgress);
   // Only the courses this user may file into — the server refuses the others.
@@ -162,8 +164,8 @@ export const useUploadMedia = ({ open }) => {
     dispatch(
       notify(
         result.meta.requestStatus === "fulfilled"
-          ? { message: "התגיות נשמרו", severity: "success" }
-          : { message: hebrewForError(result.payload, "שמירת התגיות נכשלה"), severity: "error" }
+          ? { message: t("tagsSaved"), severity: "success" }
+          : { message: hebrewForError(result.payload, t("tagsFailed")), severity: "error" }
       )
     );
     if (result.meta.requestStatus === "fulfilled") handleSkipTags();

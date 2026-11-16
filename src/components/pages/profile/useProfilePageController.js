@@ -5,6 +5,7 @@ import { updateProfile } from "../../../store/slicesAndThunks/authSlice/authPut"
 import { changePassword } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { hebrewForError } from "../../../utilities/apiError";
+import { useTranslation } from "react-i18next";
 
 // What the profile page does — the profile edit and the password change, and
 // the checks on both — so ProfilePage.jsx is layout only (the
@@ -12,6 +13,7 @@ import { hebrewForError } from "../../../utilities/apiError";
 export const MIN_PASSWORD_LENGTH = 8; // mirrors MIN_PASSWORD_LENGTH in servicesAuth.js
 
 export const useProfilePageController = () => {
+  const { t } = useTranslation("profile");
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
 
@@ -43,8 +45,8 @@ export const useProfilePageController = () => {
     setSavingProfile(false);
     dispatch(notify(
       result.meta.requestStatus === "fulfilled"
-        ? { message: "הפרטים נשמרו", severity: "success" }
-        : { message: hebrewForError(result.payload, "שמירת הפרטים נכשלה"), severity: "error" }
+        ? { message: t("details.saved"), severity: "success" }
+        : { message: hebrewForError(result.payload, t("details.failed")), severity: "error" }
     ));
   };
 
@@ -62,12 +64,12 @@ export const useProfilePageController = () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirm("");
-      dispatch(notify({ message: "הסיסמה שונתה", severity: "success" }));
+      dispatch(notify({ message: t("password.changed"), severity: "success" }));
       return;
     }
     // Shown inline rather than as a toast: it is almost always "the current
     // password is wrong", which is about the field directly above it.
-    setPasswordError(hebrewForError(result.payload, "שינוי הסיסמה נכשל"));
+    setPasswordError(hebrewForError(result.payload, t("password.failed")));
   };
 
   return {

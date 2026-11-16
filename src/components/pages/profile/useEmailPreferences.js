@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { notificationsApi } from "../../../api/notificationsApi";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
+import i18n from "../../../i18n/i18n";
 
 // The mail switches on the profile page (PRD NOTIF-6) — local state, because
 // nothing else on any screen reads them. The server decides which categories
@@ -32,7 +33,7 @@ const useEmailPreferences = () => {
     return () => { live = false; };
   }, []);
 
-  const failed = () => dispatch(notify({ message: "שמירת ההעדפה נכשלה", severity: "error" }));
+  const failed = () => dispatch(notify({ message: i18n.t("profile:email.saveFailed"), severity: "error" }));
 
   const handleToggle = async (key, email) => {
     setCategories((prev) => prev.map((c) => (c.key === key ? { ...c, email } : c)));

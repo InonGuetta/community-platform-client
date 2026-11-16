@@ -8,6 +8,7 @@ import DirectionalIcon from "../../../components/features/DirectionalIcon/Direct
 import ArchiveBrowser from "../archive/componentsArchive/ArchiveBrowser";
 import { useCreatorPageController } from "./useCreatorPageController";
 import { creatorSummary } from "./creatorSummary";
+import { useTranslation } from "react-i18next";
 
 // A lecturer's page (PRD ATTR-10, ARCH-5): everything under one name — the
 // lessons they gave and the books they wrote — with the archive's own filters,
@@ -16,13 +17,14 @@ import { creatorSummary } from "./creatorSummary";
 // By NAME, as the archive attributes: a guest speaker has lessons and no
 // account, and the name on the lesson is what a reader followed here.
 const CreatorPage = () => {
+  const { t } = useTranslation("creators");
   const c = useCreatorPageController();
   const p = c.profile;
 
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)", p: 3 }}>
       <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={c.goToArchive} sx={{ mb: 2 }}>
-        לארכיון
+        {t("toArchive")}
       </Button>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3, flexWrap: "wrap" }}>
@@ -41,7 +43,7 @@ const CreatorPage = () => {
           )}
           {c.profileStatus === "failed" && (
             <Typography variant="body1" color="text.secondary">
-              לא נמצאו שיעורים בשם הזה שפתוחים לך.
+              {t("none")}
             </Typography>
           )}
           {p?.courses?.length > 0 && (

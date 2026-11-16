@@ -11,6 +11,7 @@ import Alert from "@mui/material/Alert";
 import TagParentPicker from "./TagParentPicker";
 import { pathOf } from "./tagOptions";
 import { buildTagRelations } from "../../../utilities/tagStates";
+import { useTranslation } from "react-i18next";
 
 // A tag that does not exist yet: its name, and where in the tree it goes.
 //
@@ -34,14 +35,16 @@ const normalise = (value) => value.trim().replace(/\s+/g, " ");
 const ProposeTagDialog = ({
   open,
   nodes,
-  title = "הוספת תגית חדשה",
-  submitLabel = "שליחה לאישור",
-  note = "התגית תישלח לאישור מנהל המערכת. לאחר האישור היא תיכנס למערכת ותתווסף לשיעור הזה.",
+  // Absent, the shared words (tags:propose.*).
+  title,
+  submitLabel,
+  note,
   initialName = "",
   initialParentId = null,
   onClose,
   onSubmit,
 }) => {
+  const { t } = useTranslation(["tags", "common"]);
   const [name, setName] = useState(initialName);
   const [parentId, setParentId] = useState(initialParentId);
   const [submitting, setSubmitting] = useState(false);
@@ -79,7 +82,7 @@ const ProposeTagDialog = ({
     } catch (err) {
       // The caller turns the rejection into Hebrew; anything it could not name
       // still gets a sentence rather than nothing.
-      setError(err?.hebrew || "השמירה נכשלה. נסה שוב.");
+      setError(err?.hebrew || t("propose.saveFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -87,13 +90,13 @@ const ProposeTagDialog = ({
 
   return (
     <Dialog open={open} onClose={submitting ? undefined : onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ textAlign: "start" }}>{title}</DialogTitle>
+      <DialogTitle sx={{ textAlign: "start" }}>{title ?? t("propose.title")}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <TextField
           autoFocus
           fullWidth
           size="small"
-          label="שם התגית"
+          label={t("propose.name")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => {
@@ -102,9 +105,9 @@ const ProposeTagDialog = ({
           error={existsHere || tooLong}
           helperText={
             tooLong
-              ? `עד ${TAG_MAX} תווים`
+              ? t("propose.maxLength", { n: TAG_MAX })
               : existsHere
-                ? "התגית כבר קיימת במקום הזה — אפשר לבחור אותה מהרשימה"
+                ? t("propose.existsHere")
                 : " "
           }
           sx={{ mt: 1 }}
@@ -112,17 +115,15 @@ const ProposeTagDialog = ({
 
         {elsewhere.length > 0 && !existsHere && (
           <Alert severity="info" sx={{ mb: 1.5 }}>
-            תגית בשם הזה כבר קיימת תחת:{" "}
-            {elsewhere.map((node) => pathOf(relations, node.parent_id).join(" ← ") || "ראשי").join(" · ")}.
-            אם זו התגית שחיפשת, אפשר לבחור אותה ישירות מרשימת התגיות.
+            {t("propose.existsElsewhere", { places: elsewhere.map((node) => pathOf(relations, node.parent_id).join(" ← ") || t("root")).join(" · ") })}
           </Alert>
         )}
 
         <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
-          תחת איזו תגית אב?
+          {t("propose.whichParent")}
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-          לחיצה על תגית נכנסת אליה ובוחרת בה כאב. «ראשי» — כותרת ראשית חדשה.
+          {t("propose.parentHint")}
         </Typography>
         <TagParentPicker nodes={nodes} value={parentId} onChange={setParentId} />
 
@@ -134,17 +135,17 @@ const ProposeTagDialog = ({
           data-testid="tag-placement"
         >
           <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-            המיקום של התגית החדשה:
+            {t("propose.placement")}
           </Typography>
           <Typography variant="body2">
-            {place.length > 0 ? `${place.join(" ← ")} ← ` : "כותרת ראשית: "}
+            {place.length > 0 ? `${place.join(" ← ")} ← ` : t("propose.topLevelPrefix")}
             <Box component="strong">{clean || "…"}</Box>
           </Typography>
         </Box>
 
-        {note && (
+        {(note ?? t("propose.note")) && (
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1.5 }}>
-            {note}
+            {note ?? t("propose.note")}
           </Typography>
         )}
         {error && (
@@ -155,10 +156,10 @@ const ProposeTagDialog = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={submitting}>
-          ביטול
+          {t("common:actions.cancel")}
         </Button>
         <Button onClick={handleSubmit} variant="contained" disabled={!canSubmit}>
-          {submitLabel}
+          {submitLabel ?? t("propose.submit")}
         </Button>
       </DialogActions>
     </Dialog>

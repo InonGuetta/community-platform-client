@@ -4,7 +4,6 @@ import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import DirectionalIcon from "../../../components/features/DirectionalIcon/DirectionalIcon";
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
-import { countLabel } from "../../../utilities/countLabel";
 import { SAVED_SHELF } from "../../layout/personalShelves";
 import { useTranslation } from "react-i18next";
 import { usePlaylistPageController } from "./usePlaylistPageController";
@@ -30,7 +29,7 @@ const PlaylistPage = () => {
     status,
     user,
   } = usePlaylistPageController();
-  const { t } = useTranslation("nav");
+  const { t } = useTranslation(["personal", "nav"]);
 
   return (
     <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
@@ -42,18 +41,18 @@ const PlaylistPage = () => {
           startIcon={<DirectionalIcon toward="back" />}
           sx={{ mb: 2, "& .MuiButton-startIcon": { marginInlineEnd: -0.25, marginInlineStart: 0.75 } }}
         >
-          {t(SAVED_SHELF.labelKey)}
+          {t(`nav:${SAVED_SHELF.labelKey}`)}
         </Button>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           {/* The heading holds its place while the list loads, so the page does
               not jump once the title arrives. */}
           <Typography variant="h4" fontWeight={800} color="primary">
-            {playlist?.title || "רשימה שמורה"}
+            {playlist?.title || t("list.fallbackTitle")}
           </Typography>
           {items.length > 0 && (
             <Typography variant="body2" color="text.secondary">
-              {countLabel(items.length, "שיעור אחד", "שיעורים")}
+              {t("lessons", { count: items.length })}
             </Typography>
           )}
         </Box>
@@ -62,15 +61,15 @@ const PlaylistPage = () => {
             ריקה" under a request that never arrived sends the user looking for
             lectures they did not lose. */}
         {failed ? (
-          <Alert severity="error">טעינת הרשימה נכשלה. ייתכן שהרשימה נמחקה.</Alert>
+          <Alert severity="error">{t("list.loadFailed")}</Alert>
         ) : (
           <MediaGrid
             items={items}
             status={status}
             onView={(id) => navigate(`/media/${id}`)}
             user={user}
-            emptyMessage="אין עדיין שיעורים ברשימה הזו"
-            emptyActionLabel="לארכיון"
+            emptyMessage={t("list.empty")}
+            emptyActionLabel={t("toArchive")}
             onEmptyAction={() => navigate("/archive")}
           />
         )}

@@ -59,7 +59,7 @@ const JoinCodePanel = ({ course }) => {
             <Tooltip title={t("joinCode.copy")}>
               <IconButton onClick={p.copyCode} aria-label={t("joinCode.copy")}><ContentCopyIcon fontSize="small" /></IconButton>
             </Tooltip>
-            <Button size="small" variant="outlined" endIcon={<LinkIcon />} onClick={p.copyLink}>העתקת קישור להצטרפות</Button>
+            <Button size="small" variant="outlined" endIcon={<LinkIcon />} onClick={p.copyLink}>{t("joinCode.copyLink")}</Button>
             <Box sx={{ flex: 1 }} />
             <Button size="small" disabled={p.busy} onClick={p.askReplace}>{t("joinCode.newCode")}</Button>
             <Button size="small" color="error" disabled={p.busy} onClick={p.removeCode}>{t("joinCode.remove")}</Button>

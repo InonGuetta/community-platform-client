@@ -1,4 +1,5 @@
 import { formatDate } from "../../../utilities/formatDate";
+import i18n from "../../../i18n/i18n";
 
 // The line under a lecturer's name (PRD ATTR-10), kept apart from the layout so
 // it can be tested without rendering it:
@@ -7,9 +8,9 @@ import { formatDate } from "../../../utilities/formatDate";
 // What kinds they are, in words — only the kinds there are.
 const kinds = (p) =>
   [
-    p.video_count > 0 && (p.video_count === 1 ? "וידאו אחד" : `${p.video_count} וידאו`),
-    p.audio_count > 0 && (p.audio_count === 1 ? "הקלטת שמע אחת" : `${p.audio_count} הקלטות שמע`),
-    p.text_count > 0 && (p.text_count === 1 ? "ספר אחד" : `${p.text_count} ספרים`),
+    p.video_count > 0 && i18n.t("creators:video", { count: p.video_count }),
+    p.audio_count > 0 && i18n.t("creators:audio", { count: p.audio_count }),
+    p.text_count > 0 && i18n.t("creators:text", { count: p.text_count }),
   ].filter(Boolean);
 
 // Hours from an hour up, minutes below; nothing when nothing was measured.
@@ -18,15 +19,15 @@ export const recordedLength = (seconds) => {
   const hours = seconds / 3600;
   if (hours >= 1) {
     const rounded = Math.round(hours * 10) / 10;
-    return rounded === 1 ? "שעת הקלטה אחת" : `${rounded} שעות הקלטה`;
+    return i18n.t("creators:hours", { count: rounded });
   }
   const minutes = Math.max(1, Math.round(seconds / 60));
-  return minutes === 1 ? "דקת הקלטה אחת" : `${minutes} דקות הקלטה`;
+  return i18n.t("creators:minutes", { count: minutes });
 };
 
 export const creatorSummary = (p) => {
   if (!p) return "";
-  const total = p.media_count === 1 ? "פריט אחד" : `${p.media_count} פריטים`;
+  const total = i18n.t("creators:items", { count: p.media_count });
   const parts = [total];
   const byKind = kinds(p);
   if (byKind.length > 1) parts[0] = `${total} (${byKind.join(", ")})`;
@@ -34,6 +35,6 @@ export const creatorSummary = (p) => {
   const length = recordedLength(p.total_seconds);
   if (length) parts.push(length);
   const latest = formatDate(p.latest_at);
-  if (latest) parts.push(`אחרון: ${latest}`);
+  if (latest) parts.push(i18n.t("creators:latest", { date: latest }));
   return parts.join(" · ");
 };

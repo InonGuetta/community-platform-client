@@ -11,6 +11,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import AddIcon from "@mui/icons-material/Add";
 import TagPicker from "./TagPicker";
 import TagProposalsSection from "./TagProposalsSection";
+import { useTranslation } from "react-i18next";
 
 // The moment after an upload, when the archive asks what the item is about.
 //
@@ -54,6 +55,7 @@ const SuggestTagsDialog = ({
   onSkip,
   onSave,
 }) => {
+  const { t } = useTranslation("tags");
   const [chosen, setChosen] = useState([]);
   // Tags an admin created from this dialog. The tree in `nodes` was fetched
   // before they existed, and the picker can only show a tag it has a node for.
@@ -106,16 +108,16 @@ const SuggestTagsDialog = ({
 
   return (
     <Dialog open={open} onClose={onSkip} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ textAlign: "start" }}>על מה השיעור?</DialogTitle>
+      <DialogTitle sx={{ textAlign: "start" }}>{t("suggest.title")}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
-          «{item.title}» הועלה בהצלחה. התגיות קובעות איפה הוא יימצא בסינון ובחיפוש.
+          {t("suggest.uploaded", { title: item.title })}
         </Typography>
 
         {suggestions.length > 0 && (
           <Box sx={{ mb: 2.5 }}>
             <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>
-              הצעות לפי הכותרת — לחיצה מוסיפה או מסירה:
+              {t("suggest.fromTitle")}
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
               {suggestions.map((suggestion) => (
@@ -131,7 +133,7 @@ const SuggestTagsDialog = ({
                     // just below as a chip in the picker: without this the two
                     // are announced identically, and neither the reader nor the
                     // test can tell which one it is on.
-                    aria-label={`הצעה: ${suggestion.name}${suggestion.path ? ` (${suggestion.path})` : ""}`}
+                    aria-label={suggestion.path ? t("suggest.suggestionWithPath", { name: suggestion.name, path: suggestion.path }) : t("suggest.suggestion", { name: suggestion.name })}
                     label={
                       <Box component="span" sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.5 }}>
                         {suggestion.path && (
@@ -158,11 +160,11 @@ const SuggestTagsDialog = ({
           nodes={allNodes}
           value={chosen}
           onChange={setChosen}
-          label={suggestions.length > 0 ? "התגיות שיישמרו" : "תגיות"}
+          label={suggestions.length > 0 ? t("suggest.toSave") : t("label")}
           helperText={
             suggestions.length > 0
-              ? "אפשר להוסיף או להסיר כאן כל תגית, גם כזו שלא הוצעה."
-              : "לא נמצאה הצעה מהכותרת — אפשר לבחור ידנית."
+              ? t("suggest.canEdit")
+              : t("suggest.noneFromTitle")
           }
         />
         <TagProposalsSection
@@ -175,9 +177,9 @@ const SuggestTagsDialog = ({
       <DialogActions>
         {/* Skipping is a real answer, not a failure: the item is already stored,
             and it can be tagged later from its card in the archive. */}
-        <Button onClick={onSkip} disabled={saving}>דלג</Button>
+        <Button onClick={onSkip} disabled={saving}>{t("suggest.skip")}</Button>
         <Button onClick={handleSave} variant="contained" disabled={saving}>
-          שמירת התגיות
+          {t("suggest.save")}
         </Button>
       </DialogActions>
     </Dialog>

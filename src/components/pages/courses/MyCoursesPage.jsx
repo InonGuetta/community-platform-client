@@ -60,7 +60,7 @@ const MyCoursesPage = () => {
             </Typography>
           )}
           {/* PRD ROST-9. */}
-          <Button variant="contained" endIcon={<VpnKeyOutlinedIcon />} onClick={openJoin}>הצטרפות לקורס</Button>
+          <Button variant="contained" endIcon={<VpnKeyOutlinedIcon />} onClick={openJoin}>{t("mine.join")}</Button>
         </Box>
       </Box>
 

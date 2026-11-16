@@ -8,6 +8,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import Box from "@mui/material/Box";
+import { useTranslation } from "react-i18next";
 
 const StatCard = ({ icon, label, value, color, to }) => {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ const StatCard = ({ icon, label, value, color, to }) => {
 };
 
 const StatsCards = ({ stats }) => {
+  const { t } = useTranslation("admin");
   if (!stats) return null;
 
   const donationILS = stats.donations
@@ -50,13 +52,13 @@ const StatsCards = ({ stats }) => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={4}>
-        <StatCard icon={<PeopleIcon />} label="משתמשים פעילים" value={stats.users?.active ?? 0} color="primary" to="/users" />
+        <StatCard icon={<PeopleIcon />} label={t("stats.activeUsers")} value={stats.users?.active ?? 0} color="primary" to="/users" />
       </Grid>
       <Grid item xs={12} sm={4}>
-        <StatCard icon={<VideoLibraryIcon />} label="סה״כ מדיה" value={stats.media?.total ?? 0} color="secondary" to="/archive" />
+        <StatCard icon={<VideoLibraryIcon />} label={t("stats.totalMedia")} value={stats.media?.total ?? 0} color="secondary" to="/archive" />
       </Grid>
       <Grid item xs={12} sm={4}>
-        <StatCard icon={<VolunteerActivismIcon />} label="סה״כ תרומות" value={donationILS} color="success" to="/donate" />
+        <StatCard icon={<VolunteerActivismIcon />} label={t("stats.totalDonations")} value={donationILS} color="success" to="/donate" />
       </Grid>
     </Grid>
   );

@@ -5,6 +5,7 @@ import { hebrewForError, rejectionOf } from "../../../utilities/apiError";
 import { logger } from "../../../utilities/logger";
 import { selectUserRole } from "../../../store/selectors/authSelectors";
 import { roles } from "../../../utilities/constant";
+import i18n from "../../../i18n/i18n";
 
 // The new tags an item is waiting for, and the two things that change them.
 //
@@ -44,7 +45,7 @@ export const useTagProposals = (itemId, active) => {
         }
         return result;
       } catch (err) {
-        throw { hebrew: hebrewForError(rejectionOf(err), "שליחת התגית נכשלה. נסה שוב.") };
+        throw { hebrew: hebrewForError(rejectionOf(err), i18n.t("tags:propose.sendFailed")) };
       }
     },
     [itemId]

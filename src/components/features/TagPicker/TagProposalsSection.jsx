@@ -10,6 +10,7 @@ import ProposeTagDialog from "./ProposeTagDialog";
 import { pathOf } from "./tagOptions";
 import { useTagProposals } from "./useTagProposals";
 import { buildTagRelations } from "../../../utilities/tagStates";
+import { useTranslation } from "react-i18next";
 
 // "הוסף תגית", and the tags this item is waiting for.
 //
@@ -25,6 +26,7 @@ import { buildTagRelations } from "../../../utilities/tagStates";
 // `onTagCreated`: the dialog must add it to its selection, or the save that
 // follows (which REPLACES the item's tags) would take it straight back off.
 const TagProposalsSection = ({ itemId, nodes, active = true, onTagCreated }) => {
+  const { t } = useTranslation("tags");
   const { pending, propose, withdraw, isAdmin } = useTagProposals(itemId, active);
   const [open, setOpen] = useState(false);
   const relations = useMemo(() => buildTagRelations(nodes), [nodes]);
@@ -41,23 +43,23 @@ const TagProposalsSection = ({ itemId, nodes, active = true, onTagCreated }) => 
     <Box sx={{ mt: 1.5 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => setOpen(true)}>
-          הוסף תגית
+          {t("proposals.add")}
         </Button>
         <Typography variant="caption" color="text.secondary">
-          {isAdmin ? "לא מצאת תגית מתאימה? אפשר ליצור חדשה." : "לא מצאת תגית מתאימה? אפשר להציע חדשה לאישור המנהל."}
+          {isAdmin ? t("proposals.createHint") : t("proposals.proposeHint")}
         </Typography>
       </Box>
 
       {pending.length > 0 && (
         <Box sx={{ mt: 1.5 }}>
           <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 0.75 }}>
-            ממתינות לאישור מנהל — יתווספו לשיעור אחרי האישור:
+            {t("proposals.pending")}
           </Typography>
           <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
             {pending.map((proposal) => {
-              const place = pathOf(relations, proposal.parent_id).join(" ← ") || "כותרת ראשית";
+              const place = pathOf(relations, proposal.parent_id).join(" ← ") || t("topLevel");
               return (
-                <Tooltip key={proposal.id} title={`תחת: ${place}`}>
+                <Tooltip key={proposal.id} title={t("proposals.under", { place })}>
                   <Chip
                     size="small"
                     variant="outlined"
@@ -65,7 +67,7 @@ const TagProposalsSection = ({ itemId, nodes, active = true, onTagCreated }) => 
                     icon={<HourglassTopIcon />}
                     label={proposal.name}
                     onDelete={() => withdraw(proposal.id)}
-                    aria-label={`ממתינה לאישור: ${proposal.name} (${place})`}
+                    aria-label={t("proposals.pendingNamed", { name: proposal.name, place })}
                   />
                 </Tooltip>
               );
@@ -77,10 +79,10 @@ const TagProposalsSection = ({ itemId, nodes, active = true, onTagCreated }) => 
       <ProposeTagDialog
         open={open}
         nodes={nodes}
-        submitLabel={isAdmin ? "יצירת התגית" : "שליחה לאישור"}
+        submitLabel={isAdmin ? t("proposals.create") : undefined}
         note={
           isAdmin
-            ? "כמנהל, התגית תיווצר מיד ותתווסף לשיעור הזה."
+            ? t("proposals.adminNote")
             : undefined
         }
         onClose={() => setOpen(false)}

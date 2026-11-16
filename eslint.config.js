@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import globals from "globals";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
+import i18next from "eslint-plugin-i18next";
 
 // ── Direction: logical properties only (docs/i18n-plan.md) ──────────────────
 //
@@ -171,6 +172,29 @@ export default [
     files: ["src/**/*.jsx"],
     ignores: ["src/**/*.test.jsx"],
     rules: { "no-restricted-syntax": ["error", ...LOGICAL_ONLY] },
+  },
+  {
+    // No words written into a component (docs/i18n-plan.md): text a reader
+    // sees is a key in src/locales/<lng>/<namespace>.json, rendered through
+    // t() or <Trans>, so it changes with the interface language. Text BETWEEN
+    // tags is what this catches; punctuation, digits and symbols are not words
+    // and pass. Content — a title, a name, a transcript — arrives as a value
+    // and is never a literal here. Attribute strings are not checked (they are
+    // mostly class names, types and ids); an aria-label goes through t() by
+    // review.
+    files: ["src/**/*.jsx"],
+    ignores: ["src/**/*.test.jsx"],
+    plugins: { i18next },
+    rules: {
+      // `exclude` replaces the plugin's own list, and the plugin builds each
+      // entry with no "u" flag — so no \p{…}: spell the non-words out.
+      // ALL-CAPS tokens (AI, PDF, CSV) and product names (Word) are names,
+      // the same in every language, not sentences.
+      "i18next/no-literal-string": [
+        "error",
+        { mode: "jsx-text-only", words: { exclude: ["[\\s0-9!-/:-@[-`{-~—–·…←→↔•×₪€]+", "[A-Z_-]+", "\\s*Word\\s*"] } },
+      ],
+    },
   },
   {
     // Tests import their globals explicitly, but they run under node rather

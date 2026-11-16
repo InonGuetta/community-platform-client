@@ -6,7 +6,8 @@
     "build": "vite build",
     "test": "vitest run",
     "lint": "eslint .",
-    "verify": "npm run lint && npm test && npm run build",
+    "verify": "npm run lint && npm test && npm run build && npm run check:chunks",
+    "check:chunks": "node scripts/check-locale-chunks.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {
@@ -37,6 +38,7 @@
     "@testing-library/user-event": "^14.6.3",
     "@vitejs/plugin-react": "^4.0.0",
     "eslint": "^9.39.5",
+    "eslint-plugin-i18next": "^6.1.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.8.0",

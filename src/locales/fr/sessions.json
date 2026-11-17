@@ -89,11 +89,11 @@
     "unsupported": "Ce navigateur ne prend pas en charge l'enregistrement. Essayez Chrome, Edge ou Firefox.",
     "cannotStart": "L'enregistrement ne peut pas démarrer.",
     "saved": "L'enregistrement a été sauvegardé.",
-    "savedLesson": "L'enregistrement a été sauvegardé et est devenu un cours (brouillon) en cours de transcription et de résumé.",
+    "savedLesson": "L'enregistrement a été sauvegardé et est devenu un cours (brouillon). Vous pouvez lancer sa transcription depuis la page du cours.",
     "savedMissing_one": "L'enregistrement a été sauvegardé, mais sa dernière partie n'est pas parvenue au serveur.",
     "savedMissing_other": "L'enregistrement a été sauvegardé, mais ses {{count}} dernières parties ne sont pas parvenues au serveur.",
-    "savedLessonMissing_one": "L'enregistrement a été sauvegardé et est devenu un cours (brouillon) en cours de transcription et de résumé, mais sa dernière partie n'est pas parvenue au serveur.",
-    "savedLessonMissing_other": "L'enregistrement a été sauvegardé et est devenu un cours (brouillon) en cours de transcription et de résumé, mais ses {{count}} dernières parties ne sont pas parvenues au serveur.",
+    "savedLessonMissing_one": "L'enregistrement a été sauvegardé et est devenu un cours (brouillon), mais sa dernière partie n'est pas parvenue au serveur. Vous pouvez lancer sa transcription depuis la page du cours.",
+    "savedLessonMissing_other": "L'enregistrement a été sauvegardé et est devenu un cours (brouillon), mais ses {{count}} dernières parties ne sont pas parvenues au serveur. Vous pouvez lancer sa transcription depuis la page du cours.",
     "finishFailed": "La sauvegarde de l'enregistrement n'a pas abouti. Ce qui est déjà parvenu au serveur sera conservé à la fin de la séance."
   }
 }

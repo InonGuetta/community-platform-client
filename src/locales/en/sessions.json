@@ -89,11 +89,11 @@
     "unsupported": "This browser does not support recording. Try Chrome, Edge or Firefox.",
     "cannotStart": "The recording cannot be started.",
     "saved": "The recording was saved.",
-    "savedLesson": "The recording was saved and became a lesson (draft) that is now being transcribed and summarised.",
+    "savedLesson": "The recording was saved and became a lesson (draft). You can start its transcription from the lesson's page.",
     "savedMissing_one": "The recording was saved, but its last part did not reach the server.",
     "savedMissing_other": "The recording was saved, but its last {{count}} parts did not reach the server.",
-    "savedLessonMissing_one": "The recording was saved and became a lesson (draft) that is now being transcribed and summarised, but its last part did not reach the server.",
-    "savedLessonMissing_other": "The recording was saved and became a lesson (draft) that is now being transcribed and summarised, but its last {{count}} parts did not reach the server.",
+    "savedLessonMissing_one": "The recording was saved and became a lesson (draft), but its last part did not reach the server. You can start its transcription from the lesson's page.",
+    "savedLessonMissing_other": "The recording was saved and became a lesson (draft), but its last {{count}} parts did not reach the server. You can start its transcription from the lesson's page.",
     "finishFailed": "Saving the recording did not finish. Whatever already reached the server will be kept when the session ends."
   }
 }

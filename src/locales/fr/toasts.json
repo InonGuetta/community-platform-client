@@ -17,7 +17,9 @@
     "saves/deletePlaylist": "Liste supprimée",
     "courses/createJoinCode": "Un nouveau code d'inscription a été créé. L'ancien code ne fonctionne plus",
     "courses/removeJoinCode": "L'inscription par code a été désactivée",
-    "courses/cancelJoinRequest": "Demande annulée"
+    "courses/cancelJoinRequest": "Demande annulée",
+    "avatar/upload": "Photo de profil mise à jour",
+    "avatar/remove": "Photo de profil supprimée"
   },
   "failure": {
     "media/upload": "Le téléversement du média a échoué",
@@ -55,6 +57,8 @@
     "courses/createJoinCode": "La création du code d'inscription a échoué",
     "courses/removeJoinCode": "La désactivation du code d'inscription a échoué",
     "courses/decideJoinRequest": "Le traitement de la demande d'inscription a échoué",
-    "courses/cancelJoinRequest": "L'annulation de la demande a échoué"
+    "courses/cancelJoinRequest": "L'annulation de la demande a échoué",
+    "avatar/upload": "Le téléversement de la photo a échoué",
+    "avatar/remove": "La suppression de la photo a échoué"
   }
 }

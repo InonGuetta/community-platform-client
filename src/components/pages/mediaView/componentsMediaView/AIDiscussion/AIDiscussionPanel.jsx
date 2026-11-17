@@ -9,6 +9,7 @@ import ChatPane from "../../../../features/ChatPane/ChatPane";
 import HistoryPane from "./HistoryPane";
 import TextQualityNotice from "../TextQualityNotice";
 import { useTranslation } from "react-i18next";
+import { questionsIn } from "../../../../../utilities/suggestedQuestions";
 
 // The "דיון עם AI" tab: three ways into THIS lesson, side by side.
 //
@@ -39,7 +40,7 @@ const caption = (t, mode, isText) => {
 };
 
 const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek, onOpenPage }) => {
-  const { t } = useTranslation("lesson");
+  const { t, i18n } = useTranslation("lesson");
   const { mode, setMode, readiness, search, chat, history, notebook } = useAIDiscussionController({ mediaId, transcript, media });
 
   return (
@@ -97,8 +98,10 @@ const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek,
               isText={isText}
               onSeek={onSeek}
               onOpenPage={onOpenPage}
-              // This lesson's own starting questions (PRD ASK-7).
-              suggestedQuestions={transcript?.suggested_questions}
+              // This lesson's own starting questions (PRD ASK-7), in the
+              // reader's language — or the fixed ones in it, when this lesson
+              // has none in that language yet.
+              suggestedQuestions={questionsIn(transcript?.suggested_questions, i18n.language)}
             />
           )}
           {mode === DISCUSSION_MODES.history && (

@@ -59,6 +59,11 @@ const signUp = async (page, w, who, roleLabel) => {
   await page.getByLabel(new RegExp(`^${literally(w("auth:fields.password"))}`)).fill(who.password);
   await page.getByRole("button", { name: w("auth:signUp.submit"), exact: true }).click();
   await expect(page).toHaveURL(/\/archive/);
+  // A new account is offered a profile picture once; this journey says later.
+  const welcome = page.getByRole("dialog");
+  await expect(welcome.getByText(w("profile:avatar.welcome.title", { name: who.name }))).toBeVisible();
+  await welcome.getByRole("button", { name: w("profile:avatar.welcome.later"), exact: true }).click();
+  await expect(welcome).toBeHidden();
 };
 
 const signIn = async (page, w, who) => {

@@ -36,5 +36,22 @@
     "tryAgainLater": "You can submit a new request after seven days.",
     "current": "Your current permission: {{role}}. A request for a higher permission needs an admin's approval.",
     "send": "Send request"
+  },
+  "avatar": {
+    "upload": "Upload a picture",
+    "change": "Change picture",
+    "remove": "Remove picture",
+    "uploading": "Uploading…",
+    "hint": "JPG, PNG or WebP. The picture will be cropped to a square.",
+    "notImage": "The file cannot be read as a picture. You can upload a JPG, PNG or WebP.",
+    "label": "Profile picture",
+    "welcome": {
+      "title": "Welcome, {{name}}!",
+      "titleNoName": "Welcome!",
+      "body": "Would you like to add a profile picture? It helps lecturers and classmates recognise you in courses and sessions.",
+      "later": "Later",
+      "done": "Done",
+      "where": "You can add or change your picture at any time on the \"My account\" page."
+    }
   }
 }

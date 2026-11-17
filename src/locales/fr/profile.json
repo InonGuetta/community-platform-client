@@ -36,5 +36,22 @@
     "tryAgainLater": "Vous pourrez soumettre une nouvelle demande après sept jours.",
     "current": "Votre autorisation actuelle : {{role}}. Une demande d'autorisation supérieure nécessite l'approbation d'un administrateur.",
     "send": "Envoyer la demande"
+  },
+  "avatar": {
+    "upload": "Téléverser une photo",
+    "change": "Changer de photo",
+    "remove": "Supprimer la photo",
+    "uploading": "Téléversement…",
+    "hint": "JPG, PNG ou WebP. La photo sera recadrée en carré.",
+    "notImage": "Le fichier ne peut pas être lu comme une image. Vous pouvez téléverser un JPG, PNG ou WebP.",
+    "label": "Photo de profil",
+    "welcome": {
+      "title": "Bienvenue, {{name}} !",
+      "titleNoName": "Bienvenue !",
+      "body": "Voulez-vous ajouter une photo de profil ? Les enseignants et les autres élèves vous reconnaîtront dans les cours et les séances.",
+      "later": "Plus tard",
+      "done": "Terminé",
+      "where": "Vous pouvez ajouter ou changer votre photo à tout moment sur la page « Mon compte »."
+    }
   }
 }

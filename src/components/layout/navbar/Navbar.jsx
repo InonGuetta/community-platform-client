@@ -157,7 +157,7 @@ const Navbar = () => {
 
         {/* Compact avatar — mobile only. Logout lives inside the drawer at
             every width. */}
-        <Avatar sx={{ display: { xs: "flex", md: "none" }, width: 34, height: 34, bgcolor: "transparent", color: "primary.main", border: "1.5px solid", borderColor: "primary.main", fontSize: 14, fontWeight: 700 }}>
+        <Avatar src={user?.avatar_url || undefined} sx={{ display: { xs: "flex", md: "none" }, width: 34, height: 34, bgcolor: "transparent", color: "primary.main", border: "1.5px solid", borderColor: "primary.main", fontSize: 14, fontWeight: 700 }}>
           {avatarInitial(user)}
         </Avatar>
 

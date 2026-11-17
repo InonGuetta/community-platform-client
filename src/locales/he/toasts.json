@@ -17,7 +17,9 @@
     "saves/deletePlaylist": "הרשימה נמחקה",
     "courses/createJoinCode": "נוצר קוד הצטרפות חדש. הקוד הקודם כבר לא עובד",
     "courses/removeJoinCode": "ההצטרפות בקוד בוטלה",
-    "courses/cancelJoinRequest": "הבקשה בוטלה"
+    "courses/cancelJoinRequest": "הבקשה בוטלה",
+    "avatar/upload": "תמונת הפרופיל עודכנה",
+    "avatar/remove": "תמונת הפרופיל הוסרה"
   },
   "failure": {
     "media/upload": "העלאת המדיה נכשלה",
@@ -55,6 +57,8 @@
     "courses/createJoinCode": "יצירת קוד ההצטרפות נכשלה",
     "courses/removeJoinCode": "ביטול קוד ההצטרפות נכשל",
     "courses/decideJoinRequest": "הטיפול בבקשת ההצטרפות נכשל",
-    "courses/cancelJoinRequest": "ביטול הבקשה נכשל"
+    "courses/cancelJoinRequest": "ביטול הבקשה נכשל",
+    "avatar/upload": "העלאת התמונה נכשלה",
+    "avatar/remove": "הסרת התמונה נכשלה"
   }
 }

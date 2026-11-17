@@ -17,7 +17,9 @@
     "saves/deletePlaylist": "List deleted",
     "courses/createJoinCode": "A new join code was created. The previous code no longer works",
     "courses/removeJoinCode": "Joining by code was turned off",
-    "courses/cancelJoinRequest": "Request cancelled"
+    "courses/cancelJoinRequest": "Request cancelled",
+    "avatar/upload": "Profile picture updated",
+    "avatar/remove": "Profile picture removed"
   },
   "failure": {
     "media/upload": "Uploading the media failed",
@@ -55,6 +57,8 @@
     "courses/createJoinCode": "Creating the join code failed",
     "courses/removeJoinCode": "Turning off the join code failed",
     "courses/decideJoinRequest": "Handling the join request failed",
-    "courses/cancelJoinRequest": "Cancelling the request failed"
+    "courses/cancelJoinRequest": "Cancelling the request failed",
+    "avatar/upload": "Uploading the picture failed",
+    "avatar/remove": "Removing the picture failed"
   }
 }

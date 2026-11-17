@@ -59,6 +59,9 @@
     "OLD_DOC_FORMAT": "The old .doc format cannot be summarised. Save the file as .docx and try again.",
     "DOCUMENT_SCANNED": "The file looks like a scanned document — images without a text layer. A summary needs a file text can be extracted from.",
     "DOCUMENT_TOO_SHORT": "Not enough readable text was found in the file ({{words}} words). At least {{min}} words are needed for a summary.",
-    "DOCUMENT_NO_TEXT": "No readable text was found in the file."
+    "DOCUMENT_NO_TEXT": "No readable text was found in the file.",
+    "AVATAR_REQUIRED": "No picture was chosen",
+    "AVATAR_NOT_IMAGE": "The file is not a picture. You can upload a JPG, PNG or WebP.",
+    "AVATAR_TOO_LARGE": "The picture is too large (up to {{maxMb}}MB)."
   }
 }

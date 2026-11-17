@@ -18,7 +18,9 @@
     "saves/deletePlaylist": "די רשימה איז אויסגעמעקט",
     "courses/createJoinCode": "אַ נײַער אָנשליס־קאָד איז געשאַפֿן. דער פֿריִערדיקער קאָד אַרבעט מער נישט",
     "courses/removeJoinCode": "דאָס אָנשליסן מיט אַ קאָד איז אָפּגעשטעלט",
-    "courses/cancelJoinRequest": "די בקשה איז בטל געמאַכט"
+    "courses/cancelJoinRequest": "די בקשה איז בטל געמאַכט",
+    "avatar/upload": "דאָס פּראָפֿיל־בילד איז דערהײַנטיקט",
+    "avatar/remove": "דאָס פּראָפֿיל־בילד איז אַוועקגענומען"
   },
   "failure": {
     "media/upload": "אַרויפֿלאָדן די מעדיע איז דורכגעפֿאַלן",
@@ -56,6 +58,8 @@
     "courses/createJoinCode": "שאַפֿן דעם אָנשליס־קאָד איז דורכגעפֿאַלן",
     "courses/removeJoinCode": "אָפּשטעלן דעם אָנשליס־קאָד איז דורכגעפֿאַלן",
     "courses/decideJoinRequest": "באַהאַנדלען די אָנשליס־בקשה איז דורכגעפֿאַלן",
-    "courses/cancelJoinRequest": "בטל מאַכן די בקשה איז דורכגעפֿאַלן"
+    "courses/cancelJoinRequest": "בטל מאַכן די בקשה איז דורכגעפֿאַלן",
+    "avatar/upload": "אַרויפֿלאָדן דאָס בילד איז דורכגעפֿאַלן",
+    "avatar/remove": "אַוועקנעמען דאָס בילד איז דורכגעפֿאַלן"
   }
 }

@@ -59,6 +59,9 @@
     "OLD_DOC_FORMAT": "El antiguo formato .doc no se puede resumir. Guarda el archivo como .docx e inténtalo de nuevo.",
     "DOCUMENT_SCANNED": "El archivo parece un documento escaneado: imágenes sin capa de texto. Un resumen necesita un archivo del que se pueda extraer el texto.",
     "DOCUMENT_TOO_SHORT": "No se encontró suficiente texto legible en el archivo ({{words}} palabras). Se necesitan al menos {{min}} palabras para un resumen.",
-    "DOCUMENT_NO_TEXT": "No se encontró texto legible en el archivo."
+    "DOCUMENT_NO_TEXT": "No se encontró texto legible en el archivo.",
+    "AVATAR_REQUIRED": "No se eligió ninguna imagen",
+    "AVATAR_NOT_IMAGE": "El archivo no es una imagen. Puedes subir un JPG, PNG o WebP.",
+    "AVATAR_TOO_LARGE": "La imagen es demasiado grande (hasta {{maxMb}} MB)."
   }
 }

@@ -8,6 +8,13 @@ export const login = createApiThunk("auth/login", "Login failed", async ({ email
   return await authApi.login({ email, password });
 });
 
+// A new profile picture, already shrunk to a square by the caller
+// (utilities/avatarImage.js). Typed avatar/*, not auth/*, so its outcome is a
+// toast — the notification middleware leaves auth/* to the sign-in forms.
+export const uploadAvatar = createApiThunk("avatar/upload", "Could not upload the picture", async (image) => {
+  return await authApi.uploadAvatar(image);
+});
+
 // The new account starts in the language the visitor is reading right now.
 export const register = createApiThunk("auth/register", "Registration failed", async ({ email, password, displayName, requestedRole }) => {
   return await authApi.register({ email, password, displayName, requestedRole, locale: i18n.language });

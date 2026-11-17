@@ -90,5 +90,12 @@
     "placeholder": "Smart deep search",
     "run": "Search",
     "none": "No matching results found."
+  },
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "night": "Good night",
+    "named": "{{greeting}}, <name>{{name}}</name>"
   }
 }

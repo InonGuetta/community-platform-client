@@ -9,5 +9,7 @@ export const selectAuthError = createSelector(selectAuthState, (auth) => auth.er
 export const selectIsAuthenticated = createSelector(selectAuthState, (auth) => !!auth.user);
 export const selectUserRole = createSelector(selectAuthState, (auth) => auth.user?.role ?? null);
 export const selectAuthInitialized = createSelector(selectAuthState, (auth) => auth.initialized);
+// A profile picture is on offer to an account just created here.
+export const selectAvatarOffer = createSelector(selectAuthState, (auth) => auth.offerAvatar);
 // The server could not be reached to ask who is signed in (PRD MOB-2).
 export const selectAuthUnreachable = createSelector(selectAuthState, (auth) => auth.unreachable);

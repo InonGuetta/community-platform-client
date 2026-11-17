@@ -17,7 +17,9 @@
     "saves/deletePlaylist": "Lista eliminada",
     "courses/createJoinCode": "Se creó un nuevo código de acceso. El código anterior ya no funciona",
     "courses/removeJoinCode": "Se desactivó el acceso por código",
-    "courses/cancelJoinRequest": "Solicitud cancelada"
+    "courses/cancelJoinRequest": "Solicitud cancelada",
+    "avatar/upload": "Foto de perfil actualizada",
+    "avatar/remove": "Foto de perfil eliminada"
   },
   "failure": {
     "media/upload": "No se pudo subir el contenido",
@@ -55,6 +57,8 @@
     "courses/createJoinCode": "No se pudo crear el código de acceso",
     "courses/removeJoinCode": "No se pudo desactivar el código de acceso",
     "courses/decideJoinRequest": "No se pudo gestionar la solicitud de acceso",
-    "courses/cancelJoinRequest": "No se pudo cancelar la solicitud"
+    "courses/cancelJoinRequest": "No se pudo cancelar la solicitud",
+    "avatar/upload": "No se pudo subir la foto",
+    "avatar/remove": "No se pudo eliminar la foto"
   }
 }

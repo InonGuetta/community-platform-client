@@ -48,6 +48,15 @@ export const authApi = {
   // and avatar alone when they are absent.
   setLocale: async (locale) => (await axiosInstance.patch("/auth/me", { locale })).data,
 
+  // A profile picture (migration 052): the image as multipart field "avatar".
+  // Answers with the account row, its avatar_url pointing at the new picture.
+  uploadAvatar: async (image) => {
+    const form = new FormData();
+    form.append("avatar", image, "avatar.jpg");
+    return (await axiosInstance.post("/auth/me/avatar", form)).data;
+  },
+  removeAvatar: async () => (await axiosInstance.delete("/auth/me/avatar")).data,
+
   // Asking for a lecturer or admin role from inside the app. Takes no id — the
   // server acts on the session's own user, which is what makes it safe to
   // expose to everyone.

@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { login, register, logout, resetPassword, requestRole } from "./authPost";
+import { login, register, logout, resetPassword, requestRole, uploadAvatar } from "./authPost";
 import { updateProfile, saveLocale } from "./authPut";
+import { removeAvatar } from "./authDelete";
 import { fetchMe } from "./authGet";
 import { statuses } from "../../../utilities/constant";
 import { ERROR_CODES } from "../../../utilities/apiError";
@@ -27,6 +28,10 @@ const initialState = {
   // Tracks the in-flight fetchMe request id; cleared whenever a login/register/logout
   // happens so a stale fetchMe response can't overwrite the freshly-set user.
   activeFetchMeRequestId: null,
+  // An account was just created here: offer it a profile picture once
+  // (features/Avatar/WelcomeAvatarDialog). Not kept across a reload — an offer,
+  // not a step that must be finished.
+  offerAvatar: false,
 };
 
 const authSlice = createSlice({
@@ -38,6 +43,9 @@ const authSlice = createSlice({
     },
     clearError(state) {
       state.error = null;
+    },
+    avatarOfferDismissed(state) {
+      state.offerAvatar = false;
     },
     // The cookie expired or was rejected mid-session. Deliberately a plain
     // reducer and not the logout thunk: that thunk POSTs to /auth/logout, which
@@ -83,6 +91,7 @@ const authSlice = createSlice({
         state.status = statuses.succeeded;
         state.user = action.payload.user;
         state.initialized = true;
+        state.offerAvatar = true;
       })
       .addCase(register.rejected, (state, action) => {
         state.loginStatus = statuses.failed;
@@ -155,6 +164,7 @@ const authSlice = createSlice({
         state.activeFetchMeRequestId = null;
       })
       .addCase(logout.fulfilled, (state) => {
+        state.offerAvatar = false;
         state.user = null;
         state.status = statuses.idle;
         state.loginStatus = statuses.idle;
@@ -166,6 +176,15 @@ const authSlice = createSlice({
         state.status = statuses.idle;
         state.loginStatus = statuses.idle;
         state.initialized = true;
+      })
+
+      // Only the picture changes: the row the avatar routes answer with lacks
+      // the role-request fields the banner reads, as updateProfile's does.
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        if (state.user) state.user.avatar_url = action.payload.avatar_url;
+      })
+      .addCase(removeAvatar.fulfilled, (state) => {
+        if (state.user) state.user.avatar_url = null;
       })
 
       // MERGED into the stored user, not assigned over it: the endpoint answers
@@ -180,5 +199,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { authInitialized, clearError, sessionExpired } = authSlice.actions;
+export const { authInitialized, clearError, sessionExpired, avatarOfferDismissed } = authSlice.actions;
 export default authSlice.reducer;

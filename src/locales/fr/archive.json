@@ -90,5 +90,12 @@
     "placeholder": "Recherche approfondie intelligente",
     "run": "Rechercher",
     "none": "Aucun résultat correspondant."
+  },
+  "greeting": {
+    "morning": "Bonjour",
+    "afternoon": "Bon après-midi",
+    "evening": "Bonsoir",
+    "night": "Bonne nuit",
+    "named": "{{greeting}}, <name>{{name}}</name>"
   }
 }

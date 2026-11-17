@@ -36,5 +36,22 @@
     "tryAgainLater": "Podrás enviar una nueva solicitud dentro de siete días.",
     "current": "Tu permiso actual: {{role}}. Una solicitud de un permiso superior requiere la aprobación de un administrador.",
     "send": "Enviar solicitud"
+  },
+  "avatar": {
+    "upload": "Subir una foto",
+    "change": "Cambiar la foto",
+    "remove": "Quitar la foto",
+    "uploading": "Subiendo…",
+    "hint": "JPG, PNG o WebP. La foto se recortará en un cuadrado.",
+    "notImage": "El archivo no se puede leer como imagen. Puedes subir un JPG, PNG o WebP.",
+    "label": "Foto de perfil",
+    "welcome": {
+      "title": "¡Te damos la bienvenida, {{name}}!",
+      "titleNoName": "¡Te damos la bienvenida!",
+      "body": "¿Quieres añadir una foto de perfil? Así te reconocerán los profesores y los compañeros en los cursos y las sesiones.",
+      "later": "Más tarde",
+      "done": "Listo",
+      "where": "Puedes añadir o cambiar tu foto cuando quieras en la página «Mi cuenta»."
+    }
   }
 }

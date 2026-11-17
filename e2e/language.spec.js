@@ -72,6 +72,9 @@ test("the interface changes language and direction, and the account remembers it
     await page.getByLabel(/^סיסמה/).fill(student.password);
     await page.getByRole("button", { name: "הרשמה", exact: true }).click();
     await expect(page).toHaveURL(/\/archive/);
+    // The profile picture offered to a new account — not this test's business.
+    await page.getByRole("dialog").getByRole("button", { name: "אחר כך", exact: true }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
     expect(await accountLocale(page)).toBe("he");
     expect(await drawerSide(page)).toBe("left");
   });

@@ -87,7 +87,7 @@ const UserDrawer = ({
 
       {/* Personal details header */}
       <Box sx={{ p: 2.5, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-        <Avatar sx={{ width: 64, height: 64, bgcolor: "transparent", color: "primary.main", border: "2px solid", borderColor: "primary.main", fontSize: 26, fontWeight: 700 }}>
+        <Avatar src={user?.avatar_url || undefined} sx={{ width: 64, height: 64, bgcolor: "transparent", color: "primary.main", border: "2px solid", borderColor: "primary.main", fontSize: 26, fontWeight: 700 }}>
           {avatarInitial(user)}
         </Avatar>
         <Typography fontWeight={800} color="primary.main" noWrap sx={{ maxWidth: "100%" }}>

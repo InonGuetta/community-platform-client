@@ -59,6 +59,9 @@
     "OLD_DOC_FORMAT": "L'ancien format .doc ne peut pas être résumé. Enregistrez le fichier en .docx et réessayez.",
     "DOCUMENT_SCANNED": "Le fichier ressemble à un document numérisé — des images sans couche de texte. Un résumé nécessite un fichier dont le texte peut être extrait.",
     "DOCUMENT_TOO_SHORT": "Pas assez de texte lisible dans le fichier ({{words}} mots). Il faut au moins {{min}} mots pour un résumé.",
-    "DOCUMENT_NO_TEXT": "Aucun texte lisible n'a été trouvé dans le fichier."
+    "DOCUMENT_NO_TEXT": "Aucun texte lisible n'a été trouvé dans le fichier.",
+    "AVATAR_REQUIRED": "Aucune image n'a été choisie",
+    "AVATAR_NOT_IMAGE": "Le fichier n'est pas une image. Vous pouvez téléverser un JPG, PNG ou WebP.",
+    "AVATAR_TOO_LARGE": "L'image est trop grande (jusqu'à {{maxMb}} Mo)."
   }
 }

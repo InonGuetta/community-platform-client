@@ -9,6 +9,7 @@ import { ColorModeContext } from "./theme/colorMode";
 import Navbar from "./components/layout/navbar/Navbar";
 import PendingRoleBanner from "./components/layout/navbar/PendingRoleBanner";
 import GlobalSnackbar from "./components/features/Notification/GlobalSnackbar";
+import WelcomeAvatarDialog from "./components/features/Avatar/WelcomeAvatarDialog";
 import ProtectedRoute from "./components/pages/auth/ProtectedRoute";
 import SignIn from "./components/pages/auth/SignIn";
 import SignUp from "./components/pages/auth/SignUp";
@@ -232,6 +233,8 @@ const App = () => {
           <Route path="*" element={<Navigate to="/archive" replace />} />
         </Routes>
         </PageTransition>
+        {/* A profile picture, offered once right after signing up. */}
+        <WelcomeAvatarDialog />
         <GlobalSnackbar />
       </ThemeProvider>
     </ColorModeContext.Provider>

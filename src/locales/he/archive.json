@@ -91,5 +91,12 @@
     "placeholder": "חיפוש עומק חכם",
     "run": "חיפוש",
     "none": "לא נמצאו תוצאות תואמות."
+  },
+  "greeting": {
+    "morning": "בוקר טוב",
+    "afternoon": "צהריים טובים",
+    "evening": "ערב טוב",
+    "night": "לילה טוב",
+    "named": "{{greeting}}, <name>{{name}}</name>"
   }
 }

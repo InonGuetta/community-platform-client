@@ -6,6 +6,7 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import UploadIcon from "@mui/icons-material/Upload";
 import ArchiveBrowser from "./componentsArchive/ArchiveBrowser";
+import ArchiveGreeting from "./componentsArchive/ArchiveGreeting";
 import UploadMedia from "../../features/UploadMedia/UploadMedia";
 import SmartSearch from "../../features/SmartSearch/SmartSearch";
 import useArchivePageController from "./useArchivePageController";
@@ -29,6 +30,8 @@ const ArchivePage = () => {
             them, and side by side they were wider than a phone in French. */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2, mb: 3 }}>
           <Typography variant="h4" fontWeight={800} color="primary">{t("title")}</Typography>
+          {/* Between the title and the button: good morning, by name. */}
+          <ArchiveGreeting name={user?.display_name?.trim()} />
           {canUpload && (
             <Button variant="contained" startIcon={<UploadIcon />} onClick={archive.handleOpenUpload}
               sx={{

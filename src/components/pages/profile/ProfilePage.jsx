@@ -4,7 +4,6 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Alert from "@mui/material/Alert";
@@ -14,6 +13,7 @@ import { roleLabels } from "../../../utilities/constant";
 import RoleRequestCard from "./RoleRequestCard";
 import EmailPreferencesCard from "./EmailPreferencesCard";
 import LanguageSwitcher from "../../layout/LanguageSwitcher";
+import AvatarEditor from "../../features/Avatar/AvatarEditor";
 import { useProfilePageController, MIN_PASSWORD_LENGTH } from "./useProfilePageController";
 import { useTranslation } from "react-i18next";
 
@@ -59,23 +59,21 @@ const ProfilePage = () => {
       <Box sx={{ display: "grid", gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent component="form" onSubmit={handleSaveProfile} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Avatar src={user.avatar_url || undefined} sx={{ width: 56, height: 56 }}>
-                {(user.display_name || user.email || "?").charAt(0)}
-              </Avatar>
-              <Box sx={{ minWidth: 0 }}>
-                {/* The email is shown and NOT editable. Changing an address is a
-                    re-verification flow, not a profile edit, and offering it as a
-                    text field would promise something this screen cannot do. */}
-                <Typography variant="body2" sx={{ wordBreak: "break-all" }}>{user.email}</Typography>
-                <Box sx={{ display: "flex", gap: 0.5, mt: 0.5, flexWrap: "wrap" }}>
-                  <Chip size="small" label={roleLabels[user.role] ?? user.role} />
-                  {user.email_verified ? (
-                    <Chip size="small" color="success" variant="outlined" icon={<VerifiedIcon />} label={t("verified")} />
-                  ) : (
-                    <Chip size="small" color="warning" variant="outlined" label={t("unverified")} />
-                  )}
-                </Box>
+            {/* The picture, and the means to upload, change or remove it. */}
+            <AvatarEditor />
+
+            <Box sx={{ minWidth: 0 }}>
+              {/* The email is shown and NOT editable. Changing an address is a
+                  re-verification flow, not a profile edit, and offering it as a
+                  text field would promise something this screen cannot do. */}
+              <Typography variant="body2" sx={{ wordBreak: "break-all" }}>{user.email}</Typography>
+              <Box sx={{ display: "flex", gap: 0.5, mt: 0.5, flexWrap: "wrap" }}>
+                <Chip size="small" label={roleLabels[user.role] ?? user.role} />
+                {user.email_verified ? (
+                  <Chip size="small" color="success" variant="outlined" icon={<VerifiedIcon />} label={t("verified")} />
+                ) : (
+                  <Chip size="small" color="warning" variant="outlined" label={t("unverified")} />
+                )}
               </Box>
             </Box>
 

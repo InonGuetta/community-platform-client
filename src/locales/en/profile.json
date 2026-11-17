@@ -41,8 +41,7 @@
     "upload": "Upload a picture",
     "change": "Change picture",
     "remove": "Remove picture",
-    "uploading": "Uploading…",
-    "hint": "JPG, PNG or WebP. The picture will be cropped to a square.",
+    "hint": "JPG, PNG or WebP. After choosing, you pick which part of the picture is shown.",
     "notImage": "The file cannot be read as a picture. You can upload a JPG, PNG or WebP.",
     "label": "Profile picture",
     "welcome": {
@@ -52,6 +51,24 @@
       "later": "Later",
       "done": "Done",
       "where": "You can add or change your picture at any time on the \"My account\" page."
+    },
+    "takePhoto": "Take a photo",
+    "crop": {
+      "title": "Edit your profile picture",
+      "hint": "Drag the picture to position it, and zoom in or out to choose the part shown in the circle.",
+      "area": "Crop area — drag or use the arrows to move, + and − to zoom",
+      "zoom": "Zoom",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "save": "Save picture"
+    },
+    "camera": {
+      "title": "Take a profile picture",
+      "starting": "Starting the camera…",
+      "capture": "Take photo",
+      "denied": "Access to the camera was blocked. You can allow it in your browser's settings, or upload a picture from your device.",
+      "none": "No camera was found on this device. You can upload a picture from your device.",
+      "failed": "The camera could not be started. You can upload a picture from your device."
     }
   }
 }

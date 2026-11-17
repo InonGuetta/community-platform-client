@@ -41,8 +41,7 @@
     "upload": "Subir una foto",
     "change": "Cambiar la foto",
     "remove": "Quitar la foto",
-    "uploading": "Subiendo…",
-    "hint": "JPG, PNG o WebP. La foto se recortará en un cuadrado.",
+    "hint": "JPG, PNG o WebP. Después de elegirla, eliges qué parte de la foto se muestra.",
     "notImage": "El archivo no se puede leer como imagen. Puedes subir un JPG, PNG o WebP.",
     "label": "Foto de perfil",
     "welcome": {
@@ -52,6 +51,24 @@
       "later": "Más tarde",
       "done": "Listo",
       "where": "Puedes añadir o cambiar tu foto cuando quieras en la página «Mi cuenta»."
+    },
+    "takePhoto": "Hacer una foto",
+    "crop": {
+      "title": "Editar la foto de perfil",
+      "hint": "Arrastra la foto para colocarla, y acerca o aleja para elegir la parte que se muestra en el círculo.",
+      "area": "Zona de recorte: arrastra o usa las flechas para mover, + y − para acercar",
+      "zoom": "Zoom",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "save": "Guardar la foto"
+    },
+    "camera": {
+      "title": "Hacer una foto de perfil",
+      "starting": "Iniciando la cámara…",
+      "capture": "Hacer la foto",
+      "denied": "Se bloqueó el acceso a la cámara. Puedes permitirlo en los ajustes del navegador, o subir una foto desde tu dispositivo.",
+      "none": "No se encontró ninguna cámara en este dispositivo. Puedes subir una foto desde tu dispositivo.",
+      "failed": "No se pudo iniciar la cámara. Puedes subir una foto desde tu dispositivo."
     }
   }
 }

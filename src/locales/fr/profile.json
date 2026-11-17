@@ -41,8 +41,7 @@
     "upload": "Téléverser une photo",
     "change": "Changer de photo",
     "remove": "Supprimer la photo",
-    "uploading": "Téléversement…",
-    "hint": "JPG, PNG ou WebP. La photo sera recadrée en carré.",
+    "hint": "JPG, PNG ou WebP. Après le choix, vous choisissez la partie de la photo qui sera affichée.",
     "notImage": "Le fichier ne peut pas être lu comme une image. Vous pouvez téléverser un JPG, PNG ou WebP.",
     "label": "Photo de profil",
     "welcome": {
@@ -52,6 +51,24 @@
       "later": "Plus tard",
       "done": "Terminé",
       "where": "Vous pouvez ajouter ou changer votre photo à tout moment sur la page « Mon compte »."
+    },
+    "takePhoto": "Prendre une photo",
+    "crop": {
+      "title": "Modifier la photo de profil",
+      "hint": "Faites glisser la photo pour la placer, et zoomez ou dézoomez pour choisir la partie affichée dans le cercle.",
+      "area": "Zone de recadrage — glisser ou flèches pour déplacer, + et − pour zoomer",
+      "zoom": "Zoom",
+      "zoomIn": "Zoomer",
+      "zoomOut": "Dézoomer",
+      "save": "Enregistrer la photo"
+    },
+    "camera": {
+      "title": "Prendre une photo de profil",
+      "starting": "Démarrage de la caméra…",
+      "capture": "Prendre la photo",
+      "denied": "L'accès à la caméra a été bloqué. Vous pouvez l'autoriser dans les paramètres du navigateur, ou téléverser une photo de votre appareil.",
+      "none": "Aucune caméra n'a été trouvée sur cet appareil. Vous pouvez téléverser une photo de votre appareil.",
+      "failed": "La caméra n'a pas pu démarrer. Vous pouvez téléverser une photo de votre appareil."
     }
   }
 }

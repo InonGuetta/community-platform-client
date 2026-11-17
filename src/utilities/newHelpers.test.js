@@ -1,7 +1,9 @@
 import { test, expect, describe } from "vitest";
 import { partOfDay } from "./greeting";
 import { questionsIn } from "./suggestedQuestions";
-import { squareCrop, looksLikePicture, MAX_SOURCE_BYTES } from "./avatarImage";
+import {
+  looksLikePicture, MAX_SOURCE_BYTES, coverScale, clampOffset, centredOffset, zoomAbout, sourceRect, MAX_ZOOM,
+} from "./avatarImage";
 
 describe("partOfDay — the archive's greeting", () => {
   const at = (hour, minute = 0) => new Date(2026, 10, 17, hour, minute);
@@ -38,11 +40,35 @@ describe("questionsIn — a lesson's suggested questions in the reader's languag
   });
 });
 
-describe("the profile picture's shape", () => {
-  test("the middle square of a picture of any shape", () => {
-    expect(squareCrop(400, 300)).toEqual({ sx: 50, sy: 0, size: 300 });
-    expect(squareCrop(300, 400)).toEqual({ sx: 0, sy: 50, size: 300 });
-    expect(squareCrop(256, 256)).toEqual({ sx: 0, sy: 0, size: 256 });
+// The crop editor's arithmetic: a 400×300 picture in a 240px viewport.
+describe("framing the profile picture", () => {
+  const picture = { width: 400, height: 300, view: 240 };
+
+  test("at zoom 1 the picture just covers the viewport, centred", () => {
+    expect(coverScale(400, 300, 240)).toBe(0.8);
+    expect(centredOffset({ ...picture, zoom: 1 })).toEqual({ x: -40, y: 0 });
+    // Centred and unzoomed is the middle square of the original.
+    expect(sourceRect({ x: -40, y: 0 }, { ...picture, zoom: 1 })).toEqual({ sx: 50, sy: 0, size: 300 });
+  });
+
+  test("the picture cannot be dragged off the circle", () => {
+    expect(clampOffset({ x: 50, y: 30 }, { ...picture, zoom: 1 })).toEqual({ x: 0, y: 0 });
+    expect(clampOffset({ x: -500, y: -500 }, { ...picture, zoom: 1 })).toEqual({ x: -80, y: 0 });
+  });
+
+  test("dragged to an edge, that edge's square is what is saved", () => {
+    expect(sourceRect({ x: 0, y: 0 }, { ...picture, zoom: 1 })).toEqual({ sx: 0, sy: 0, size: 300 });
+    expect(sourceRect({ x: -80, y: 0 }, { ...picture, zoom: 1 })).toEqual({ sx: 100, sy: 0, size: 300 });
+  });
+
+  test("zooming keeps the point under the finger still, and stays in bounds", () => {
+    const { zoom, offset } = zoomAbout({ x: -40, y: 0 }, 1, 2, { x: 120, y: 120 }, picture);
+    expect(zoom).toBe(2);
+    // About the centre: the centre of the picture stays at the centre.
+    expect(offset).toEqual({ x: -200, y: -120 });
+    expect(sourceRect(offset, { ...picture, zoom })).toEqual({ sx: 125, sy: 75, size: 150 });
+    expect(zoomAbout({ x: -40, y: 0 }, 1, 99, { x: 120, y: 120 }, picture).zoom).toBe(MAX_ZOOM);
+    expect(zoomAbout({ x: -40, y: 0 }, 1, 0.2, { x: 120, y: 120 }, picture).zoom).toBe(1);
   });
   test("only a picture-sized picture is worth decoding", () => {
     expect(looksLikePicture(new Blob(["x"], { type: "image/png" }))).toBe(true);

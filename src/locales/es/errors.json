@@ -62,6 +62,15 @@
     "DOCUMENT_NO_TEXT": "No se encontró texto legible en el archivo.",
     "AVATAR_REQUIRED": "No se eligió ninguna imagen",
     "AVATAR_NOT_IMAGE": "El archivo no es una imagen. Puedes subir un JPG, PNG o WebP.",
-    "AVATAR_TOO_LARGE": "La imagen es demasiado grande (hasta {{maxMb}} MB)."
+    "AVATAR_TOO_LARGE": "La imagen es demasiado grande (hasta {{maxMb}} MB).",
+    "PHONE_INVALID": "El número de teléfono no es válido",
+    "PHONE_NOT_MOBILE": "Hace falta un número de móvil: no se puede enviar un SMS a un fijo",
+    "PHONE_CODE_INVALID": "El código es incorrecto. Quedan {{attemptsLeft}} intentos.",
+    "PHONE_CODE_EXPIRED": "El código ha caducado. Puedes pedir uno nuevo.",
+    "PHONE_CODE_LIMIT": "Demasiados intentos. Puedes pedir un código nuevo.",
+    "PHONE_SEND_LIMIT": "Se enviaron demasiados códigos. Inténtalo de nuevo dentro de {{minutes}} minutos.",
+    "PHONE_NOT_VERIFIED": "Añade y verifica un número de teléfono antes de activar las notificaciones por SMS",
+    "SMS_FAILED": "No se puede enviar un SMS en este momento. Inténtalo de nuevo en un momento.",
+    "SMS_BUDGET_EXCEEDED": "Se alcanzó el límite mensual de coste de SMS. Se podrá volver a enviar el mes que viene."
   }
 }

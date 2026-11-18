@@ -62,6 +62,15 @@
     "DOCUMENT_NO_TEXT": "Aucun texte lisible n'a été trouvé dans le fichier.",
     "AVATAR_REQUIRED": "Aucune image n'a été choisie",
     "AVATAR_NOT_IMAGE": "Le fichier n'est pas une image. Vous pouvez téléverser un JPG, PNG ou WebP.",
-    "AVATAR_TOO_LARGE": "L'image est trop grande (jusqu'à {{maxMb}} Mo)."
+    "AVATAR_TOO_LARGE": "L'image est trop grande (jusqu'à {{maxMb}} Mo).",
+    "PHONE_INVALID": "Le numéro de téléphone n'est pas valide",
+    "PHONE_NOT_MOBILE": "Il faut un numéro de mobile — un SMS ne peut pas être envoyé à un fixe",
+    "PHONE_CODE_INVALID": "Le code est erroné. Il reste {{attemptsLeft}} essais.",
+    "PHONE_CODE_EXPIRED": "Le code a expiré. Vous pouvez en demander un nouveau.",
+    "PHONE_CODE_LIMIT": "Trop d'essais. Vous pouvez demander un nouveau code.",
+    "PHONE_SEND_LIMIT": "Trop de codes ont été envoyés. Réessayez dans {{minutes}} minutes.",
+    "PHONE_NOT_VERIFIED": "Ajoutez et vérifiez un numéro de téléphone avant d'activer les notifications par SMS",
+    "SMS_FAILED": "Impossible d'envoyer un SMS pour le moment. Réessayez dans un instant.",
+    "SMS_BUDGET_EXCEEDED": "Le plafond mensuel de coût des SMS est atteint. L'envoi sera de nouveau possible le mois prochain."
   }
 }

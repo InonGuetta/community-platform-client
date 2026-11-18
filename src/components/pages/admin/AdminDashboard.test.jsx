@@ -16,6 +16,7 @@ vi.mock("../../../api/adminApi", () => ({
   adminApi: { overview: (...args) => overview(...args), reconcile: (...args) => reconcile(...args) },
 }));
 vi.mock("./componentsAdmin/AiUsagePanel", () => ({ default: () => <div data-testid="ai-usage" /> }));
+vi.mock("./componentsAdmin/SmsUsagePanel", () => ({ default: () => <div data-testid="sms-usage" /> }));
 vi.mock("./componentsAdmin/TagProposals", () => ({ default: () => <div data-testid="tag-proposals" /> }));
 
 import AdminDashboard from "./AdminDashboard";

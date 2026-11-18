@@ -11,6 +11,7 @@ import PipelineTrouble from "./componentsAdmin/PipelineTrouble";
 import DonationsLedger from "./componentsAdmin/DonationsLedger";
 import TagProposals from "./componentsAdmin/TagProposals";
 import AiUsagePanel from "./componentsAdmin/AiUsagePanel";
+import SmsUsagePanel from "./componentsAdmin/SmsUsagePanel";
 import { useAdminDashboardController } from "./useAdminDashboardController";
 import { useTranslation } from "react-i18next";
 
@@ -57,6 +58,13 @@ const AdminDashboard = () => {
         <Grid item xs={12}>
           <Paper sx={{ p: 3 }}>
             <AiUsagePanel />
+          </Paper>
+        </Grid>
+
+        {/* And SMS — codes and notifications — against its own cap (AUTH-13). */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3 }}>
+            <SmsUsagePanel />
           </Paper>
         </Grid>
 

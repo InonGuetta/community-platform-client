@@ -121,5 +121,19 @@
     "activeUsers": "Usuarios activos",
     "totalMedia": "Total de contenido",
     "totalDonations": "Total de donaciones"
+  },
+  "sms": {
+    "title": "Coste de SMS este mes",
+    "loadFailed": "No se pueden cargar las cifras de SMS.",
+    "notConfigured": "No hay ningún proveedor de SMS configurado: los códigos de verificación y las notificaciones se escriben en el registro del servidor, no se envían. Para enviarlos, define TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y SMS_SENDER en el archivo .env del servidor.",
+    "estimate": "Una estimación: los segmentos por el precio configurado (SMS_PRICE_PER_SEGMENT_USD). La factura del proveedor es la cifra definitiva.",
+    "capReached": "Se alcanzó el límite mensual. No se enviarán SMS — ni siquiera códigos de verificación — hasta el mes que viene.",
+    "noCap": "No hay un límite mensual definido. Puedes definirlo con SMS_MONTHLY_CAP_USD en el archivo .env del servidor.",
+    "unused": "Este mes todavía no se ha enviado ningún SMS.",
+    "tableLabel": "Coste de SMS por tipo",
+    "verification": "Códigos de verificación",
+    "messages": "Mensajes",
+    "segments": "Segmentos",
+    "failed": "Fallidos"
   }
 }

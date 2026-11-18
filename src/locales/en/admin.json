@@ -121,5 +121,19 @@
     "activeUsers": "Active users",
     "totalMedia": "Total media",
     "totalDonations": "Total donations"
+  },
+  "sms": {
+    "title": "SMS cost this month",
+    "loadFailed": "The SMS figures can't be loaded.",
+    "notConfigured": "No SMS provider is set up: verification codes and notifications are written to the server's log, not sent. To send them, set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and SMS_SENDER in the server's .env file.",
+    "estimate": "An estimate: segments times the configured price (SMS_PRICE_PER_SEGMENT_USD). The provider's invoice is the final figure.",
+    "capReached": "The monthly cap has been reached. No SMS will be sent — not even verification codes — until next month.",
+    "noCap": "No monthly cap is set. You can set one with SMS_MONTHLY_CAP_USD in the server's .env file.",
+    "unused": "No SMS has been sent this month yet.",
+    "tableLabel": "SMS cost by kind",
+    "verification": "Verification codes",
+    "messages": "Messages",
+    "segments": "Segments",
+    "failed": "Failed"
   }
 }

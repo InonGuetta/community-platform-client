@@ -36,5 +36,6 @@
     "role": "Rol",
     "status": "Estado",
     "actions": "Acciones"
-  }
+  },
+  "phoneMasked": "Teléfono verificado: {{phone}}"
 }

@@ -2,6 +2,7 @@ import TableBody from "@mui/material/TableBody";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Chip from "@mui/material/Chip";
+import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
@@ -34,7 +35,16 @@ const UsersTableContent = ({ users, onEdit, onDelete, onToggleActive, canToggleA
       <TableRow key={user.id} hover sx={{ opacity: user.is_active ? 1 : 0.4 }}>
         <TableCell>{user.id}</TableCell>
         <TableCell>{user.display_name || "—"}</TableCell>
-        <TableCell>{user.email}</TableCell>
+        <TableCell>
+          {user.email}
+          {/* A verified number, masked by the server (AUTH-13): whether the
+              member has one, never the number itself. */}
+          {user.phone_masked && (
+            <Box component="span" dir="ltr" sx={{ display: "block", color: "text.secondary", fontSize: "0.75rem" }} aria-label={t("phoneMasked", { phone: user.phone_masked })}>
+              {user.phone_masked}
+            </Box>
+          )}
+        </TableCell>
         <TableCell>
           <Chip label={roleLabels[user.role] || user.role} color={ROLE_COLOR[user.role]} size="small" />
         </TableCell>

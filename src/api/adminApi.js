@@ -5,6 +5,8 @@ export const adminApi = {
   // This month's estimated OpenAI spend, by purpose and by day, and the cap
   // (null when none is set) — PRD ADM-1, NFR-3.
   aiUsage: async () => (await axiosInstance.get("/admin/ai-usage")).data,
+  // SMS this month — codes and notifications — against its cap (PRD AUTH-13).
+  smsUsage: async () => (await axiosInstance.get("/admin/sms-usage")).data,
   queueStatus: async () => (await axiosInstance.get("/admin/queue-status")).data,
   systemHealth: async () => (await axiosInstance.get("/admin/system-health")).data,
 

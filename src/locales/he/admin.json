@@ -121,5 +121,19 @@
     "activeUsers": "משתמשים פעילים",
     "totalMedia": "סה״כ מדיה",
     "totalDonations": "סה״כ תרומות"
+  },
+  "sms": {
+    "title": "עלות SMS החודש",
+    "loadFailed": "לא ניתן לטעון את נתוני ה־SMS.",
+    "notConfigured": "לא הוגדר ספק SMS: קודי אימות והתראות נכתבים ללוג של השרת ולא נשלחים. כדי לשלוח, מגדירים את TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN ו־SMS_SENDER בקובץ ‎.env של השרת.",
+    "estimate": "הערכה: מספר המקטעים כפול המחיר שהוגדר (SMS_PRICE_PER_SEGMENT_USD). החשבונית של הספק היא המספר הסופי.",
+    "capReached": "התקרה החודשית הושגה. לא יישלחו SMS, גם לא קודי אימות, עד החודש הבא.",
+    "noCap": "לא הוגדרה תקרה חודשית. אפשר להגדיר אותה במשתנה SMS_MONTHLY_CAP_USD בקובץ ‎.env של השרת.",
+    "unused": "החודש עוד לא נשלחו SMS.",
+    "tableLabel": "עלות SMS לפי סוג",
+    "verification": "קודי אימות",
+    "messages": "הודעות",
+    "segments": "מקטעים",
+    "failed": "נכשלו"
   }
 }

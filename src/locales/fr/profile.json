@@ -21,12 +21,20 @@
     "failed": "L'enregistrement des informations a échoué"
   },
   "email": {
-    "title": "Notifications par e-mail",
-    "intro": "Toutes les notifications apparaissent dans la cloche en haut de la page. Ici, vous choisissez celles qui arrivent aussi par e-mail.",
+    "title": "Notifications par e-mail et par SMS",
+    "intro": "Toutes les notifications apparaissent dans la cloche en haut de la page. Choisissez ici lesquelles arrivent aussi par e-mail ou par SMS.",
     "loadFailed": "Vos préférences ne peuvent pas être chargées pour le moment.",
     "allOff": "Vous avez demandé à ne plus recevoir aucun e-mail de la plateforme.",
     "restore": "Réactiver les e-mails",
-    "saveFailed": "L'enregistrement de la préférence a échoué"
+    "saveFailed": "L'enregistrement de la préférence a échoué",
+    "channelEmail": "E-mail",
+    "channelSms": "SMS",
+    "switchEmail": "{{category}} — par e-mail",
+    "switchSms": "{{category}} — par SMS",
+    "noSms": "Non envoyé par SMS",
+    "smsNeedsPhone": "Pour recevoir des notifications par SMS, ajoutez et vérifiez un numéro de téléphone dans la carte « Numéro de téléphone ».",
+    "quietHours": "Aucun SMS n'est envoyé entre 22 h et 7 h, sauf pour signaler qu'une séance a commencé.",
+    "smsAllOff": "Désactiver tous les SMS"
   },
   "role": {
     "title": "Demande d'autorisation",

@@ -21,12 +21,20 @@
     "failed": "Saving the details failed"
   },
   "email": {
-    "title": "Email notifications",
-    "intro": "Every notification appears in the bell at the top of the page. Here you choose which ones also arrive by email.",
+    "title": "Email and SMS notifications",
+    "intro": "Every notification appears in the bell at the top of the page. Here you choose which of them also arrive by email or by SMS.",
     "loadFailed": "Your preferences cannot be loaded right now.",
     "allOff": "You asked to stop all email from the platform.",
     "restore": "Turn email back on",
-    "saveFailed": "Saving the preference failed"
+    "saveFailed": "Saving the preference failed",
+    "channelEmail": "Email",
+    "channelSms": "SMS",
+    "switchEmail": "{{category}} — by email",
+    "switchSms": "{{category}} — by SMS",
+    "noSms": "Not sent by SMS",
+    "smsNeedsPhone": "To get notifications by SMS, add and verify a phone number in the \"Phone number\" card.",
+    "quietHours": "No SMS is sent between 22:00 and 07:00, except to say a session has started.",
+    "smsAllOff": "Turn off all SMS"
   },
   "role": {
     "title": "Permission request",

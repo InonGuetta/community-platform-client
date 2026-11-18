@@ -14,11 +14,14 @@ export const notificationsApi = {
     await axiosInstance.post("/notifications/read-all");
   },
 
-  // NOTIF-6. Which mail this user can get, and which of it is switched off.
+  // NOTIF-6. Which mail this user can get, and which of it is switched off —
+  // and, per category, whether it also goes by SMS (`sms`: a boolean, or null
+  // where no SMS goes; `phoneVerified`), migration 054.
   preferences: async () => (await axiosInstance.get("/notifications/preferences")).data,
 
-  setPreference: async (category, email) => {
-    await axiosInstance.put("/notifications/preferences", { category, email });
+  // One channel at a time: "email" or "sms".
+  setPreference: async (category, channel, on) => {
+    await axiosInstance.put("/notifications/preferences", { category, [channel]: on });
   },
 
   // From the link in a mail — no session needed; the token is the credential.

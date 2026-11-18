@@ -11,7 +11,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import { roleLabels } from "../../../utilities/constant";
 import RoleRequestCard from "./RoleRequestCard";
-import EmailPreferencesCard from "./EmailPreferencesCard";
+import NotificationPreferencesCard from "./NotificationPreferencesCard";
 import PhoneCard from "./PhoneCard";
 import LanguageSwitcher from "../../layout/LanguageSwitcher";
 import AvatarEditor from "../../features/Avatar/AvatarEditor";
@@ -117,7 +117,7 @@ const ProfilePage = () => {
         <PhoneCard />
 
         {/* NOTIF-6 — the place every notification mail's footer points back to. */}
-        <EmailPreferencesCard />
+        <NotificationPreferencesCard />
 
         <Card sx={{ borderRadius: 2 }}>
           <CardContent component="form" onSubmit={handleChangePassword} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

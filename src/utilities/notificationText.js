@@ -106,6 +106,14 @@ export const describeNotification = (notification) => {
         body: `"${payload.title || t("defaults.aLesson")}"${payload.courseTitle ? ` · ${payload.courseTitle}` : ""}`,
         href: lessonHref(payload),
       };
+    // The number went to the account that proved it; the payload holds it
+    // masked ("+972•••••1234"), shown left to right inside the sentence.
+    case "phone_moved":
+      return {
+        title: t("types.phone_moved.title"),
+        body: t("types.phone_moved.body", { phone: `⁦${payload.phone || ""}⁩` }),
+        href: "/profile",
+      };
     default:
       return { title: t("types.unknown.title"), body: "", href: null };
   }

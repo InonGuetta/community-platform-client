@@ -23,6 +23,10 @@
     "enrolments": {
       "label": "Réponses aux demandes d'inscription",
       "help": "Quand l'enseignant accepte ou refuse votre demande d'inscription à un cours"
+    },
+    "account": {
+      "label": "Mon compte",
+      "help": "Quand quelque chose arrive à votre compte — par exemple, votre numéro est vérifié sur un autre compte"
     }
   },
   "withHost": " avec {{name}}",
@@ -73,6 +77,10 @@
     },
     "new_lesson": {
       "title": "Nouveau cours dans un cursus"
+    },
+    "phone_moved": {
+      "title": "Numéro de téléphone retiré de votre compte",
+      "body": "Le numéro {{phone}} a été vérifié sur un autre compte. Les notifications par SMS sont désactivées"
     },
     "unknown": {
       "title": "Notification"

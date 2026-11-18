@@ -23,6 +23,10 @@
     "enrolments": {
       "label": "Respuestas a solicitudes de acceso",
       "help": "Cuando el profesor aprueba o rechaza tu solicitud para unirte a un curso"
+    },
+    "account": {
+      "label": "Mi cuenta",
+      "help": "Cuando pasa algo en tu cuenta — por ejemplo, tu número se verifica en otra cuenta"
     }
   },
   "withHost": " con {{name}}",
@@ -73,6 +77,10 @@
     },
     "new_lesson": {
       "title": "Clase nueva en un curso"
+    },
+    "phone_moved": {
+      "title": "Se quitó el número de teléfono de tu cuenta",
+      "body": "El número {{phone}} se verificó en otra cuenta. Las notificaciones por SMS están desactivadas"
     },
     "unknown": {
       "title": "Notificación"

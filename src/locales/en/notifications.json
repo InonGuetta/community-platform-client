@@ -23,6 +23,10 @@
     "enrolments": {
       "label": "Answers to join requests",
       "help": "When the lecturer approves or refuses your request to join a course"
+    },
+    "account": {
+      "label": "My account",
+      "help": "When something happens to your account — for example, your phone number is verified on another account"
     }
   },
   "withHost": " with {{name}}",
@@ -73,6 +77,10 @@
     },
     "new_lesson": {
       "title": "New lesson in a course"
+    },
+    "phone_moved": {
+      "title": "Phone number removed from your account",
+      "body": "The number {{phone}} was verified on another account. SMS notifications are off"
     },
     "unknown": {
       "title": "Notification"

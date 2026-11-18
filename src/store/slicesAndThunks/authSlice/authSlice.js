@@ -11,6 +11,7 @@ import { ERROR_CODES } from "../../../utilities/apiError";
 const PHONE_FIELDS = ["phone", "phone_verified_at", "phone_pending", "phone_pending_expires_at"];
 const phoneFieldsOf = (source) =>
   Object.fromEntries(PHONE_FIELDS.filter((key) => source && key in source).map((key) => [key, source[key]]));
+const ENDED_CODE = new Set(["PHONE_CODE_LIMIT", "PHONE_CODE_EXPIRED"]);
 const mergePhone = (state, action) => {
   if (state.user) Object.assign(state.user, phoneFieldsOf(action.payload));
 };
@@ -202,6 +203,14 @@ const authSlice = createSlice({
       .addCase(startPhoneVerification.fulfilled, mergePhone)
       .addCase(verifyPhone.fulfilled, mergePhone)
       .addCase(removePhone.fulfilled, mergePhone)
+      // Too many attempts, or expired: the server has deleted the waiting code,
+      // so the card stops offering to type it.
+      .addCase(verifyPhone.rejected, (state, action) => {
+        if (state.user && ENDED_CODE.has(action.payload?.code)) {
+          state.user.phone_pending = null;
+          state.user.phone_pending_expires_at = null;
+        }
+      })
 
       // MERGED into the stored user, not assigned over it: the endpoint answers
       // with the columns it touched, and replacing would drop avatar_url and

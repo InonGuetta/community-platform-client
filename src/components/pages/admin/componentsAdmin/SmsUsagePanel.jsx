@@ -40,6 +40,7 @@ const SmsUsagePanel = () => {
         <Button size="small" onClick={reload} disabled={status === "loading"}>{t("ai.refresh")}</Button>
       </Box>
 
+      {status === "failed" && <Alert severity="warning">{t("sms.loadFailed")}</Alert>}
       {!report.configured && <Alert severity="info">{t("sms.notConfigured")}</Alert>}
 
       <Box>

@@ -15,6 +15,8 @@ export const formatPhone = (e164) => {
 export const CODE_LENGTH = 6;
 export const codeDigits = (value) => String(value ?? "").replace(/\D/g, "").slice(0, CODE_LENGTH);
 
-// How long after one code another may be asked for — the server's
-// RESEND_AFTER_SECONDS (services/servicesPhone.js), which refuses sooner.
+// How long after one code another may be asked for, and how long a code lasts
+// — the server's RESEND_AFTER_SECONDS and CODE_TTL_MINUTES
+// (services/servicesPhone.js), which decide; these only time the countdown.
 export const RESEND_AFTER_SECONDS = 60;
+export const CODE_TTL_MINUTES = 10;

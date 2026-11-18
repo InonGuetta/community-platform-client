@@ -42,7 +42,8 @@ const PhoneCodeDialog = ({ open, phone, code, error, verifying, sending, resendI
               inputMode: "numeric",
               autoComplete: "one-time-code",
               pattern: "[0-9]*",
-              maxLength: CODE_LENGTH + 4,
+              // Room for a whole SMS pasted in: codeDigits keeps the six digits.
+              maxLength: 200,
               dir: "ltr",
               style: { textAlign: "center", fontSize: "1.6rem", letterSpacing: "0.5em", fontVariantNumeric: "tabular-nums" },
             }}

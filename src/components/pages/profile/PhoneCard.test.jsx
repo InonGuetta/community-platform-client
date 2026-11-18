@@ -130,3 +130,32 @@ it("a profile save keeps the phone the PATCH does not return", () => {
   expect(store.getState().auth.user.display_name).toBe("דנה כהן");
   expect(store.getState().auth.user.phone).toBe(PHONE);
 });
+
+it("a whole SMS pasted into the field is read for its six digits", async () => {
+  const user = userEvent.setup();
+  setUp(WAITING);
+  await user.click(screen.getByRole("button", { name: "הזנת הקוד" }));
+  const field = within(await screen.findByRole("dialog")).getByLabelText("קוד אימות");
+  await user.click(field);
+  await user.paste("קוד האימות שלך: 481516. אין למסור אותו לאף אחד.");
+  await waitFor(() => expect(authApi.verifyPhone).toHaveBeenCalledWith("481516"));
+  expect(authApi.verifyPhone).toHaveBeenCalledTimes(1);
+});
+
+it("a code the server ended (too many attempts) is no longer offered", async () => {
+  authApi.verifyPhone.mockRejectedValue(Object.assign(new Error("x"), { response: { status: 429, data: { message: "x", code: "PHONE_CODE_LIMIT" } } }));
+  const user = userEvent.setup();
+  const store = setUp(WAITING);
+  await user.click(screen.getByRole("button", { name: "הזנת הקוד" }));
+  await user.type(within(await screen.findByRole("dialog")).getByLabelText("קוד אימות"), "000000");
+  await waitFor(() => expect(store.getState().auth.user.phone_pending).toBeNull());
+});
+
+it("the minute before another code counts from when the waiting one was sent, even after a reload", async () => {
+  const user = userEvent.setup();
+  // Sent 30 seconds ago: its expiry is ten minutes after that.
+  setUp({ ...WAITING, phone_pending_expires_at: new Date(Date.now() - 30_000 + 10 * 60 * 1000).toISOString() });
+  await user.click(screen.getByRole("button", { name: "הזנת הקוד" }));
+  const resend = within(await screen.findByRole("dialog")).getByRole("button", { name: /קוד חדש בעוד (2\d|30|31) שנ׳/ });
+  expect(resend.disabled).toBe(true);
+});

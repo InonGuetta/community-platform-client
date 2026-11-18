@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../../../store/selectors/authSelectors";
 import { startPhoneVerification, verifyPhone } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { removePhone } from "../../../store/slicesAndThunks/authSlice/authDelete";
 import { messageForError } from "../../../utilities/apiError";
-import { CODE_LENGTH, RESEND_AFTER_SECONDS, codeDigits } from "../../../utilities/phone";
+import { CODE_LENGTH, CODE_TTL_MINUTES, RESEND_AFTER_SECONDS, codeDigits } from "../../../utilities/phone";
 import i18n from "../../../i18n/i18n";
 
 // The phone card on the account page (PRD AUTH-13): a number typed, a code sent
 // to it by SMS, the code typed back — and the verified number changed or
-// removed. The account's phone lives in the auth slice (fetchMe, and every
-// phone/* answer merged in), because the notification preferences read it too.
+// removed. The account's phone lives in the auth slice (fetchMe, sign-in, and
+// every phone/* answer merged in), because the notification preferences read
+// it too.
 //
 // A refusal is said where it happened: under the number (not a mobile, too many
 // codes) or in the code dialog (wrong code, N attempts left, expired). Success
@@ -19,9 +20,9 @@ export const usePhoneCard = () => {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const phone = user?.phone ?? null;
-  // A number waiting for its code — only while that code is still good.
   const pendingExpiresAt = user?.phone_pending_expires_at ? Date.parse(user.phone_pending_expires_at) : 0;
   const [now, setNow] = useState(() => Date.now());
+  // A number waiting for its code — only while that code is still good.
   const pending = user?.phone_pending && pendingExpiresAt > now ? user.phone_pending : null;
 
   // Typing a number: the first one, or a change of the verified one.
@@ -30,26 +31,40 @@ export const usePhoneCard = () => {
   const [numberError, setNumberError] = useState(null);
   const [sending, setSending] = useState(false);
 
-  // The code dialog.
+  // The code dialog — with the number it is about held here, so a code that
+  // expires while the dialog is open still names the number and can be sent
+  // again.
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogPhone, setDialogPhone] = useState(null);
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState(null);
   const [verifying, setVerifying] = useState(false);
-  const [resendAt, setResendAt] = useState(0);
+  // A ref as well as state: the sixth digit and an Enter in the same moment
+  // must not send the code twice — a wrong one would cost two attempts.
+  const verifyingRef = useRef(false);
 
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [removing, setRemoving] = useState(false);
 
-  // A clock for the resend countdown and the waiting number's expiry — ticking
-  // only while there is something to count down.
-  const counting = (dialogOpen && resendAt > now) || Boolean(user?.phone_pending && pendingExpiresAt > now);
+  // When another code may be asked for: the server allows one a minute. Its
+  // waiting code says when it was sent (expiry less the code's lifetime), so
+  // the countdown survives a reload.
+  const sentAt = pendingExpiresAt ? pendingExpiresAt - CODE_TTL_MINUTES * 60 * 1000 : 0;
+  const resendAt = sentAt ? sentAt + RESEND_AFTER_SECONDS * 1000 : 0;
+  const resendIn = Math.max(0, Math.ceil((resendAt - now) / 1000));
+
+  // A clock only while the dialog counts down…
   useEffect(() => {
-    if (!counting) return undefined;
+    if (!dialogOpen || resendIn === 0) return undefined;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [counting]);
-
-  const resendIn = Math.max(0, Math.ceil((resendAt - now) / 1000));
+  }, [dialogOpen, resendIn]);
+  // …and one tick when the waiting code expires, to stop offering it.
+  useEffect(() => {
+    if (!pendingExpiresAt || pendingExpiresAt <= Date.now()) return undefined;
+    const id = setTimeout(() => setNow(Date.now()), pendingExpiresAt - Date.now() + 50);
+    return () => clearTimeout(id);
+  }, [pendingExpiresAt]);
 
   const startEdit = () => {
     setEditing(true);
@@ -61,13 +76,15 @@ export const usePhoneCard = () => {
     setNumberError(null);
   };
 
-  const openDialog = () => {
+  const openDialog = (forPhone = pending) => {
+    setDialogPhone(forPhone);
     setCode("");
     setCodeError(null);
+    setNow(Date.now());
     setDialogOpen(true);
   };
   const closeDialog = () => {
-    if (verifying) return;
+    if (verifyingRef.current) return;
     setDialogOpen(false);
   };
 
@@ -76,11 +93,11 @@ export const usePhoneCard = () => {
     setSending(true);
     report(null);
     try {
-      await dispatch(startPhoneVerification(value)).unwrap();
-      setResendAt(Date.now() + RESEND_AFTER_SECONDS * 1000);
+      const state = await dispatch(startPhoneVerification(value)).unwrap();
       setNow(Date.now());
       setCode("");
-      if (!fromDialog) openDialog();
+      if (fromDialog) setDialogPhone(state.phone_pending ?? value);
+      else openDialog(state.phone_pending ?? value);
       return true;
     } catch (rejection) {
       report(messageForError(rejection, i18n.t("profile:phone.sendFailed")));
@@ -97,13 +114,14 @@ export const usePhoneCard = () => {
   };
 
   const resend = async () => {
-    if (!pending || resendIn > 0 || sending) return;
-    await sendTo(pending, { fromDialog: true });
+    if (!dialogPhone || resendIn > 0 || sending) return;
+    await sendTo(dialogPhone, { fromDialog: true });
   };
 
   const verify = async (value = code) => {
     const digits = codeDigits(value);
-    if (digits.length !== CODE_LENGTH || verifying) return;
+    if (digits.length !== CODE_LENGTH || verifyingRef.current) return;
+    verifyingRef.current = true;
     setVerifying(true);
     setCodeError(null);
     try {
@@ -115,6 +133,7 @@ export const usePhoneCard = () => {
       setCodeError(messageForError(rejection, i18n.t("profile:phone.dialog.verifyFailed")));
       setCode("");
     } finally {
+      verifyingRef.current = false;
       setVerifying(false);
     }
   };
@@ -143,6 +162,7 @@ export const usePhoneCard = () => {
   return {
     phone,
     pending,
+    dialogPhone,
     editing,
     number,
     numberError,
@@ -158,7 +178,7 @@ export const usePhoneCard = () => {
     startEdit,
     cancelEdit,
     send,
-    openDialog,
+    openDialog: () => openDialog(pending),
     closeDialog,
     resend,
     verify,

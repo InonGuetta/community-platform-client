@@ -88,7 +88,7 @@ const PhoneCard = () => {
 
       <PhoneCodeDialog
         open={card.dialogOpen}
-        phone={card.pending}
+        phone={card.dialogPhone}
         code={card.code}
         error={card.codeError}
         verifying={card.verifying}

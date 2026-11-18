@@ -57,6 +57,13 @@ export const authApi = {
   },
   removeAvatar: async () => (await axiosInstance.delete("/auth/me/avatar")).data,
 
+  // A mobile number (migration 054). Each answers with the account's phone
+  // state — phone, phone_verified_at, phone_pending, phone_pending_expires_at —
+  // which the slice merges into the user.
+  startPhoneVerification: async (phone) => (await axiosInstance.post("/auth/me/phone", { phone })).data,
+  verifyPhone: async (code) => (await axiosInstance.post("/auth/me/phone/verify", { code })).data,
+  removePhone: async () => (await axiosInstance.delete("/auth/me/phone")).data,
+
   // Asking for a lecturer or admin role from inside the app. Takes no id — the
   // server acts on the session's own user, which is what makes it safe to
   // expose to everyone.

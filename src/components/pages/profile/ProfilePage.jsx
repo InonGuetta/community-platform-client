@@ -12,6 +12,7 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import { roleLabels } from "../../../utilities/constant";
 import RoleRequestCard from "./RoleRequestCard";
 import EmailPreferencesCard from "./EmailPreferencesCard";
+import PhoneCard from "./PhoneCard";
 import LanguageSwitcher from "../../layout/LanguageSwitcher";
 import AvatarEditor from "../../features/Avatar/AvatarEditor";
 import { useProfilePageController, MIN_PASSWORD_LENGTH } from "./useProfilePageController";
@@ -111,6 +112,9 @@ const ProfilePage = () => {
             account is rather than how it is secured. Renders nothing for an
             admin, who has nothing left to ask for. */}
         <RoleRequestCard />
+
+        {/* A mobile number for SMS (AUTH-13), just above the choices it enables. */}
+        <PhoneCard />
 
         {/* NOTIF-6 — the place every notification mail's footer points back to. */}
         <EmailPreferencesCard />

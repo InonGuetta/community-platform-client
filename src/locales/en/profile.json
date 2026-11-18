@@ -70,5 +70,31 @@
       "none": "No camera was found on this device. You can upload a picture from your device.",
       "failed": "The camera could not be started. You can upload a picture from your device."
     }
+  },
+  "phone": {
+    "title": "Phone number",
+    "help": "For notifications by SMS — choose which in the notifications card. Only you see the number; site admins see just its last four digits.",
+    "label": "Mobile number",
+    "newLabel": "New mobile number",
+    "hint": "An Israeli number, or with its country code (+1…)",
+    "send": "Send code",
+    "verified": "Verified",
+    "change": "Change number",
+    "remove": "Remove number",
+    "cancel": "Cancel",
+    "enterCode": "Enter code",
+    "pendingText": "We sent a code to <num>{{phone}}</num>. The number is added once you enter it.",
+    "sendFailed": "The code can't be sent right now. Try again in a moment.",
+    "removeTitle": "Remove your phone number?",
+    "removeBody": "SMS notifications will be turned off. You can add a number again at any time.",
+    "dialog": {
+      "title": "Enter the verification code",
+      "body": "We sent a 6-digit code to <num>{{phone}}</num>. It is valid for 10 minutes.",
+      "codeLabel": "Verification code",
+      "verify": "Verify",
+      "resend": "Send a new code",
+      "resendIn": "New code in {{seconds}}s",
+      "verifyFailed": "The code can't be verified right now. Try again."
+    }
   }
 }

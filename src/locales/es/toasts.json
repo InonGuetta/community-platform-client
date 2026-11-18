@@ -19,7 +19,9 @@
     "courses/removeJoinCode": "Se desactivó el acceso por código",
     "courses/cancelJoinRequest": "Solicitud cancelada",
     "avatar/upload": "Foto de perfil actualizada",
-    "avatar/remove": "Foto de perfil eliminada"
+    "avatar/remove": "Foto de perfil eliminada",
+    "phone/verify": "Número de teléfono verificado y añadido a tu cuenta",
+    "phone/remove": "Se quitó el número de teléfono"
   },
   "failure": {
     "media/upload": "No se pudo subir el contenido",
@@ -59,6 +61,7 @@
     "courses/decideJoinRequest": "No se pudo gestionar la solicitud de acceso",
     "courses/cancelJoinRequest": "No se pudo cancelar la solicitud",
     "avatar/upload": "No se pudo subir la foto",
-    "avatar/remove": "No se pudo eliminar la foto"
+    "avatar/remove": "No se pudo eliminar la foto",
+    "phone/remove": "No se puede quitar el número de teléfono ahora mismo"
   }
 }

@@ -19,7 +19,9 @@
     "courses/removeJoinCode": "ההצטרפות בקוד בוטלה",
     "courses/cancelJoinRequest": "הבקשה בוטלה",
     "avatar/upload": "תמונת הפרופיל עודכנה",
-    "avatar/remove": "תמונת הפרופיל הוסרה"
+    "avatar/remove": "תמונת הפרופיל הוסרה",
+    "phone/verify": "מספר הטלפון אומת ונוסף לחשבון",
+    "phone/remove": "מספר הטלפון הוסר"
   },
   "failure": {
     "media/upload": "העלאת המדיה נכשלה",
@@ -59,6 +61,7 @@
     "courses/decideJoinRequest": "הטיפול בבקשת ההצטרפות נכשל",
     "courses/cancelJoinRequest": "ביטול הבקשה נכשל",
     "avatar/upload": "העלאת התמונה נכשלה",
-    "avatar/remove": "הסרת התמונה נכשלה"
+    "avatar/remove": "הסרת התמונה נכשלה",
+    "phone/remove": "לא ניתן להסיר את מספר הטלפון כרגע"
   }
 }

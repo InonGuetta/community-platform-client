@@ -7,3 +7,8 @@ import { authApi } from "../../../api/authApi";
 export const removeAvatar = createApiThunk("avatar/remove", "Could not remove the picture", async () => {
   return await authApi.removeAvatar();
 });
+
+// Removing one's own mobile number (migration 054) — and with it every SMS choice.
+export const removePhone = createApiThunk("phone/remove", "Could not remove the phone number", async () => {
+  return await authApi.removePhone();
+});

@@ -70,5 +70,31 @@
       "none": "No se encontró ninguna cámara en este dispositivo. Puedes subir una foto desde tu dispositivo.",
       "failed": "No se pudo iniciar la cámara. Puedes subir una foto desde tu dispositivo."
     }
+  },
+  "phone": {
+    "title": "Número de teléfono",
+    "help": "Para recibir notificaciones por SMS — elige cuáles en la tarjeta de notificaciones. Solo tú ves el número; los administradores solo ven sus cuatro últimas cifras.",
+    "label": "Número de móvil",
+    "newLabel": "Nuevo número de móvil",
+    "hint": "Un número israelí, o con el prefijo del país (+1…)",
+    "send": "Enviar código",
+    "verified": "Verificado",
+    "change": "Cambiar número",
+    "remove": "Quitar el número",
+    "cancel": "Cancelar",
+    "enterCode": "Introducir el código",
+    "pendingText": "Enviamos un código al <num>{{phone}}</num>. El número se añadirá cuando lo introduzcas.",
+    "sendFailed": "No se puede enviar el código ahora mismo. Inténtalo de nuevo en un momento.",
+    "removeTitle": "¿Quitar tu número de teléfono?",
+    "removeBody": "Las notificaciones por SMS se desactivarán. Puedes volver a añadir un número cuando quieras.",
+    "dialog": {
+      "title": "Introduce el código de verificación",
+      "body": "Enviamos un código de 6 cifras al <num>{{phone}}</num>. Es válido durante 10 minutos.",
+      "codeLabel": "Código de verificación",
+      "verify": "Verificar",
+      "resend": "Enviar un código nuevo",
+      "resendIn": "Código nuevo en {{seconds}} s",
+      "verifyFailed": "No se puede verificar el código ahora mismo. Inténtalo de nuevo."
+    }
   }
 }

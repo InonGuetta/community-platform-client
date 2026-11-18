@@ -19,7 +19,9 @@
     "courses/removeJoinCode": "L'inscription par code a été désactivée",
     "courses/cancelJoinRequest": "Demande annulée",
     "avatar/upload": "Photo de profil mise à jour",
-    "avatar/remove": "Photo de profil supprimée"
+    "avatar/remove": "Photo de profil supprimée",
+    "phone/verify": "Numéro de téléphone vérifié et ajouté à votre compte",
+    "phone/remove": "Numéro de téléphone retiré"
   },
   "failure": {
     "media/upload": "Le téléversement du média a échoué",
@@ -59,6 +61,7 @@
     "courses/decideJoinRequest": "Le traitement de la demande d'inscription a échoué",
     "courses/cancelJoinRequest": "L'annulation de la demande a échoué",
     "avatar/upload": "Le téléversement de la photo a échoué",
-    "avatar/remove": "La suppression de la photo a échoué"
+    "avatar/remove": "La suppression de la photo a échoué",
+    "phone/remove": "Impossible de retirer le numéro de téléphone pour le moment"
   }
 }

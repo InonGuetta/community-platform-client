@@ -19,7 +19,9 @@
     "courses/removeJoinCode": "Joining by code was turned off",
     "courses/cancelJoinRequest": "Request cancelled",
     "avatar/upload": "Profile picture updated",
-    "avatar/remove": "Profile picture removed"
+    "avatar/remove": "Profile picture removed",
+    "phone/verify": "Phone number verified and added to your account",
+    "phone/remove": "Phone number removed"
   },
   "failure": {
     "media/upload": "Uploading the media failed",
@@ -59,6 +61,7 @@
     "courses/decideJoinRequest": "Handling the join request failed",
     "courses/cancelJoinRequest": "Cancelling the request failed",
     "avatar/upload": "Uploading the picture failed",
-    "avatar/remove": "Removing the picture failed"
+    "avatar/remove": "Removing the picture failed",
+    "phone/remove": "The phone number can't be removed right now"
   }
 }

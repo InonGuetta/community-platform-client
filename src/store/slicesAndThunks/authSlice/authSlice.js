@@ -1,10 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { login, register, logout, resetPassword, requestRole, uploadAvatar } from "./authPost";
+import { login, register, logout, resetPassword, requestRole, uploadAvatar, startPhoneVerification, verifyPhone } from "./authPost";
 import { updateProfile, saveLocale } from "./authPut";
-import { removeAvatar } from "./authDelete";
+import { removeAvatar, removePhone } from "./authDelete";
 import { fetchMe } from "./authGet";
 import { statuses } from "../../../utilities/constant";
 import { ERROR_CODES } from "../../../utilities/apiError";
+
+// The account's phone, as the server sends it (services/servicesPhone.js →
+// phoneStateOf).
+const PHONE_FIELDS = ["phone", "phone_verified_at", "phone_pending", "phone_pending_expires_at"];
+const phoneFieldsOf = (source) =>
+  Object.fromEntries(PHONE_FIELDS.filter((key) => source && key in source).map((key) => [key, source[key]]));
+const mergePhone = (state, action) => {
+  if (state.user) Object.assign(state.user, phoneFieldsOf(action.payload));
+};
 
 // "Who am I" failed because nothing answered — no network, or the API is down —
 // rather than because the server said no. The app cannot tell whether this
@@ -119,9 +128,10 @@ const authSlice = createSlice({
 
       // The saved row comes back complete, so it replaces the held one rather
       // than being merged into it — a merge would keep whatever the server just
-      // decided not to change.
+      // decided not to change. Except the phone (migration 054): the PATCH does
+      // not read it, so the held phone fields are carried over.
       .addCase(updateProfile.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.user = { ...action.payload, ...phoneFieldsOf(state.user) };
       })
 
       // The language is taken from the REQUEST, the moment it is sent — not
@@ -186,6 +196,12 @@ const authSlice = createSlice({
       .addCase(removeAvatar.fulfilled, (state) => {
         if (state.user) state.user.avatar_url = null;
       })
+
+      // The phone routes answer with the phone fields alone (phone,
+      // phone_verified_at, phone_pending, phone_pending_expires_at): merged.
+      .addCase(startPhoneVerification.fulfilled, mergePhone)
+      .addCase(verifyPhone.fulfilled, mergePhone)
+      .addCase(removePhone.fulfilled, mergePhone)
 
       // MERGED into the stored user, not assigned over it: the endpoint answers
       // with the columns it touched, and replacing would drop avatar_url and

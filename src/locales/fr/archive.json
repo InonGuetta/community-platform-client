@@ -1,6 +1,16 @@
 {
   "title": "Archives des médias",
   "upload": "Téléverser un média",
+  "subtitle": "Cours, livres et vidéos. Tout ce qui a été réuni, au même endroit.",
+  "allItems": "Tous les éléments",
+  "hero": {
+    "label": "Dernière publication",
+    "kicker": "Nouveau dans les archives · {{type}}",
+    "listen": "Écouter",
+    "watch": "Regarder",
+    "read": "Lire",
+    "details": "Détails du cours"
+  },
   "tabs": {
     "archive": "Archives",
     "smartSearch": "Recherche approfondie intelligente"
@@ -14,7 +24,8 @@
     "oldest": "Les plus anciens",
     "title": "Titre du cours (A–Z)",
     "creator": "Nom de l'enseignant (A–Z)",
-    "liked": "Les plus aimés"
+    "liked": "Les plus aimés",
+    "button": "Trier : {{order}}"
   },
   "filter": {
     "toggle": "Filtrer",

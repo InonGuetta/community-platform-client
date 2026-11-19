@@ -2,14 +2,18 @@ import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button";
 import useLoadMoreTrigger from "./useLoadMoreTrigger";
-import MediaCard from "./MediaCard";
+import MediaTile from "../MediaTile/MediaTile";
+import { useTileLikes } from "../MediaTile/useTileLikes";
+import { useAdminView } from "../../layout/useAdminView";
+import { TILE, RADIUS } from "../../../theme/tokens";
 import NoDataDialog from "../NoDataDialog/NoDataDialog";
 import { statuses } from "../../../utilities/constant";
 import { useTranslation } from "react-i18next";
 
 const SKELETON_COUNT = 6;
 
-// The cards' grid: one column on a phone, two on a tablet, three from md up.
+// The tiles' grid (component 5): two columns on a phone, three from md, four
+// from lg; 16/32 between columns and 32/48 between rows.
 //
 // A CSS grid with `gap`, not MUI's Grid. MUI's Grid spaces its items with a
 // negative margin on the container and a width of 100% plus the spacing, and
@@ -20,22 +24,20 @@ const SKELETON_COUNT = 6;
 // unbroken title cannot widen its column past the screen either.
 const gridSx = {
   display: "grid",
-  gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
-  gap: 3,
+  gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
+  columnGap: TILE.gap.column,
+  rowGap: TILE.gap.row,
 };
 
-// A placeholder that mirrors MediaCard's shape (image area + two text lines) so
-// the grid keeps its layout while loading instead of collapsing to a spinner.
-const MediaCardSkeleton = () => (
-  <Box sx={{ height: "100%" }}>
-    <Skeleton
-      variant="rectangular"
-      height={180}
-      sx={{ borderStartEndRadius: "20px", borderEndStartRadius: "20px" }}
-    />
-    <Box sx={{ px: 2, pt: 1.5 }}>
-      <Skeleton width="70%" />
-      <Skeleton width="90%" />
+// A placeholder in the tile's shape (a square cover and three lines of text),
+// so the grid keeps its layout while loading instead of collapsing to a spinner.
+const MediaTileSkeleton = () => (
+  <Box>
+    <Skeleton variant="rectangular" sx={{ width: "100%", height: "auto", aspectRatio: "1 / 1", borderRadius: `${RADIUS.cover}px` }} />
+    <Box sx={{ pt: 1.5 }}>
+      <Skeleton width="40%" />
+      <Skeleton width="85%" />
+      <Skeleton width="55%" />
     </Box>
   </Box>
 );
@@ -54,6 +56,9 @@ const MediaGrid = ({
   const { t } = useTranslation("media");
   // Before the early returns: a hook must run on every render.
   const loadMoreRef = useLoadMoreTrigger(onLoadMore, { enabled: Boolean(onLoadMore && hasMore) });
+  // Once for the whole grid: the liked ids (D-18) and "תצוגת מנהל" (D-66).
+  const likes = useTileLikes();
+  const { showAdmin } = useAdminView();
 
   // Skeletons only on the first load (no items yet). `media.status` is shared with
   // mutations like upload (uploadMedia.pending → loading), so gating on an empty
@@ -63,7 +68,7 @@ const MediaGrid = ({
     return (
       <Box sx={gridSx}>
         {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-          <MediaCardSkeleton key={i} />
+          <MediaTileSkeleton key={i} />
         ))}
       </Box>
     );
@@ -85,14 +90,26 @@ const MediaGrid = ({
       <Box sx={gridSx}>
         {items.map((item) => (
           <Box key={item.id} sx={{ minWidth: 0 }}>
-            <MediaCard item={item} onView={onView} user={user} onDelete={onDelete} onTogglePublish={onTogglePublish} onEditTags={onEditTags} onEditDetails={onEditDetails} onOpenCreator={onOpenCreator} />
+            <MediaTile
+              item={item}
+              onView={onView}
+              user={user}
+              showAdmin={showAdmin}
+              liked={likes.isLiked(item.id)}
+              onToggleLike={likes.enabled ? () => likes.toggleLike(item.id) : undefined}
+              onDelete={onDelete}
+              onTogglePublish={onTogglePublish}
+              onEditTags={onEditTags}
+              onEditDetails={onEditDetails}
+              onOpenCreator={onOpenCreator}
+            />
           </Box>
         ))}
         {/* The next page on its way: placeholder cards where it will land, so
             the grid grows rather than the page jumping when it arrives. */}
         {loadingMore &&
-          Array.from({ length: 3 }).map((_, i) => (
-            <MediaCardSkeleton key={`more-${i}`} />
+          Array.from({ length: 4 }).map((_, i) => (
+            <MediaTileSkeleton key={`more-${i}`} />
           ))}
       </Box>
 
@@ -100,8 +117,8 @@ const MediaGrid = ({
         // The sentinel the scroll watches, and the same thing as a button:
         // for a browser without IntersectionObserver, and for anybody moving
         // through the page with a keyboard rather than a wheel.
-        <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-          <Button variant="outlined" onClick={onLoadMore} disabled={loadingMore}>
+        <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", mt: { xs: 4, md: 6 } }}>
+          <Button variant="soft" onClick={onLoadMore} disabled={loadingMore}>
             {loadingMore ? t("grid.loadingMore") : t("grid.loadMore")}
           </Button>
         </Box>

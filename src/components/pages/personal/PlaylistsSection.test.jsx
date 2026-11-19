@@ -38,6 +38,8 @@ const show = (playlists) => {
       auth: () => ({ user: { id: 3, role: "student" } }),
       // Each card's download menu reads what is saved for offline listening.
       offline: () => ({ items: [], loaded: true, progress: {} }),
+      // And each tile's heart, what this reader has liked.
+      likes: () => ({ ids: [] }),
     },
   });
   return render(

@@ -1,6 +1,16 @@
 {
   "title": "Archivo multimedia",
   "upload": "Subir contenido",
+  "subtitle": "Clases, libros y videos. Todo lo reunido, en un solo lugar.",
+  "allItems": "Todos los elementos",
+  "hero": {
+    "label": "Lo último publicado",
+    "kicker": "Nuevo en el archivo · {{type}}",
+    "listen": "Escuchar",
+    "watch": "Ver",
+    "read": "Leer",
+    "details": "Detalles de la clase"
+  },
   "tabs": {
     "archive": "Archivo",
     "smartSearch": "Búsqueda profunda inteligente"
@@ -14,7 +24,8 @@
     "oldest": "Más antiguos",
     "title": "Título de la clase (A–Z)",
     "creator": "Nombre del profesor (A–Z)",
-    "liked": "Más gustados"
+    "liked": "Más gustados",
+    "button": "Ordenar: {{order}}"
   },
   "filter": {
     "toggle": "Filtrar",

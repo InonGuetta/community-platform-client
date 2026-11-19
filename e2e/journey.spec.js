@@ -159,9 +159,10 @@ test(`[${lng}] a lecturer is approved, opens a course, enrols a student, and the
     // Untagged, so the app offers tags; this journey is not about tags.
     await asLecturer.getByRole("button", { name: w("tags:suggest.skip") }).click();
 
-    const publish = w("media:card.publish");
-    const card = rowWith(asLecturer, lessonTitle, asLecturer.getByRole("button", { name: publish }));
-    await card.getByRole("button", { name: publish }).click();
+    // Publishing is in the tile's ⋯ menu (Redesign v4, component 5), named for
+    // the lesson it acts on.
+    await asLecturer.getByRole("button", { name: w("media:card.actionsFor", { title: lessonTitle }) }).click();
+    await asLecturer.getByRole("menuitem", { name: w("media:card.publish") }).click();
     await expect(asLecturer.getByText(w("archive:notices.published"))).toBeVisible();
   });
 

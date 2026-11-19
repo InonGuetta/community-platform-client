@@ -2,86 +2,32 @@
 import { test, expect, vi, describe } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import FilterBar from "./FilterBar";
+import { activeFilterCount } from "./filterCount";
 
-// What the type toggle DRAWS, which is what the user reads the mechanism from.
-// Under "הכל" every type's button used to be drawn pressed as well, so the first
-// press on one looked like it should pick it and instead took it out.
+// The archive's filter panel (mockup 29), opened from the toolbar's "סינון".
 
-const setup = (selectedTypes) => {
-  const onToggleType = vi.fn();
-  const onPressAllTypes = vi.fn();
-  render(
-    <FilterBar
-      selectedTypes={selectedTypes}
-      onToggleType={onToggleType}
-      onPressAllTypes={onPressAllTypes}
-      onSearch={vi.fn()}
-    />
-  );
-  // The toggle lives in the collapsible panel.
-  fireEvent.click(screen.getByRole("button", { name: "סינון" }));
-  const pressed = (name) => screen.getByRole("button", { name }).getAttribute("aria-pressed");
-  return { onToggleType, onPressAllTypes, pressed };
-};
-
-test("under הכל, only הכל is pressed", () => {
-  const { pressed } = setup([]);
-  expect(pressed("הכל")).toBe("true");
-  expect(pressed("וידאו")).toBe("false");
-  expect(pressed("שמע")).toBe("false");
-  expect(pressed("קריאה")).toBe("false");
-});
-
-test("with types chosen, exactly those are pressed, and הכל is not", () => {
-  const { pressed } = setup(["video", "text"]);
-  expect(pressed("הכל")).toBe("false");
-  expect(pressed("וידאו")).toBe("true");
-  expect(pressed("שמע")).toBe("false");
-  expect(pressed("קריאה")).toBe("true");
-});
-
-test("each button reports its own press", () => {
-  const { onToggleType, onPressAllTypes } = setup([]);
-  fireEvent.click(screen.getByRole("button", { name: "שמע" }));
-  expect(onToggleType).toHaveBeenCalledWith("audio");
-  fireEvent.click(screen.getByRole("button", { name: "הכל" }));
-  expect(onPressAllTypes).toHaveBeenCalled();
-});
-
-describe("the sort menu", () => {
-  const renderBar = (props = {}) => {
-    const onSortChange = vi.fn();
-    render(<FilterBar onSearch={vi.fn()} onSortChange={onSortChange} {...props} />);
-    return { onSortChange };
-  };
-
-  // Outside the collapsible panel: nothing has to be opened to reach it.
-  test("is on the page without opening the filter panel, showing newest first", () => {
-    renderBar();
-    expect(screen.getByRole("combobox", { name: /^מיון/ })).toHaveTextContent("החדשים ביותר");
+describe("the panel", () => {
+  // Decision 1: the type is chosen on the toolbar and nowhere else.
+  test("holds no type selector", () => {
+    render(<FilterBar open />);
+    expect(screen.queryByRole("button", { name: "וידאו" })).toBeNull();
+    expect(screen.queryByText("סוג תוכן")).toBeNull();
   });
 
-  test("shows the order it is given", () => {
-    renderBar({ sortOrder: "liked" });
-    expect(screen.getByRole("combobox", { name: /^מיון/ })).toHaveTextContent("הכי אהובים");
-  });
-
-  test("offers the five orders, and reports the one chosen", () => {
-    const { onSortChange } = renderBar();
-    fireEvent.mouseDown(screen.getByRole("combobox", { name: /^מיון/ }));
-    expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual([
-      "החדשים ביותר", "הישנים ביותר", "שם השיעור (א–ת)", "שם המרצה (א–ת)", "הכי אהובים",
-    ]);
-    fireEvent.click(screen.getByRole("option", { name: "שם המרצה (א–ת)" }));
-    expect(onSortChange).toHaveBeenCalledWith("creator");
+  test("offers clearing only once there is something to clear", () => {
+    const onClearAll = vi.fn();
+    const { rerender } = render(<FilterBar open onClearAll={onClearAll} />);
+    expect(screen.queryByRole("button", { name: "ניקוי הכל" })).toBeNull();
+    rerender(<FilterBar open onClearAll={onClearAll} uploadedAfter="2026-01-01" />);
+    fireEvent.click(screen.getByRole("button", { name: "ניקוי הכל" }));
+    expect(onClearAll).toHaveBeenCalled();
   });
 });
 
 describe("the length field", () => {
   const openPanel = (props = {}) => {
     const onDurationFilter = vi.fn();
-    render(<FilterBar onSearch={vi.fn()} onDurationFilter={onDurationFilter} {...props} />);
-    fireEvent.click(screen.getByRole("button", { name: "סינון" }));
+    render(<FilterBar open onDurationFilter={onDurationFilter} {...props} />);
     return { onDurationFilter };
   };
 
@@ -99,9 +45,18 @@ describe("the length field", () => {
     openPanel({ lengthOffered: false });
     expect(screen.queryByRole("combobox", { name: /^אורך השיעור/ })).not.toBeInTheDocument();
   });
+});
 
-  test("a chosen range counts on the filter badge", () => {
-    render(<FilterBar onSearch={vi.fn()} durationRange="short" />);
-    expect(screen.getByText("1")).toBeInTheDocument();
+describe("the number on the filter chip", () => {
+  test("a chosen range counts, unless a length means nothing", () => {
+    expect(activeFilterCount({ durationRange: "short" })).toBe(1);
+    expect(activeFilterCount({ durationRange: "short", lengthOffered: false })).toBe(0);
+  });
+
+  test("each filter in the panel counts once; a tag branch is one decision", () => {
+    expect(
+      activeFilterCount({ creatorFilter: "הרב כהן", uploadedAfter: "2026-01-01", uploadedBefore: "2026-02-01", tagIds: [1] })
+    ).toBe(4);
+    expect(activeFilterCount({})).toBe(0);
   });
 });

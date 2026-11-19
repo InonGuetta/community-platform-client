@@ -102,3 +102,36 @@
 - padding כפול בדפים שלא עוצבו (ה-`p: 3` הישן בתוך `PageContainer`) – כל שלב מוריד בדפים שלו (D-13). המחברת גוללת זמנית (D-72) – 5ב.
 - Breakpoint 900 ולא 768 (D-68) – לבדוק ב-8ב.
 - אייקוני האפליקציה עדיין navy; שם המותג בשרת (מיילים, דף שיתוף) – שאלה פתוחה משלב 0.
+
+---
+
+## שלב 3א – CoverArt, MediaTile, ⋯ ודף הארכיון (2026-11-19, opus)
+
+### מה השתנה
+- **`CoverArt`** (`features/MediaTile/CoverArt.jsx` + `src/utilities/coverArt.js`): 15 הפלטות והצורות של `art()` מהמוקאפ, פלטה לפי FNV-hash של `item.id` (D-19), `thumbnail_url` גובר, id ל-gradient מ-`useId`.
+- **`MediaTile`** (קומפוננטה 5) מחליף את `MediaCard` בכל מקום – דרך `MediaGrid`, ולכן גם בדף יוצר, אהבתי, שמורים, רשימה שמורה והמשך צפייה. עטיפה מרובעת, ▶ (ציור, D-02/D-80), ♥ עם pop (רק בלחיצה, מבוטל ב-reduced-motion; D-79), ⋯ (`MediaTileMenu` + `useMediaTileMenu` + `tileActions.js` טהור: הורדה לכולם; עריכה · תגיות · פרסום/הסתרה · מפריד · מחיקה רק עם הרשאה **ו**-`showAdmin` **ו**-handler – D-14/D-15; "הורדה" פותח את `DownloadMenu` – D-16), badge טיוטה/ציבורי admin-only, kicker "סוג · משך", כותרת h3 עד 2 שורות, מרצה (לחיץ לדף יוצר), תגית ראשונה. בלי מונה לייקים ובלי שורת אייקונים. תצוגה מקדימה של וידאו ב-hover נשמרה (`useVideoPreview`).
+- **לייק בגריד:** `useTileLikes` – `fetchLikedIds` פעם אחת לגריד, אותם `likeMedia`/`unlikeMedia` (D-18).
+- **`MediaGrid`:** 2/3/4 עמודות, רווחים 16/32 × 32/48 (`TILE.gap`), skeleton מרובע, "טעינת עוד" soft. מחושב בו `showAdmin` ו-likes פעם אחת לכל הגריד.
+- **דף הארכיון (02)** במבנה של החלטה 1: `PageHeader` (ברכה כ-kicker – D-88, H1 44/80, כותרת משנה, "העלאת מדיה" admin-only) → טאבים → `ArchiveHero` (D-01, D-87; `featuredItem.js` טהור) → `ArchiveToolbar` דביק ב-`top: HEADER_HEIGHT` (צ׳יפי סוג multi-select – D-03, חיפוש, מיון כצ׳יפ עם תפריט – D-84, צ׳יפ "סינון" כהה כשפתוח עם מונה – D-86) → פאנל 29 (`FilterBar` הפך לפאנל בלבד: מרצה, אורך, 2 תאריכים, ניקוי, מפריד, תגיות; בלי בורר סוג) → "כל הפריטים" + ספירה (D-34) → גריד. הכל ב-`ArchiveBrowser`, ולכן גם בדף היוצר.
+- **`FilterChip`** חדש ב-`features/` (D-85). `filterCount.js` – הספירה של הצ׳יפ "סינון", בלי הסוג.
+- **חיפוש עומק חכם (03):** שדה גדול ממורכז (D-90). `TagDrilldown`: צ׳יפים בגודל מלא, חיפוש תגית כ-pill בתחילת השורה.
+- **טוקנים:** `TILE`, `HERO` ב-`tokens.js`.
+- **מחרוזות** (דרך `add-translation`, 5 שפות, yi טיוטה): `archive:subtitle`, `allItems`, `hero.{label,kicker,listen,watch,read,details}`, `sort.button`; `media:card.{kicker,actionsFor,likeOf}`; ניסוח חדש ל-`card.publishedHint`/`draftHint` (D-83). נמחקו: `card.editDetailsOf`, `editTagsOf`, `length`, `likes_*` (D-82).
+- **נמחקו:** `features/MediaGrid/MediaCard.jsx`, `MediaCard.test.jsx`.
+- **סקיל חדש** בריפו השורש: `.claude/skills/redesign-screen/SKILL.md` – הצ׳קליסט להחלת v4 על מסך (רכיבים, טוקנים, admin-only, PageContainer, i18n, lint, בדיקות, DECISIONS/LOG). commit נפרד בריפו השורש (ענף `i18n`).
+
+### קבצים
+`src/utilities/coverArt.js` (+test), `src/components/features/MediaTile/{CoverArt,MediaTile,MediaTileMenu}.jsx`, `{useMediaTileMenu,useTileLikes,useVideoPreview,tileActions}.js`, `MediaTile.test.jsx`, `tileActions.test.js`, `features/FilterChip/FilterChip.jsx`, `features/MediaGrid/MediaGrid.jsx`, `features/SmartSearch/SmartSearch.jsx`, `pages/archive/{ArchivePage.jsx,featuredItem.js,featuredItem.test.js}`, `pages/archive/componentsArchive/{ArchiveBrowser,ArchiveGreeting,ArchiveHero,ArchiveToolbar,FilterBar,TagDrilldown}.jsx`, `filterCount.js`, `ArchiveToolbar.test.jsx`, `FilterBar.test.jsx`, `src/theme/tokens.js`, `src/locales/*/{archive,media}.json`, `src/components/a11yReview.test.jsx`, `pages/personal/PlaylistsSection.test.jsx`, `e2e/journey.spec.js`, `design/REDESIGN_V4_{DECISIONS,LOG}.md`.
+
+### בדיקות
+- `npm run verify` ירוק – 170 קובצי בדיקה, 1881 בדיקות, build, check:chunks (אזהרת lint ישנה אחת ב-`useAdminDashboardController.js`).
+- **חדשות:** `MediaTile.test.jsx` (16: kicker עם/בלי משך, כותרת ותגית אחת, בלי מונה ותיאור, תמונה מול CoverArt, פתיחה בלחיצה וב-Enter, יוצר לחיץ בלבד, לב עם `aria-pressed`, ⋯ לסטודנט/מנהל/תצוגת מנהל כבויה, טיוטה + פרסום, כל פעולה ל-handler, הורדה → `DownloadMenu`), `tileActions.test.js`, `coverArt.test.js`, `featuredItem.test.js`, `ArchiveToolbar.test.jsx`.
+- **נכתבו מחדש (מבנה, לא התנהגות):** `MediaCard.test.jsx` → `MediaTile.test.jsx` (אורך ב-kicker במקום chip עם `aria-label`); `FilterBar.test.jsx` – בדיקות הסוג והמיון עברו ל-`ArchiveToolbar.test.jsx` (המיון: `button` + `menuitemradio` במקום `combobox` + `option`), "ספירה על ה-badge" נבדקת על `activeFilterCount` ועל הצ׳יפ; הפאנל נבדק שאין בו בורר סוג. `a11yReview.test.jsx` – ה-mock עבר ל-`MediaTile` + mocks ל-`useTileLikes`/`useAdminView`. `PlaylistsSection.test.jsx` – ה-store של הבדיקה קיבל `likes` (האריח קורא אותו).
+- **e2e:** `journey.spec.js` – הפרסום נעשה דרך ⋯ של האריח (`media:card.actionsFor` עם שם השיעור) ואז `menuitem` `media:card.publish`. **`npm run e2e` ירוק – 5/5:** בריצה המלאה 4 עברו (journey en/yi עם הפרסום החדש, language, phone), וה-journey בעברית נפל בצעד הראשון (הרשמה) על "לא ניתן להגיע לשרת" – תקלת API רגעית לפני כל UI של השלב; בהרצה חוזרת (`-g "[he]"`) עבר במלואו, כולל הפרסום דרך ⋯.
+- ה-API, Vite ו-Memurai כבר רצו כשהשלב התחיל – לא הופעלו ולא נעצרו על ידו.
+- **אין סקריפט חדש ב-`package.json`** – אין סקיל קיים לעדכן.
+
+### מה נשאר פתוח
+- **לשלב 3ב:** `CollectionPage`, `PlaylistPage`, `PlaylistsSection`, `CreatorPage` כבר מציגים `MediaTile` (דרך `MediaGrid`), אבל עדיין עם הכותרות, ה-`p: 3` וה-`bgcolor` הישנים. `PlaylistsSection` עדיין סופר "3 בשורה" (`PER_ROW`) מול גריד של 4 ב-lg – יתוקן במבנה המתקפל (D-36). בדפים האישיים ⋯ = הורדה בלבד (D-14), כי לא מועברים handlers.
+- הלב באריח מול האגודל בעמוד הפריט (D-79) – להכריע ב-4א.
+- לא צולם בדפדפן בשלב הזה מעבר ל-e2e; השוואה ויזואלית מול `new-02`/`new-29` – 8ב.

@@ -1,6 +1,16 @@
 {
   "title": "Media archive",
   "upload": "Upload media",
+  "subtitle": "Lessons, books and videos. Everything gathered, in one place.",
+  "allItems": "All items",
+  "hero": {
+    "label": "Latest published",
+    "kicker": "New in the archive · {{type}}",
+    "listen": "Listen",
+    "watch": "Watch",
+    "read": "Read",
+    "details": "Lesson details"
+  },
   "tabs": {
     "archive": "Archive",
     "smartSearch": "Smart deep search"
@@ -14,7 +24,8 @@
     "oldest": "Oldest",
     "title": "Lesson title (A–Z)",
     "creator": "Lecturer's name (A–Z)",
-    "liked": "Most liked"
+    "liked": "Most liked",
+    "button": "Sort: {{order}}"
   },
   "filter": {
     "toggle": "Filter",

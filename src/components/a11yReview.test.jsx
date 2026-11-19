@@ -5,7 +5,10 @@ import SearchBar from "./features/SearchBar/SearchBar";
 import DialogTitle from "./features/Dialogs/DialogTitle";
 import UsersTableContent from "./pages/users/componentsUsers/UsersTableContent";
 
-vi.mock("./features/MediaGrid/MediaCard", () => ({ default: ({ item }) => <div data-testid="card">{item.title}</div> }));
+vi.mock("./features/MediaTile/MediaTile", () => ({ default: ({ item }) => <div data-testid="card">{item.title}</div> }));
+// The grid reads the liked ids and "תצוגת מנהל" from the store; neither is what this test is about.
+vi.mock("./features/MediaTile/useTileLikes", () => ({ useTileLikes: () => ({ enabled: false, isLiked: () => false, toggleLike: () => {} }) }));
+vi.mock("./layout/useAdminView", () => ({ useAdminView: () => ({ showAdmin: false }) }));
 const { default: MediaGrid } = await import("./features/MediaGrid/MediaGrid");
 
 // What the desktop-and-375px review (PRD MOB-7) found and fixed, pinned so it

@@ -13,6 +13,9 @@ import { creatorPrefixes } from "../../../utilities/constant";
 import { useSmartSearch } from "./useSmartSearch";
 import { useTranslation } from "react-i18next";
 import { creatorDisplayName } from "../../../utilities/creatorPage";
+import { RADIUS } from "../../../theme/tokens";
+
+const SMART_SEARCH_SHADOW = "0 10px 40px -14px rgba(79,70,229,.3)";
 
 // ts_headline returns the snippet with <b>…</b> around matches; render as plain
 // text to avoid injecting transcript-derived HTML into the DOM.
@@ -32,8 +35,8 @@ const tierOf = (sim) => {
   if (s >= MEDIUM_THRESHOLD) return "medium";
   return "normal";
 };
-const TITLE_COLOR = { strong: "success.main", medium: "#b8860b", normal: "text.primary" };
-const BORDER_COLOR = { strong: "success.main", medium: "#b8860b", normal: "transparent" };
+const TITLE_COLOR = { strong: "success.main", medium: "warning.main", normal: "text.primary" };
+const BORDER_COLOR = { strong: "success.main", medium: "warning.main", normal: "transparent" };
 
 // "Smart deep search" over transcripts: hybrid (meaning + keyword). Fires on
 // Enter / the search button — NOT per keystroke, since each query embeds the
@@ -67,7 +70,25 @@ const SmartSearch = ({ onOpenResult }) => {
             </InputAdornment>
           ),
         }}
-        sx={{ mb: 2 }}
+        // Mockup 03 (D-33): one large field, centred — a white pill 64 high
+        // with a line and an indigo glow, 18px text.
+        sx={(theme) => ({
+          display: "flex",
+          maxWidth: 768,
+          mx: "auto",
+          mb: { xs: 4, md: 5 },
+          "& .MuiOutlinedInput-root": {
+            minHeight: 64,
+            fontSize: 18,
+            borderRadius: `${RADIUS.pill}px`,
+            bgcolor: "background.paper",
+            border: `1px solid ${theme.palette.divider}`,
+            boxShadow: SMART_SEARCH_SHADOW,
+            paddingInline: "12px",
+            "&.Mui-focused": { borderColor: theme.palette.primary.main },
+          },
+          "& .MuiInputAdornment-root": { color: "text.secondary" },
+        })}
       />
 
       {loading && (

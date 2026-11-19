@@ -146,3 +146,26 @@ export const SHELL = {
   drawerShadow: "0 0 80px rgba(0,0,0,.3)",
   backdrop: "rgba(0,0,0,.25)",
 };
+
+// The item tile (component 5): the round buttons and the badge that sit ON a
+// cover. White in both modes — they are read against the cover's own colours,
+// not against the page — and the heart is the light mode's rose for the same
+// reason. The hero (decision 1) is the archive's indigo banner.
+export const TILE = {
+  fab: "rgba(255,255,255,.9)",
+  fabInk: "#1d1d1f",
+  fabShadow: "0 1px 3px rgba(0,0,0,.15)",
+  heart: "#e11d48",
+  badge: "rgba(255,255,255,.92)",
+  gap: { column: { xs: 2, md: 4 }, row: { xs: 4, md: 6 } },
+};
+
+export const HERO = {
+  base: "#14123a",
+  gradient: ["#4f46e5", "#2b2a7a", "#14123a"],
+  ring: "rgba(255,255,255,.10)",
+  kicker: "#c7d2fe",
+  text: "rgba(224,231,255,.8)",
+  ghost: "rgba(255,255,255,.15)",
+  ghostHover: "rgba(255,255,255,.25)",
+};

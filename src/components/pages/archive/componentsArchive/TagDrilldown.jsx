@@ -257,13 +257,14 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
       </Box>
 
       {/* Searching the vocabulary, not the archive — this finds a TAG, and
-          choosing it is what filters. Centred, like the type toggle above it. */}
+          choosing it is what filters. A grey pill at the start of the line, as in
+          mockup 29. */}
       <TextField
         size="small"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t("tree.search")}
-        sx={{ alignSelf: "center", width: "100%", maxWidth: 260 }}
+        sx={{ alignSelf: "flex-start", width: "100%", maxWidth: 384, "& .MuiOutlinedInput-root": { borderRadius: "999px", bgcolor: "surface.fill" } }}
         slotProps={{
           htmlInput: { "aria-label": t("tree.searchLabel") },
           input: {
@@ -298,9 +299,10 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
           const countsWholeBranch = relations
             .descendantsOf(node.id)
             .some((id) => excludedIds.includes(id));
+          // Full-size filter chips (component 9, mockup 29), the item count
+          // inside in a quieter tone.
           const chip = (
             <Chip
-              size="small"
               // The state, said in the markup rather than only in colour and an
               // icon. A chip's meaning currently lives entirely in how it looks,
               // which leaves it unreadable to anything that is not a pair of

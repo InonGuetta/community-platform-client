@@ -5,7 +5,9 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import { formatTime } from "../../../../utilities/formatTime";
+import { RADIUS } from "../../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 
 const ChaptersPanel = ({
@@ -24,39 +26,38 @@ const ChaptersPanel = ({
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-        <Typography variant="subtitle1" fontWeight={600}>{t("chapters.title")}</Typography>
-        {canEdit && (
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={onGenerate}
-            disabled={generating || !canGenerate}
-            startIcon={generating ? <CircularProgress size={14} /> : null}
-          >
-            {generating ? t("chapters.generating") : hasHeadings ? t("chapters.regenerate") : t("chapters.generate")}
-          </Button>
-        )}
-      </Box>
+      <Typography variant="display" component="h3" sx={{ fontSize: 24, mb: 1.5 }}>{t("chapters.title")}</Typography>
 
       {hasHeadings ? (
-        <List disablePadding dense>
+        <List disablePadding dense sx={{ mb: canEdit ? 3 : 0 }}>
           {keyPointHeadings.map((heading, i) => (
-            <ListItemButton key={i} onClick={() => onSeek?.(heading.start_time)} sx={{ borderRadius: 1, mb: 0.5 }}>
+            <ListItemButton key={i} onClick={() => onSeek?.(heading.start_time)} sx={{ borderRadius: `${RADIUS.menu}px`, mb: 0.5 }}>
               <ListItemText
                 primary={heading.title}
-                primaryTypographyProps={{ dir: "auto" }}
+                primaryTypographyProps={{ dir: "auto", fontWeight: 600 }}
                 secondary={formatTime(heading.start_time)}
               />
             </ListItemButton>
           ))}
         </List>
       ) : (
-        <Typography variant="body2" color="text.secondary">
+        <Typography sx={{ fontSize: 15, color: "text.secondary", mb: canEdit ? 3 : 0 }}>
           {canGenerate
             ? t("chapters.howTo")
             : t("chapters.notYet")}
         </Typography>
+      )}
+
+      {/* The queued job: `generating` is the page's headings_status polling. */}
+      {canEdit && (
+        <Button
+          variant={hasHeadings ? "soft" : "contained"}
+          onClick={onGenerate}
+          disabled={generating || !canGenerate}
+          startIcon={generating ? <CircularProgress size={14} color="inherit" /> : <AutoAwesomeOutlinedIcon />}
+        >
+          {generating ? t("chapters.generating") : hasHeadings ? t("chapters.regenerate") : t("chapters.generate")}
+        </Button>
       )}
     </Box>
   );

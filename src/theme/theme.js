@@ -39,6 +39,7 @@ const paletteFor = (mode) => {
       accentSoft: c.accentSoft,
       danger: c.danger,
       draft: c.draft,
+      cue: c.cue,
       wash: c.wash,
       glass: c.glass,
     },

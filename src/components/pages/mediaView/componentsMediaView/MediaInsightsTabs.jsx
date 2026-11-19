@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import SegmentedControl from "../../../features/SegmentedControl/SegmentedControl";
 import AISummaryPanel from "./AISummaryPanel";
 import ChaptersPanel from "./ChaptersPanel";
 import TranscriptEditor from "../../../features/TranscriptEditor/TranscriptEditor";
@@ -129,17 +128,16 @@ const MediaInsightsTabs = ({
         {activeKey === "sessionChat" && sessionChatPanel}
         {activeKey === "discuss" && discussionPanel}
         {activeKey === "transcript" && captions && (
-          <ToggleButtonGroup
-            exclusive
-            size="small"
+          <SegmentedControl
             value={transcriptView}
-            onChange={(_, next) => next && setTranscriptView(next)}
-            aria-label={t("tabs.transcriptView")}
-            sx={{ mb: 1.5, display: "flex", "& .MuiToggleButton-root": { flex: 1, py: 0.25 } }}
-          >
-            <ToggleButton value="follow">{t("tabs.follow")}</ToggleButton>
-            <ToggleButton value="text">{canEditTranscript ? t("tabs.fullTextEdit") : t("tabs.fullText")}</ToggleButton>
-          </ToggleButtonGroup>
+            onChange={setTranscriptView}
+            label={t("tabs.transcriptView")}
+            options={[
+              { value: "follow", label: t("tabs.follow") },
+              { value: "text", label: canEditTranscript ? t("tabs.fullTextEdit") : t("tabs.fullText") },
+            ]}
+            sx={{ mb: 2.5 }}
+          />
         )}
         {activeKey === "transcript" && captions && transcriptView === "follow" && (
           <FollowAlongTranscript captions={captions} currentTime={currentTime} onSeek={onSeek} />

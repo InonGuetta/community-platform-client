@@ -33,6 +33,8 @@ const light = {
   error: { bg: "#fff1f2", fg: "#be123c" },
   // The draft badge on a cover: amber-800 on white, legible over any palette.
   draft: "#92400e",
+  // The sentence playing in the transcript: the mockup's cyan-200 at 80%.
+  cue: "rgba(165,243,252,.8)",
   // The empty state's wash and the glass of the header and dock.
   wash: "rgba(255,255,255,.6)",
   glass: "rgba(251,251,253,.78)",
@@ -61,6 +63,8 @@ const dark = {
   warning: { bg: "rgba(245,158,11,.15)", fg: "#fcd34d" },
   error: { bg: "rgba(244,63,94,.15)", fg: "#fda4af" },
   draft: "#92400e",
+  // Cyan-400 at 28%: a wash the light text still reads on.
+  cue: "rgba(34,211,238,.28)",
   wash: "rgba(17,24,39,.6)",
   glass: "rgba(11,15,25,.78)",
 };

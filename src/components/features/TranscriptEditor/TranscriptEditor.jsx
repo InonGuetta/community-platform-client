@@ -26,7 +26,7 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="subtitle1" fontWeight={600}>{t("transcript.title")}</Typography>
+        <Typography variant="display" component="h3" sx={{ fontSize: 24 }}>{t("transcript.title")}</Typography>
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           <Chip
             label={isProcessing ? `${statusLabel}...` : statusLabel}
@@ -110,7 +110,7 @@ const TranscriptEditor = ({ transcript, mediaId, canEdit = false, pollingStalled
         InputProps={{ readOnly: !canEdit || isAiActionBusy(fixStatus) }}
         // Each line in the direction of its own words (the transcript is
         // content): a line opening with a Latin name stays right to left.
-        sx={{ "& textarea": { unicodeBidi: "plaintext", textAlign: "start" } }}
+        sx={{ "& textarea": { unicodeBidi: "plaintext", textAlign: "start", fontSize: 16, lineHeight: 1.9 } }}
         helperText={isAiActionBusy(fixStatus) ? t("transcript.fixInBackground") : undefined}
       />
 

@@ -167,7 +167,7 @@
 - **נכתבו מחדש (מבנה, לא התנהגות):** `MediaPlayer.test.jsx` – לשמע: "stage 16:9 עם בר ממורכז" → "כרטיס בלי stage", האלמנט 1×1 נמצא לפי `data-testid`, הבר "לא נעלם" → הפקדים לא נעלמים; צבע ההתקדמות → accent בשני הסוגים (במקום כתום/כחול). נוספו: הכרטיס מציע play/מיקום/זמנים/עוצמה/הגדרות, מהירות מתפריט הכרטיס, רדיוס 28 לווידאו. `MediaViewPage.test.jsx` – עטוף ב-`MemoryRouter` (ה-BackLink); נוספו: header (קישור לארכיון, kicker, H1 בלי נקודה, badge רק עם `showStatusBadge`, "ציבורי"), עטיפה רק לשמע. כל 25 הבדיקות הקיימות עברו בלי שינוי (תוויות לייק/שמירה, caret, טאבים, תאריך).
 - **חדשה:** `lessonTitle.test.js`. **נמחקה:** `stageGeometry.test.js` (הפונקציה יצאה).
 - `SourcePreviewDialogBookmarks`, `LessonNotebook*`, `SaveMenu*`, `ShareDialogActions` – עברו בלי שינוי.
-- **`npm run verify` ירוק** – 170 קובצי בדיקה, 1890 בדיקות, build, check:chunks (אזהרת lint ישנה אחת ב-`useAdminDashboardController.js`). בריצה הראשונה נפל `PdfViewer.test.jsx` ("a file that will not open", `loading` במקום `error`) תחת עומס – קובץ שהשלב לא נגע בו; עבר לבד (16/16), והריצה המלאה השנייה ירוקה.
+
 - **`npm run e2e` ירוק – 5/5** בריצה אחת (journey he/en/yi – כולל heading בשם השיעור, `lesson:actions.share` והקישור הציבורי בעמוד החדש; language; phone). ה-e2e לא מנגן מדיה; ניגון, הסתרת הבר בווידאו ו-seek נבדקו ביחידה ובדפדפן.
 - נבדק בדפדפן (1510px, עברית, מנהל): שמע (`/media/100`) – עטיפה, כרטיס נגן עם כתובית, טאבים עם גלילה פנימית, שורת פעולות, מטא, מחברת; וידאו (`/media/46`, טיוטה) – badge, נגן ברדיוס 28, ניגון והסתרת הבר, תאריך מתחת לנגן. מובייל לא צולם (חלון הדפדפן לא השתנה בגודל) – העמודות נערמות ב-xs דרך `gridTemplateColumns`.
 - ה-API, Vite ו-Memurai כבר רצו כשהשלב התחיל – לא הופעלו ולא נעצרו על ידו. **אין סקריפט חדש ב-`package.json`.**
@@ -177,3 +177,22 @@
 - **4ב:** ענף `isText` כבר ב-layout של 7/5 מ-lg עם `LessonHeader` (kicker "ספר", H1 40/56) ותאריך 13px מתחת למציג; `TextViewer` עצמו, הקישור "פתיחה בכרטיסייה חדשה" וכפתור "הפקת סיכום מחדש" – 4ב.
 - `mediaTypeAccents` עדיין בשימוש במחברת (`RichNoteEditor`, `BookmarksSidebar`) – 5ג.
 - השוואה מול `new-20`/`new-26` במובייל – 8ב.
+
+---
+
+## שלב 4ג – תוכן הטאבים: סיכום, פרקים, תמלול, הערות, דיון + ChatPane (2026-11-19, sonnet)
+
+### מה השתנה
+- **סיכום (20):** `AISummaryPanel` – H3 display 24, פסקה 16 / 1.9 ב-`ink2`, נקודות מפתח כרשימה עם נקודת accent של 6px (לא chips), כותרות h4 18/800, בלי Divider; `AiTagSuggestions` – קופסת `fill-2` (D-105).
+- **פרקים (21):** `ChaptersPanel` (D-106).
+- **תמלול (22):** `SegmentedControl` במקום `ToggleButtonGroup` ב-`MediaInsightsTabs`; `FollowAlongTranscript` עם `<mark>` ו-`surface.cue` (D-104); `TranscriptEditor` – כותרת display 24 ופסקאות 16 / 1.9. טוקן `cue` ב-`tokens.js`/`theme.js`.
+- **הערות (23):** `NotesPanel` – כותרת display 24, כפתור "שמור" primary בלי אייקון. הרשימה, העריכה, שלושת סוגי העוגנים – ללא שינוי.
+- **דיון (24):** `AIDiscussionPanel` עם `SegmentedControl` לשלושת המצבים; `ChatPane` (D-107). `SmartSearchPane` ו-`HistoryPane` לא שונו (כרטיסי Paper קיימים נראים נכון בסגנון החדש).
+- לא נוסף מיכל גלילה; לא נוספו או נמחקו מחרוזות.
+- החלטות: D-102 עד D-107.
+
+### בדיקות ושער
+- בדיקות קיימות עברו בלי שינוי (כפתורי `aria-pressed` נשמרו – D-103). נוספה בדיקה אחת: נקודות מפתח כ-`ul`/`li` (`AISummaryPanel.test.jsx`).
+- **`npm run verify` ירוק** – 170 קבצים + הבדיקה החדשה, build, check:chunks.
+- **`npm run e2e`:** ריצה ראשונה 4/5 – ה-journey בעברית נפל בהרשמה (נשאר ב-`/sign-up`, לפני מסך שעוצב מחדש); ריצה חוזרת של הספק לבדו – עברה. API ו-Vite כבר רצו, לא הופעלו ולא נעצרו.
+- **פתוח:** לא צולם בדפדפן; השוואה מול `new-20..24` ובדיקת dark/מובייל – 8ב. `ChatPane` ב-/ask לא נבדק חזותית (5ב).

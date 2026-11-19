@@ -1,7 +1,6 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import SegmentedControl from "../../../../features/SegmentedControl/SegmentedControl";
 import Typography from "@mui/material/Typography";
 import useAIDiscussionController, { DISCUSSION_MODES } from "../../useAIDiscussionController";
 import SmartSearchPane from "./SmartSearchPane";
@@ -45,38 +44,21 @@ const AIDiscussionPanel = ({ mediaId, media, transcript, isText = false, onSeek,
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, height: "100%" }}>
-      <ToggleButtonGroup
+      {/* Three ways into the lesson, in this order in the DOM and so in
+          reading order: the history sits after the discussion, where it was
+          asked. A long label scrolls the track sideways rather than push the
+          panel wider (SegmentedControl, overflowX auto). */}
+      <SegmentedControl
         value={mode}
-        exclusive
-        fullWidth
-        size="small"
-        color="primary"
-        // An exclusive group reports null when the active button is pressed
-        // again; that is not a mode, so it is ignored rather than stored.
-        onChange={(_, next) => next && setMode(next)}
-        aria-label={t("discussion.modes")}
-        // MUI joins grouped buttons with margin-left: -1px, which assumes
-        // left-to-right. In this right-to-left page that pushed the second
-        // button 1px past the panel's edge and gave the tab a horizontal
-        // scrollbar. The logical property overlaps the borders on whichever
-        // side the page reads from.
-        sx={{
-          "& .MuiToggleButtonGroup-grouped:not(:first-of-type)": {
-            // eslint-disable-next-line no-restricted-syntax -- zeroes MUI's own physical margin
-            marginLeft: 0,
-            marginInlineStart: "-1px",
-          },
-          // Three labels share a third of the page; let a long one wrap
-          // rather than push the group wider than the panel.
-          "& .MuiToggleButton-root": { lineHeight: 1.3, px: 1 },
-        }}
-      >
-        {/* In this order in the DOM, and so in reading order on the screen:
-            the history sits after the discussion, where it was asked. */}
-        <ToggleButton value={DISCUSSION_MODES.search}>{t("discussion.search")}</ToggleButton>
-        <ToggleButton value={DISCUSSION_MODES.chat}>{t("discussion.chat")}</ToggleButton>
-        <ToggleButton value={DISCUSSION_MODES.history}>{t("discussion.history")}</ToggleButton>
-      </ToggleButtonGroup>
+        onChange={setMode}
+        label={t("discussion.modes")}
+        options={[
+          { value: DISCUSSION_MODES.search, label: t("discussion.search") },
+          { value: DISCUSSION_MODES.chat, label: t("discussion.chat") },
+          { value: DISCUSSION_MODES.history, label: t("discussion.history") },
+        ]}
+        sx={{ alignSelf: "flex-start" }}
+      />
 
       {readiness !== "ready" ? (
         <Alert severity={NOT_READY_SEVERITY[readiness]} data-testid="discussion-not-ready">

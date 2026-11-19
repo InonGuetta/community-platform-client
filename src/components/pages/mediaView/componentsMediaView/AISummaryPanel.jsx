@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
-import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -96,7 +95,7 @@ const AISummaryPanel = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="subtitle1" fontWeight={600}>{t("summary.title")}</Typography>
+      <Typography variant="display" component="h3" sx={{ fontSize: 24 }}>{t("summary.title")}</Typography>
 
       {/* A book only: a recording's transcript is never OCR. canGenerate is
           exactly "may re-process this document", so it is also who can fix it. */}
@@ -135,16 +134,22 @@ const AISummaryPanel = ({
       )}
 
       {summary && !running && (
-        <Typography variant="body2" color="text.secondary" dir="auto">{summary}</Typography>
+        <Typography dir="auto" sx={{ fontSize: 16, lineHeight: 1.9, color: "surface.ink2" }}>{summary}</Typography>
       )}
 
       {summary && keyPoints.length > 0 && !running && (
         <>
-          <Divider />
-          <Typography variant="subtitle2" fontWeight={600}>{t("summary.keyPoints")}</Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          <Typography variant="h6" component="h4" sx={{ fontWeight: 800, fontSize: 18, mt: 1 }}>{t("summary.keyPoints")}</Typography>
+          {/* A list with a 6px accent dot, not chips (Redesign v4, screen 20). */}
+          <Box component="ul" data-testid="key-points" sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 1.5 }}>
             {keyPoints.map((point, i) => (
-              <Chip key={i} label={point} dir="auto" size="small" variant="outlined" color="primary" />
+              <Box component="li" key={i} dir="auto" sx={{ display: "flex", gap: 1.5, fontSize: 15, lineHeight: 1.6 }}>
+                <Box
+                  aria-hidden="true"
+                  sx={{ mt: "9px", width: 6, height: 6, borderRadius: "50%", bgcolor: "primary.main", flexShrink: 0 }}
+                />
+                <span>{point}</span>
+              </Box>
             ))}
           </Box>
         </>
@@ -155,8 +160,7 @@ const AISummaryPanel = ({
           all the same. The same chips the archive card shows. */}
       {tags.length > 0 && (
         <>
-          <Divider />
-          <Typography variant="subtitle2" fontWeight={600}>{t("summary.tags")}</Typography>
+          <Typography variant="h6" component="h4" sx={{ fontWeight: 800, fontSize: 18, mt: 1 }}>{t("summary.tags")}</Typography>
           <Box data-testid="summary-tags" sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
             {tags.map((tag) => (
               <Chip key={tag} label={tag} size="small" variant="outlined" color="secondary" />

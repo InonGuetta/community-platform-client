@@ -2,6 +2,7 @@ import { memo, useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { cueIndexAt } from "../../../../utilities/transcriptTiming";
 import { formatTime } from "../../../../utilities/formatTime";
 import { useTranslation } from "react-i18next";
@@ -31,7 +32,7 @@ const scrollParentOf = (el) => {
 // sentences whose highlight changed, not every sentence of a two-hour lesson.
 const Cue = memo(({ cue, index, active, onSeek }) => (
   <Box
-    component="span"
+    component="mark"
     role="button"
     tabIndex={0}
     data-cue={index}
@@ -46,13 +47,15 @@ const Cue = memo(({ cue, index, active, onSeek }) => (
     }}
     sx={{
       cursor: "pointer",
-      borderRadius: 0.5,
-      px: 0.25,
+      // A <mark> on every sentence so the playing one is the page's own
+      // highlight (screen 22): cyan-200/80 in light, a readable wash in dark.
+      borderRadius: "4px",
+      px: 0.5,
       transition: "background-color 200ms ease",
-      bgcolor: active ? "secondary.light" : "transparent",
-      color: active ? "secondary.contrastText" : "text.primary",
-      "&:hover": { bgcolor: active ? "secondary.light" : "action.hover" },
-      "&:focus-visible": { outline: "2px solid", outlineColor: "secondary.main" },
+      bgcolor: active ? "surface.cue" : "transparent",
+      color: "text.primary",
+      "&:hover": { bgcolor: active ? "surface.cue" : "action.hover" },
+      "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main" },
     }}
   >
     {cue.text}{" "}
@@ -105,13 +108,13 @@ const FollowAlongTranscript = ({ captions, currentTime, onSeek }) => {
         </Typography>
       )}
       {active !== null && (
-        <Box sx={{ position: "sticky", top: 0, zIndex: 1, display: "flex", justifyContent: "flex-end", pointerEvents: "none" }}>
-          <Button size="small" variant="outlined" onClick={jumpToNow} sx={{ pointerEvents: "auto", bgcolor: "background.paper", borderRadius: 999 }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 1, display: "flex", justifyContent: "flex-start", pointerEvents: "none", mb: 2 }}>
+          <Button size="small" variant="outlined" startIcon={<AccessTimeIcon />} onClick={jumpToNow} sx={{ pointerEvents: "auto", bgcolor: "background.paper" }}>
             {t("follow.toPlaying")}
           </Button>
         </Box>
       )}
-      <Typography component="div" dir="auto" sx={{ lineHeight: 2, textAlign: "start", whiteSpace: "normal" }}>
+      <Typography component="div" dir="auto" sx={{ fontSize: 16, lineHeight: 1.9, color: "surface.ink2", textAlign: "start", whiteSpace: "normal" }}>
         {cues.map((cue, index) => (
           <Cue key={index} cue={cue} index={index} active={index === active} onSeek={onSeek} />
         ))}

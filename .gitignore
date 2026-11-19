@@ -44,3 +44,6 @@ Thumbs.db
 e2e/.run.json
 test-results/
 playwright-report/
+
+# Redesign v4 mockups: 20MB of reference PNG/HTML, kept out of history (design/redesign-v4.zip source is outside the repo)
+design/redesign-v4/

@@ -304,3 +304,75 @@
 ### D-48 · אנימציות ו-reduced motion · `לסקירה`
 - **החלטה:** `PageTransition` הקיים נשאר, ומתבטל תחת `prefers-reduced-motion` יחד עם אנימציות האריח, ה-dock והלב (חלק א׳, נגישות). דרך `@media (prefers-reduced-motion: reduce)` גלובלי ב-`MuiCssBaseline`.
 - **שלב:** 1.
+
+---
+
+## שלב 1 – theme, טוקנים, פונטים ורכיבי בסיס
+
+### D-49 · `secondary` בפלטה · `לסקירה`
+- **בעיה:** המפרט לא מגדיר צבע משני. ה-teal הישן (`secondary`) משמש כ-15 מקומות: שורת תמלול פעילה (`secondary.light` + `contrastText`), מסגרת "נשמר", צ׳יפים, כפתורי האורח.
+- **החלטה:** `secondary.main` = brand-500 `#6366f1` (כהה: `#818cf8`), ו-`light` נגזר ע"י MUI (לא `#eef2ff`), כי הקוראים מצמידים אליו `contrastText` לבן.
+- **חלופה:** `secondary` = `ink` – הופך כל הדגשה לשחורה, ושורת התמלול הפעילה הייתה לבן על לבן.
+- **שלב:** 1.
+
+### D-50 · `shape.borderRadius` נשאר 4 · `לסקירה`
+- **בעיה:** כל `sx={{ borderRadius: N }}` בקוד הוא כפולה של `shape.borderRadius`. שינוי הבסיס היה משנה בשקט את כולם.
+- **החלטה:** נשאר 4. הרדיוסים של המפרט ב-`src/theme/tokens.js` → `RADIUS` (וב-`theme.tokens.radius`), ונכתבים בפיקסלים (`` `${RADIUS.card}px` ``). רכיבים מקבלים את הרדיוס שלהם ב-overrides.
+- **שלב:** 1.
+
+### D-51 · `Paper` בגובה ברירת המחדל הוא כרטיס סקשן · `לסקירה`
+- **החלטה:** `MuiPaper.elevation1` = גבול `line`, רדיוס 24, צל כרטיס (קומפוננטה 12) – כל `<Paper>` ו-`TableContainer component={Paper}` מקבלים את המראה. הרדיוס כתוב plain (לא `&.MuiPaper-rounded`) כדי ש-`sx` של קורא ותתי-רכיבים (Accordion, רשימת Autocomplete) יגברו עליו. Menu (16), Dialog (24), Drawer, AppBar ו-Snackbar בגבהים אחרים ושומרים על הצורה שלהם. ה-hairline של Accordion מוסתר.
+- **חלופה:** רק `MuiCard` – אז רוב הכרטיסים באפליקציה (Paper) לא היו משתנים עד שלבם.
+- **שלב:** 1.
+
+### D-52 · פונטים: Heebo כגיבוי ליידיש · `לסקירה`
+- **בעיה (נבדק ב-cmap של קובצי ה-woff):** ל-Assistant **אין** את ליגטורות היידיש װ ױ ײ (U+05F0–05F2) ואת FB1D, FB1F (ײַ), FB4C. ב-`src/locales/yi` יש 377 מופעים של ײ. ל-Heebo יש את כולן. לשני הפונטים חסרים מתג (U+05BD) ו-U+05C4–05C6 (נדירים). צרפתית וספרדית מכוסות במלואן.
+- **החלטה:** `src/theme/fonts.js` (מיובא ב-`main.jsx`): Assistant 400–800 (hebrew + latin + latin-ext); Heebo hebrew 400–800 (גיבוי לגליפים של היידיש באותו משקל) + latin/latin-ext 800 (display). ה-stack: `"Assistant", "Heebo", "Segoe UI", Arial, sans-serif`; display: `"Heebo", "Assistant", …`. `unicode-range` מבטיח שרק מה שמצויר יורד. 300 ו-900 לא נטענים (לא בשימוש בטוקנים).
+- **חלופה:** Heebo כפונט הטקסט ביידיש בלבד (`:lang(yi)`) – אחידות מלאה ביידיש, אבל סטייה מהמפרט בשפה שלמה.
+- **שלב:** 1.
+
+### D-53 · מראה השדות דרך ה-theme – פרטים · `לסקירה`
+- **החלטה (מימוש D-28):** `MuiInputLabel.defaultProps.shrink = true` (כל השדות, גם `variant="standard"` בדפי ה-auth – התווית שלהם קטנה מעל השדה כבר עכשיו, עד 5א); override ל-`outlined` בלבד: `position: relative`, `transform: none`, 13/600 `ink-2`, ריווח 6. ה-`legend` של ה-notch מוסתר. שדה: רקע `fill-2`, רדיוס 14, גבול שקוף, 48/40 (רגיל/קטן); focus: לבן, גבול accent, טבעת 4px. placeholder `#86868b`.
+- **כיוון:** MUI כותב padding של adornment, את ה-chevron של Select ואת ה-thumb של Switch בצדדים פיזיים, ואין stylis flip. `buildTheme` מחשב את הצד הפיזי מתוך `direction` (S/E). זה גם מתקן באג קיים: ב-RTL אייקון החיפוש ישב צמוד לגבול וה-chevron ישב בצד ההתחלה. `InputAdornment` ו-`Chip` (icon/delete/avatar) עברו ל-margins לוגיים, כמו הכפתור.
+- **שלב:** 1.
+
+### D-54 · בלי ripple, טבעת focus אחידה · `לסקירה`
+- **החלטה:** `MuiButtonBase.disableRipple` גלובלי (המוקאפ לוחץ ב-`scale(.95)`, בלי ripple). `.Mui-focusVisible` מקבל `outline: 2px solid accent; offset 3` על כל ButtonBase; ב-Tab וב-MenuItem הטבעת פנימית (offset שלילי) כי המיכל חותך; ב-Switch הטבעת על ה-track. רכיב לא-MUI עם `tabindex`/קישור מקבל אותה טבעת מ-CssBaseline.
+- **שלב:** 1.
+
+### D-55 · Tabs גלילים כברירת מחדל · `לסקירה`
+- **החלטה:** `MuiTabs.defaultProps = { variant: "scrollable", scrollButtons: false }` – גלילה אופקית במובייל (קומפוננטה 10) בלי חצים. אין היום `centered` באפליקציה.
+- **שלב:** 1.
+
+### D-56 · כפתורים: `outlined` נייטרלי, `text` צר · `לסקירה`
+- **החלטה:** variant `outlined` בצבע ברירת המחדל = גבול `line-strong` וטקסט `ink` (ה-"outline" של המפרט); `outlined` בצבע אחר (error וכו') שומר על הצבע שלו. `text`: padding אופקי 16 (לא 24). גדלים: small 36/16/13, medium 44/24/15, large 52/28/16. `minHeight` ולא `height`, כדי שתווית ארוכה תוכל לרדת שורה. variants חדשים: `soft`, `dark`, `tinted-success`.
+- **שלב:** 1.
+
+### D-57 · Chip · `לסקירה`
+- **החלטה:** צ׳יפ filled בצבע ברירת המחדל = `fill`/`ink`, 36, pill, 14/600 (צ׳יפ הסינון). `size="small"` = 28, 12/700 (גודל של badge – התגיות הקיימות). צ׳יפים צבעוניים (`color="primary"` וכו') שומרים על הצבע. מצב "נבחר" (`ink`) ייבנה ב-toolbar של 3א, לא ב-theme.
+- **שלב:** 1.
+
+### D-58 · `SegmentedControl` – שתי סמנטיקות · `לסקירה`
+- **החלטה:** prop `semantics`: `"pressed"` (ברירת מחדל) = `role="group"` + כפתורים עם `aria-pressed`, כל אחד tab stop (ה-e2e של ההרשמה מוצא את התפקיד כ-button בשמו); `"radio"` = `radiogroup` + `radio`/`aria-checked`, tab stop אחד, חצים מזיזים את הבחירה לפי כיוון הקריאה (ב-RTL שמאלה = קדימה), Home/End. בחירה יחידה בלבד – צ׳יפי הסוג (multi, D-03) נשארים צ׳יפים. אפשרות disabled יכולה לשאת `tooltip` (תרומה חודשית, D-38).
+- **שלב:** 1.
+
+### D-59 · `SearchField` = `SearchBar` · `לסקירה`
+- **החלטה:** לפי D-29 לא נוצר רכיב `SearchField`. `features/SearchBar/SearchBar.jsx` מקבל את קומפוננטה 8: pill, רקע `fill`, 40, אייקון בהתחלה, ו-focus: לבן + טבעת accent של 2px (במקום ההילה של 4px של שדה טופס). `FilterBar` עדיין דורס את הסגנון ב-`sx` משלו – יוסר ב-3א.
+- **שלב:** 1.
+
+### D-60 · `NoDataDialog` ← `EmptyState` · `לסקירה`
+- **החלטה:** `NoDataDialog` מרנדר `EmptyState` (D-30). הכותרת עוברת מ-`h6` ל-`h2` בסגנון display – שינוי ברמת הכותרת בכל מצבי הריק הקיימים (MediaGrid, הקורסים שלי, ניהול קורסים, מפגשים). שום בדיקה קיימת לא נשענה על הרמה.
+- **שלב:** 1.
+
+### D-61 · טוקנים כהים שהמפרט לא נותן · `לסקירה`
+- **החלטה:** `ink-2` `#D1D5DB`, `placeholder` `#7C8594`, `fill-2` `#1F2937` (כמו `fill`), hover של `fill` `#334155`, פריט נבחר ב-segmented `#334155`, `danger` `#fb7185` (rose-400, קריא על `#111827`), `accentSoft` = accent ב-15%. badges: הצבע ב-15% וטקסט בגוון 300 שלו (`#6ee7b7`, `#fcd34d`, `#fda4af`, `#a5b4fc`), לפי הכלל של חלק ב׳.
+- **שלב:** 1.
+
+### D-62 · וריאנטים של טיפוגרפיה · `לסקירה`
+- **החלטה:** `display` (Heebo 800, `-0.035em`, 1.02, בלי גודל – כל שימוש קובע) מרונדר כברירת מחדל כ-`h2`; `kicker` (11/700/`.08em`/uppercase) כ-`p`. גם `h1`–`h3` מקבלים את סגנון ה-display, `h4` 800, `h5`/`h6` 700. `button`: בלי uppercase.
+- **שלב:** 1.
+
+### D-63 · ESLint מתעלם מ-`design/` · `לסקירה`
+- **בעיה:** `design/redesign-v4/_coverart.js` (מקומי, gitignored, משלב 0) הכשיל את `npm run lint` על משתנה לא בשימוש.
+- **החלטה:** `design/**` נוסף ל-`ignores` ב-`eslint.config.js`. זה חומר עזר, לא קוד של האפליקציה; הקובץ עצמו לא נערך (3א מעתיק ממנו).
+- **שלב:** 1.

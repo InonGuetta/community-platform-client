@@ -1,6 +1,8 @@
 // First, before anything renders: the browser may announce that the app can be
 // installed (PRD MOB-1) before React has mounted anything to hear it.
 import "./utilities/installPrompt";
+// The typefaces, before the first paint asks for them (D-27).
+import "./theme/fonts";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";

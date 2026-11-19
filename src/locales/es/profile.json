@@ -1,0 +1,108 @@
+{
+  "title": "Mi cuenta",
+  "unverified": "Dirección no verificada",
+  "verified": "Dirección verificada",
+  "displayName": "Nombre visible",
+  "save": "Guardar",
+  "password": {
+    "title": "Cambiar la contraseña",
+    "current": "Contraseña actual",
+    "new": "Contraseña nueva",
+    "confirm": "Confirmar la contraseña nueva",
+    "minLength": "Al menos {{n}} caracteres",
+    "mismatch": "Las contraseñas no coinciden",
+    "signsOutOthers": "Cambiar la contraseña cierra la sesión en todos los demás dispositivos conectados a la cuenta.",
+    "submit": "Cambiar la contraseña",
+    "changed": "Contraseña cambiada",
+    "failed": "No se pudo cambiar la contraseña"
+  },
+  "details": {
+    "saved": "Datos guardados",
+    "failed": "No se pudieron guardar los datos"
+  },
+  "email": {
+    "title": "Notificaciones por correo y por SMS",
+    "intro": "Todas las notificaciones aparecen en la campana de la parte superior de la página. Aquí eliges cuáles llegan también por correo o por SMS.",
+    "loadFailed": "No se pueden cargar tus preferencias en este momento.",
+    "allOff": "Pediste dejar de recibir todos los correos de la plataforma.",
+    "restore": "Volver a recibir correos",
+    "saveFailed": "No se pudo guardar la preferencia",
+    "channelEmail": "Correo",
+    "channelSms": "SMS",
+    "switchEmail": "{{category}} — por correo",
+    "switchSms": "{{category}} — por SMS",
+    "noSms": "No se envía por SMS",
+    "smsNeedsPhone": "Para recibir notificaciones por SMS, añade y verifica un número de teléfono en la tarjeta «Número de teléfono».",
+    "quietHours": "No se envían SMS entre las 22:00 y las 07:00, salvo para avisar de que una sesión ha empezado.",
+    "smsAllOff": "Desactivar todos los SMS"
+  },
+  "role": {
+    "title": "Solicitud de permiso",
+    "pending": "Tu solicitud de permiso de {{role}} está pendiente de aprobación por un administrador. Hasta entonces, la cuenta conserva sus permisos actuales.",
+    "rejected": "Tu solicitud anterior de permiso de {{role}} no fue aprobada.",
+    "rejectedReason": "Tu solicitud anterior de permiso de {{role}} no fue aprobada. Motivo: {{reason}}",
+    "tryAgainLater": "Podrás enviar una nueva solicitud dentro de siete días.",
+    "current": "Tu permiso actual: {{role}}. Una solicitud de un permiso superior requiere la aprobación de un administrador.",
+    "send": "Enviar solicitud"
+  },
+  "avatar": {
+    "upload": "Subir una foto",
+    "change": "Cambiar la foto",
+    "remove": "Quitar la foto",
+    "hint": "JPG, PNG o WebP. Después de elegirla, eliges qué parte de la foto se muestra.",
+    "notImage": "El archivo no se puede leer como imagen. Puedes subir un JPG, PNG o WebP.",
+    "label": "Foto de perfil",
+    "welcome": {
+      "title": "¡Te damos la bienvenida, {{name}}!",
+      "titleNoName": "¡Te damos la bienvenida!",
+      "body": "¿Quieres añadir una foto de perfil? Así te reconocerán los profesores y los compañeros en los cursos y las sesiones.",
+      "later": "Más tarde",
+      "done": "Listo",
+      "where": "Puedes añadir o cambiar tu foto cuando quieras en la página «Mi cuenta»."
+    },
+    "takePhoto": "Hacer una foto",
+    "crop": {
+      "title": "Editar la foto de perfil",
+      "hint": "Arrastra la foto para colocarla, y acerca o aleja para elegir la parte que se muestra en el círculo.",
+      "area": "Zona de recorte: arrastra o usa las flechas para mover, + y − para acercar",
+      "zoom": "Zoom",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "save": "Guardar la foto"
+    },
+    "camera": {
+      "title": "Hacer una foto de perfil",
+      "starting": "Iniciando la cámara…",
+      "capture": "Hacer la foto",
+      "denied": "Se bloqueó el acceso a la cámara. Puedes permitirlo en los ajustes del navegador, o subir una foto desde tu dispositivo.",
+      "none": "No se encontró ninguna cámara en este dispositivo. Puedes subir una foto desde tu dispositivo.",
+      "failed": "No se pudo iniciar la cámara. Puedes subir una foto desde tu dispositivo."
+    }
+  },
+  "phone": {
+    "title": "Número de teléfono",
+    "help": "Para recibir notificaciones por SMS — elige cuáles en la tarjeta de notificaciones. Solo tú ves el número; los administradores solo ven sus cuatro últimas cifras.",
+    "label": "Número de móvil",
+    "newLabel": "Nuevo número de móvil",
+    "hint": "Un número israelí, o con el prefijo del país (+1…)",
+    "send": "Enviar código",
+    "verified": "Verificado",
+    "change": "Cambiar número",
+    "remove": "Quitar el número",
+    "cancel": "Cancelar",
+    "enterCode": "Introducir el código",
+    "pendingText": "Enviamos un código al <num>{{phone}}</num>. El número se añadirá cuando lo introduzcas.",
+    "sendFailed": "No se puede enviar el código ahora mismo. Inténtalo de nuevo en un momento.",
+    "removeTitle": "¿Quitar tu número de teléfono?",
+    "removeBody": "Las notificaciones por SMS se desactivarán. Puedes volver a añadir un número cuando quieras.",
+    "dialog": {
+      "title": "Introduce el código de verificación",
+      "body": "Enviamos un código de 6 cifras al <num>{{phone}}</num>. Es válido durante 10 minutos.",
+      "codeLabel": "Código de verificación",
+      "verify": "Verificar",
+      "resend": "Enviar un código nuevo",
+      "resendIn": "Código nuevo en {{seconds}} s",
+      "verifyFailed": "No se puede verificar el código ahora mismo. Inténtalo de nuevo."
+    }
+  }
+}

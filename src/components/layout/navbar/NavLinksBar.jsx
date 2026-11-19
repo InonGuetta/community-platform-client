@@ -4,11 +4,18 @@ import Box from "@mui/material/Box";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { navButtonSx } from "./navStyles";
 import NavLinkLabel from "./NavLinkLabel";
+import { useTranslation } from "react-i18next";
 
 // The bar's row of tabs, from md up: "תוכן אישי" first, which opens the
 // personal menu (PersonalMenu), then the role's links (navLinks.js).
-const NavLinksBar = ({ links, pathname, personalActive, personalAnchor, setPersonalAnchor, pendingRoleRequests }) => (
-  <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0, flexGrow: 1, alignSelf: "stretch" }}>
+const NavLinksBar = ({ links, pathname, personalActive, personalAnchor, setPersonalAnchor, pendingRoleRequests }) => {
+  const { t } = useTranslation("nav");
+  return (
+  // minWidth 0 and overflowX: the row is as wide as its language makes it —
+  // French and Spanish labels run half again as long as Hebrew — and when it
+  // does not fit, IT scrolls, rather than pushing the bell, the language and
+  // the account off the edge of the bar.
+  <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0, flexGrow: 1, alignSelf: "stretch", minWidth: 0, overflowX: "auto", scrollbarWidth: "none" }}>
     {/* Leads the row, where the personal tabs it replaces used to sit.
         Highlighted whenever ANY of the shelves behind it is the open page,
         so the bar still says where you are once the menu is closed. */}
@@ -24,12 +31,12 @@ const NavLinksBar = ({ links, pathname, personalActive, personalAnchor, setPerso
       // the app — see MuiButton in theme.js.
       sx={navButtonSx(personalActive)}
     >
-      תוכן אישי
+      {t("personal")}
     </Button>
 
     {links.map((link) => (
       <Button
-        key={link.label}
+        key={link.to}
         component={Link}
         to={link.to}
         size="small"
@@ -39,6 +46,7 @@ const NavLinksBar = ({ links, pathname, personalActive, personalAnchor, setPerso
       </Button>
     ))}
   </Box>
-);
+  );
+};
 
 export default NavLinksBar;

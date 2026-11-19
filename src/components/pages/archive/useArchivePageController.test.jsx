@@ -2,7 +2,7 @@
 import { it, expect, describe, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
-import { ERROR_CODES, ERROR_CODE_HE } from "../../../utilities/apiError";
+import { ERROR_CODES, messageForError } from "../../../utilities/apiError";
 
 // The wiring between the filter and the address.
 //
@@ -380,6 +380,6 @@ describe("a refused edit says why, as text", () => {
     await open();
     answerThunksWith(refused(ERROR_CODES.FORBIDDEN));
     await act(() => api.handleTogglePublish(ITEM));
-    expect(lastToast()).toEqual({ message: ERROR_CODE_HE[ERROR_CODES.FORBIDDEN], severity: "error" });
+    expect(lastToast()).toEqual({ message: messageForError({ code: ERROR_CODES.FORBIDDEN }), severity: "error" });
   });
 });

@@ -1,0 +1,93 @@
+{
+  "roles": {
+    "student": "Élève",
+    "lecturer": "Enseignant",
+    "admin": "Administrateur"
+  },
+  "mediaTypes": {
+    "video": "Vidéo",
+    "audio": "Audio",
+    "text": "Lecture"
+  },
+  "creatorLabel": {
+    "video": "Nom de l'enseignant",
+    "audio": "Nom de l'enseignant",
+    "text": "Nom de l'auteur"
+  },
+  "creatorPrefix": {
+    "video": "Enseignant",
+    "audio": "Enseignant",
+    "text": "Auteur"
+  },
+  "creatorNone": "Général",
+  "sessionTypes": {
+    "1on1": "Individuel",
+    "group": "Groupe",
+    "webinar": "Webinaire"
+  },
+  "countNone": "Aucun(e) {{many}}",
+  "duration": {
+    "short": "0–15 minutes",
+    "medium": "15–30 minutes",
+    "long": "30–60 minutes",
+    "xlong": "Plus de 60 minutes",
+    "seconds": "{{n}} s",
+    "minutes": "{{n}} min",
+    "hours": "{{h}} h",
+    "hoursMinutes": "{{h}} h {{m}} min"
+  },
+  "place": {
+    "page": "p. {{page}}",
+    "atTime": "à {{time}}",
+    "orphaned": "L'emplacement n'est plus disponible",
+    "inText": "À un endroit du texte",
+    "orphanedShort": "Indisponible",
+    "inTextShort": "Dans le texte",
+    "chunk": "Passage {{n}}"
+  },
+  "track": {
+    "oneDone": "Cours terminé",
+    "allDone": "Les {{total}} cours sont terminés",
+    "progress": "{{completed}} cours terminés sur {{total}}"
+  },
+  "notesExport": {
+    "untitled": "(sans titre)",
+    "from": " — extrait de : {{title}}",
+    "untitledNote": "Note sans titre",
+    "notebook": "Mon carnet",
+    "notebookDated": "Mon carnet - {{date}}"
+  },
+  "csv": {
+    "name": "Nom",
+    "email": "E-mail",
+    "enrolledAt": "Date d'inscription",
+    "active": "Actif",
+    "yes": "Oui",
+    "no": "Non",
+    "students": "Élèves",
+    "studentsFile": "Élèves - {{course}}",
+    "completed": "Terminés",
+    "started": "Commencés",
+    "lastActivity": "Dernière activité",
+    "progress": "Progression",
+    "progressFile": "Progression - {{course}}",
+    "statusDone": "Terminé",
+    "statusStarted": "Commencé"
+  },
+  "discussion": {
+    "source": "Source {{n}}",
+    "question": "Question :",
+    "answer": "Réponse :",
+    "title": "Discussion avec l'IA — {{title}}",
+    "sources": "Sources : {{list}}"
+  },
+  "noteSource": {
+    "pageSuffix": " · p. {{page}}",
+    "lessonFallback": "Cours",
+    "generalReference": "Référence générale",
+    "image": "[image]"
+  },
+  "timing": {
+    "estimated": "Les horaires sont estimés : ce cours a été transcrit avant que le minutage exact de chaque phrase soit conservé."
+  }
+}

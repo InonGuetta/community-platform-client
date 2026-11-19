@@ -9,6 +9,7 @@ import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { selectDiscussionByMediaId, selectDiscussionQuota } from "../../../store/selectors/discussionSelectors";
 import { statuses } from "../../../utilities/constant";
 import { answerNote, questionBefore, conversationText, SAVE_STATES } from "../../../utilities/discussionNote";
+import i18n from "../../../i18n/i18n";
 
 // The "דיון עם AI" tab's logic: every dispatch and selector it needs, so the
 // panel and its two panes stay presentation only.
@@ -123,7 +124,7 @@ const useAIDiscussionController = ({ mediaId, transcript, media }) => {
     setSavedAnswers((prev) => ({ ...prev, [answerId]: saved ? SAVE_STATES.saved : SAVE_STATES.failed }));
     // Said out loud as well as on the answer: the notebook is further down
     // the page, out of sight of the chat.
-    if (saved) dispatch(notify({ message: "התשובה נשמרה במחברת של השיעור", severity: "success" }));
+    if (saved) dispatch(notify({ message: i18n.t("lesson:discussion.answerSaved"), severity: "success" }));
     return saved;
   }, [dispatch, mediaId, media?.title, media?.media_type]);
 
@@ -134,10 +135,10 @@ const useAIDiscussionController = ({ mediaId, transcript, media }) => {
   const copyConversation = useCallback(async (messages) => {
     try {
       await navigator.clipboard.writeText(conversationText(messages, { mediaTitle: media?.title }));
-      dispatch(notify({ message: "השיחה הועתקה", severity: "success" }));
+      dispatch(notify({ message: i18n.t("chat:copied"), severity: "success" }));
       return true;
     } catch {
-      dispatch(notify({ message: "לא ניתן להעתיק את השיחה בדפדפן הזה", severity: "warning" }));
+      dispatch(notify({ message: i18n.t("chat:copyFailed"), severity: "warning" }));
       return false;
     }
   }, [dispatch, media?.title]);

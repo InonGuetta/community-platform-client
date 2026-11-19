@@ -1,0 +1,265 @@
+{
+  "published": "Publié le : ",
+  "draftUploaded": "Brouillon · téléversé le : ",
+  "tabs": {
+    "summary": "Résumé",
+    "chapters": "Chapitres",
+    "transcript": "Transcription",
+    "notes": "Notes personnelles",
+    "sessionChat": "Chat de la séance",
+    "discuss": "Discussion avec l'IA",
+    "transcriptView": "Affichage de la transcription",
+    "follow": "Suivre la lecture",
+    "fullText": "Texte intégral",
+    "fullTextEdit": "Texte intégral et modification"
+  },
+  "summary": {
+    "title": "Résumé IA",
+    "queued": "En attente dans la file...",
+    "extracting": "Extraction du texte du fichier...",
+    "transcribing": "Transcription de l'enregistrement...",
+    "analyzing": "Production du résumé et des points clés...",
+    "checkAgain": "Vérifier à nouveau",
+    "stoppedChecking": "Nous avons cessé de vérifier après une longue attente. Le processus est peut-être bloqué.",
+    "failed": "La production du résumé a échoué. Vous pouvez réessayer.",
+    "keyPoints": "Points clés",
+    "tags": "Étiquettes",
+    "none_book": "Il n'y a pas de résumé pour ce contenu",
+    "none_lesson": "Pas encore de résumé.",
+    "howToBook": "Cliquez sur « Produire le résumé » pour extraire le texte du fichier et le résumer.",
+    "generate": "Produire le résumé",
+    "regenerate": "Produire à nouveau le résumé"
+  },
+  "chapters": {
+    "title": "Intertitres selon les points clés",
+    "generating": "Génération...",
+    "regenerate": "Générer à nouveau",
+    "generate": "Générer les intertitres",
+    "howTo": "Cliquez sur « Générer les intertitres » pour diviser la transcription en intertitres selon les points clés.",
+    "notYet": "Les intertitres seront disponibles une fois la transcription et le résumé prêts."
+  },
+  "follow": {
+    "estimated": "Le minutage de ce cours est estimé : la phrase surlignée peut être en avance ou en retard de quelques secondes.",
+    "toPlaying": "Vers la lecture en cours"
+  },
+  "aiActions": {
+    "hebrewFixed": "L'hébreu a été corrigé",
+    "hebrewFixFailed": "La correction de l'hébreu a échoué",
+    "headingsMade": "Les intertitres ont été créés",
+    "headingsFailed": "La création des intertitres a échoué"
+  },
+  "notes": {
+    "title": "Signets et notes",
+    "howToMarkBook": "Pour marquer : sélectionnez la ligne dans le livre et cliquez sur « Enregistrer »",
+    "addAtTime": "Ajouter une note au moment actuel",
+    "atTime": "à {{time}}",
+    "save": "Enregistrer",
+    "note": "Note",
+    "saveNote": "Enregistrer la note",
+    "cancelEdit": "Annuler la modification",
+    "editNote": "Modifier la note",
+    "deleteBookmark": "Supprimer le signet"
+  },
+  "save": {
+    "listName": "Nom de la liste",
+    "title": "Ajouter à une liste de cours",
+    "loadFailed": "Le chargement des listes a échoué. Essayez de rouvrir.",
+    "noLists": "Vous n'avez pas encore de liste. Vous pouvez en créer une ici.",
+    "update": "Mettre à jour",
+    "lessons_zero": "Aucun cours",
+    "lessons_one": "Un cours",
+    "lessons_other": "{{count}} cours",
+    "rename": "Renommer la liste {{title}}",
+    "delete": "Supprimer la liste {{title}}",
+    "create": "Créer",
+    "newList": "Nouvelle liste",
+    "deleteQuestion": "Supprimer la liste <strong>{{title}}</strong> ? Les cours eux-mêmes restent enregistrés ; seule la liste est supprimée.",
+    "added": "Le cours a été ajouté à la liste « {{title}} »"
+  },
+  "discussion": {
+    "modes": "Type de discussion",
+    "search": "Recherche intelligente",
+    "chat": "Discussion avec l'IA",
+    "history": "Historique",
+    "caption": {
+      "search_lesson": "Recherche par le sens dans ce cours uniquement",
+      "search_book": "Recherche par le sens dans ce livre uniquement",
+      "history_lesson": "Vos conversations précédentes sur ce cours",
+      "history_book": "Vos conversations précédentes sur ce livre",
+      "chat_lesson": "Les réponses s'appuient sur ce cours uniquement, avec un renvoi à la source",
+      "chat_book": "Les réponses s'appuient sur ce livre uniquement, avec un renvoi à la source"
+    },
+    "notReady": {
+      "processing": "Le cours est encore en cours de traitement. Vous pourrez y faire des recherches et en discuter une fois le traitement terminé.",
+      "error": "Le traitement du cours a échoué, il n'y a donc pas encore de texte à discuter. L'enseignant peut relancer le traitement.",
+      "empty": "Ce cours n'a encore ni transcription ni texte : il n'y a rien à rechercher ni à discuter.",
+      "unavailable": "Nous n'avons pas pu charger le texte du cours. Essayez d'actualiser la page."
+    },
+    "answerSaved": "La réponse a été enregistrée dans le carnet du cours"
+  },
+  "smartSearch": {
+    "strongMatch": "Forte correspondance",
+    "playFrom": "Lire à partir de {{place}}",
+    "openAt_book": "Ouvrir le livre à {{place}}",
+    "openAt_lesson": "Ouvrir le fichier à {{place}}",
+    "placeholder_book": "Que voulez-vous trouver dans le livre ? Par exemple : ce qui est dit sur le repentir",
+    "placeholder_lesson": "Que voulez-vous trouver dans le cours ? Par exemple : ce qui est dit sur le repentir",
+    "label": "Rechercher dans le cours",
+    "clear": "Effacer la recherche",
+    "run": "Rechercher",
+    "failed": "La recherche a échoué. Veuillez réessayer.",
+    "intro": "La recherche trouve des passages par le sens, pas seulement par les mots exacts.",
+    "introPlay": " Cliquer sur un résultat lance la lecture à ce moment.",
+    "introOpen": " Cliquer sur un résultat ouvre la page.",
+    "none": "Aucun passage adapté n'a été trouvé. Essayez de reformuler, ou posez la question en mode « Discussion avec l'IA »."
+  },
+  "history": {
+    "questions_one": "Une question",
+    "questions_other": "{{count}} questions",
+    "untitled": "Conversation",
+    "current": "Conversation en cours",
+    "delete": "Supprimer la conversation",
+    "deleteNamed": "Supprimer la conversation « {{title}} »",
+    "deleteTitle": "Supprimer la conversation ?",
+    "deleteBody": "Les questions et réponses de la conversation seront supprimées et ne pourront pas être restaurées. Les réponses enregistrées dans le carnet y restent.",
+    "deleteConfirm": "Supprimer",
+    "backToList": "Retour à la liste",
+    "backToChat": "Retour à la conversation",
+    "resume": "Reprendre cette conversation",
+    "resumeFailed": "Nous n'avons pas pu reprendre la conversation. Veuillez réessayer.",
+    "loading": "Chargement de la conversation",
+    "openFailed": "L'ouverture de la conversation a échoué.",
+    "previous": "Conversation précédente",
+    "loadingList": "Chargement de l'historique",
+    "retry": "Réessayer",
+    "listFailed": "Le chargement de l'historique a échoué.",
+    "empty_lesson": "Il n'y a pas encore de conversation précédente sur ce cours. Une conversation apparaîtra ici après sa première question.",
+    "empty_book": "Il n'y a pas encore de conversation précédente sur ce livre. Une conversation apparaîtra ici après sa première question.",
+    "deleteFailed": "La suppression de la conversation a échoué. Veuillez réessayer."
+  },
+  "pdf": {
+    "prev": "Page précédente",
+    "next": "Page suivante",
+    "pageNumber": "Numéro de page",
+    "zoomOut": "Dézoomer",
+    "zoomIn": "Zoomer",
+    "fit": "Ajuster à la largeur",
+    "cannotShow": "Le fichier ne peut pas être affiché. Vous pouvez l'ouvrir dans un nouvel onglet.",
+    "markPassage": "Enregistrer un signet sur le passage sélectionné",
+    "untilPageEnd": "La sélection sera enregistrée jusqu'à la fin de la page."
+  },
+  "preview": {
+    "lessonFallback": "Cours",
+    "prev": "Source précédente",
+    "next": "Source suivante",
+    "openPage": "Ouvrir sur la page du cours",
+    "closeTab": "Fermer l'onglet actuel",
+    "closeAll": "Fermer la fenêtre et tous ses onglets",
+    "loadFailed": "Le cours ne peut pas être chargé."
+  },
+  "aiTags": {
+    "title": "Étiquettes suggérées",
+    "approveAll": "Tout approuver",
+    "dismissAll": "Tout écarter",
+    "request": "Suggérer des étiquettes",
+    "none": "Aucune suggestion en attente. Vous pouvez demander des suggestions tirées de l'arbre des étiquettes d'après le résumé du cours.",
+    "add": "Ajouter au cours",
+    "addNamed": "Ajouter l'étiquette {{name}}",
+    "dismiss": "Écarter",
+    "dismissNamed": "Écarter l'étiquette {{name}}",
+    "requestFailed": "La suggestion d'étiquettes a échoué",
+    "noneFound": "Aucune étiquette adaptée n'a été trouvée dans l'arbre",
+    "approveFailed": "L'ajout des étiquettes a échoué",
+    "added_one": "L'étiquette a été ajoutée au cours",
+    "added_other": "Les étiquettes ont été ajoutées au cours",
+    "dismissFailed": "L'écartement de la suggestion a échoué"
+  },
+  "share": {
+    "title": "Partager",
+    "mailApp": "Application de messagerie",
+    "copyLink": "Copier le lien",
+    "publicLink": "Lien public : s'ouvre aussi sans compte",
+    "publicHint": "Qui reçoit le lien voit le cours et son résumé, sans le carnet ni le chat. Le reste des archives reste fermé.",
+    "draftWarning": "Le cours est un brouillon : le lien public ne s'ouvrira pas avant sa publication.",
+    "alreadyPublic": "Ce cours s'ouvre sans compte, vous pouvez donc le partager avec n'importe qui.",
+    "fromTime": "Partager à partir du moment actuel ({{time}})",
+    "copied": "Lien copié",
+    "copyManually": "La copie automatique est impossible. Le lien : {{url}}",
+    "nowPublic": "Le cours est maintenant ouvert à toute personne disposant du lien",
+    "noLongerPublic": "Le cours n'est plus ouvert sans compte",
+    "publicFailed": "La modification du lien public a échoué"
+  },
+  "sessionChat": {
+    "loading": "Chargement du chat",
+    "failed": "Le chargement du chat de la séance a échoué.",
+    "empty": "Aucun message n'a été écrit dans le chat pendant l'enregistrement.",
+    "label": "Le chat de la séance",
+    "intro": "Les messages écrits dans le chat pendant l'enregistrement. Cliquer sur l'heure lit le moment où ils ont été écrits.",
+    "playFrom": "Lire à partir de {{time}}",
+    "participant": "Participant"
+  },
+  "textViewer": {
+    "newTab": "Ouvrir dans un nouvel onglet",
+    "cannotShow": "Un fichier .{{ext}} ne peut pas être affiché ici. Vous pouvez le télécharger depuis « Télécharger » en bas du panneau.",
+    "cannotShowDoc": "Un fichier .{{ext}} ne peut pas être affiché ici. Vous pouvez le télécharger depuis « Télécharger » en bas du panneau, ou l'enregistrer en .docx et le téléverser à nouveau.",
+    "frameTitle": "Affichage du document"
+  },
+  "actions": {
+    "liked": "Aimé",
+    "like": "J'aime",
+    "saved": "Enregistré",
+    "save": "Enregistrer",
+    "addToList": "Ajouter à une liste de cours",
+    "download": "Télécharger",
+    "share": "Partager"
+  },
+  "notebook": {
+    "title": "Mon carnet pour ce cours",
+    "all": "Vers tout le carnet",
+    "newNote": "Nouvelle note pour le cours",
+    "empty": "Il n'y a pas encore de note pour ce cours. Cliquez sur « Nouvelle note pour le cours » pour commencer à écrire.",
+    "deleteQuestion": "Voulez-vous vraiment supprimer la note « {{title}} » ?",
+    "untitled": "Sans titre"
+  },
+  "track": {
+    "now": "Maintenant",
+    "nextStarts": "Le cours suivant, « {{title}} », commencera dans {{seconds}} secondes",
+    "place": "Cours {{index}} sur {{count}} du cursus",
+    "next": "Suivant : {{title}}"
+  },
+  "bookmark": {
+    "save": "Enregistrer le signet",
+    "marked": "Le passage marqué",
+    "note": "Note (facultatif)"
+  },
+  "textQuality": {
+    "readable": "Seulement environ {{quality}} % du texte extrait du livre est lisible, probablement à cause d'une reconnaissance de texte (OCR) défectueuse dans le fichier. Le résumé, la recherche et le chat ne couvrent que la partie lisible.",
+    "howToFix": " Pour améliorer cela, téléversez un PDF avec une meilleure reconnaissance de texte."
+  },
+  "transcript": {
+    "title": "Transcription",
+    "status": {
+      "pending": "En attente",
+      "processing": "Transcription",
+      "analyzing": "Résumé",
+      "done": "Prête",
+      "error": "Erreur",
+      "none": "Pas de transcription"
+    },
+    "emptyCanRun": "Pas encore de transcription. Cliquez sur « Lancer la transcription » pour commencer.",
+    "empty": "Pas encore de transcription.",
+    "fixing": "Correction...",
+    "fixHebrew": "Corriger l'hébreu",
+    "running": "En cours...",
+    "run": "Lancer la transcription",
+    "checkAgain": "Vérifier à nouveau",
+    "stoppedChecking": "Nous avons cessé de vérifier après une longue attente. La transcription est peut-être bloquée.",
+    "readyAnalyzing": "La transcription est prête. Production du résumé et des points clés...",
+    "transcribingHint": "Transcription de l'audio avec Whisper. Cela prend généralement 1 à 3 minutes pour un enregistrement de 30 minutes.",
+    "fixInBackground": "L'hébreu est corrigé en arrière-plan. Le texte se mettra à jour à la fin de la correction.",
+    "saved": "Transcription enregistrée",
+    "saving": "Enregistrement...",
+    "save": "Enregistrer la transcription",
+    "saveFailed": "L'enregistrement a échoué"
+  }
+}

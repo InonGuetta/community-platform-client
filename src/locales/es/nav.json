@@ -1,0 +1,58 @@
+{
+  "links": {
+    "archive": "Archivo",
+    "ask": "Pregunta al archivo",
+    "myCourses": "Mis cursos",
+    "sessions": "Sesiones",
+    "donate": "Donar",
+    "manageCourses": "Gestionar cursos",
+    "users": "Usuarios",
+    "admin": "Administración"
+  },
+  "pendingRequests_one": "{{label}}, una solicitud pendiente",
+  "pendingRequests_other": "{{label}}, {{count}} solicitudes pendientes",
+  "personal": "Mi contenido",
+  "shelves": {
+    "notebook": "Mi cuaderno",
+    "likes": "Contenido que me gustó",
+    "saved": "Contenido guardado",
+    "continue": "Seguir viendo",
+    "downloads": "Escuchar sin conexión"
+  },
+  "shelfEmpty": {
+    "likes": "Todavía no has marcado nada con me gusta",
+    "saved": "Todavía no has guardado nada",
+    "savedAllInLists": "Todo lo que guardaste está ordenado en las listas de abajo",
+    "continue": "Todavía no has empezado a ver ninguna clase"
+  },
+  "colorMode": {
+    "toLight": "Modo claro",
+    "toDark": "Modo oscuro",
+    "toggle": "Cambiar el modo de visualización"
+  },
+  "myAccount": "Mi cuenta",
+  "drawer": {
+    "open": "Abrir el menú personal",
+    "close": "Cerrar el menú personal",
+    "closePanel": "Cerrar el menú",
+    "install": "Instalar la aplicación",
+    "signOut": "Cerrar sesión"
+  },
+  "bell": {
+    "title": "Notificaciones",
+    "unread_one": "Notificaciones, una sin leer",
+    "unread_other": "Notificaciones, {{count}} sin leer",
+    "markAllRead": "Marcar todo como leído",
+    "empty": "Todavía no hay notificaciones. Aquí aparecerá un aviso cuando termine el procesamiento de una clase, y más."
+  },
+  "roleBanner": {
+    "pending": "Tu solicitud de permiso de {{role}} está pendiente de aprobación por un administrador. Hasta entonces, la cuenta funciona con permisos de alumno.",
+    "rejected": "Tu solicitud de permiso de {{role}} no fue aprobada. La cuenta sigue funcionando con normalidad con permisos de alumno."
+  },
+  "installHelp": {
+    "title": "Instalación en iPhone o iPad",
+    "step1": "1. En Safari, toca el botón de compartir <icon/> en la parte inferior de la pantalla.",
+    "step2": "2. Elige «Añadir a pantalla de inicio».",
+    "step3": "3. Toca «Añadir». La aplicación aparecerá en la pantalla de inicio y se abrirá sin la barra de direcciones."
+  }
+}

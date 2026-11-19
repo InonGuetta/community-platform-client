@@ -2,6 +2,7 @@ import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
+import { useTranslation } from "react-i18next";
 
 // `label` names the field for a screen reader — a placeholder is not a name, and
 // vanishes once something is typed. It defaults to the placeholder without its
@@ -9,7 +10,9 @@ import SearchIcon from "@mui/icons-material/Search";
 //
 // No fixed minimum width on a phone: 280px beside a heading and a button pushed
 // the users page 150px past a 375px screen (PRD MOB-7 review).
-const SearchBar = ({ onSearch, placeholder = "חיפוש...", label, sx = {} }) => {
+const SearchBar = ({ onSearch, placeholder: given, label, sx = {} }) => {
+  const { t } = useTranslation();
+  const placeholder = given ?? t("search.placeholder");
   const [value, setValue] = useState("");
 
   const handleChange = (e) => {

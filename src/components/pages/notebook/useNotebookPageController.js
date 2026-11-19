@@ -19,6 +19,7 @@ import { useNotesSearch } from "./useNotesSearch";
 import { useNotesExport } from "./useNotesExport";
 import { selectNotesState } from "../../../store/selectors/notesSelectors";
 import { selectBookmarksState } from "../../../store/selectors/bookmarksSelectors";
+import { useTranslation } from "react-i18next";
 
 // Everything the notebook page DOES — what it reads from the store, what it
 // dispatches, and the state of the editors, the selection, the source window and
@@ -40,6 +41,7 @@ import { selectBookmarksState } from "../../../store/selectors/bookmarksSelector
 
 
 export const useNotebookPageController = () => {
+  const { t } = useTranslation(["notebook", "notes"]);
   const dispatch = useDispatch();
   const { items, status } = useSelector(selectNotesState);
   const { items: bookmarks, status: bookmarksStatus } = useSelector(selectBookmarksState);
@@ -89,7 +91,7 @@ export const useNotebookPageController = () => {
     names,
     lightList: true,
     onBodyMissing: (note) => {
-      dispatch(notify({ message: "ההערה עוד נטענת. נסה שוב בעוד רגע.", severity: "info" }));
+      dispatch(notify({ message: t("notices.stillLoading"), severity: "info" }));
       requestBodies([note.id]);
     },
     scrollBlock: "start",
@@ -114,7 +116,7 @@ export const useNotebookPageController = () => {
     const byMedia = new Map();
 
     for (const bm of bookmarks) {
-      const mediaTitle = bm.media_title || "שיעור";
+      const mediaTitle = bm.media_title || t("notes:lessonFallback");
       if (q && !`${bm.note || ""} ${mediaTitle}`.toLowerCase().includes(q)) continue;
 
       let group = byMedia.get(bm.media_id);
@@ -134,7 +136,7 @@ export const useNotebookPageController = () => {
       group.items = inReadingOrder(group.items);
     }
     return groups;
-  }, [bookmarks, search]);
+  }, [bookmarks, search, t]);
 
 
   // A note created or picked from the list is scrolled to the top of the view
@@ -183,12 +185,12 @@ export const useNotebookPageController = () => {
       // message — has no way to tell "it saved" from "this application ignores
       // Ctrl+S".
       if (!saveActiveNote()) {
-        dispatch(notify({ message: "לא נבחרה הערה. לחץ בתוך הערה ואז שמור.", severity: "info" }));
+        dispatch(notify({ message: t("notices.noneChosen"), severity: "info" }));
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [dispatch, saveActiveNote]);
+  }, [dispatch, saveActiveNote, t]);
 
   // Deleting is irreversible and the notes are the user's own writing, so both
   // the single-note button and the bulk action go through the same confirmation
@@ -232,8 +234,8 @@ export const useNotebookPageController = () => {
   // are hidden gives no answer to where the hidden ones go, and any answer the
   // code picked would move notes the user cannot see.
   const reorderHint = search.trim()
-    ? "נקה את החיפוש כדי לשנות את סדר ההערות"
-    : (items.length < 2 ? "צריך לפחות שתי הערות כדי לשנות סדר" : "");
+    ? t("notices.clearSearchToReorder")
+    : (items.length < 2 ? t("notices.needTwoToReorder") : "");
 
   const drag = useDragReorder({
     ids: items.map((note) => note.id),

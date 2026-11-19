@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import { randomBytes } from "node:crypto";
 import { RUN_FILE } from "./fixtures.js";
+import { words, literally } from "./words.js";
 
 // The journey the platform exists for (PRD NFR-9), end to end through the real
 // screens, API and database:
@@ -12,12 +13,19 @@ import { RUN_FILE } from "./fixtures.js";
 //
 // Three people, three browser contexts — three separate sessions, as three
 // devices would be. Everything they create is deleted by global-teardown.
+//
+// The journey runs once per language below (docs/i18n-plan.md, prompt 33):
+// every label is found through the locale files (e2e/words.js), each browser
+// starts in that language, and Hebrew and Yiddish run right to left, English
+// left to right. The names people type stay Hebrew in every run — content
+// never changes language.
 
 const run = JSON.parse(fs.readFileSync(RUN_FILE, "utf8"));
 
-const person = (who, name) => ({
-  name: `${name} ${run.runId}`,
-  email: `e2e-${who}-${run.runId}@example.test`,
+const person = (who, name, lng) => ({
+  name: `${name} ${lng} ${run.runId}`,
+  // e2e-<who>-<lng>-<runId>: still matched by teardown's e2e-%-<runId>.
+  email: `e2e-${who}-${lng}-${run.runId}@example.test`,
   // Made here, for this run; the account is deleted with the run.
   password: randomBytes(12).toString("base64url"),
 });
@@ -43,22 +51,44 @@ const wav = (seconds = 2) => {
   return buf;
 };
 
-const signUp = async (page, who, roleLabel) => {
+const signUp = async (page, w, who, roleLabel) => {
   await page.goto("/sign-up");
   if (roleLabel) await page.getByRole("button", { name: roleLabel, exact: true }).click();
-  await page.getByLabel("שם תצוגה").fill(who.name);
-  await page.getByLabel("אימייל").fill(who.email);
-  await page.getByLabel(/^סיסמה/).fill(who.password);
-  await page.getByRole("button", { name: "הרשמה", exact: true }).click();
+  await page.getByLabel(w("auth:fields.displayName")).fill(who.name);
+  await page.getByLabel(w("auth:fields.email")).fill(who.email);
+  await page.getByLabel(new RegExp(`^${literally(w("auth:fields.password"))}`)).fill(who.password);
+  await page.getByRole("button", { name: w("auth:signUp.submit"), exact: true }).click();
+  await expect(page).toHaveURL(/\/archive/);
+  // A new account is offered a profile picture once; this journey says later.
+  const welcome = page.getByRole("dialog");
+  await expect(welcome.getByText(w("profile:avatar.welcome.title", { name: who.name }))).toBeVisible();
+  await welcome.getByRole("button", { name: w("profile:avatar.welcome.later"), exact: true }).click();
+  await expect(welcome).toBeHidden();
+};
+
+const signIn = async (page, w, who) => {
+  await page.goto("/sign-in");
+  await page.getByLabel(w("auth:fields.email")).fill(who.email);
+  await page.getByLabel(new RegExp(`^${literally(w("auth:fields.password"))}`)).fill(who.password);
+  await page.getByRole("button", { name: w("auth:signIn.submit"), exact: true }).click();
   await expect(page).toHaveURL(/\/archive/);
 };
 
-const signIn = async (page, who) => {
-  await page.goto("/sign-in");
-  await page.getByLabel("אימייל").fill(who.email);
-  await page.getByLabel(/^סיסמה/).fill(who.password);
-  await page.getByRole("button", { name: "התחברות", exact: true }).click();
-  await expect(page).toHaveURL(/\/archive/);
+// A browser that opens in this language, and keeps it through signing in: the
+// language is remembered as a visitor's choice (src/i18n/i18n.js), so an
+// account that signs in here — the admin's included — takes it on rather than
+// switching the page to the account's own language.
+const contextIn = async (browser, lng) => {
+  const context = await browser.newContext();
+  await context.addInitScript((code) => {
+    try {
+      if (!localStorage.getItem("language")) localStorage.setItem("language", code);
+      sessionStorage.setItem("languageChosenSignedOut", code);
+    } catch {
+      // A page with no storage simply starts in Hebrew.
+    }
+  }, lng);
+  return context;
 };
 
 // The innermost element that holds both this text and this control — a row,
@@ -67,73 +97,79 @@ const signIn = async (page, who) => {
 const rowWith = (page, text, control) =>
   page.locator("div, li, tr").filter({ hasText: text }).filter({ has: control }).last();
 
-test("a lecturer is approved, opens a course, enrols a student, and the student opens the lesson", async ({ browser }) => {
-  const lecturer = person("lecturer", "מרצה בדיקה");
-  const student = person("student", "תלמיד בדיקה");
+for (const lng of ["he", "en", "yi"]) {
+test(`[${lng}] a lecturer is approved, opens a course, enrols a student, and the student opens the lesson`, async ({ browser }) => {
+  const w = words(lng);
+  const direction = lng === "en" ? "ltr" : "rtl";
+  const lecturer = person("lecturer", "מרצה בדיקה", lng);
+  const student = person("student", "תלמיד בדיקה", lng);
   const admin = run.admin;
-  const courseTitle = `קורס בדיקה ${run.runId}`;
-  const lessonTitle = `שיעור בדיקה ${run.runId}`;
+  const courseTitle = `קורס בדיקה ${lng} ${run.runId}`;
+  const lessonTitle = `שיעור בדיקה ${lng} ${run.runId}`;
 
-  const asLecturer = await (await browser.newContext()).newPage();
-  const asAdmin = await (await browser.newContext()).newPage();
-  const asStudent = await (await browser.newContext()).newPage();
+  const asLecturer = await (await contextIn(browser, lng)).newPage();
+  const asAdmin = await (await contextIn(browser, lng)).newPage();
+  const asStudent = await (await contextIn(browser, lng)).newPage();
 
   await test.step("the lecturer signs up, asking to be a lecturer", async () => {
-    await signUp(asLecturer, lecturer, "מרצה");
+    await signUp(asLecturer, w, lecturer, w("format:roles.lecturer"));
+    await expect(asLecturer.locator("html")).toHaveAttribute("dir", direction);
+    await expect(asLecturer.locator("html")).toHaveAttribute("lang", lng);
   });
 
   await test.step("an admin approves the request", async () => {
-    await signIn(asAdmin, { email: admin.email, password: admin.password });
+    await signIn(asAdmin, w, { email: admin.email, password: admin.password });
     await asAdmin.goto("/users");
     // Only this run's lecturer — other people may be waiting in a real queue.
-    const approve = asAdmin.getByRole("button", { name: "אישור", exact: true });
-    await rowWith(asAdmin, lecturer.email, approve).getByRole("button", { name: "אישור", exact: true }).click();
+    const approve = asAdmin.getByRole("button", { name: w("users:pending.approve"), exact: true });
+    await rowWith(asAdmin, lecturer.email, approve).getByRole("button", { name: w("users:pending.approve"), exact: true }).click();
     await expect(asAdmin.getByText(lecturer.email)).toHaveCount(1);
   });
 
   await test.step("the lecturer, now approved, opens a course", async () => {
     await asLecturer.goto("/courses");
-    await asLecturer.getByRole("button", { name: "קורס חדש" }).first().click();
-    await asLecturer.getByLabel("שם הקורס").fill(courseTitle);
-    await asLecturer.getByRole("button", { name: "שמירה" }).click();
+    await asLecturer.getByRole("button", { name: w("courses:newCourse") }).first().click();
+    await asLecturer.getByLabel(w("courses:form.name")).fill(courseTitle);
+    await asLecturer.getByRole("button", { name: w("courses:form.save") }).click();
     await expect(asLecturer.getByText(courseTitle)).toBeVisible();
   });
 
   await test.step("a student signs up", async () => {
-    await signUp(asStudent, student);
+    await signUp(asStudent, w, student);
   });
 
   await test.step("the lecturer enrols the student", async () => {
     await asLecturer.getByText(courseTitle).click();
-    const search = asLecturer.getByLabel("חיפוש משתמש להוספה לקורס");
+    const search = asLecturer.getByLabel(w("courses:roster.search"));
     await search.fill(student.name);
     await asLecturer.getByRole("option", { name: student.name }).click();
-    await asLecturer.getByRole("button", { name: "הוספה", exact: true }).click();
-    await expect(asLecturer.getByText(`1 תלמידים`)).toBeVisible();
+    await asLecturer.getByRole("button", { name: w("courses:roster.add"), exact: true }).click();
+    await expect(asLecturer.getByText(w("courses:students", { count: 1 }), { exact: true })).toBeVisible();
   });
 
   await test.step("the lecturer uploads a lesson into the course and publishes it", async () => {
     await asLecturer.goto("/archive");
-    await asLecturer.getByRole("button", { name: "העלאת מדיה" }).click();
+    await asLecturer.getByRole("button", { name: w("archive:upload") }).click();
     const dialog = asLecturer.getByRole("dialog");
     await dialog.locator('input[type="file"]').setInputFiles({ name: "e2e.wav", mimeType: "audio/wav", buffer: wav() });
-    await dialog.getByLabel("כותרת").fill(lessonTitle);
-    await dialog.getByLabel("שיוך לקורס").click();
+    await dialog.getByLabel(w("upload:fields.title")).fill(lessonTitle);
+    await dialog.getByLabel(w("upload:fields.course")).click();
     await asLecturer.getByRole("option", { name: courseTitle }).click();
-    await dialog.getByRole("button", { name: "העלאה", exact: true }).click();
+    await dialog.getByRole("button", { name: w("upload:upload"), exact: true }).click();
     // Untagged, so the app offers tags; this journey is not about tags.
-    await asLecturer.getByRole("button", { name: "דלג" }).click();
+    await asLecturer.getByRole("button", { name: w("tags:suggest.skip") }).click();
 
-    const card = rowWith(asLecturer, lessonTitle, asLecturer.getByRole("button", { name: "פרסום לתלמידים" }));
-    await card.getByRole("button", { name: "פרסום לתלמידים" }).click();
-    await expect(asLecturer.getByText("הפריט פורסם ומוצג לתלמידים")).toBeVisible();
+    const publish = w("media:card.publish");
+    const card = rowWith(asLecturer, lessonTitle, asLecturer.getByRole("button", { name: publish }));
+    await card.getByRole("button", { name: publish }).click();
+    await expect(asLecturer.getByText(w("archive:notices.published"))).toBeVisible();
   });
 
   await test.step("the student finds the lesson in their course and opens it", async () => {
     await asStudent.goto("/my-courses");
     await asStudent.getByText(courseTitle).click();
     await expect(asStudent).toHaveURL(/\/my-courses\/\d+/);
-    await expect(asStudent.getByText("0 מתוך 1 שיעורים הושלמו")).toBeVisible();
+    await expect(asStudent.getByText(w("format:track.progress", { completed: 0, total: 1 }))).toBeVisible();
     await asStudent.getByRole("button", { name: lessonTitle, exact: true }).click();
     await expect(asStudent).toHaveURL(/\/media\/\d+/);
     await expect(asStudent.getByRole("heading", { name: lessonTitle })).toBeVisible();
@@ -144,11 +180,11 @@ test("a lecturer is approved, opens a course, enrols a student, and the student 
   await test.step("the lecturer makes the lesson public, and a guest opens the shared link", async () => {
     const lessonId = asStudent.url().match(/\/media\/(\d+)/)[1];
     await asLecturer.goto(`/media/${lessonId}`);
-    await asLecturer.getByRole("button", { name: "שיתוף", exact: true }).click();
-    await asLecturer.getByRole("checkbox", { name: /קישור ציבורי/ }).click();
-    await expect(asLecturer.getByText("השיעור פתוח עכשיו לכל מי שיש לו את הקישור")).toBeVisible();
+    await asLecturer.getByRole("button", { name: w("lesson:actions.share"), exact: true }).click();
+    await asLecturer.getByRole("checkbox", { name: new RegExp(literally(w("lesson:share.publicLink").split(":")[0])) }).click();
+    await expect(asLecturer.getByText(w("lesson:share.nowPublic"))).toBeVisible();
 
-    const guestContext = await browser.newContext();
+    const guestContext = await contextIn(browser, lng);
     const shareUrl = `http://localhost:5173/api/public/share/${lessonId}`;
     // What WhatsApp reads: tags in the HTML, no JavaScript.
     const preview = await (await guestContext.request.get(shareUrl)).text();
@@ -158,10 +194,11 @@ test("a lecturer is approved, opens a course, enrols a student, and the student 
     await guest.goto(shareUrl);
     await expect(guest).toHaveURL(new RegExp(`/l/${lessonId}$`));
     await expect(guest.getByRole("heading", { name: lessonTitle })).toBeVisible();
-    await expect(guest.getByRole("link", { name: "הצטרפות לקהילה" })).toBeVisible();
+    await expect(guest.getByRole("link", { name: w("guest:join") })).toBeVisible();
     // The recording itself plays for a guest: the browser reads its length.
     await expect
       .poll(() => guest.locator("audio").evaluate((a) => a.duration), { timeout: 15_000 })
       .toBeGreaterThan(1);
   });
 });
+}

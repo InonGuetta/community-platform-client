@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 // A course as a track (PRD CRS-1, CRS-2, CRS-3) — the words and the arithmetic,
 // apart from any page, so the course page and the lesson page say the same
 // thing about the same lesson.
@@ -20,8 +21,8 @@ export const lessonStatus = (lesson) => {
 // "3 מתוך 10 שיעורים" — or nothing for a course of books only.
 export const progressText = ({ total, completed }) => {
   if (!total) return "";
-  if (completed >= total) return total === 1 ? "השיעור הושלם" : `כל ${total} השיעורים הושלמו`;
-  return `${completed} מתוך ${total} שיעורים הושלמו`;
+  if (completed >= total) return total === 1 ? i18n.t("format:track.oneDone") : i18n.t("format:track.allDone", { total });
+  return i18n.t("format:track.progress", { completed, total });
 };
 
 export const progressPercent = ({ total, completed }) => (total ? Math.round((completed / total) * 100) : 0);

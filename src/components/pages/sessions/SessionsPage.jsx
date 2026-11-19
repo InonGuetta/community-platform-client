@@ -22,7 +22,8 @@ import DialogActions from "../../features/Dialogs/DialogActions";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import useSessionsPageController from "./useSessionsPageController";
 import { sessionTypes, sessionTypeLabels } from "../../../utilities/constant";
-import { formatHebrewDateTime } from "../../../utilities/formatDate";
+import { formatDateTime } from "../../../utilities/formatDate";
+import { useTranslation } from "react-i18next";
 
 // Enough of a lead that the default is a plan rather than "now", which is what
 // the unscheduled button next to it is already for.
@@ -36,6 +37,7 @@ const defaultScheduledAt = () => {
 };
 
 const SessionsPage = () => {
+  const { t } = useTranslation(["sessions", "common"]);
   const {
     rooms, upcoming, createDialogOpen, setCreateDialogOpen,
     handleJoinRoom, handleStartSession, handleCreateSession, canCreate, isHost, courses,
@@ -53,18 +55,18 @@ const SessionsPage = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h5" fontWeight={700}>מפגשים חיים</Typography>
+        <Typography variant="h5" fontWeight={700}>{t("title")}</Typography>
         {canCreate && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateDialogOpen(true)}>
-            מפגש חדש
+            {t("new")}
           </Button>
         )}
       </Box>
 
       {rooms.length === 0 ? (
         <NoDataDialog
-          message="אין מפגשים פעילים כרגע"
-          actionLabel={canCreate ? "מפגש חדש" : undefined}
+          message={t("noneActive")}
+          actionLabel={canCreate ? t("new") : undefined}
           onAction={() => setCreateDialogOpen(true)}
         />
       ) : (
@@ -73,10 +75,10 @@ const SessionsPage = () => {
             <Grid item xs={12} sm={6} md={4} key={room.id}>
               <Card>
                 <CardContent>
-                  <Typography variant="subtitle1" fontWeight={600}>{room.title || "מפגש ללא כותרת"}</Typography>
+                  <Typography variant="subtitle1" fontWeight={600}>{room.title || t("untitled")}</Typography>
                   <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
                     <Chip label={sessionTypeLabels[room.session_type] || room.session_type} size="small" color="primary" />
-                    <Chip label={`מארח: ${room.host_name}`} size="small" variant="outlined" />
+                    <Chip label={t("host", { name: room.host_name })} size="small" variant="outlined" />
                       {room.course_title && <Chip label={room.course_title} size="small" color="primary" variant="outlined" />}
                   </Box>
                 </CardContent>
@@ -84,7 +86,7 @@ const SessionsPage = () => {
                   {/* By id. The room token is no longer something the client
                       holds — SessionRoom asks the server for one on arrival. */}
                   <Button startIcon={<MeetingRoomIcon />} variant="contained" size="small" onClick={() => handleJoinRoom(room.id)} fullWidth>
-                    הצטרפות
+                    {t("join")}
                   </Button>
                 </CardActions>
               </Card>
@@ -98,16 +100,16 @@ const SessionsPage = () => {
           anything is a permanent reminder of a feature nobody used. */}
       {upcoming.length > 0 && (
         <Box sx={{ mt: 5 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>מפגשים קרובים</Typography>
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>{t("upcoming")}</Typography>
           <Grid container spacing={2}>
             {upcoming.map((room) => (
               <Grid item xs={12} sm={6} md={4} key={room.id}>
                 <Card sx={{ opacity: 0.92 }}>
                   <CardContent>
-                    <Typography variant="subtitle1" fontWeight={600}>{room.title || "מפגש ללא כותרת"}</Typography>
+                    <Typography variant="subtitle1" fontWeight={600}>{room.title || t("untitled")}</Typography>
                     <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
-                      <Chip icon={<EventIcon />} label={formatHebrewDateTime(room.scheduled_at)} size="small" color="secondary" />
-                      <Chip label={`מארח: ${room.host_name}`} size="small" variant="outlined" />
+                      <Chip icon={<EventIcon />} label={formatDateTime(room.scheduled_at)} size="small" color="secondary" />
+                      <Chip label={t("host", { name: room.host_name })} size="small" variant="outlined" />
                       {room.course_title && <Chip label={room.course_title} size="small" color="primary" variant="outlined" />}
                     </Box>
                   </CardContent>
@@ -117,11 +119,11 @@ const SessionsPage = () => {
                         a control that always fails is a worse way to say so. */}
                     {isHost(room) ? (
                       <Button startIcon={<PlayArrowIcon />} variant="contained" size="small" onClick={() => handleStartSession(room.id)} fullWidth>
-                        פתיחת המפגש
+                        {t("open")}
                       </Button>
                     ) : (
                       <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>
-                        המפגש ייפתח על ידי המארח
+                        {t("hostOpens")}
                       </Typography>
                     )}
                     {/* NOTIF-3 — for everyone, host included: the session goes
@@ -136,7 +138,7 @@ const SessionsPage = () => {
                         size="small"
                         sx={{ flexShrink: 0 }}
                       >
-                        הוספה ליומן
+                        {t("addToCalendar")}
                       </Button>
                     )}
                   </CardActions>
@@ -148,20 +150,20 @@ const SessionsPage = () => {
       )}
 
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle onClose={() => setCreateDialogOpen(false)}>יצירת מפגש</DialogTitle>
+        <DialogTitle onClose={() => setCreateDialogOpen(false)}>{t("create.title")}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <TextField label="כותרת" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} fullWidth />
-            <TextField label="סוג" value={form.sessionType} onChange={(e) => setForm((p) => ({ ...p, sessionType: e.target.value }))} select fullWidth>
+            <TextField label={t("create.name")} value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} fullWidth />
+            <TextField label={t("create.type")} value={form.sessionType} onChange={(e) => setForm((p) => ({ ...p, sessionType: e.target.value }))} select fullWidth>
               {Object.values(sessionTypes).map((t) => <MenuItem key={t} value={t}>{sessionTypeLabels[t] || t}</MenuItem>)}
             </TextField>
-            <TextField label="מספר משתתפים מרבי" type="number" value={form.maxParticipants} onChange={(e) => setForm((p) => ({ ...p, maxParticipants: Number(e.target.value) }))} fullWidth />
+            <TextField label={t("create.maxParticipants")} type="number" value={form.maxParticipants} onChange={(e) => setForm((p) => ({ ...p, maxParticipants: Number(e.target.value) }))} fullWidth />
 
             {/* Who is TOLD about the session (PRD D8) — not who may join, which
                 stays everyone. Hidden for somebody who teaches no course. */}
             {courses.length > 0 && (
               <TextField
-                label="קורס"
+                label={t("create.course")}
                 value={form.courseId}
                 onChange={(e) => setForm((p) => ({ ...p, courseId: e.target.value }))}
                 select
@@ -170,9 +172,9 @@ const SessionsPage = () => {
                 // choice with its own consequence, stated in the helper below.
                 SelectProps={{ displayEmpty: true }}
                 InputLabelProps={{ shrink: true }}
-                helperText={form.courseId ? "תלמידי הקורס יקבלו התראה" : "תלמידי כל הקורסים שלך יקבלו התראה"}
+                helperText={form.courseId ? t("create.courseNotified") : t("create.allNotified")}
               >
-                <MenuItem value="">ללא קורס</MenuItem>
+                <MenuItem value="">{t("create.noCourse")}</MenuItem>
                 {courses.map((c) => <MenuItem key={c.id} value={c.id}>{c.title}</MenuItem>)}
               </TextField>
             )}
@@ -181,7 +183,7 @@ const SessionsPage = () => {
                 dialog has always had. Filling it in makes the session exist
                 before it begins, which is the whole point of scheduling. */}
             <TextField
-              label="מועד (ריק = להתחיל עכשיו)"
+              label={t("create.when")}
               type="datetime-local"
               value={form.scheduledAt}
               onChange={(e) => setForm((p) => ({ ...p, scheduledAt: e.target.value }))}
@@ -190,15 +192,15 @@ const SessionsPage = () => {
             />
             {!form.scheduledAt && (
               <Button size="small" onClick={() => setForm((p) => ({ ...p, scheduledAt: defaultScheduledAt() }))}>
-                לקבוע למועד עתידי
+                {t("create.schedule")}
               </Button>
             )}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)} variant="outlined">ביטול</Button>
+          <Button onClick={() => setCreateDialogOpen(false)} variant="outlined">{t("common:actions.cancel")}</Button>
           <Button onClick={() => handleCreateSession(form)} variant="contained">
-            {form.scheduledAt ? "קביעת מפגש" : "יצירה והתחלה"}
+            {form.scheduledAt ? t("create.scheduleSubmit") : t("create.createStart")}
           </Button>
         </DialogActions>
       </Dialog>

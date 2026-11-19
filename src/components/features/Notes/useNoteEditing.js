@@ -4,6 +4,7 @@ import { updateNote } from "../../../store/slicesAndThunks/notesSlice/notesPut";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { noteBodyToHtml, sanitizeNoteHtml } from "../../../utilities/noteHtml";
 import { syncChipNames } from "../../../utilities/noteSource";
+import { useTranslation } from "react-i18next";
 
 // Editing a column of note cards — the part the notebook page
 // (pages/notebook/useNotebookPageController) and the strip under a lesson
@@ -48,6 +49,7 @@ const EMPTY_DRAFT_OF = () => ({ title: "", body: "" });
  * @param {ScrollLogicalPosition} options.scrollBlock
  */
 export const useNoteEditing = ({ notes, names, lightList = false, onBodyMissing, scrollBlock }) => {
+  const { t } = useTranslation("notes");
   const dispatch = useDispatch();
   const [drafts, setDrafts] = useState({});
   const [activeNoteId, setActiveNoteId] = useState(null);
@@ -123,7 +125,7 @@ export const useNoteEditing = ({ notes, names, lightList = false, onBodyMissing,
       // A click on the save button is its own receipt — the button greys out
       // under the cursor that pressed it. A keyboard save has no button and no
       // cursor near one, so that path says so out loud instead.
-      if (announce) dispatch(notify({ message: "ההערה נשמרה", severity: "success" }));
+      if (announce) dispatch(notify({ message: t("saved"), severity: "success" }));
     }
   };
 
@@ -162,7 +164,7 @@ export const useNoteEditing = ({ notes, names, lightList = false, onBodyMissing,
       const note = notes.find((n) => n.id === activeNoteId);
       if (!note) return false;
       if (!isDirty(note.id)) {
-        dispatch(notify({ message: "אין שינויים לשמירה", severity: "info" }));
+        dispatch(notify({ message: t("noChanges"), severity: "info" }));
       } else {
         requestSave(note, { announce: true });
       }

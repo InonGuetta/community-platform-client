@@ -10,6 +10,7 @@ import NotebookHeader from "./componentsNotebook/NotebookHeader";
 import NotesIndex from "./componentsNotebook/NotesIndex";
 import BookmarksSidebar from "./componentsNotebook/BookmarksSidebar";
 import NotesColumn from "./componentsNotebook/NotesColumn";
+import { useTranslation } from "react-i18next";
 
 // The sticky navbar's height, which this page's own height is measured against.
 const NAVBAR_HEIGHT = 64;
@@ -18,6 +19,7 @@ const NAVBAR_HEIGHT = 64;
 // sections are in componentsNotebook/ (NotebookHeader, NotesIndex,
 // BookmarksSidebar, NotesColumn), and the dialogs they open are mounted here.
 const NotebookPage = () => {
+  const { t } = useTranslation(["notebook", "notes"]);
   const {
     activeNoteId,
     allVisibleSelected,
@@ -225,8 +227,8 @@ const NotebookPage = () => {
         current={sourceStyle}
         exporting={exporting}
         summary={pendingExport?.books
-          ? `${pendingExport.books.length} קבצים · ${pendingExport.format === "pdf" ? "PDF" : "Word"}`
-          : `${notesToExport.length} הערות · ${pendingExport?.format === "pdf" ? "PDF" : "Word"}`}
+          ? t("export.summaryFiles", { files: pendingExport.books.length, format: pendingExport.format === "pdf" ? "PDF" : "Word" })
+          : t("export.summaryNotes", { notes: notesToExport.length, format: pendingExport?.format === "pdf" ? "PDF" : "Word" })}
         onChoose={runExport}
         onClose={() => setPendingExport(null)}
       />
@@ -243,8 +245,8 @@ const NotebookPage = () => {
         onConfirm={handleDeleteConfirm}
         message={
           deleteTargets?.length === 1
-            ? `האם אתה בטוח שאתה מעוניין למחוק את ההערה "${deleteTargets[0].title?.trim() || "ללא כותרת"}"?`
-            : `האם אתה בטוח שאתה מעוניין למחוק ${deleteTargets?.length ?? 0} הערות? לא ניתן לבטל פעולה זו.`
+            ? t("delete.one", { title: deleteTargets[0].title?.trim() || t("notes:untitledBare") })
+            : t("delete.many", { count: deleteTargets?.length ?? 0 })
         }
       />
     </Box>

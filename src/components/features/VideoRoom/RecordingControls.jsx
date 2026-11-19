@@ -9,6 +9,8 @@ import Typography from "@mui/material/Typography";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import StopIcon from "@mui/icons-material/Stop";
 import { myRecordingStatus } from "./sessionRecorder";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../i18n/i18n";
 
 // Recording a session (PRD REC-1), as each person in the room sees it.
 //
@@ -21,10 +23,10 @@ import { myRecordingStatus } from "./sessionRecorder";
 // Presentation only; useVideoRoom holds the state and the socket.
 
 const STATUS_TEXT = {
-  host: (count) => (count > 1 ? `מקליט — ${count} משתתפים בהקלטה` : "מקליט — רק הקול שלך בהקלטה"),
-  recorded: () => "מוקלט — הקול שלך בהקלטה",
-  declined: () => "מוקלט — הקול שלך לא בהקלטה",
-  unanswered: () => "מוקלט — ממתין לתשובתך",
+  host: (count) => i18n.t(count > 1 ? "sessions:recording.hostMany" : "sessions:recording.hostAlone", { count }),
+  recorded: () => i18n.t("sessions:recording.recorded"),
+  declined: () => i18n.t("sessions:recording.declined"),
+  unanswered: () => i18n.t("sessions:recording.unanswered"),
 };
 
 export const recordingLabel = (recording, mySocketId) => {
@@ -34,17 +36,18 @@ export const recordingLabel = (recording, mySocketId) => {
 
 // The host's button, in the controls row.
 export const RecordButton = ({ recorderStatus, pendingParts, onStart, onStop, disabled }) => {
+  const { t } = useTranslation("sessions");
   if (recorderStatus === "saving") {
     return (
       <Button size="small" variant="outlined" color="inherit" disabled sx={{ color: "grey.300" }}>
-        {pendingParts > 0 ? `שומר הקלטה… (${pendingParts})` : "שומר הקלטה…"}
+        {pendingParts > 0 ? t("recording.savingParts", { n: pendingParts }) : t("recording.saving")}
       </Button>
     );
   }
   if (recorderStatus === "recording") {
     return (
       <Button size="small" variant="contained" color="error" startIcon={<StopIcon />} onClick={onStop}>
-        עצירת הקלטה
+        {t("recording.stop")}
       </Button>
     );
   }
@@ -57,7 +60,7 @@ export const RecordButton = ({ recorderStatus, pendingParts, onStart, onStop, di
       onClick={onStart}
       disabled={disabled || recorderStatus === "starting"}
     >
-      {recorderStatus === "starting" ? "מתחיל…" : "הקלטה"}
+      {recorderStatus === "starting" ? t("recording.starting") : t("recording.record")}
     </Button>
   );
 };
@@ -65,6 +68,7 @@ export const RecordButton = ({ recorderStatus, pendingParts, onStart, onStop, di
 // The chip in the top bar, and — for a participant — the way to change their
 // answer. Nothing at all when the room is not being recorded.
 export const RecordingIndicator = ({ recording, mySocketId, onAnswer }) => {
+  const { t } = useTranslation("sessions");
   const status = myRecordingStatus(recording, mySocketId);
   if (!status) return null;
   return (
@@ -78,12 +82,12 @@ export const RecordingIndicator = ({ recording, mySocketId, onAnswer }) => {
       />
       {status === "recorded" && (
         <Button size="small" color="inherit" sx={{ color: "grey.300" }} onClick={() => onAnswer(false)}>
-          הפסיקו להקליט אותי
+          {t("recording.stopMe")}
         </Button>
       )}
       {status === "declined" && (
         <Button size="small" color="inherit" sx={{ color: "grey.300" }} onClick={() => onAnswer(true)}>
-          אני מסכים/ה להקלטה
+          {t("recording.consent")}
         </Button>
       )}
     </Box>
@@ -93,25 +97,26 @@ export const RecordingIndicator = ({ recording, mySocketId, onAnswer }) => {
 // The question. Open while the participant has not answered; closing it any
 // other way than "מסכים/ה" is a no — silence is never consent.
 export const ConsentDialog = ({ recording, mySocketId, onAnswer }) => {
+  const { t } = useTranslation("sessions");
   const open = myRecordingStatus(recording, mySocketId) === "unanswered";
   return (
     <Dialog open={open} onClose={() => onAnswer(false)} aria-labelledby="recording-consent-title">
-      <DialogTitle id="recording-consent-title">המארח מקליט את המפגש</DialogTitle>
+      <DialogTitle id="recording-consent-title">{t("recording.consentTitle")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" sx={{ mb: 1.5 }}>
-          ההקלטה תהפוך לשיעור בארכיון, עם תמלול וסיכום. היא כוללת קול בלבד, בלי וידאו.
+          {t("recording.consentWhat")}
         </Typography>
         <Typography variant="body2" sx={{ mb: 1.5 }}>
-          {"הקול שלך, ומה שתכתוב/י בצ'אט בזמן ההקלטה, ייכללו בשיעור רק אם תסכים/י. אם לא — אפשר להמשיך להשתתף כרגיל, ושום דבר שלך לא יישמר."}
+          {t("recording.consentOnly")}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          אפשר לשנות את התשובה בכל רגע במהלך המפגש.
+          {t("recording.consentChange")}
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => onAnswer(false)}>לא, בלי הקול שלי</Button>
+        <Button onClick={() => onAnswer(false)}>{t("recording.decline")}</Button>
         {/* No autoFocus on either: Enter must not answer for them. */}
-        <Button variant="contained" onClick={() => onAnswer(true)}>מסכים/ה להקלטה</Button>
+        <Button variant="contained" onClick={() => onAnswer(true)}>{t("recording.agree")}</Button>
       </DialogActions>
     </Dialog>
   );

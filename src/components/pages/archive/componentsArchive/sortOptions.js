@@ -1,3 +1,4 @@
+import i18n from "../../../../i18n/i18n";
 // The archive's sort orders, as the menu offers them.
 //
 // The values are the server's — lib/validate.js MEDIA_SORTS in the server
@@ -12,13 +13,11 @@
 
 export const DEFAULT_SORT = "newest";
 
-export const SORT_OPTIONS = [
-  { value: "newest", label: "החדשים ביותר" },
-  { value: "oldest", label: "הישנים ביותר" },
-  { value: "title", label: "שם השיעור (א–ת)" },
-  { value: "creator", label: "שם המרצה (א–ת)" },
-  { value: "liked", label: "הכי אהובים" },
-];
+// `label` is read when the menu renders, in the language of that moment.
+export const SORT_OPTIONS = ["newest", "oldest", "title", "creator", "liked"].map((value) => ({
+  value,
+  get label() { return i18n.t(`archive:sort.${value}`); },
+}));
 
 const KNOWN = new Set(SORT_OPTIONS.map((option) => option.value));
 

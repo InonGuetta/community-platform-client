@@ -1,0 +1,93 @@
+{
+  "roles": {
+    "student": "Student",
+    "lecturer": "Lecturer",
+    "admin": "Admin"
+  },
+  "mediaTypes": {
+    "video": "Video",
+    "audio": "Audio",
+    "text": "Reading"
+  },
+  "creatorLabel": {
+    "video": "Lecturer's name",
+    "audio": "Lecturer's name",
+    "text": "Author's name"
+  },
+  "creatorPrefix": {
+    "video": "Lecturer",
+    "audio": "Lecturer",
+    "text": "Author"
+  },
+  "creatorNone": "General",
+  "sessionTypes": {
+    "1on1": "One-on-one",
+    "group": "Group",
+    "webinar": "Webinar"
+  },
+  "countNone": "No {{many}}",
+  "duration": {
+    "short": "0–15 minutes",
+    "medium": "15–30 minutes",
+    "long": "30–60 minutes",
+    "xlong": "Over 60 minutes",
+    "seconds": "{{n}} sec",
+    "minutes": "{{n}} min",
+    "hours": "{{h}} h",
+    "hoursMinutes": "{{h}} h {{m}} min"
+  },
+  "place": {
+    "page": "p. {{page}}",
+    "atTime": "at {{time}}",
+    "orphaned": "The location is no longer available",
+    "inText": "At a place in the text",
+    "orphanedShort": "Unavailable",
+    "inTextShort": "In the text",
+    "chunk": "Passage {{n}}"
+  },
+  "track": {
+    "oneDone": "Lesson completed",
+    "allDone": "All {{total}} lessons completed",
+    "progress": "{{completed}} of {{total}} lessons completed"
+  },
+  "notesExport": {
+    "untitled": "(untitled)",
+    "from": " — from: {{title}}",
+    "untitledNote": "Untitled note",
+    "notebook": "My notebook",
+    "notebookDated": "My notebook - {{date}}"
+  },
+  "csv": {
+    "name": "Name",
+    "email": "Email",
+    "enrolledAt": "Enrolled on",
+    "active": "Active",
+    "yes": "Yes",
+    "no": "No",
+    "students": "Students",
+    "studentsFile": "Students - {{course}}",
+    "completed": "Completed",
+    "started": "Started",
+    "lastActivity": "Last activity",
+    "progress": "Progress",
+    "progressFile": "Progress - {{course}}",
+    "statusDone": "Completed",
+    "statusStarted": "Started"
+  },
+  "discussion": {
+    "source": "Source {{n}}",
+    "question": "Question:",
+    "answer": "Answer:",
+    "title": "Discussion with AI — {{title}}",
+    "sources": "Sources: {{list}}"
+  },
+  "noteSource": {
+    "pageSuffix": " · p. {{page}}",
+    "lessonFallback": "Lesson",
+    "generalReference": "General reference",
+    "image": "[image]"
+  },
+  "timing": {
+    "estimated": "The times are estimates: this lesson was transcribed before exact timing was kept for each sentence."
+  }
+}

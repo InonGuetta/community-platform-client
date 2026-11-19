@@ -18,7 +18,7 @@ const ParticipantGrid = ({ streams }) => (
           ref={(el) => { if (el && stream) el.srcObject = stream; }}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
-        <Typography sx={{ position: "absolute", bottom: 8, left: 8, color: "white", fontSize: 12, bgcolor: "rgba(0,0,0,0.5)", px: 1, borderRadius: 0.5 }}>
+        <Typography sx={{ position: "absolute", bottom: 8, insetInlineEnd: 8, color: "white", fontSize: 12, bgcolor: "rgba(0,0,0,0.5)", px: 1, borderRadius: 0.5 }}>
           {label || id}
         </Typography>
       </Box>

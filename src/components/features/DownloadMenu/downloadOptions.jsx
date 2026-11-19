@@ -17,6 +17,7 @@ import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
 import { toVtt } from "../../../utilities/transcriptTiming";
 import { saveBlob } from "../../../utilities/saveBlob";
 import { useDownloadActions } from "./useDownloadActions";
+import { useTranslation } from "react-i18next";
 
 // WHAT CAN BE DOWNLOADED FROM A LECTURE — stated once, for every menu that
 // offers it.
@@ -40,9 +41,9 @@ import { useDownloadActions } from "./useDownloadActions";
 // being downloaded rather than saying a generic "file", so a user who sees two
 // entries can tell which one is the lecture and which one is its text.
 const FILE_OPTION = {
-  [mediaTypes.audio]: { label: "הורדת שמע", Icon: AudiotrackOutlinedIcon },
-  [mediaTypes.video]: { label: "הורדת וידאו", Icon: VideocamOutlinedIcon },
-  [mediaTypes.text]: { label: "הורדת המסמך", Icon: DescriptionOutlinedIcon },
+  [mediaTypes.audio]: { labelKey: "download.audio", Icon: AudiotrackOutlinedIcon },
+  [mediaTypes.video]: { labelKey: "download.video", Icon: VideocamOutlinedIcon },
+  [mediaTypes.text]: { labelKey: "download.text", Icon: DescriptionOutlinedIcon },
 };
 
 // MenuItem inherits a physical `text-align: left` from MUI, and this app runs
@@ -62,11 +63,13 @@ const itemSx = { textAlign: "start" };
  * it navigated to a file or finished building a PDF.
  */
 export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) => {
+  const { t } = useTranslation("media");
   const { busy, savedOffline, saving, captions, offerTranscript, handleTranscript, saveOffline } =
     useDownloadActions({ media, transcript, hasTranscript, onClose });
   const navigate = useNavigate();
 
-  const { label: fileLabel, Icon: FileIcon } = FILE_OPTION[media.media_type] || FILE_OPTION[mediaTypes.text];
+  const { labelKey: fileLabelKey, Icon: FileIcon } = FILE_OPTION[media.media_type] || FILE_OPTION[mediaTypes.text];
+  const fileLabel = t(fileLabelKey);
   const isVideo = media.media_type === mediaTypes.video;
 
   const items = [
@@ -97,7 +100,7 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
         sx={itemSx}
       >
         <ListItemIcon><AudiotrackOutlinedIcon fontSize="small" /></ListItemIcon>
-        <ListItemText primary="הורדת שמע בלבד" />
+        <ListItemText primary={t("download.audioOnly")} />
       </MenuItem>
     );
   }
@@ -111,7 +114,7 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
       items.push(
         <MenuItem key="offline" onClick={() => { onClose?.(); navigate(DOWNLOADS_SHELF.path); }} sx={itemSx}>
           <ListItemIcon><OfflinePinOutlinedIcon fontSize="small" color="success" /></ListItemIcon>
-          <ListItemText primary="זמין בלי רשת" secondary="להורדות להאזנה" />
+          <ListItemText primary={t("download.availableOffline")} secondary={t("download.toOfflineShelf")} />
         </MenuItem>
       );
     } else if (saving) {
@@ -119,14 +122,14 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
       items.push(
         <MenuItem key="offline" disabled sx={itemSx}>
           <ListItemIcon><CircularProgress size={18} /></ListItemIcon>
-          <ListItemText primary={percent === null ? "שומר להאזנה…" : `שומר להאזנה… ${percent}%`} />
+          <ListItemText primary={percent === null ? t("download.savingOffline") : t("download.savingOfflinePercent", { percent })} />
         </MenuItem>
       );
     } else {
       items.push(
         <MenuItem key="offline" onClick={() => { onClose?.(); saveOffline(); }} sx={itemSx}>
           <ListItemIcon><DownloadForOfflineOutlinedIcon fontSize="small" /></ListItemIcon>
-          <ListItemText primary="שמירה להאזנה בלי רשת" />
+          <ListItemText primary={t("download.saveOffline")} />
         </MenuItem>
       );
     }
@@ -141,14 +144,14 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
       <MenuItem
         key="captions"
         onClick={() => {
-          const name = (media.title || "כתוביות").replace(/[\\/:*?"<>|]+/g, " ").trim() || "כתוביות";
+          const name = (media.title || t("download.captionsFile")).replace(/[\\/:*?"<>|]+/g, " ").trim() || t("download.captionsFile");
           saveBlob(new Blob([toVtt(captions.cues, { precise: captions.precise })], { type: "text/vtt" }), `${name}.vtt`);
           onClose?.();
         }}
         sx={itemSx}
       >
         <ListItemIcon><ClosedCaptionOutlinedIcon fontSize="small" /></ListItemIcon>
-        <ListItemText primary="הורדת כתוביות (VTT)" />
+        <ListItemText primary={t("download.captions")} />
       </MenuItem>
     );
   }
@@ -162,7 +165,7 @@ export const useDownloadItems = ({ media, transcript, hasTranscript, onClose }) 
         <ListItemIcon>
           {busy ? <CircularProgress size={18} /> : <PictureAsPdfOutlinedIcon fontSize="small" />}
         </ListItemIcon>
-        <ListItemText primary={busy ? "מכין PDF..." : "הורדת תמלול (PDF)"} />
+        <ListItemText primary={busy ? t("download.preparingPdf") : t("download.transcriptPdf")} />
       </MenuItem>
     );
   }

@@ -18,11 +18,11 @@ import { roles } from "../../../utilities/constant";
 // which is what this row is for.
 // "שאל את הארכיון" sits beside the archive it asks (PRD ASK-2).
 const studentLinks = [
-  { label: "ארכיון", to: "/archive" },
-  { label: "שאל את הארכיון", to: "/ask" },
-  { label: "הקורסים שלי", to: "/my-courses" },
-  { label: "מפגשים", to: "/sessions" },
-  { label: "תרומה", to: "/donate" },
+  { labelKey: "links.archive", to: "/archive" },
+  { labelKey: "links.ask", to: "/ask" },
+  { labelKey: "links.myCourses", to: "/my-courses" },
+  { labelKey: "links.sessions", to: "/sessions" },
+  { labelKey: "links.donate", to: "/donate" },
 ];
 
 // Lecturers get the management entry as well — they run their own courses. Both
@@ -31,13 +31,13 @@ const studentLinks = [
 // "קורסים" so the pair is not two tabs with indistinguishable names.
 const lecturerLinks = [
   ...studentLinks,
-  { label: "ניהול קורסים", to: "/courses" },
+  { labelKey: "links.manageCourses", to: "/courses" },
 ];
 
 const adminLinks = [
   ...lecturerLinks,
-  { label: "משתמשים", to: "/users" },
-  { label: "ניהול", to: "/admin" },
+  { labelKey: "links.users", to: "/users" },
+  { labelKey: "links.admin", to: "/admin" },
 ];
 
 // The user's own material comes from personalShelves.js rather than being listed

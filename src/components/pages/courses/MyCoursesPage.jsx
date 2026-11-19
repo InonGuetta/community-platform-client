@@ -12,8 +12,8 @@ import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import JoinCourseDialog from "./componentsCourses/JoinCourseDialog";
 import { trackPath } from "../../../utilities/courseTrack";
-import { countLabel } from "../../../utilities/countLabel";
 import { useMyCoursesPageController } from "./useMyCoursesPageController";
+import { useTranslation } from "react-i18next";
 
 // What a student is enrolled in.
 //
@@ -30,6 +30,7 @@ import { useMyCoursesPageController } from "./useMyCoursesPageController";
 // there having to remember a mode it was not designed for.
 
 const MyCoursesPage = () => {
+  const { t } = useTranslation("courses");
   const {
     courses,
     navigate,
@@ -51,15 +52,15 @@ const MyCoursesPage = () => {
   return (
     <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, mb: 3, flexWrap: "wrap" }}>
-        <Typography variant="h4" fontWeight={800} color="primary">הקורסים שלי</Typography>
+        <Typography variant="h4" fontWeight={800} color="primary">{t("mine.title")}</Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {courses.length > 0 && (
             <Typography variant="body2" color="text.secondary">
-              {countLabel(courses.length, "קורס אחד", "קורסים")}
+              {t("mine.count", { count: courses.length })}
             </Typography>
           )}
           {/* PRD ROST-9. */}
-          <Button variant="contained" endIcon={<VpnKeyOutlinedIcon />} onClick={openJoin}>הצטרפות לקורס</Button>
+          <Button variant="contained" endIcon={<VpnKeyOutlinedIcon />} onClick={openJoin}>{t("mine.join")}</Button>
         </Box>
       </Box>
 
@@ -67,7 +68,7 @@ const MyCoursesPage = () => {
           a code sees that it went somewhere, until the course itself appears. */}
       {pendingRequests.length > 0 && (
         <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-          <Typography fontWeight={700} sx={{ mb: 1 }}>ממתינים לאישור המרצה</Typography>
+          <Typography fontWeight={700} sx={{ mb: 1 }}>{t("mine.awaiting")}</Typography>
           {pendingRequests.map((request) => (
             <Box key={request.id} sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.5 }}>
               <HourglassEmptyIcon fontSize="small" color="warning" />
@@ -75,7 +76,7 @@ const MyCoursesPage = () => {
                 {request.course_title}
                 {request.lecturer_name && <Typography component="span" color="text.secondary"> · {request.lecturer_name}</Typography>}
               </Typography>
-              <Button size="small" color="inherit" onClick={() => cancelRequest(request.id)}>ביטול הבקשה</Button>
+              <Button size="small" color="inherit" onClick={() => cancelRequest(request.id)}>{t("mine.cancelRequest")}</Button>
             </Box>
           ))}
         </Paper>
@@ -85,8 +86,8 @@ const MyCoursesPage = () => {
         // Joining by code is the way in a student can take themselves; the
         // archive's general library is still open to them meanwhile.
         <NoDataDialog
-          message="עדיין לא שויכת לאף קורס. קיבלת קוד מהמרצה? אפשר להצטרף איתו."
-          actionLabel="הצטרפות לקורס"
+          message={t("mine.none")}
+          actionLabel={t("mine.join")}
           onAction={openJoin}
         />
       ) : (
@@ -96,7 +97,7 @@ const MyCoursesPage = () => {
               <CardActionArea onClick={() => navigate(trackPath(course.id))} sx={{ p: 2, textAlign: "start", height: "100%" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                   <SchoolOutlinedIcon color="primary" fontSize="small" />
-                  <Typography variant="subtitle1" fontWeight={800} color="primary">
+                  <Typography variant="subtitle1" fontWeight={800} color="primary" dir="auto">
                     {course.title}
                   </Typography>
                 </Box>
@@ -105,6 +106,7 @@ const MyCoursesPage = () => {
                   <Typography
                     variant="body2"
                     color="text.secondary"
+                    dir="auto"
                     sx={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", mb: 1 }}
                   >
                     {course.description}
@@ -119,7 +121,7 @@ const MyCoursesPage = () => {
                       servicesCourses — so no request per card is needed. */}
                   {course.media_count > 0 && (
                     <Chip
-                      label={countLabel(course.media_count, "שיעור אחד", "שיעורים")}
+                      label={t("lessons", { count: Number(course.media_count) || 0 })}
                       size="small"
                       color="primary"
                       variant="outlined"

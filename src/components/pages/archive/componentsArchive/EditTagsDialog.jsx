@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import TagPicker from "../../../features/TagPicker/TagPicker";
 import TagProposalsSection from "../../../features/TagPicker/TagProposalsSection";
+import { useTranslation } from "react-i18next";
 
 // Tagging an item that already exists.
 //
@@ -49,6 +50,7 @@ import TagProposalsSection from "../../../features/TagPicker/TagProposalsSection
 const EMPTY = [];
 
 const EditTagsDialog = ({ open, item, tagTree = EMPTY, onClose, onSave }) => {
+  const { t } = useTranslation(["archive", "common"]);
   const [chosen, setChosen] = useState([]);
   const [saving, setSaving] = useState(false);
   // Tags an admin created from this dialog — see SuggestTagsDialog.
@@ -90,10 +92,10 @@ const EditTagsDialog = ({ open, item, tagTree = EMPTY, onClose, onSave }) => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ textAlign: "right" }}>תגיות — {item.title}</DialogTitle>
+      <DialogTitle sx={{ textAlign: "start" }}>{t("edit.tagsTitle", { title: item.title })}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
-          התגיות קובעות איפה הפריט יימצא בסינון ובחיפוש.
+          {t("edit.tagsHint")}
         </Typography>
         <TagPicker nodes={allNodes} value={chosen} onChange={setChosen} />
         <TagProposalsSection
@@ -104,9 +106,9 @@ const EditTagsDialog = ({ open, item, tagTree = EMPTY, onClose, onSave }) => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={saving}>ביטול</Button>
+        <Button onClick={onClose} disabled={saving}>{t("common:actions.cancel")}</Button>
         <Button onClick={handleSave} variant="contained" disabled={saving}>
-          שמירה
+          {t("edit.save")}
         </Button>
       </DialogActions>
     </Dialog>

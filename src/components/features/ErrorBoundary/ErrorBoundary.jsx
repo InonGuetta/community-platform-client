@@ -1,5 +1,7 @@
 import { Component } from "react";
 import { captureError } from "../../../utilities/monitoring";
+import i18n from "../../../i18n/i18n";
+import { directionOf } from "../../../i18n/languages";
 
 // React has no hook equivalent for error boundaries — this has to stay a class.
 //
@@ -59,7 +61,7 @@ const styles = {
     padding: "12px",
     background: "#fbeaea",
     borderRadius: "8px",
-    textAlign: "left",
+    textAlign: "start",
     direction: "ltr",
     fontFamily: "monospace",
     fontSize: "0.75rem",
@@ -105,18 +107,18 @@ class ErrorBoundary extends Component {
     if (!error) return this.props.children;
 
     return (
-      <div dir="rtl" style={styles.page}>
+      <div dir={directionOf(i18n.language)} style={styles.page}>
         <div style={styles.card}>
-          <h1 style={styles.title}>משהו השתבש</h1>
+          <h1 style={styles.title}>{i18n.t("errorBoundary.title")}</h1>
           <p style={styles.text}>
-            אירעה שגיאה בלתי צפויה בטעינת הדף. רענון הדף בדרך כלל פותר את הבעיה.
+            {i18n.t("errorBoundary.body")}
           </p>
           <div style={styles.actions}>
             <button type="button" style={styles.button} onClick={this.handleReload}>
-              רענון הדף
+              {i18n.t("errorBoundary.reload")}
             </button>
             <button type="button" style={styles.secondaryButton} onClick={this.handleGoHome}>
-              חזרה לארכיון
+              {i18n.t("errorBoundary.toArchive")}
             </button>
           </div>
           {import.meta.env.DEV && (

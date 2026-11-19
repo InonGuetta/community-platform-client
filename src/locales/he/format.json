@@ -1,0 +1,93 @@
+{
+  "roles": {
+    "student": "תלמיד",
+    "lecturer": "מרצה",
+    "admin": "מנהל"
+  },
+  "mediaTypes": {
+    "video": "וידאו",
+    "audio": "שמע",
+    "text": "קריאה"
+  },
+  "creatorLabel": {
+    "video": "שם המרצה",
+    "audio": "שם המרצה",
+    "text": "שם המחבר"
+  },
+  "creatorPrefix": {
+    "video": "מרצה",
+    "audio": "מרצה",
+    "text": "מחבר"
+  },
+  "creatorNone": "כללי",
+  "sessionTypes": {
+    "1on1": "אחד על אחד",
+    "group": "קבוצה",
+    "webinar": "וובינר"
+  },
+  "countNone": "אין {{many}}",
+  "duration": {
+    "short": "0–15 דקות",
+    "medium": "15–30 דקות",
+    "long": "30–60 דקות",
+    "xlong": "מעל 60 דקות",
+    "seconds": "{{n}} שנ׳",
+    "minutes": "{{n}} דק׳",
+    "hours": "{{h}} שע׳",
+    "hoursMinutes": "{{h}} שע׳ {{m}} דק׳"
+  },
+  "place": {
+    "page": "עמ׳ {{page}}",
+    "atTime": "בזמן {{time}}",
+    "orphaned": "המיקום אינו זמין עוד",
+    "inText": "במיקום בטקסט",
+    "orphanedShort": "לא זמין",
+    "inTextShort": "בטקסט",
+    "chunk": "קטע {{n}}"
+  },
+  "track": {
+    "oneDone": "השיעור הושלם",
+    "allDone": "כל {{total}} השיעורים הושלמו",
+    "progress": "{{completed}} מתוך {{total}} שיעורים הושלמו"
+  },
+  "notesExport": {
+    "untitled": "(ללא כותרת)",
+    "from": " — מתוך: {{title}}",
+    "untitledNote": "הערה ללא כותרת",
+    "notebook": "המחברת שלי",
+    "notebookDated": "המחברת שלי - {{date}}"
+  },
+  "csv": {
+    "name": "שם",
+    "email": "אימייל",
+    "enrolledAt": "תאריך רישום",
+    "active": "פעיל",
+    "yes": "כן",
+    "no": "לא",
+    "students": "תלמידים",
+    "studentsFile": "תלמידים - {{course}}",
+    "completed": "הושלמו",
+    "started": "התחילו",
+    "lastActivity": "פעילות אחרונה",
+    "progress": "התקדמות",
+    "progressFile": "התקדמות - {{course}}",
+    "statusDone": "הושלם",
+    "statusStarted": "התחיל"
+  },
+  "discussion": {
+    "source": "מקור {{n}}",
+    "question": "שאלה:",
+    "answer": "תשובה:",
+    "title": "דיון עם בינה מלאכותית — {{title}}",
+    "sources": "מקורות: {{list}}"
+  },
+  "noteSource": {
+    "pageSuffix": " · עמ׳ {{page}}",
+    "lessonFallback": "שיעור",
+    "generalReference": "הפנייה כללית",
+    "image": "[תמונה]"
+  },
+  "timing": {
+    "estimated": "הזמנים משוערים: השיעור תומלל לפני שנשמר תזמון מדויק לכל משפט."
+  }
+}

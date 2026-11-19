@@ -1,0 +1,130 @@
+{
+  "title": "Cours",
+  "newCourse": "Nouveau cours",
+  "editCourse": "Modifier le cours",
+  "tabs": {
+    "mine": "Mes cours",
+    "all": "Tous les cours"
+  },
+  "noneDefined": "Aucun cours n'a encore été créé",
+  "noneOwn": "Vous n'avez pas encore de cours à vous. Les cours des autres enseignants se trouvent sous « Tous les cours ».",
+  "inactive": "Inactif",
+  "noLecturer": "Sans enseignant",
+  "students_one": "Un élève",
+  "students_other": "{{count}} élèves",
+  "lessons_zero": "Aucune leçon",
+  "lessons_one": "Une leçon",
+  "lessons_other": "{{count}} leçons",
+  "viewOnly": "Lecture seule",
+  "joinRequests_one": "Une demande d'inscription",
+  "joinRequests_other": "{{count}} demandes d'inscription",
+  "edit": "Modifier",
+  "delete": "Supprimer",
+  "pageManage": "Page du cours : ordre des leçons et qui a écouté quoi",
+  "page": "Page du cours",
+  "rosterPrivate": "La liste des élèves n'est visible que par l'enseignant du cours.",
+  "unenroll": {
+    "title": "Retirer du cours",
+    "confirm": "Retirer",
+    "question": "Retirer <strong>{{student}}</strong> du cours <strong>{{course}}</strong> ? L'accès aux leçons du cours sera bloqué immédiatement. Vous pourrez l'inscrire à nouveau à tout moment."
+  },
+  "form": {
+    "name": "Nom du cours",
+    "description": "Description",
+    "lecturer": "Enseignant responsable",
+    "save": "Enregistrer"
+  },
+  "report": {
+    "doneOf": "{{title}} : terminé",
+    "done": "Terminé",
+    "reachedOf": "{{title}} : arrivé à {{time}}",
+    "started": "Commencé, arrivé à {{time}}",
+    "notYet": "Pas encore",
+    "title": "Qui a écouté quoi",
+    "export": "Exporter en CSV",
+    "loadFailed": "Le rapport ne peut pas être chargé pour le moment.",
+    "noStudents": "Aucun élève n'est encore inscrit au cours.",
+    "noRecordings": "Le cours ne contient aucun enregistrement dont l'écoute peut être suivie.",
+    "tableLabel": "Progression des élèves dans le cours",
+    "student": "Élève",
+    "completed": "Terminées",
+    "lessonCompletedBy": "{{title}} · terminée par {{completed}} sur {{total}}",
+    "lessonLabel": "Leçon {{n}} : {{title}}",
+    "lastActive": "Dernière activité le {{date}}",
+    "neverListened": "N'a pas encore écouté",
+    "exportFailed": "L'export du rapport a échoué"
+  },
+  "roster": {
+    "typeMore": "Saisissez au moins deux lettres pour rechercher",
+    "noUsers": "Aucun utilisateur trouvé",
+    "search": "Rechercher un utilisateur à ajouter au cours",
+    "add": "Ajouter",
+    "export": "Exporter en CSV",
+    "empty": "Aucun élève n'est inscrit à ce cours."
+  },
+  "joinCode": {
+    "requestedOn": "Demandé le {{date}}",
+    "approve": "Accepter",
+    "reject": "Refuser",
+    "title": "Inscription par code",
+    "copy": "Copier le code",
+    "newCode": "Nouveau code",
+    "remove": "Désactiver l'inscription par code",
+    "howItWorks": "Quiconque saisit le code envoie une demande, et n'entre dans le cours qu'après votre accord.",
+    "pitch": "Avec un code, les élèves peuvent demander eux-mêmes à rejoindre le cours, et vous acceptez chaque demande.",
+    "create": "Créer un code",
+    "pending_one": "Une demande en attente",
+    "pending_other": "{{count}} demandes en attente",
+    "replaceConfirm": "Créer un nouveau code",
+    "replaceWarning": "Le code actuel cessera de fonctionner immédiatement, même pour ceux qui l'ont déjà. Les demandes déjà envoyées restent.",
+    "codeCopied": "Code copié",
+    "linkCopied": "Lien copié",
+    "copyFailed": "La copie n'a pas fonctionné. Vous pouvez le sélectionner et le copier à la main.",
+    "copyLink": "Copier le lien d'inscription"
+  },
+  "join": {
+    "title": "Rejoindre un cours",
+    "sent": "Votre demande d'inscription au cours <strong>{{course}}</strong> a été envoyée. Le cours apparaîtra ici une fois la demande acceptée.",
+    "sentTo": "Votre demande d'inscription au cours <strong>{{course}}</strong> a été envoyée à {{lecturer}}. Le cours apparaîtra ici une fois la demande acceptée.",
+    "intro": "Saisissez le code reçu de l'enseignant. La demande lui sera envoyée pour accord.",
+    "code": "Code d'inscription",
+    "close": "Fermer",
+    "sending": "Envoi…",
+    "send": "Envoyer la demande",
+    "failed": "L'envoi a échoué. Veuillez réessayer."
+  },
+  "myStudents": {
+    "title": "Mes élèves",
+    "empty": "Aucun élève n'est encore inscrit à vos cours. Vous pouvez ajouter des élèves depuis chaque cours ci-dessous."
+  },
+  "track": {
+    "status": {
+      "done": "Terminé",
+      "started": "Commencé",
+      "new": "Pas encore",
+      "book": "À lire"
+    },
+    "reached": "Vous êtes arrivé à {{time}}",
+    "dragHint": "{{index}}. {{title}} — faites-la glisser, ou déplacez-la avec les flèches",
+    "draft": "Brouillon",
+    "myCourses": "Mes cours",
+    "forbidden": "Les leçons de ce cours sont ouvertes aux élèves qui y sont inscrits. Vous avez un code de l'enseignant ? Vous pouvez vous inscrire dans « Mes cours ».",
+    "loadFailed": "Le cours ne peut pas être chargé pour le moment.",
+    "progress": "Progression dans le cours",
+    "continue": "Continuer : {{title}}",
+    "start": "Commencer : {{title}}",
+    "arrangeHint": "Faites glisser une leçon pour changer l'ordre, ou sélectionnez-la et déplacez-la avec les flèches. Les élèves voient le cours dans cet ordre.",
+    "empty": "Le cours ne contient encore aucune leçon.",
+    "reorderFailed": "L'enregistrement de l'ordre des leçons a échoué. L'ordre précédent a été rétabli."
+  },
+  "mine": {
+    "title": "Mes cours",
+    "count_zero": "Aucun cours",
+    "count_one": "Un cours",
+    "count_other": "{{count}} cours",
+    "awaiting": "En attente de l'accord de l'enseignant",
+    "cancelRequest": "Annuler la demande",
+    "none": "Vous n'avez encore été ajouté à aucun cours. Vous avez reçu un code de l'enseignant ? Vous pouvez vous inscrire avec.",
+    "join": "Rejoindre un cours"
+  }
+}

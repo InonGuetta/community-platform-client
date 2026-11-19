@@ -1,0 +1,63 @@
+{
+  "untitled": "(sin título)",
+  "untitledBare": "Sin título",
+  "titlePlaceholder": "Título de la nota",
+  "from": "De: {{title}}",
+  "lessonFallback": "Clase",
+  "bodyPlaceholder": "Escribe aquí tu nota... También puedes pegar imágenes y arrastrar marcadores.",
+  "dropHere": "Suelta aquí para insertar un enlace a la clase",
+  "unsaved": "Hay cambios sin guardar",
+  "updated": "Última actualización: {{date}}",
+  "deleteNamed": "Eliminar la nota {{title}}",
+  "saveShortcut": "Guardar (Ctrl+S)",
+  "save": "Guardar",
+  "saved": "Nota guardada",
+  "noChanges": "No hay cambios que guardar",
+  "body": "Cuerpo de la nota",
+  "editor": {
+    "deleteImage": "Eliminar la imagen",
+    "deleteSource": "Eliminar la fuente",
+    "imageTooLarge": "La imagen es demasiado grande (más de {{mb}} MB). Prueba con una más pequeña.",
+    "imageReadFailed": "No se pudo leer la imagen.",
+    "renameReference": "Cambiar el nombre de la referencia",
+    "referenceName": "Nombre de la referencia",
+    "clearToRemove": "Déjalo vacío para quitar el nombre de la referencia"
+  },
+  "untitledDialog": {
+    "title": "La pestaña no tiene nombre",
+    "body": "Puedes ponerle un nombre ahora o guardarla sin nombre.",
+    "name": "Nombre de la pestaña",
+    "save": "Guardar",
+    "saveAnyway": "Guardar de todos modos"
+  },
+  "toolbar": {
+    "label": "Formato de la nota",
+    "fontSize": "Tamaño del texto",
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "underline": "Subrayado",
+    "strike": "Tachado",
+    "textColor": "Color del texto",
+    "highlight": "Resaltado",
+    "bullets": "Lista con viñetas",
+    "numbered": "Lista numerada",
+    "clear": "Borrar formato",
+    "pixels": "Tamaño en píxeles",
+    "apply": "Aplicar",
+    "sample": "Abc",
+    "textColorTitle": "Color del texto",
+    "highlightTitle": "Color de resaltado",
+    "colors": {
+      "default": "Predeterminado",
+      "red": "Rojo",
+      "orange": "Naranja",
+      "green": "Verde",
+      "blue": "Azul",
+      "purple": "Morado",
+      "none": "Sin resaltado",
+      "yellow": "Amarillo",
+      "lightBlue": "Celeste",
+      "pink": "Rosa"
+    }
+  }
+}

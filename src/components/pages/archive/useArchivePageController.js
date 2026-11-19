@@ -20,7 +20,7 @@ import { creatorPath } from "../../../utilities/creatorPage";
 import { toggleType, pressAllTypes } from "./componentsArchive/typeSelection";
 import { readSort, DEFAULT_SORT } from "./componentsArchive/sortOptions";
 import { readDuration, durationParams, lengthApplies } from "../../../utilities/durationOptions";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import {
   buildTagRelations,
   normalizeSelection,
@@ -29,12 +29,14 @@ import {
   pruneUnknownTags,
   sameSelection,
 } from "../../../utilities/tagStates";
+import { useTranslation } from "react-i18next";
 
 // `fixedCreator` — the lecturer's page (PRD ATTR-10): the same archive, filters
 // and all, with the lecturer chosen by the page rather than by the reader. It is
 // not written into the address (the path already names them), not counted as a
 // filter the reader can clear, and not offered as a choice.
 const useArchivePageController = ({ fixedCreator = "" } = {}) => {
+  const { t } = useTranslation("archive");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const allMedia = useSelector(selectAllMedia);
@@ -155,7 +157,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
     if (!sameSelection(pruned, tagSelection)) {
       dispatch(
         notify({
-          message: "חלק מהתגיות בסינון כבר אינן קיימות והוסרו ממנו",
+          message: t("notices.staleTags"),
           severity: "info",
         })
       );
@@ -335,8 +337,8 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
     dispatch(
       notify(
         ok
-          ? { message: "התגיות עודכנו", severity: "success" }
-          : { message: hebrewForError(result.payload, "עדכון התגיות נכשל"), severity: "error" }
+          ? { message: t("notices.tagsSaved"), severity: "success" }
+          : { message: messageForError(result.payload, t("notices.tagsFailed")), severity: "error" }
       )
     );
     if (!ok) return;
@@ -368,8 +370,8 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
     dispatch(
       notify(
         ok
-          ? { message: "פרטי השיעור עודכנו", severity: "success" }
-          : { message: hebrewForError(result.payload, "עדכון הפרטים נכשל"), severity: "error" }
+          ? { message: t("notices.detailsSaved"), severity: "success" }
+          : { message: messageForError(result.payload, t("notices.detailsFailed")), severity: "error" }
       )
     );
     if (!ok) return;
@@ -395,8 +397,8 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
     dispatch(
       notify(
         ok
-          ? { message: next ? "הפריט פורסם ומוצג לתלמידים" : "הפריט הוסתר מהתלמידים", severity: "success" }
-          : { message: hebrewForError(result.payload, "עדכון הפרסום נכשל"), severity: "error" }
+          ? { message: next ? t("notices.published") : t("notices.hidden"), severity: "success" }
+          : { message: messageForError(result.payload, t("notices.publishFailed")), severity: "error" }
       )
     );
   };

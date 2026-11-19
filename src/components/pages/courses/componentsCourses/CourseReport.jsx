@@ -7,9 +7,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { formatHebrewDate } from "../../../../utilities/formatDate";
+import { formatDate } from "../../../../utilities/formatDate";
 import { formatTime } from "../../../../utilities/formatTime";
 import { useCourseReport } from "./useCourseReport";
+import { useTranslation } from "react-i18next";
 
 // "מי שמע מה" (PRD CRS-4): every student in the course against every recording,
 // in the track's order. Shown to the course's lecturer on the course page —
@@ -35,53 +36,55 @@ const nameCellSx = {
 const cellSx = { textAlign: "center", px: 0.5, py: 1, borderBottom: 1, borderColor: "divider", minWidth: 44 };
 
 const StatusCell = ({ cell, lessonTitle }) => {
+  const { t } = useTranslation("courses");
   if (cell?.status === "done") {
-    return <Tooltip title={`${lessonTitle}: הושלם`}><CheckCircleIcon fontSize="small" sx={{ color: "success.main" }} aria-label="הושלם" /></Tooltip>;
+    return <Tooltip title={t("report.doneOf", { title: lessonTitle })}><CheckCircleIcon fontSize="small" sx={{ color: "success.main" }} aria-label={t("report.done")} /></Tooltip>;
   }
   if (cell?.status === "started") {
     return (
-      <Tooltip title={`${lessonTitle}: הגיע ל-${formatTime(cell.position)}`}>
-        <TimelapseIcon fontSize="small" sx={{ color: "warning.main" }} aria-label={`התחיל, הגיע ל-${formatTime(cell.position)}`} />
+      <Tooltip title={t("report.reachedOf", { title: lessonTitle, time: formatTime(cell.position) })}>
+        <TimelapseIcon fontSize="small" sx={{ color: "warning.main" }} aria-label={t("report.started", { time: formatTime(cell.position) })} />
       </Tooltip>
     );
   }
-  return <Box component="span" aria-label="עוד לא" sx={{ color: "text.disabled" }}>·</Box>;
+  return <Box component="span" aria-label={t("report.notYet")} sx={{ color: "text.disabled" }}>·</Box>;
 };
 
 const CourseReport = ({ courseId, courseTitle }) => {
+  const { t } = useTranslation("courses");
   const { status, report, exportCsv } = useCourseReport(courseId);
 
   return (
     <Paper variant="outlined" sx={{ p: 2, mt: 4, borderRadius: 3 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5, flexWrap: "wrap" }}>
-        <Typography variant="h6" fontWeight={800} sx={{ flex: 1 }}>מי שמע מה</Typography>
+        <Typography variant="h6" fontWeight={800} sx={{ flex: 1 }}>{t("report.title")}</Typography>
         {report?.students?.length > 0 && report.lessons.length > 0 && (
           <Button size="small" variant="outlined" endIcon={<FileDownloadOutlinedIcon />} onClick={() => exportCsv(courseTitle)}>
-            ייצוא ל-CSV
+            {t("report.export")}
           </Button>
         )}
       </Box>
 
       {status === "loading" && <CircularProgress size={24} />}
-      {status === "failed" && <Typography color="text.secondary">לא ניתן לטעון את הדוח כרגע.</Typography>}
+      {status === "failed" && <Typography color="text.secondary">{t("report.loadFailed")}</Typography>}
       {status === "succeeded" && report.students.length === 0 && (
-        <Typography color="text.secondary">עוד אין תלמידים רשומים לקורס.</Typography>
+        <Typography color="text.secondary">{t("report.noStudents")}</Typography>
       )}
       {status === "succeeded" && report.students.length > 0 && report.lessons.length === 0 && (
-        <Typography color="text.secondary">אין בקורס הקלטות שאפשר לעקוב אחרי ההאזנה להן.</Typography>
+        <Typography color="text.secondary">{t("report.noRecordings")}</Typography>
       )}
 
       {status === "succeeded" && report.students.length > 0 && report.lessons.length > 0 && (
         <Box sx={{ overflowX: "auto" }}>
-          <Box component="table" sx={{ borderCollapse: "collapse", width: "100%" }} aria-label="התקדמות התלמידים בקורס">
+          <Box component="table" sx={{ borderCollapse: "collapse", width: "100%" }} aria-label={t("report.tableLabel")}>
             <thead>
               <tr>
-                <Box component="th" scope="col" sx={{ ...nameCellSx, fontWeight: 700 }}>תלמיד</Box>
-                <Box component="th" scope="col" sx={{ ...cellSx, fontWeight: 700, minWidth: 70 }}>הושלמו</Box>
+                <Box component="th" scope="col" sx={{ ...nameCellSx, fontWeight: 700 }}>{t("report.student")}</Box>
+                <Box component="th" scope="col" sx={{ ...cellSx, fontWeight: 700, minWidth: 70 }}>{t("report.completed")}</Box>
                 {report.lessons.map((lesson, i) => (
                   <Box component="th" scope="col" key={lesson.id} sx={{ ...cellSx, fontWeight: 700 }}>
-                    <Tooltip title={`${lesson.title} · השלימו ${lesson.completedBy} מתוך ${report.students.length}`}>
-                      <Box component="span" aria-label={`שיעור ${i + 1}: ${lesson.title}`}>{i + 1}</Box>
+                    <Tooltip title={t("report.lessonCompletedBy", { title: lesson.title, completed: lesson.completedBy, total: report.students.length })}>
+                      <Box component="span" aria-label={t("report.lessonLabel", { n: i + 1, title: lesson.title })}>{i + 1}</Box>
                     </Tooltip>
                   </Box>
                 ))}
@@ -93,7 +96,7 @@ const CourseReport = ({ courseId, courseTitle }) => {
                   <Box component="th" scope="row" sx={nameCellSx}>
                     <Typography fontWeight={600} noWrap title={student.email}>{student.display_name || student.email}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {student.lastActivity ? `פעיל לאחרונה ${formatHebrewDate(student.lastActivity)}` : "עוד לא האזין"}
+                      {student.lastActivity ? t("report.lastActive", { date: formatDate(student.lastActivity) }) : t("report.neverListened")}
                     </Typography>
                   </Box>
                   <Box component="td" sx={{ ...cellSx, fontWeight: 700 }} data-testid={`report-total-${student.id}`}>

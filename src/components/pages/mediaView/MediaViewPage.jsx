@@ -22,7 +22,9 @@ import { creatorPrefixes } from "../../../utilities/constant";
 import { creatorPath, hasCreatorPage } from "../../../utilities/creatorPage";
 import Link from "@mui/material/Link";
 import { Link as RouterLink } from "react-router-dom";
-import { formatHebrewDate } from "../../../utilities/formatDate";
+import { formatDate } from "../../../utilities/formatDate";
+import { useTranslation } from "react-i18next";
+import { creatorDisplayName } from "../../../utilities/creatorPage";
 
 // Presentation only. Everything that dispatches, selects or derives from server
 // data lives in useMediaViewPageController — see its header for where that line
@@ -33,6 +35,7 @@ import { formatHebrewDate } from "../../../utilities/formatDate";
 // like, download, share, and the overlays they open — is MediaActionsBar, shared
 // with the notebook's source preview so the two cannot drift apart.
 const MediaViewPage = () => {
+  const { t } = useTranslation("lesson");
   const controller = useMediaViewPageController();
   const {
     media, bookmarks, transcript,
@@ -129,7 +132,7 @@ const MediaViewPage = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: 1, mb: 2 }}>
-        <Typography variant="h5" fontWeight={700}>{media.title}</Typography>
+        <Typography variant="h5" fontWeight={700} dir="auto">{media.title}</Typography>
         {/* "מרצה" or "מחבר" by media type — one column, worded for what it is.
             Always present: creator_name is NOT NULL and reads "כללי" when nobody
             said, so this never collapses into a title that looks unattributed by
@@ -143,7 +146,7 @@ const MediaViewPage = () => {
                 {media.creator_name}
               </Link>
             ) : (
-              media.creator_name
+              creatorDisplayName(media.creator_name)
             )}
           </Typography>
         )}
@@ -196,7 +199,7 @@ const MediaViewPage = () => {
               publication date. A draft says so rather than claiming to be
               published, since the people who can see one are exactly the
               people who know it is not. */}
-          {formatHebrewDate(media.created_at) && (
+          {formatDate(media.created_at) && (
             <Typography
               variant="body2"
               color="text.secondary"
@@ -205,8 +208,8 @@ const MediaViewPage = () => {
               // under the start of the player, where the title above it begins.
               sx={{ mt: 1, textAlign: "start" }}
             >
-              {media.is_published === false ? "טיוטה · הועלה בתאריך: " : "פורסם בתאריך: "}
-              {formatHebrewDate(media.created_at)}
+              {media.is_published === false ? t("draftUploaded") : t("published")}
+              {formatDate(media.created_at)}
             </Typography>
           )}
           {/* Its place in its course, and the way on (PRD CRS-1, CRS-3). Also
@@ -297,7 +300,7 @@ const MediaViewPage = () => {
       {media.description && (
         <Box sx={{ mt: 3 }}>
           <Divider sx={{ mb: 2 }} />
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" dir="auto">
             {media.description}
           </Typography>
         </Box>

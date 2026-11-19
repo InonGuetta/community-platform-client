@@ -17,7 +17,8 @@ import ProposeTagDialog from "../../../features/TagPicker/ProposeTagDialog";
 import { pathOf } from "../../../features/TagPicker/tagOptions";
 import { buildTagRelations } from "../../../../utilities/tagStates";
 import { useTagProposalsAdmin } from "./useTagProposalsAdmin";
-import { formatShortHebrewDate } from "../../../../utilities/formatDate";
+import { formatShortDate } from "../../../../utilities/formatDate";
+import { useTranslation } from "react-i18next";
 
 // New tags lecturers asked for, waiting for an admin.
 //
@@ -27,6 +28,7 @@ import { formatShortHebrewDate } from "../../../../utilities/formatDate";
 // tag exists rather than renamed after items already carry it.
 
 const TagProposals = () => {
+  const { t } = useTranslation(["admin", "common"]);
   const { proposals, tree, error, notice, clearNotice, approve, reject } = useTagProposalsAdmin();
   const relations = useMemo(() => buildTagRelations(tree), [tree]);
   const [editing, setEditing] = useState(null);
@@ -35,7 +37,7 @@ const TagProposals = () => {
   const [busyId, setBusyId] = useState(null);
   const [rowError, setRowError] = useState(null);
 
-  const placeOf = (parentId) => pathOf(relations, parentId).join(" ← ") || "כותרת ראשית";
+  const placeOf = (parentId) => pathOf(relations, parentId).join(" ← ") || t("tags.topLevel");
 
   const run = async (proposal, work) => {
     setBusyId(proposal.id);
@@ -43,7 +45,7 @@ const TagProposals = () => {
     try {
       await work();
     } catch (err) {
-      setRowError({ id: proposal.id, message: err?.hebrew || "הפעולה נכשלה" });
+      setRowError({ id: proposal.id, message: err?.userMessage || t("tags.actionFailed") });
     } finally {
       setBusyId(null);
     }
@@ -59,7 +61,7 @@ const TagProposals = () => {
   return (
     <Box>
       <Typography variant="h6" fontWeight={700} mb={2}>
-        תגיות חדשות שממתינות לאישור{proposals?.length ? ` (${proposals.length})` : ""}
+        {proposals?.length ? t("tags.pendingTitleCount", { n: proposals.length }) : t("tags.pendingTitle")}
       </Typography>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -72,7 +74,7 @@ const TagProposals = () => {
       {proposals === null && !error && <CircularProgress size={24} />}
       {proposals?.length === 0 && (
         <Typography variant="body2" color="text.secondary">
-          אין תגיות שממתינות לאישור.
+          {t("tags.none")}
         </Typography>
       )}
 
@@ -85,14 +87,14 @@ const TagProposals = () => {
                 {proposal.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                תחת: {placeOf(proposal.parent_id)}
+                {t("tags.under", { place: placeOf(proposal.parent_id) })}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                הוצעה על ידי {proposal.proposed_by_name || "משתמש שנמחק"} · {formatShortHebrewDate(proposal.created_at)}
+                {t("tags.proposedBy", { name: proposal.proposed_by_name || t("tags.deletedUser"), date: formatShortDate(proposal.created_at) })}
               </Typography>
               {proposal.media.length > 0 && (
                 <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
-                  תתווסף ל: {proposal.media.map((m) => `«${m.title}»`).join(", ")}
+                  {t("tags.willTag", { titles: proposal.media.map((m) => `«${m.title}»`).join(", ") })}
                 </Typography>
               )}
               {rowError?.id === proposal.id && (
@@ -108,7 +110,7 @@ const TagProposals = () => {
                 disabled={busyId !== null}
                 onClick={() => run(proposal, () => approve(proposal, {}))}
               >
-                אישור
+                {t("tags.approve")}
               </Button>
               <Button
                 size="small"
@@ -117,7 +119,7 @@ const TagProposals = () => {
                 disabled={busyId !== null}
                 onClick={() => setEditing(proposal)}
               >
-                עריכה ואישור
+                {t("tags.editApprove")}
               </Button>
               <Button
                 size="small"
@@ -126,7 +128,7 @@ const TagProposals = () => {
                 disabled={busyId !== null}
                 onClick={() => setRejecting(proposal)}
               >
-                דחייה
+                {t("tags.reject")}
               </Button>
             </Box>
           </Box>
@@ -136,12 +138,12 @@ const TagProposals = () => {
       <ProposeTagDialog
         open={Boolean(editing)}
         nodes={tree}
-        title="עריכה ואישור תגית"
-        submitLabel="אישור"
+        title={t("tags.editApproveTitle")}
+        submitLabel={t("tags.approve")}
         note={
           editing?.media.length
-            ? `אחרי האישור התגית תיכנס לעץ ותתווסף ל-${editing.media.length} שיעורים.`
-            : "אחרי האישור התגית תיכנס לעץ."
+            ? t("tags.afterApproveTagged", { count: editing.media.length })
+            : t("tags.afterApprove")
         }
         initialName={editing?.name ?? ""}
         initialParentId={editing?.parent_id ?? null}
@@ -154,22 +156,22 @@ const TagProposals = () => {
       />
 
       <Dialog open={Boolean(rejecting)} onClose={() => setRejecting(null)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ textAlign: "right" }}>דחיית «{rejecting?.name}»</DialogTitle>
+        <DialogTitle sx={{ textAlign: "start" }}>{t("tags.rejectTitle", { name: rejecting?.name })}</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
             multiline
             minRows={2}
-            label="סיבה (לא חובה)"
+            label={t("tags.reasonOptional")}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             sx={{ mt: 1 }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRejecting(null)}>ביטול</Button>
+          <Button onClick={() => setRejecting(null)}>{t("common:actions.cancel")}</Button>
           <Button color="error" variant="contained" onClick={confirmReject}>
-            דחייה
+            {t("tags.reject")}
           </Button>
         </DialogActions>
       </Dialog>

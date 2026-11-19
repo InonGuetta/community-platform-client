@@ -12,7 +12,7 @@ import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 import { discussionApi } from "../../../api/discussionApi";
 import { placeOf, placeHref } from "../../../utilities/discussionPlace";
 import AskArchivePage from "./AskArchivePage";
-import { ARCHIVE_SUGGESTIONS } from "./useAskArchivePageController";
+import { archiveSuggestions } from "./useAskArchivePageController";
 
 // "שאל את הארכיון" (PRD ASK-2): the lesson chat's slice and pane, keyed by
 // "archive", with citations that open their own lesson.
@@ -57,7 +57,7 @@ beforeEach(() => {
 describe("asking the archive", () => {
   it("loads the archive's own conversation and offers questions about many lessons", async () => {
     renderPage();
-    expect(await screen.findByText(ARCHIVE_SUGGESTIONS[0])).toBeInTheDocument();
+    expect(await screen.findByText(archiveSuggestions()[0])).toBeInTheDocument();
     expect(discussionApi.getConversation).toHaveBeenCalledWith("archive");
     expect(screen.getByPlaceholderText("שאל שאלה על הארכיון…")).toBeInTheDocument();
     expect(screen.getByText(/נשארו לך היום 48 שאלות/)).toBeInTheDocument();

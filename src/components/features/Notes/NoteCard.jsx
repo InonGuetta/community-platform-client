@@ -15,7 +15,8 @@ import { formatTime } from "../../../utilities/formatTime";
 import { noteHtmlToPlainText } from "../../../utilities/noteHtml";
 import { BOOKMARK_DRAG_MIME } from "../../../utilities/noteSource";
 import { iconForMediaType } from "../../../utilities/mediaIcons";
-import { formatHebrewDate } from "../../../utilities/formatDate";
+import { formatDate } from "../../../utilities/formatDate";
+import { useTranslation } from "react-i18next";
 
 // One note, open for editing. The notebook stacks these — every note is on the
 // page at once, one under the other, and the user scrolls between them instead
@@ -43,6 +44,7 @@ import { formatHebrewDate } from "../../../utilities/formatDate";
 // too: jumping to a note from the list scrolls to this card, and arriving there
 // is what brings the body in.
 const NotePlaceholder = ({ note, cardRef, onNeedBody }) => {
+  const { t } = useTranslation("notes");
   const node = useRef(null);
   useEffect(() => {
     const element = node.current;
@@ -74,7 +76,7 @@ const NotePlaceholder = ({ note, cardRef, onNeedBody }) => {
       aria-busy="true"
       sx={{ p: 3, borderRadius: 3, display: "flex", flexDirection: "column", gap: 2, border: "1px solid", borderColor: "divider", scrollMarginTop: { xs: 80, md: 8 } }}
     >
-      <Typography sx={{ fontSize: "1.5rem", fontWeight: 700 }}>{note.title?.trim() || "(ללא כותרת)"}</Typography>
+      <Typography sx={{ fontSize: "1.5rem", fontWeight: 700 }}>{note.title?.trim() || t("untitled")}</Typography>
       <Typography color="text.secondary" sx={{ overflowWrap: "anywhere" }}>{note.preview || ""}</Typography>
       <Skeleton variant="rounded" height={120} />
     </Paper>
@@ -92,6 +94,7 @@ const NoteCard = ({
   // Asked when the body is needed — see NotePlaceholder.
   onNeedBody,
 }) => {
+  const { t } = useTranslation("notes");
   const [sourceHovering, setSourceHovering] = useState(false);
 
   // No draft means no body yet: the page passes null rather than an empty one
@@ -166,11 +169,11 @@ const NoteCard = ({
           value={draft.title}
           onChange={(e) => onDraftChange({ ...draft, title: e.target.value })}
           onFocus={onFocus}
-          placeholder="כותרת ההערה"
+          placeholder={t("titlePlaceholder")}
           variant="standard"
           fullWidth
           // The placeholder is gone once a title is typed; this name stays.
-          inputProps={{ "aria-label": "כותרת ההערה" }}
+          inputProps={{ "aria-label": t("titlePlaceholder"), dir: "auto" }}
           InputProps={{ disableUnderline: true, sx: { fontSize: "1.5rem", fontWeight: 700 } }}
         />
       </Box>
@@ -199,7 +202,7 @@ const NoteCard = ({
           size="small"
           sx={{ alignSelf: "flex-start", textTransform: "none" }}
         >
-          {`מתוך: ${note.media_title || "שיעור"}${note.timestamp_seconds != null ? ` · ${formatTime(note.timestamp_seconds)}` : ""}`}
+          {`${t("from", { title: note.media_title || t("lessonFallback") })}${note.timestamp_seconds != null ? ` · ${formatTime(note.timestamp_seconds)}` : ""}`}
         </Button>
         );
       })()}
@@ -218,26 +221,26 @@ const NoteCard = ({
         // A chip that is a bookmark is renamed by renaming the bookmark.
         onRenameSource={onRenameSource}
         minHeight={editorMinHeight}
-        placeholder="כתוב כאן את ההערה שלך... אפשר גם להדביק תמונות ולגרור לכאן סימניות."
+        placeholder={t("bodyPlaceholder")}
       />
 
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="caption" color={sourceHovering ? "success.main" : "text.secondary"}>
           {sourceHovering
-            ? "שחרר כאן כדי לשבץ קישור לשיעור"
-            : (isDirty ? "יש שינויים שלא נשמרו" : `עודכן לאחרונה: ${formatHebrewDate(note.updated_at)}`)}
+            ? t("dropHere")
+            : (isDirty ? t("unsaved") : t("updated", { date: formatDate(note.updated_at) }))}
         </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton color="error" onClick={onDelete} aria-label={`מחיקת ההערה ${note.title?.trim() || "ללא כותרת"}`}>
+          <IconButton color="error" onClick={onDelete} aria-label={t("deleteNamed", { title: note.title?.trim() || t("untitledBare") })}>
             <DeleteIcon />
           </IconButton>
           {/* Ctrl+S does the same thing for the card the caret is in — see the
               keyboard handler in NotebookPage. */}
-          <Tooltip title="שמירה (Ctrl+S)">
+          <Tooltip title={t("saveShortcut")}>
             <span>
               <Button variant="contained" startIcon={<SaveIcon />} onClick={onSave} disabled={!isDirty}
                 sx={{ borderRadius: 2, fontWeight: 700 }}>
-                שמירה
+                {t("save")}
               </Button>
             </span>
           </Tooltip>

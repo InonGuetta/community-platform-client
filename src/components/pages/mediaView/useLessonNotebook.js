@@ -10,7 +10,7 @@ import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { statuses } from "../../../utilities/constant";
 import { isSaveShortcut } from "../../../utilities/keyboard";
 import {
-  isNoteAboutMedia, sourceChipHtml, referencesBlockHtml, GENERAL_REFERENCE_LABEL,
+  isNoteAboutMedia, sourceChipHtml, referencesBlockHtml, generalReferenceLabel,
   bookmarkNames,
 } from "../../../utilities/noteSource";
 import { isPageBookmark } from "../../../utilities/bookmarks";
@@ -129,7 +129,7 @@ const useLessonNotebook = ({
     const place = generalBookmarkPlace({ isText, currentTime, page });
     let bookmarkId = null;
     if (place) {
-      const made = await dispatch(createBookmark({ mediaId: Number(mediaId), note: GENERAL_REFERENCE_LABEL, ...place }));
+      const made = await dispatch(createBookmark({ mediaId: Number(mediaId), note: generalReferenceLabel(), ...place }));
       if (made.meta.requestStatus === "fulfilled") bookmarkId = made.payload?.id ?? null;
     }
 
@@ -139,7 +139,7 @@ const useLessonNotebook = ({
       timestampSeconds: isText ? null : Math.floor(currentTime > 0 ? currentTime : 0),
       pageNumber: page,
       mediaTitle: media?.title,
-      note: GENERAL_REFERENCE_LABEL,
+      note: generalReferenceLabel(),
       mediaType: media?.media_type,
     });
     const res = await dispatch(createNote({

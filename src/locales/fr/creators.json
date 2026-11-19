@@ -1,0 +1,17 @@
+{
+  "toArchive": "Vers les archives",
+  "none": "Aucun cours sous ce nom ne vous est ouvert.",
+  "video_one": "Une vidéo",
+  "video_other": "{{count}} vidéos",
+  "audio_one": "Un enregistrement audio",
+  "audio_other": "{{count}} enregistrements audio",
+  "text_one": "Un livre",
+  "text_other": "{{count}} livres",
+  "hours_one": "Une heure d'enregistrement",
+  "hours_other": "{{count}} heures d'enregistrement",
+  "minutes_one": "Une minute d'enregistrement",
+  "minutes_other": "{{count}} minutes d'enregistrement",
+  "items_one": "Un élément",
+  "items_other": "{{count}} éléments",
+  "latest": "Dernier : {{date}}"
+}

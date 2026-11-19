@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import Tooltip from "@mui/material/Tooltip";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import DirectionalIcon from "../../../../components/features/DirectionalIcon/DirectionalIcon";
 import CheckIcon from "@mui/icons-material/Check";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import CircleIcon from "@mui/icons-material/Circle";
@@ -20,6 +20,7 @@ import {
   isPartiallyIncluded,
   countUnder,
 } from "../../../../utilities/tagStates";
+import { useTranslation } from "react-i18next";
 
 // Choosing a tag by walking down the taxonomy, one level at a time.
 //
@@ -64,6 +65,7 @@ import {
 // no results at all.
 
 const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle }) => {
+  const { t } = useTranslation("archive");
   // The path from a root down to where the user currently is. Empty = the top.
   const [path, setPath] = useState([]);
   // Searching the vocabulary rather than walking it. Navigation alone means that
@@ -139,23 +141,23 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
   const MARK = {
     [TAG_STATE.INCLUDED]: {
       icon: <CheckIcon sx={{ fontSize: 14 }} />,
-      title: "נבחר · לחיצה נוספת מבטלת את הבחירה",
+      title: t("tree.mark.included"),
     },
     [TAG_STATE.INHERITED]: {
       icon: <DoneAllIcon sx={{ fontSize: 14 }} />,
-      title: "כלול דרך קטגוריית האב שנבחרה · לחיצה מוציאה אותו מהסינון",
+      title: t("tree.mark.inherited"),
     },
     [TAG_STATE.EXCLUDED]: {
       icon: <BlockIcon sx={{ fontSize: 14 }} />,
-      title: "הוצא מהסינון · לחיצה נוספת מחזירה למצב רגיל",
+      title: t("tree.mark.excluded"),
     },
     [TAG_STATE.INHERITED_EXCLUDED]: {
       icon: <BlockIcon sx={{ fontSize: 14 }} />,
-      title: "מחוץ לסינון דרך קטגוריית אב שהוצאה",
+      title: t("tree.mark.inheritedExcluded"),
     },
     [TAG_STATE.CONTAINS]: {
       icon: <CircleIcon sx={{ fontSize: 8 }} />,
-      title: "יש בחירה בתוך הקטגוריה הזו",
+      title: t("tree.mark.contains"),
     },
     [TAG_STATE.NONE]: { icon: null, title: "" },
   };
@@ -166,7 +168,7 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
   // the number is no longer the number the user would assume.
   const PARTIAL = {
     icon: <IndeterminateCheckBoxIcon sx={{ fontSize: 14 }} />,
-    title: "נבחר חלקית — יש קטגוריות שהוצאו מתוך הענף הזה",
+    title: t("tree.partial"),
   };
 
   const isOut = (state) =>
@@ -181,19 +183,19 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
   // three positions announced as a plain button is a control nobody can operate
   // without watching what happens.
   const SPOKEN = {
-    [TAG_STATE.INCLUDED]: "נבחר · לחיצה מבטלת את הבחירה",
-    [TAG_STATE.INHERITED]: "כלול דרך קטגוריית אב · לחיצה מוציאה אותו מהסינון",
-    [TAG_STATE.EXCLUDED]: "הוצא מהסינון · לחיצה מחזירה",
-    [TAG_STATE.INHERITED_EXCLUDED]: "מחוץ לסינון דרך קטגוריית אב · לחיצה מחזירה",
-    [TAG_STATE.CONTAINS]: "יש בחירה בתוכו · לחיצה בוחרת את כולו",
-    [TAG_STATE.NONE]: "לא נבחר · לחיצה בוחרת",
+    [TAG_STATE.INCLUDED]: t("tree.spoken.included"),
+    [TAG_STATE.INHERITED]: t("tree.spoken.inherited"),
+    [TAG_STATE.EXCLUDED]: t("tree.spoken.excluded"),
+    [TAG_STATE.INHERITED_EXCLUDED]: t("tree.spoken.inheritedExcluded"),
+    [TAG_STATE.CONTAINS]: t("tree.spoken.contains"),
+    [TAG_STATE.NONE]: t("tree.spoken.none"),
   };
 
   const spokenNameOf = (node, state, partial, chosenCount) =>
     [
       node.name,
-      partial ? `נבחר חלקית, ${chosenCount} תגיות` : SPOKEN[state] || SPOKEN[TAG_STATE.NONE],
-      pathTextOf(node) ? `בתוך ${pathTextOf(node)}` : "",
+      partial ? t("tree.partialSpoken", { count: chosenCount }) : SPOKEN[state] || SPOKEN[TAG_STATE.NONE],
+      pathTextOf(node) ? t("tree.inside", { path: pathTextOf(node) }) : "",
     ]
       .filter(Boolean)
       .join(", ");
@@ -204,8 +206,8 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
           strip does not change height as you descend. */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap", minHeight: 28 }}>
         {path.length > 0 && (
-          <IconButton size="small" onClick={() => setPath(path.slice(0, -1))} aria-label="חזרה">
-            <ChevronLeftIcon fontSize="small" sx={{ transform: "scaleX(-1)" }} />
+          <IconButton size="small" onClick={() => setPath(path.slice(0, -1))} aria-label={t("tree.back")}>
+            <DirectionalIcon toward="back" shape="chevron" fontSize="small" />
           </IconButton>
         )}
         {/* A button, not clickable text. The way back up the tree was reachable
@@ -216,7 +218,7 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
           type="button"
           onClick={() => setPath([])}
           disabled={path.length === 0}
-          aria-label="חזרה לכל התגיות"
+          aria-label={t("tree.backToAll")}
           sx={{
             background: "none",
             border: "none",
@@ -227,7 +229,7 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
             cursor: path.length ? "pointer" : "default",
           }}
         >
-          כל התגיות
+          {t("tree.all")}
         </Box>
         {path.map((node, i) => (
           <Typography key={node.id} variant="caption" sx={{ color: "text.secondary" }}>
@@ -260,10 +262,10 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
         size="small"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="חיפוש תגית..."
+        placeholder={t("tree.search")}
         sx={{ alignSelf: "center", width: "100%", maxWidth: 260 }}
         slotProps={{
-          htmlInput: { "aria-label": "חיפוש תגית" },
+          htmlInput: { "aria-label": t("tree.searchLabel") },
           input: {
             startAdornment: (
               <InputAdornment position="start">
@@ -387,7 +389,7 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
           );
 
           const title = countsWholeBranch
-            ? `${mark.title ? `${mark.title} · ` : ""}המספר כולל את כל הענף, גם את מה שהוצא ממנו`
+            ? `${mark.title ? `${mark.title} · ` : ""}${t("tree.wholeBranch")}`
             : mark.title;
 
           // The chip and the way into it, side by side.
@@ -411,11 +413,11 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
               {children.length > 0 && (
                 <IconButton
                   size="small"
-                  aria-label={`פתיחת ${node.name}`}
+                  aria-label={t("tree.open", { name: node.name })}
                   onClick={() => openBranch(node)}
-                  sx={{ p: 0.25, ml: -0.25, color: "text.secondary" }}
+                  sx={{ p: 0.25, marginInlineEnd: -0.25, color: "text.secondary" }}
                 >
-                  <ChevronLeftIcon sx={{ fontSize: 16 }} />
+                  <DirectionalIcon toward="forward" shape="chevron" sx={{ fontSize: 16 }} />
                 </IconButton>
               )}
             </Box>
@@ -425,12 +427,12 @@ const TagDrilldown = ({ nodes = [], selectedIds = [], excludedIds = [], onCycle 
         })}
         {level.length === 0 && (
           <Typography variant="caption" color="text.secondary">
-            {searching ? `לא נמצאה תגית התואמת "${term}"` : "אין תגיות ברמה זו"}
+            {searching ? t("tree.noMatch", { term }) : t("tree.empty")}
           </Typography>
         )}
         {hiddenMatches > 0 && (
           <Typography variant="caption" color="text.secondary" sx={{ width: "100%" }}>
-            {`מוצגות ${matches.length} מתוך ${allMatches.length} תגיות — כדאי לצמצם את החיפוש`}
+            {t("tree.tooMany", { shown: matches.length, total: allMatches.length })}
           </Typography>
         )}
       </Box>

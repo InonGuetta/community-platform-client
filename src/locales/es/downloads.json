@@ -1,0 +1,48 @@
+{
+  "retry": "Intentarlo de nuevo",
+  "offline": "No hay conexión con el servidor. Las clases que descargaste están disponibles aquí para escuchar.",
+  "downloading": "Descargando… {{progress}}",
+  "cancel": "Cancelar la descarga",
+  "cancelNamed": "Cancelar la descarga de {{title}}",
+  "playing": "Reproduciendo ahora",
+  "listen": "Escuchar",
+  "listenTo": "Escuchar {{title}}",
+  "toLesson": "A la página de la clase",
+  "toLessonNamed": "A la página de la clase {{title}}",
+  "remove": "Quitar del dispositivo",
+  "removeNamed": "Quitar {{title}} del dispositivo",
+  "summary_one": "Una clase en este dispositivo · {{storage}}",
+  "summary_other": "{{count}} clases en este dispositivo · {{storage}}",
+  "intro": "Las clases guardadas en este dispositivo se reproducen incluso sin conexión.",
+  "unsupported": "Este navegador no permite guardar clases para escuchar sin conexión. Prueba un navegador actualizado, como Chrome o Safari.",
+  "emptyTitle": "Todavía no has descargado ninguna clase",
+  "emptyHow": "En la página de una clase de audio o vídeo, haz clic en «Descargar» y elige «Guardar para escuchar sin conexión».",
+  "toArchive": "Al archivo",
+  "removeAll": {
+    "title": "Quitar todas las descargas",
+    "confirm": "Quitar todo",
+    "one": "¿Quitar del dispositivo la clase que descargaste? Puedes volver a descargarla cuando tengas conexión.",
+    "many": "¿Quitar del dispositivo las {{count}} clases que descargaste? Puedes volver a descargarlas cuando tengas conexión."
+  },
+  "audioFromVideo": "Audio de un vídeo",
+  "savedOn": "Guardada el {{date}}",
+  "soFar": "{{size}} hasta ahora",
+  "storageUsed": "Las clases ocupan {{size}}",
+  "storageFree": "{{used}} · quedan unos {{free}} libres",
+  "player": {
+    "close": "Cerrar el reproductor",
+    "missing": "El archivo de esta clase ya no está en el dispositivo. Puedes quitarla de la lista y volver a descargarla.",
+    "speed": "Velocidad:",
+    "speedLabel": "Velocidad de reproducción"
+  },
+  "removeAllButton": "Quitar todo",
+  "save": {
+    "noRoom": "No hay espacio suficiente en el dispositivo. Quita clases descargadas e inténtalo de nuevo.",
+    "busy": "El servidor está preparando otros archivos de audio en este momento. Inténtalo de nuevo en unos minutos.",
+    "unavailable": "Esta clase no está disponible para descargar.",
+    "failed": "No se pudo guardar para escuchar sin conexión. Comprueba tu conexión e inténtalo de nuevo.",
+    "unsupported": "Este navegador no permite guardar clases para escuchar sin conexión.",
+    "saved": "La clase se guardó para escuchar sin conexión",
+    "lessonFallback": "Clase"
+  }
+}

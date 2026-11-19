@@ -14,13 +14,14 @@ import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DirectionalIcon from "../../../../../components/features/DirectionalIcon/DirectionalIcon";
 import ChatIcon from "@mui/icons-material/ChatOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import { statuses } from "../../../../../utilities/constant";
-import { hebrewForError } from "../../../../../utilities/apiError";
-import { formatHebrewDate } from "../../../../../utilities/formatDate";
+import { messageForError } from "../../../../../utilities/apiError";
+import { formatDate } from "../../../../../utilities/formatDate";
 import { MessageBubble, placeOpener, answerSaver, CopyConversationButton } from "../../../../features/ChatPane/ChatPane";
+import { useTranslation } from "react-i18next";
 
 // The reader's earlier conversations on THIS lesson. Presentation only:
 // `history` is what useAIDiscussionController hands it.
@@ -28,13 +29,14 @@ import { MessageBubble, placeOpener, answerSaver, CopyConversationButton } from 
 // Two views. The list: each conversation titled by its first question, with
 // its date and how many questions it holds; the current one is marked. And one
 // conversation, read exactly as the chat shows it — sources clickable — with
-// "המשך את השיחה הזו" to make it the current conversation again and go back
+// "continue this conversation" to make it the current conversation again and go back
 // to asking in it. Each row can be deleted, after a confirmation — what was
 // written in it is erased on the server and cannot be brought back.
 
-const questionsLabel = (n) => (n === 1 ? "שאלה אחת" : `${n} שאלות`);
-
-const ConversationRow = ({ item, current, onOpen, onDelete, deleting }) => (
+const ConversationRow = ({ item, current, onOpen, onDelete, deleting }) => {
+  const { t } = useTranslation("lesson");
+  const title = item.first_question || t("history.untitled");
+  return (
   <Paper
     variant="outlined"
     data-testid="history-item"
@@ -46,24 +48,24 @@ const ConversationRow = ({ item, current, onOpen, onDelete, deleting }) => (
       sx={{ flex: 1, minWidth: 0, display: "block", textAlign: "start", p: 1.5, "&:hover": { bgcolor: "action.hover" } }}
     >
       <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
-        {item.first_question || "שיחה"}
+        {title}
       </Typography>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         <Typography variant="caption" color="text.secondary">
-          {formatHebrewDate(item.updated_at)} · {questionsLabel(item.questions)}
+          {formatDate(item.updated_at)} · {t("history.questions", { count: item.questions })}
         </Typography>
-        {current && <Chip size="small" color="primary" variant="outlined" label="השיחה הנוכחית" />}
+        {current && <Chip size="small" color="primary" variant="outlined" label={t("history.current")} />}
       </Box>
     </ButtonBase>
     {/* Beside the row, not inside it: a button within a button is neither
         valid markup nor one click target. */}
-    <Tooltip title="מחק שיחה">
+    <Tooltip title={t("history.delete")}>
       <span>
         <IconButton
           size="small"
           onClick={() => onDelete(item)}
           disabled={deleting}
-          aria-label={`מחק את השיחה "${item.first_question || "שיחה"}"`}
+          aria-label={t("history.deleteNamed", { title })}
           sx={{ mx: 0.5 }}
         >
           {deleting ? <CircularProgress size={18} /> : <DeleteIcon fontSize="small" />}
@@ -71,27 +73,32 @@ const ConversationRow = ({ item, current, onOpen, onDelete, deleting }) => (
       </span>
     </Tooltip>
   </Paper>
-);
+  );
+};
 
 // Asked before anything is deleted: the words are erased on the server, and
 // there is no undo to offer instead.
-const ConfirmDelete = ({ item, onCancel, onConfirm }) => (
+const ConfirmDelete = ({ item, onCancel, onConfirm }) => {
+  const { t } = useTranslation(["lesson", "common"]);
+  return (
   <Dialog open={Boolean(item)} onClose={onCancel} aria-labelledby="delete-conversation-title">
-    <DialogTitle id="delete-conversation-title">למחוק את השיחה?</DialogTitle>
+    <DialogTitle id="delete-conversation-title">{t("history.deleteTitle")}</DialogTitle>
     <DialogContent>
       <DialogContentText>
         {item?.first_question ? `"${item.first_question}" — ` : ""}
-        השאלות והתשובות בשיחה יימחקו ולא יהיה אפשר לשחזר אותן. תשובות ששמרת במחברת יישארו בה.
+        {t("history.deleteBody")}
       </DialogContentText>
     </DialogContent>
     <DialogActions>
-      <Button onClick={onCancel}>ביטול</Button>
-      <Button color="error" variant="contained" onClick={onConfirm}>מחק</Button>
+      <Button onClick={onCancel}>{t("common:actions.cancel")}</Button>
+      <Button color="error" variant="contained" onClick={onConfirm}>{t("history.deleteConfirm")}</Button>
     </DialogActions>
   </Dialog>
-);
+  );
+};
 
 const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
+  const { t } = useTranslation("lesson");
   const { viewing } = history;
   const [continuing, setContinuing] = useState(false);
   const isCurrent = viewing.conversationId === history.currentId;
@@ -107,9 +114,8 @@ const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1, flex: 1, minHeight: 0 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
-        {/* Forward in a right-to-left page points to the right — back to the list. */}
-        <Button size="small" startIcon={<ArrowForwardIcon />} onClick={history.close}>
-          חזרה לרשימה
+        <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={history.close}>
+          {t("history.backToList")}
         </Button>
         {viewing.status === statuses.succeeded && (
           <Box sx={{ display: "flex", gap: 1 }}>
@@ -121,7 +127,7 @@ const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
               onClick={continueHere}
               disabled={continuing}
             >
-              {isCurrent ? "חזרה לשיחה" : "המשך את השיחה הזו"}
+              {isCurrent ? t("history.backToChat") : t("history.resume")}
             </Button>
           </Box>
         )}
@@ -129,22 +135,22 @@ const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
 
       {viewing.resumeError && (
         <Alert severity="error">
-          {hebrewForError(viewing.resumeError, "לא הצלחנו להמשיך את השיחה. נסה שוב.")}
+          {messageForError(viewing.resumeError, t("history.resumeFailed"))}
         </Alert>
       )}
 
       {viewing.status === statuses.loading && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress size={24} aria-label="טוען את השיחה" />
+          <CircularProgress size={24} aria-label={t("history.loading")} />
         </Box>
       )}
       {viewing.status === statuses.failed && (
-        <Alert severity="error">{hebrewForError(viewing.error, "פתיחת השיחה נכשלה.")}</Alert>
+        <Alert severity="error">{messageForError(viewing.error, t("history.openFailed"))}</Alert>
       )}
       {viewing.status === statuses.succeeded && (
         <Box
           role="log"
-          aria-label="שיחה קודמת"
+          aria-label={t("history.previous")}
           sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, py: 0.5 }}
         >
           {viewing.messages.map((m) => <MessageBubble key={m.id} message={m} onOpen={onOpen} save={saverFor(m)} />)}
@@ -155,6 +161,7 @@ const ConversationView = ({ history, notebook, onSeek, onOpenPage }) => {
 };
 
 const HistoryPane = ({ history, notebook = null, isText = false, onSeek, onOpenPage }) => {
+  const { t } = useTranslation("lesson");
   // The row whose deletion is being confirmed.
   const [confirming, setConfirming] = useState(null);
 
@@ -171,15 +178,15 @@ const HistoryPane = ({ history, notebook = null, isText = false, onSeek, onOpenP
   if (history.status === statuses.loading || history.status === statuses.idle) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <CircularProgress size={24} aria-label="טוען את ההיסטוריה" />
+        <CircularProgress size={24} aria-label={t("history.loadingList")} />
       </Box>
     );
   }
 
   if (history.status === statuses.failed) {
     return (
-      <Alert severity="error" action={<Button color="inherit" size="small" onClick={history.retry}>נסה שוב</Button>}>
-        {hebrewForError(history.error, "טעינת ההיסטוריה נכשלה.")}
+      <Alert severity="error" action={<Button color="inherit" size="small" onClick={history.retry}>{t("history.retry")}</Button>}>
+        {messageForError(history.error, t("history.listFailed"))}
       </Alert>
     );
   }
@@ -187,7 +194,7 @@ const HistoryPane = ({ history, notebook = null, isText = false, onSeek, onOpenP
   if (history.items.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary" data-testid="history-empty">
-        עדיין אין שיחות קודמות על {isText ? "הספר" : "השיעור"} הזה. שיחה תופיע כאן אחרי השאלה הראשונה בה.
+        {t("history.empty", { context: isText ? "book" : "lesson" })}
       </Typography>
     );
   }
@@ -195,7 +202,7 @@ const HistoryPane = ({ history, notebook = null, isText = false, onSeek, onOpenP
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
       {history.deleteError && (
-        <Alert severity="error">{hebrewForError(history.deleteError, "מחיקת השיחה נכשלה. נסה שוב.")}</Alert>
+        <Alert severity="error">{messageForError(history.deleteError, t("history.deleteFailed"))}</Alert>
       )}
       {history.items.map((item) => (
         <ConversationRow

@@ -15,12 +15,14 @@ import UntitledNoteDialog from "../../../features/Notes/UntitledNoteDialog";
 import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import { NOTEBOOK_SHELF } from "../../../layout/personalShelves";
 import useLessonNotebook from "../useLessonNotebook";
+import { useTranslation } from "react-i18next";
 
 // The notebook strip under a lesson: every note taken on it or quoting it, open
 // for editing in place, with the same cards, toolbar and source window as
 // /notebook. See useLessonNotebook for what belongs here and why a chip for this
 // lesson moves the player instead of opening a window.
 const LessonNotebook = ({ media, isText, currentTime, readerPage, bookmarks, onSeek, onJumpTo }) => {
+  const { t } = useTranslation("lesson");
   const notebook = useLessonNotebook({ media, isText, currentTime, readerPage, bookmarks, onSeek, onJumpTo });
   const { notes, loading, preview } = notebook;
 
@@ -33,7 +35,7 @@ const LessonNotebook = ({ media, isText, currentTime, readerPage, bookmarks, onS
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", mb: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <MenuBookIcon color="primary" />
-          <Typography variant="h6" fontWeight={800} color="primary">המחברת שלי לשיעור זה</Typography>
+          <Typography variant="h6" fontWeight={800} color="primary">{t("notebook.title")}</Typography>
           {notes.length > 0 && <Chip size="small" label={notes.length} />}
         </Box>
 
@@ -50,14 +52,14 @@ const LessonNotebook = ({ media, isText, currentTime, readerPage, bookmarks, onS
           </Box>
         )}
 
-        <Box sx={{ display: "flex", gap: 1, ml: "auto" }}>
+        <Box sx={{ display: "flex", gap: 1, marginInlineEnd: "auto" }}>
           <Button
             component={RouterLink}
             to={NOTEBOOK_SHELF.path}
             variant="outlined"
             sx={{ borderRadius: 2, fontWeight: 700 }}
           >
-            לכל המחברת
+            {t("notebook.all")}
           </Button>
           <Button
             variant="contained"
@@ -65,7 +67,7 @@ const LessonNotebook = ({ media, isText, currentTime, readerPage, bookmarks, onS
             onClick={notebook.handleCreate}
             sx={{ borderRadius: 2, fontWeight: 700 }}
           >
-            הערה חדשה לשיעור
+            {t("notebook.newNote")}
           </Button>
         </Box>
       </Box>
@@ -76,7 +78,7 @@ const LessonNotebook = ({ media, isText, currentTime, readerPage, bookmarks, onS
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, py: 4, color: "text.secondary" }}>
           <NoteAltOutlinedIcon sx={{ fontSize: 48, opacity: 0.4 }} />
           <Typography variant="body2">
-            {"עדיין אין הערות לשיעור הזה. לחץ על \"הערה חדשה לשיעור\" כדי להתחיל לכתוב."}
+            {t("notebook.empty")}
           </Typography>
         </Box>
       ) : (
@@ -133,7 +135,7 @@ const LessonNotebook = ({ media, isText, currentTime, readerPage, bookmarks, onS
         open={Boolean(notebook.deleteTarget)}
         onClose={notebook.cancelDelete}
         onConfirm={notebook.handleDeleteConfirm}
-        message={`האם אתה בטוח שאתה מעוניין למחוק את ההערה "${notebook.deleteTarget?.title?.trim() || "ללא כותרת"}"?`}
+        message={t("notebook.deleteQuestion", { title: notebook.deleteTarget?.title?.trim() || t("notebook.untitled") })}
       />
     </Paper>
   );

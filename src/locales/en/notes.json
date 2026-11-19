@@ -1,0 +1,63 @@
+{
+  "untitled": "(untitled)",
+  "untitledBare": "Untitled",
+  "titlePlaceholder": "Note title",
+  "from": "From: {{title}}",
+  "lessonFallback": "Lesson",
+  "bodyPlaceholder": "Write your note here... You can also paste images and drag bookmarks in.",
+  "dropHere": "Drop here to insert a link to the lesson",
+  "unsaved": "There are unsaved changes",
+  "updated": "Last updated: {{date}}",
+  "deleteNamed": "Delete the note {{title}}",
+  "saveShortcut": "Save (Ctrl+S)",
+  "save": "Save",
+  "saved": "Note saved",
+  "noChanges": "No changes to save",
+  "body": "Note body",
+  "editor": {
+    "deleteImage": "Delete the image",
+    "deleteSource": "Delete the source",
+    "imageTooLarge": "The image is too large (over {{mb}}MB). Try a smaller one.",
+    "imageReadFailed": "Reading the image failed.",
+    "renameReference": "Rename the reference",
+    "referenceName": "Reference name",
+    "clearToRemove": "Leave empty to remove the name from the reference"
+  },
+  "untitledDialog": {
+    "title": "The tab has no name",
+    "body": "You can name it now, or save it without a name.",
+    "name": "Tab name",
+    "save": "Save",
+    "saveAnyway": "Save anyway"
+  },
+  "toolbar": {
+    "label": "Note formatting",
+    "fontSize": "Text size",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "strike": "Strikethrough",
+    "textColor": "Text color",
+    "highlight": "Highlight",
+    "bullets": "Bulleted list",
+    "numbered": "Numbered list",
+    "clear": "Clear formatting",
+    "pixels": "Size in pixels",
+    "apply": "Apply",
+    "sample": "Abc",
+    "textColorTitle": "Text color",
+    "highlightTitle": "Highlight color",
+    "colors": {
+      "default": "Default",
+      "red": "Red",
+      "orange": "Orange",
+      "green": "Green",
+      "blue": "Blue",
+      "purple": "Purple",
+      "none": "No highlight",
+      "yellow": "Yellow",
+      "lightBlue": "Light blue",
+      "pink": "Pink"
+    }
+  }
+}

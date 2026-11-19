@@ -2,10 +2,10 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DirectionalIcon from "../../../components/features/DirectionalIcon/DirectionalIcon";
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
-import { countLabel } from "../../../utilities/countLabel";
 import { SAVED_SHELF } from "../../layout/personalShelves";
+import { useTranslation } from "react-i18next";
 import { usePlaylistPageController } from "./usePlaylistPageController";
 
 // One saved list, opened from the cards on the saved-content page.
@@ -29,30 +29,30 @@ const PlaylistPage = () => {
     status,
     user,
   } = usePlaylistPageController();
+  const { t } = useTranslation(["personal", "nav"]);
 
   return (
     <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
       <Box sx={{ flexGrow: 1, p: 3 }}>
-        {/* Forward-pointing arrow, because back is to the RIGHT in Hebrew — the
-            app does not flip MUI's physical icons, so the direction has to be
-            chosen rather than inherited. */}
+        {/* "Back" by meaning: DirectionalIcon points it right in Hebrew and
+            left in English. */}
         <Button
           onClick={() => navigate(SAVED_SHELF.path)}
-          startIcon={<ArrowForwardIcon />}
-          sx={{ mb: 2, "& .MuiButton-startIcon": { ml: -0.25, mr: 0.75 } }}
+          startIcon={<DirectionalIcon toward="back" />}
+          sx={{ mb: 2, "& .MuiButton-startIcon": { marginInlineEnd: -0.25, marginInlineStart: 0.75 } }}
         >
-          {SAVED_SHELF.label}
+          {t(`nav:${SAVED_SHELF.labelKey}`)}
         </Button>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           {/* The heading holds its place while the list loads, so the page does
               not jump once the title arrives. */}
           <Typography variant="h4" fontWeight={800} color="primary">
-            {playlist?.title || "רשימה שמורה"}
+            {playlist?.title || t("list.fallbackTitle")}
           </Typography>
           {items.length > 0 && (
             <Typography variant="body2" color="text.secondary">
-              {countLabel(items.length, "שיעור אחד", "שיעורים")}
+              {t("lessons", { count: items.length })}
             </Typography>
           )}
         </Box>
@@ -61,15 +61,15 @@ const PlaylistPage = () => {
             ריקה" under a request that never arrived sends the user looking for
             lectures they did not lose. */}
         {failed ? (
-          <Alert severity="error">טעינת הרשימה נכשלה. ייתכן שהרשימה נמחקה.</Alert>
+          <Alert severity="error">{t("list.loadFailed")}</Alert>
         ) : (
           <MediaGrid
             items={items}
             status={status}
             onView={(id) => navigate(`/media/${id}`)}
             user={user}
-            emptyMessage="אין עדיין שיעורים ברשימה הזו"
-            emptyActionLabel="לארכיון"
+            emptyMessage={t("list.empty")}
+            emptyActionLabel={t("toArchive")}
             onEmptyAction={() => navigate("/archive")}
           />
         )}

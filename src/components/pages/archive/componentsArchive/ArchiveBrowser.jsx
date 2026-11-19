@@ -5,6 +5,8 @@ import EditTagsDialog from "./EditTagsDialog";
 import EditMediaDialog from "./EditMediaDialog";
 import MediaGrid from "../../../features/MediaGrid/MediaGrid";
 import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
+import { useTranslation } from "react-i18next";
+import { formatNumber } from "../../../../utilities/formatDate";
 
 // The archive's body — the filters, the count, the cards and the dialogs that
 // edit them — shared by the archive itself and a lecturer's page (PRD ATTR-10,
@@ -15,6 +17,7 @@ import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog
 // on the lecturer's page: the lecturer is the page's, so the field choosing one
 // is not offered and does not count as a filter.
 const ArchiveBrowser = ({ archive: a, user, canUpload, onOpenUpload, chooseCreator = true }) => {
+  const { t } = useTranslation("archive");
   const deleteTarget = a.filteredMedia.find((i) => i.id === a.deleteTargetId);
 
   return (
@@ -51,8 +54,8 @@ const ArchiveBrowser = ({ archive: a, user, canUpload, onOpenUpload, chooseCreat
           which the grid's own empty state already says. */}
       {a.total > 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }} aria-live="polite">
-          {a.total === 1 ? "תוצאה אחת" : `${a.total.toLocaleString("he-IL")} תוצאות`}
-          {a.filteredMedia.length < a.total && ` · מוצגות ${a.filteredMedia.length}`}
+          {t("results", { count: a.total, formatted: formatNumber(a.total) })}
+          {a.filteredMedia.length < a.total && t("showing", { n: a.filteredMedia.length })}
         </Typography>
       )}
       <MediaGrid
@@ -65,7 +68,7 @@ const ArchiveBrowser = ({ archive: a, user, canUpload, onOpenUpload, chooseCreat
         onEditTags={a.handleEditTags}
         onEditDetails={a.handleEditDetails}
         onOpenCreator={a.handleOpenCreator}
-        emptyActionLabel={canUpload && onOpenUpload ? "העלאת מדיה" : undefined}
+        emptyActionLabel={canUpload && onOpenUpload ? t("upload") : undefined}
         onEmptyAction={onOpenUpload}
         filtered={a.hasActiveFilter}
         hasMore={a.hasMore}

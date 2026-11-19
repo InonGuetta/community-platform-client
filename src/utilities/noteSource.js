@@ -1,4 +1,5 @@
 import { formatTime } from "./formatTime";
+import i18n from "../i18n/i18n";
 
 // A bookmark dragged out of the sidebar and dropped into a note becomes a
 // SOURCE CHIP: a small inline reference, inside the note's own body, that opens
@@ -97,13 +98,13 @@ export const CHIP_MARKER = "▶";
 // pdfFontCoverage.test.js (which checks the embedded font has a glyph for it) —
 // two files changed so the icon could be marginally more apt.
 const chipStamp = ({ timestampSeconds, pageNumber }) => {
-  if (Number.isInteger(pageNumber)) return ` · עמ׳ ${pageNumber}`;
+  if (Number.isInteger(pageNumber)) return i18n.t("format:noteSource.pageSuffix", { page: pageNumber });
   if (timestampSeconds == null) return "";
   return ` · ${formatTime(timestampSeconds)}`;
 };
 
 const chipLabel = (source) => {
-  const title = shorten(source.mediaTitle || "שיעור", CHIP_LABEL_CHARS);
+  const title = shorten(source.mediaTitle || i18n.t("format:noteSource.lessonFallback"), CHIP_LABEL_CHARS);
   return `${CHIP_MARKER} ${title}${chipStamp(source)}`;
 };
 
@@ -213,12 +214,12 @@ export const sourceFromChip = (element) => {
  * exactly what it said when it was written.
  */
 export const sourceFootnoteLabel = ({ mediaTitle, note, timestampSeconds, pageNumber }) => [
-  String(mediaTitle || "").trim() || "שיעור",
+  String(mediaTitle || "").trim() || i18n.t("format:noteSource.lessonFallback"),
   String(note || "").trim(),
   // The page when there is one, and never a minute alongside it. "עמ׳ 47" is how
   // a person cites a sefer and how they would go and find the passage again;
   // a timestamp on a book would be 0:00 for every reference in the document.
-  Number.isInteger(pageNumber) ? `עמ׳ ${pageNumber}` : (timestampSeconds == null ? "" : formatTime(timestampSeconds)),
+  Number.isInteger(pageNumber) ? i18n.t("format:place.page", { page: pageNumber }) : (timestampSeconds == null ? "" : formatTime(timestampSeconds)),
 ].filter(Boolean).join(" · ");
 
 /**
@@ -272,7 +273,9 @@ export const isNoteAboutMedia = (note, mediaId) => {
 
 // The name a reference gets when the user has not given it one: a note started
 // from a lesson's page is about the lesson in general until they say what part.
-export const GENERAL_REFERENCE_LABEL = "הפנייה כללית";
+// Written into the note (and the bookmark) when the reference is made, so it is
+// in the interface's language of that moment; after that it is the user's text.
+export const generalReferenceLabel = () => i18n.t("format:noteSource.generalReference");
 
 /**
  * Rename a chip already in a note body, in place.

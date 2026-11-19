@@ -1,0 +1,61 @@
+{
+  "label": "Tags",
+  "helper": "Up to {{max}} tags. Used for filtering and search.",
+  "noOptions": "No such tag — you can add it with \"Add tag\"",
+  "placeholder": "Type of content — search and choose from the list",
+  "rootGroup": "Top-level headings",
+  "topLevel": "Top-level heading",
+  "root": "Top",
+  "propose": {
+    "title": "Add a new tag",
+    "submit": "Send for approval",
+    "note": "The tag will be sent for the system admin's approval. Once approved it will enter the system and be added to this lesson.",
+    "saveFailed": "Saving failed. Please try again.",
+    "name": "Tag name",
+    "maxLength": "Up to {{n}} characters",
+    "existsHere": "This tag already exists here — you can choose it from the list",
+    "existsElsewhere": "A tag with this name already exists under: {{places}}. If it's the one you were looking for, you can choose it directly from the tag list.",
+    "whichParent": "Under which parent tag?",
+    "parentHint": "Clicking a tag opens it and chooses it as the parent. \"Top\" — a new top-level heading.",
+    "placement": "Where the new tag will go:",
+    "topLevelPrefix": "Top-level heading: ",
+    "sendFailed": "Sending the tag failed. Please try again."
+  },
+  "parent": {
+    "search": "Search for a parent tag by name...",
+    "searchLabel": "Search for a parent tag",
+    "trail": "Position in the tag tree",
+    "noMatch": "No tag with this name",
+    "noChildren": "There are no tags under \"{{name}}\". The new tag will be the first here.",
+    "below": "{{count}} tags below"
+  },
+  "proposals": {
+    "add": "Add tag",
+    "createHint": "Didn't find a suitable tag? You can create a new one.",
+    "proposeHint": "Didn't find a suitable tag? You can propose a new one for the admin's approval.",
+    "pending": "Awaiting an admin's approval — they will be added to the lesson once approved:",
+    "under": "Under: {{place}}",
+    "pendingNamed": "Awaiting approval: {{name}} ({{place}})",
+    "create": "Create the tag",
+    "adminNote": "As an admin, the tag will be created immediately and added to this lesson."
+  },
+  "suggest": {
+    "title": "What is the lesson about?",
+    "uploaded": "\"{{title}}\" was uploaded. Tags decide where it will be found in filters and search.",
+    "fromTitle": "Suggestions from the title — click to add or remove:",
+    "suggestion": "Suggestion: {{name}}",
+    "suggestionWithPath": "Suggestion: {{name}} ({{path}})",
+    "toSave": "Tags to save",
+    "canEdit": "You can add or remove any tag here, including ones that were not suggested.",
+    "noneFromTitle": "No suggestion was found from the title — you can choose by hand.",
+    "skip": "Skip",
+    "save": "Save the tags",
+    "reasons": {
+      "titleSays": "The title says \"{{phrase}}\"",
+      "nameInTitle": "The name \"{{name}}\" appears in the title",
+      "closestSubject": "\"{{word}}\" in the title — the closest subject in the tree",
+      "parasha": "and a parasha, from the word \"פרשת\"",
+      "broader": "the broader of the two, since the title did not say \"פרשת\""
+    }
+  }
+}

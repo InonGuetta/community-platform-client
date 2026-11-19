@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { cueIndexAt } from "../../../../utilities/transcriptTiming";
 import { formatTime } from "../../../../utilities/formatTime";
+import { useTranslation } from "react-i18next";
 
 // The transcript as the lesson plays (PRD MOB-6): the sentence being said is
 // highlighted and kept in view, and pressing any sentence plays from there.
@@ -60,6 +61,7 @@ const Cue = memo(({ cue, index, active, onSeek }) => (
 Cue.displayName = "Cue";
 
 const FollowAlongTranscript = ({ captions, currentTime, onSeek }) => {
+  const { t } = useTranslation("lesson");
   const containerRef = useRef(null);
   const manualUntil = useRef(0);
   const { cues, precise } = captions;
@@ -99,17 +101,17 @@ const FollowAlongTranscript = ({ captions, currentTime, onSeek }) => {
     <Box ref={containerRef}>
       {!precise && (
         <Typography variant="caption" color="text.secondary" component="p" sx={{ mb: 1 }}>
-          התזמון בשיעור הזה משוער, ולכן המשפט המודגש עשוי להקדים או לאחר בכמה שניות.
+          {t("follow.estimated")}
         </Typography>
       )}
       {active !== null && (
         <Box sx={{ position: "sticky", top: 0, zIndex: 1, display: "flex", justifyContent: "flex-end", pointerEvents: "none" }}>
           <Button size="small" variant="outlined" onClick={jumpToNow} sx={{ pointerEvents: "auto", bgcolor: "background.paper", borderRadius: 999 }}>
-            למקום שמתנגן
+            {t("follow.toPlaying")}
           </Button>
         </Box>
       )}
-      <Typography component="div" sx={{ lineHeight: 2, textAlign: "start", whiteSpace: "normal" }}>
+      <Typography component="div" dir="auto" sx={{ lineHeight: 2, textAlign: "start", whiteSpace: "normal" }}>
         {cues.map((cue, index) => (
           <Cue key={index} cue={cue} index={index} active={index === active} onSeek={onSeek} />
         ))}

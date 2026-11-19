@@ -19,6 +19,7 @@ import BookmarkAddOutlinedIcon from "@mui/icons-material/BookmarkAddOutlined";
 import {
   isTextBookmark, isPageBookmark, isOrphaned, bookmarkLines,
 } from "../../../../utilities/bookmarks";
+import { useTranslation } from "react-i18next";
 
 // "Active" bookmark = the latest one whose timestamp is <= current playback.
 // That's the one the user is "inside" right now.
@@ -51,6 +52,7 @@ const NotesPanel = ({
   onSeekText,
   isText = false,
 }) => {
+  const { t } = useTranslation("lesson");
   const {
     note, setNote, editingId, draft, setDraft, startEditing, stopEditing, commit, handleCreate, removeBookmark,
   } = useNotesPanel({ currentTime, onCreateBookmark });
@@ -60,7 +62,7 @@ const NotesPanel = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="subtitle1" fontWeight={600}>סימניות והערות</Typography>
+      <Typography variant="subtitle1" fontWeight={600}>{t("notes.title")}</Typography>
 
       {/* ── Where a bookmark is made ──────────────────────────────────────────
           A recording has a playhead, so "here" is a value this panel can read
@@ -82,21 +84,21 @@ const NotesPanel = ({
         <Paper variant="outlined" sx={{ display: "flex", alignItems: "center", gap: 1, p: 1 }}>
           <BookmarkAddOutlinedIcon fontSize="small" color="disabled" />
           <Typography variant="body2" color="text.secondary">
-            לסימון: סמנו את השורה בספר ולחצו „שמירה”
+            {t("notes.howToMarkBook")}
           </Typography>
         </Paper>
       ) : (
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
-            label="הוסף הערה בזמן הנוכחי"
+            label={t("notes.addAtTime")}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             size="small"
             fullWidth
-            placeholder={`בזמן ${formatTime(Math.floor(currentTime))}`}
+            placeholder={t("notes.atTime", { time: formatTime(Math.floor(currentTime)) })}
           />
           <Button variant="contained" onClick={handleCreate} startIcon={<BookmarkIcon />} sx={{ flexShrink: 0 }}>
-            שמור
+            {t("notes.save")}
           </Button>
         </Box>
       )}
@@ -128,21 +130,21 @@ const NotesPanel = ({
                   fullWidth
                   autoFocus
                   variant="standard"
-                  placeholder="הערה"
+                  placeholder={t("notes.note")}
                   // Labelled for what it IS, not for the action that opened it.
                   // The pencil is "עריכת ההערה"; giving the field the same words
                   // put two different controls behind one name — ambiguous to a
                   // screen reader, and to anything else looking one up.
-                  inputProps={{ "aria-label": "הערה" }}
+                  inputProps={{ "aria-label": t("notes.note") }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") { e.preventDefault(); commit(bm); }
                     if (e.key === "Escape") { e.preventDefault(); stopEditing(); }
                   }}
                 />
-                <IconButton size="small" onClick={() => commit(bm)} aria-label="שמירת ההערה">
+                <IconButton size="small" onClick={() => commit(bm)} aria-label={t("notes.saveNote")}>
                   <CheckIcon fontSize="small" />
                 </IconButton>
-                <IconButton size="small" onClick={stopEditing} aria-label="ביטול העריכה">
+                <IconButton size="small" onClick={stopEditing} aria-label={t("notes.cancelEdit")}>
                   <CloseIcon fontSize="small" />
                 </IconButton>
               </Box>
@@ -173,7 +175,7 @@ const NotesPanel = ({
                 borderRadius: 1,
                 mb: 0.5,
                 // Room for two controls now, not one.
-                pr: 10,
+                paddingInlineStart: 10,
                 ...listRowSx,
                 // Still legible: the row is not an error, it is a note whose
                 // place is gone, and the words on it are the reason to keep it.
@@ -218,14 +220,14 @@ const NotesPanel = ({
                   away from the thing being annotated. */}
               <Box
                 sx={{
-                  position: "absolute", right: 4, display: "flex",
+                  position: "absolute", insetInlineStart: 4, display: "flex",
                   color: isActive ? "primary.contrastText" : "inherit",
                 }}
               >
                 <IconButton
                   size="small"
                   onClick={(e) => { e.stopPropagation(); startEditing(bm); }}
-                  aria-label="עריכת ההערה"
+                  aria-label={t("notes.editNote")}
                   sx={{ color: "inherit" }}
                 >
                   <EditIcon fontSize="small" />
@@ -233,7 +235,7 @@ const NotesPanel = ({
                 <IconButton
                   size="small"
                   onClick={(e) => { e.stopPropagation(); removeBookmark(bm.id); }}
-                  aria-label="מחיקת סימנייה"
+                  aria-label={t("notes.deleteBookmark")}
                   sx={{ color: "inherit" }}
                 >
                   <DeleteIcon fontSize="small" />

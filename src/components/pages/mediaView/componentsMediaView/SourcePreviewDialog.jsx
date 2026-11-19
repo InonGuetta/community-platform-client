@@ -9,8 +9,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import DirectionalIcon from "../../../../components/features/DirectionalIcon/DirectionalIcon";
 import FloatingWindow from "../../../features/FloatingWindow/FloatingWindow";
 import MediaPlayer from "../../../features/MediaPlayer/MediaPlayer";
 import TextViewer from "./TextViewer";
@@ -27,6 +26,7 @@ import { formatTime } from "../../../../utilities/formatTime";
 import { isPageBookmark } from "../../../../utilities/bookmarks";
 import { truncateWords } from "../../../../utilities/truncateWords";
 import { continueReadingHref } from "../../../../utilities/deepLink";
+import { useTranslation } from "react-i18next";
 
 // Where the remembered position and size are kept. One key for every source, on
 // purpose: having dragged the window somewhere and sized it, the user has said
@@ -91,6 +91,7 @@ const SourcePreviewDialog = ({
   bookmarks = [],
   trailPosition, trailLength, onPrev, onNext,
 }) => {
+  const { t } = useTranslation("lesson");
   const { media, error, handleCreateBookmark, handleCreateTextBookmark } = useSourcePreview({ open, mediaId });
   const playerRef = useRef(null);
 
@@ -156,7 +157,7 @@ const SourcePreviewDialog = ({
   // Reset with the source, or page 70 of one sefer follows the reader into the
   // next one and the link points at a place they were never at.
   useEffect(() => { setReaderPage(null); }, [mediaId]);
-  const title = media?.title || fallbackTitle || "שיעור";
+  const title = media?.title || fallbackTitle || t("preview.lessonFallback");
   const notePreview = truncateWords(noteText, NOTE_PREVIEW_WORDS);
   const isText = media?.media_type === mediaTypes.text;
 
@@ -179,10 +180,10 @@ const SourcePreviewDialog = ({
         // Both arrows are data-no-drag — the header is the drag handle, and a
         // click on a button in it must be a click, not the start of a drag.
         <>
-          <Tooltip title="המקור הקודם">
+          <Tooltip title={t("preview.prev")}>
             <span data-no-drag>
-              <IconButton onClick={onPrev} disabled={!onPrev} aria-label="המקור הקודם" sx={arrowSx}>
-                <KeyboardArrowRightIcon sx={{ fontSize: 42 }} />
+              <IconButton onClick={onPrev} disabled={!onPrev} aria-label={t("preview.prev")} sx={arrowSx}>
+                <DirectionalIcon toward="back" shape="keyboardArrow" sx={{ fontSize: 42 }} />
               </IconButton>
             </span>
           </Tooltip>
@@ -194,7 +195,7 @@ const SourcePreviewDialog = ({
                 <Chip
                   size="small"
                   label={formatTime(timestampSeconds)}
-                  sx={{ height: 18, fontSize: "0.65rem", mr: 0.75, verticalAlign: "middle" }}
+                  sx={{ height: 18, fontSize: "0.65rem", marginInlineStart: 0.75, verticalAlign: "middle" }}
                 />
               )}
             </Typography>
@@ -207,10 +208,10 @@ const SourcePreviewDialog = ({
             )}
           </Box>
 
-          <Tooltip title="המקור הבא">
+          <Tooltip title={t("preview.next")}>
             <span data-no-drag>
-              <IconButton onClick={onNext} disabled={!onNext} aria-label="המקור הבא" sx={arrowSx}>
-                <KeyboardArrowLeftIcon sx={{ fontSize: 42 }} />
+              <IconButton onClick={onNext} disabled={!onNext} aria-label={t("preview.next")} sx={arrowSx}>
+                <DirectionalIcon toward="forward" shape="keyboardArrow" sx={{ fontSize: 42 }} />
               </IconButton>
             </span>
           </Tooltip>
@@ -240,7 +241,7 @@ const SourcePreviewDialog = ({
             size="small"
             sx={{ textTransform: "none" }}
           >
-            פתיחה בעמוד השיעור
+            {t("preview.openPage")}
           </Button>
           {/* Just this one. Outlined rather than filled: it removes one item
               from a list the user can rebuild in a click, so it must not carry
@@ -252,7 +253,7 @@ const SourcePreviewDialog = ({
             size="small"
             sx={{ textTransform: "none" }}
           >
-            סגירת כרטיסייה נוכחית
+            {t("preview.closeTab")}
           </Button>
 
           {/* The heaviest close: the window AND the whole trail of sources
@@ -264,13 +265,13 @@ const SourcePreviewDialog = ({
             size="small"
             sx={{ fontWeight: 700 }}
           >
-            סגירה מלאה של החלון והכרטיסיות
+            {t("preview.closeAll")}
           </Button>
         </>
       }
     >
       {error ? (
-        <Alert severity="error">לא ניתן לטעון את השיעור.</Alert>
+        <Alert severity="error">{t("preview.loadFailed")}</Alert>
       ) : !media ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress />

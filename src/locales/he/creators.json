@@ -1,0 +1,17 @@
+{
+  "toArchive": "לארכיון",
+  "none": "לא נמצאו שיעורים בשם הזה שפתוחים לך.",
+  "video_one": "וידאו אחד",
+  "video_other": "{{count}} וידאו",
+  "audio_one": "הקלטת שמע אחת",
+  "audio_other": "{{count}} הקלטות שמע",
+  "text_one": "ספר אחד",
+  "text_other": "{{count}} ספרים",
+  "hours_one": "שעת הקלטה אחת",
+  "hours_other": "{{count}} שעות הקלטה",
+  "minutes_one": "דקת הקלטה אחת",
+  "minutes_other": "{{count}} דקות הקלטה",
+  "items_one": "פריט אחד",
+  "items_other": "{{count}} פריטים",
+  "latest": "אחרון: {{date}}"
+}

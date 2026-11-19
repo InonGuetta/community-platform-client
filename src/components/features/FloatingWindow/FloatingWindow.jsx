@@ -5,6 +5,7 @@ import Portal from "@mui/material/Portal";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import CloseIcon from "@mui/icons-material/Close";
+import { useTranslation } from "react-i18next";
 import {
   clampToViewport,
   readGeometry,
@@ -44,6 +45,7 @@ const RESIZE_HANDLES = [
 ];
 
 const FloatingWindow = ({ open, onClose, title, storageKey, actions, children }) => {
+  const { t } = useTranslation();
   // Read once, lazily: the stored geometry is the size and place the user
   // dragged this to last time, which is the whole point of persisting it.
   const [geometry, setGeometry] = useState(() => readGeometry(storageKey, viewportSize()));
@@ -124,6 +126,8 @@ const FloatingWindow = ({ open, onClose, title, storageKey, actions, children })
         onKeyDown={(e) => { if (e.key === "Escape") onClose?.(); }}
         sx={{
           position: "fixed",
+          // Physical: geometry.x is a drag position measured on the page.
+          // eslint-disable-next-line no-restricted-syntax
           left: geometry.x,
           top: geometry.y,
           width: geometry.width,
@@ -167,17 +171,17 @@ const FloatingWindow = ({ open, onClose, title, storageKey, actions, children })
               it sits inches from the navigation arrows — so it is deliberately
               the one thing here that looks like nothing else, rather than
               another grey icon in a row of grey icons. */}
-          <Tooltip title="סגירת החלון (הכרטיסיות נשמרות)">
+          <Tooltip title={t("floatingWindow.closeKeepsTabs")}>
             <IconButton
               data-no-drag
               size="small"
               onClick={onClose}
-              aria-label="סגירת החלון"
+              aria-label={t("actions.close")}
               sx={{
                 flexShrink: 0,
                 // Its own space: a mis-click happens when the target is flush
                 // against its neighbour.
-                ml: 1.5,
+                marginInlineEnd: 1.5,
                 bgcolor: "error.main",
                 color: "error.contrastText",
                 boxShadow: 2,

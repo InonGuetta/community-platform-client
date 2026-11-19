@@ -1,9 +1,20 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { login, register, logout, resetPassword, requestRole } from "./authPost";
-import { updateProfile } from "./authPut";
+import { login, register, logout, resetPassword, requestRole, uploadAvatar, startPhoneVerification, verifyPhone } from "./authPost";
+import { updateProfile, saveLocale } from "./authPut";
+import { removeAvatar, removePhone } from "./authDelete";
 import { fetchMe } from "./authGet";
 import { statuses } from "../../../utilities/constant";
 import { ERROR_CODES } from "../../../utilities/apiError";
+
+// The account's phone, as the server sends it (services/servicesPhone.js →
+// phoneStateOf).
+const PHONE_FIELDS = ["phone", "phone_verified_at", "phone_pending", "phone_pending_expires_at"];
+const phoneFieldsOf = (source) =>
+  Object.fromEntries(PHONE_FIELDS.filter((key) => source && key in source).map((key) => [key, source[key]]));
+const ENDED_CODE = new Set(["PHONE_CODE_LIMIT", "PHONE_CODE_EXPIRED"]);
+const mergePhone = (state, action) => {
+  if (state.user) Object.assign(state.user, phoneFieldsOf(action.payload));
+};
 
 // "Who am I" failed because nothing answered — no network, or the API is down —
 // rather than because the server said no. The app cannot tell whether this
@@ -27,6 +38,10 @@ const initialState = {
   // Tracks the in-flight fetchMe request id; cleared whenever a login/register/logout
   // happens so a stale fetchMe response can't overwrite the freshly-set user.
   activeFetchMeRequestId: null,
+  // An account was just created here: offer it a profile picture once
+  // (features/Avatar/WelcomeAvatarDialog). Not kept across a reload — an offer,
+  // not a step that must be finished.
+  offerAvatar: false,
 };
 
 const authSlice = createSlice({
@@ -38,6 +53,9 @@ const authSlice = createSlice({
     },
     clearError(state) {
       state.error = null;
+    },
+    avatarOfferDismissed(state) {
+      state.offerAvatar = false;
     },
     // The cookie expired or was rejected mid-session. Deliberately a plain
     // reducer and not the logout thunk: that thunk POSTs to /auth/logout, which
@@ -83,6 +101,7 @@ const authSlice = createSlice({
         state.status = statuses.succeeded;
         state.user = action.payload.user;
         state.initialized = true;
+        state.offerAvatar = true;
       })
       .addCase(register.rejected, (state, action) => {
         state.loginStatus = statuses.failed;
@@ -110,9 +129,21 @@ const authSlice = createSlice({
 
       // The saved row comes back complete, so it replaces the held one rather
       // than being merged into it — a merge would keep whatever the server just
-      // decided not to change.
+      // decided not to change. Except the phone (migration 054): the PATCH does
+      // not read it, so the held phone fields are carried over.
       .addCase(updateProfile.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.user = { ...action.payload, ...phoneFieldsOf(state.user) };
+      })
+
+      // The language is taken from the REQUEST, the moment it is sent — not
+      // from the answer: two quick choices can be answered out of order, and
+      // the later answer would otherwise put the earlier language back (and
+      // the sync in useAccountLanguage would then adopt it). Only the language
+      // changes; the row PATCH returns lacks the role-request fields. A failed
+      // save is a toast (language/save); the next "who am I" brings the
+      // account's real value back.
+      .addCase(saveLocale.pending, (state, action) => {
+        if (state.user) state.user.locale = action.meta.arg;
       })
 
       .addCase(fetchMe.pending, (state, action) => {
@@ -144,6 +175,7 @@ const authSlice = createSlice({
         state.activeFetchMeRequestId = null;
       })
       .addCase(logout.fulfilled, (state) => {
+        state.offerAvatar = false;
         state.user = null;
         state.status = statuses.idle;
         state.loginStatus = statuses.idle;
@@ -155,6 +187,29 @@ const authSlice = createSlice({
         state.status = statuses.idle;
         state.loginStatus = statuses.idle;
         state.initialized = true;
+      })
+
+      // Only the picture changes: the row the avatar routes answer with lacks
+      // the role-request fields the banner reads, as updateProfile's does.
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        if (state.user) state.user.avatar_url = action.payload.avatar_url;
+      })
+      .addCase(removeAvatar.fulfilled, (state) => {
+        if (state.user) state.user.avatar_url = null;
+      })
+
+      // The phone routes answer with the phone fields alone (phone,
+      // phone_verified_at, phone_pending, phone_pending_expires_at): merged.
+      .addCase(startPhoneVerification.fulfilled, mergePhone)
+      .addCase(verifyPhone.fulfilled, mergePhone)
+      .addCase(removePhone.fulfilled, mergePhone)
+      // Too many attempts, or expired: the server has deleted the waiting code,
+      // so the card stops offering to type it.
+      .addCase(verifyPhone.rejected, (state, action) => {
+        if (state.user && ENDED_CODE.has(action.payload?.code)) {
+          state.user.phone_pending = null;
+          state.user.phone_pending_expires_at = null;
+        }
       })
 
       // MERGED into the stored user, not assigned over it: the endpoint answers
@@ -169,5 +224,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { authInitialized, clearError, sessionExpired } = authSlice.actions;
+export const { authInitialized, clearError, sessionExpired, avatarOfferDismissed } = authSlice.actions;
 export default authSlice.reducer;

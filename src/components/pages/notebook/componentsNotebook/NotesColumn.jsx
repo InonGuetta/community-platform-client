@@ -5,6 +5,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import NoteCard from "../../../features/Notes/NoteCard";
 import { statuses } from "../../../../utilities/constant";
+import { useTranslation } from "react-i18next";
 
 // The notes themselves, one NoteCard each in the index's order, and what the
 // column shows while there are none. Layout only — every value and handler is
@@ -28,14 +29,16 @@ const NotesColumn = ({
   setDrafts,
   setFormats,
   status,
-}) => (
+}) => {
+  const { t } = useTranslation("notebook");
+  return (
   <Box
     sx={{
       flexGrow: 1, minWidth: 0, minHeight: 0,
       display: "flex", flexDirection: "column", gap: 2,
       overflowY: { md: "auto" },
       // Room for the scrollbar so it does not sit on the cards' edge.
-      pl: { md: 1 },
+      paddingInlineEnd: { md: 1 },
     }}
   >
     {status === statuses.loading && items.length === 0 ? (
@@ -44,7 +47,7 @@ const NotesColumn = ({
       <Paper elevation={0} sx={{ flexGrow: 1, p: 3, borderRadius: 3, border: "1px solid", borderColor: "divider", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, color: "text.secondary", minHeight: 400 }}>
         <NoteAltOutlinedIcon sx={{ fontSize: 64, opacity: 0.4 }} />
         <Typography>
-          {items.length === 0 ? "עדיין אין הערות. צור הערה חדשה כדי להתחיל." : "אין הערות התואמות את החיפוש."}
+          {items.length === 0 ? t("noNotes") : t("noMatchingNotes")}
         </Typography>
       </Paper>
     ) : (
@@ -91,6 +94,7 @@ const NotesColumn = ({
       ))
     )}
   </Box>
-);
+  );
+};
 
 export default NotesColumn;

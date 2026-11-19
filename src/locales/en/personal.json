@@ -1,0 +1,24 @@
+{
+  "lessons_zero": "No lessons",
+  "lessons_one": "One lesson",
+  "lessons_other": "{{count}} lessons",
+  "items_zero": "No items",
+  "items_one": "One item",
+  "items_other": "{{count}} items",
+  "fullList": "See the full list",
+  "more": "More lessons",
+  "noMore": "No more lessons",
+  "showMore": "Show more lessons from {{title}}",
+  "emptyList": "It has no lessons to show.",
+  "lists": {
+    "title": "Saved lists",
+    "loadFailed": "Loading the lists failed. Try refreshing the page.",
+    "none": "You have no lists yet. You can create one from the save button on a lesson's page."
+  },
+  "list": {
+    "fallbackTitle": "Saved list",
+    "loadFailed": "Loading the list failed. It may have been deleted.",
+    "empty": "There are no lessons in this list yet"
+  },
+  "toArchive": "To the archive"
+}

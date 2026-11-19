@@ -1,0 +1,51 @@
+{
+  "title": "Support our community",
+  "intro": "Your donation helps us create more content and keep the platform free for students.",
+  "form": {
+    "type": "Donation type",
+    "oneTime": "One-time",
+    "monthly": "Monthly",
+    "monthlySoon": "Monthly donations will be available soon",
+    "amount": "Amount (₪)",
+    "custom": "Custom amount",
+    "minimum": "The minimum amount is ₪{{min}}",
+    "preparing": "Preparing the payment...",
+    "continue": "Continue to pay ₪{{amount}}",
+    "secure": "Secure payment through Stripe. Your card details are typed directly into Stripe and never pass through us."
+  },
+  "payment": {
+    "of": "A donation of {{amount}}",
+    "processing": "Processing...",
+    "pay": "Pay {{amount}}",
+    "back": "Back"
+  },
+  "result": {
+    "retry": "Try again",
+    "another": "Another donation",
+    "completed": {
+      "title": "Thank you!",
+      "body": "Your donation was received. A receipt will be sent to you by email."
+    },
+    "pending": {
+      "title": "Payment under review",
+      "body": "The payment has not been finally confirmed yet. Its status will update under \"My donations\" as soon as it is."
+    },
+    "failed": {
+      "title": "The payment did not go through",
+      "body": "No money was taken. You can try again, with the same card or another one."
+    }
+  },
+  "mine": {
+    "title": "My donations"
+  },
+  "status": {
+    "completed": "Completed",
+    "pending": "Pending",
+    "failed": "Failed"
+  },
+  "errors": {
+    "start": "The payment could not be started. Please try again.",
+    "loadForm": "The payment form could not be loaded. Check your connection and try again.",
+    "paymentFailed": "The payment did not go through. Please try again."
+  }
+}

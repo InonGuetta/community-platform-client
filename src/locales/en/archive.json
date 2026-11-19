@@ -1,0 +1,101 @@
+{
+  "title": "Media archive",
+  "upload": "Upload media",
+  "tabs": {
+    "archive": "Archive",
+    "smartSearch": "Smart deep search"
+  },
+  "results_one": "One result",
+  "results_other": "{{formatted}} results",
+  "showing": " · showing {{n}}",
+  "sort": {
+    "label": "Sort",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "title": "Lesson title (A–Z)",
+    "creator": "Lecturer's name (A–Z)",
+    "liked": "Most liked"
+  },
+  "filter": {
+    "toggle": "Filter",
+    "search": "Search...",
+    "type": "Content type",
+    "all": "All",
+    "creator": "Lecturer / author",
+    "length": "Lesson length",
+    "from": "Uploaded from",
+    "to": "Uploaded until",
+    "clearAll": "Clear all"
+  },
+  "selected": {
+    "chosenGroup": "Tags chosen for the filter",
+    "removedGroup": "Tags taken out of the filter",
+    "chosenLabel": "Filtered by:",
+    "removedLabel": "Without:",
+    "chosenSpoken": "Filtered by",
+    "removedSpoken": "Taken out of the filter",
+    "tagCount": "{{count}} tags",
+    "remove": "Remove {{name}} from the filter",
+    "clear": "Clear the tags"
+  },
+  "tree": {
+    "back": "Back",
+    "backToAll": "Back to all tags",
+    "all": "All tags",
+    "search": "Search for a tag...",
+    "searchLabel": "Search for a tag",
+    "open": "Open {{name}}",
+    "noMatch": "No tag matches \"{{term}}\"",
+    "empty": "No tags at this level",
+    "tooMany": "Showing {{shown}} of {{total}} tags — try narrowing the search",
+    "wholeBranch": "The number covers the whole branch, including what was taken out of it",
+    "partial": "Partly chosen — some categories in this branch were taken out",
+    "partialSpoken": "Partly chosen, {{count}} tags",
+    "inside": "Inside {{path}}",
+    "mark": {
+      "included": "Chosen · click again to unchoose",
+      "inherited": "Included through the chosen parent category · click to take it out of the filter",
+      "excluded": "Taken out of the filter · click again to reset",
+      "inheritedExcluded": "Outside the filter through a parent category that was taken out",
+      "contains": "Something inside this category is chosen"
+    },
+    "spoken": {
+      "included": "Chosen · click to unchoose",
+      "inherited": "Included through a parent category · click to take it out of the filter",
+      "excluded": "Taken out of the filter · click to restore",
+      "inheritedExcluded": "Outside the filter through a parent category · click to restore",
+      "contains": "Something inside is chosen · click to choose all of it",
+      "none": "Not chosen · click to choose"
+    }
+  },
+  "edit": {
+    "detailsTitle": "Edit details — {{title}}",
+    "currentCourse": "Current course",
+    "tagsTitle": "Tags — {{title}}",
+    "tagsHint": "Tags decide where the item will be found in filters and search.",
+    "saving": "Saving...",
+    "save": "Save"
+  },
+  "notices": {
+    "staleTags": "Some tags in the filter no longer exist and were removed from it",
+    "tagsSaved": "Tags updated",
+    "tagsFailed": "Updating the tags failed",
+    "detailsSaved": "Lesson details updated",
+    "detailsFailed": "Updating the details failed",
+    "published": "The item was published and is shown to students",
+    "hidden": "The item was hidden from students",
+    "publishFailed": "Updating the publication failed"
+  },
+  "smartSearch": {
+    "placeholder": "Smart deep search",
+    "run": "Search",
+    "none": "No matching results found."
+  },
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "night": "Good night",
+    "named": "{{greeting}}, <name>{{name}}</name>"
+  }
+}

@@ -4,7 +4,8 @@ import { updateTranscript, triggerTranscriptPipeline, fixHebrewTranscript } from
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
 import { transcriptToText } from "../../../utilities/transcriptText";
 import { isAiActionBusy, aiActionOutcome } from "../../../utilities/aiActionState";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
+import { useTranslation } from "react-i18next";
 
 // What the transcript editor does — the text being edited, kept in step with
 // the server's, and its three actions (save, start the pipeline, queue the
@@ -16,6 +17,7 @@ const IN_FLIGHT = new Set(["pending", "processing", "analyzing"]);
  * @param {{ transcript: any, mediaId: number|string, canEdit?: boolean }} props
  */
 export const useTranscriptEditor = ({ transcript, mediaId, canEdit = false }) => {
+  const { t } = useTranslation("lesson");
   const dispatch = useDispatch();
   const initialText = transcriptToText(transcript);
   const [editedText, setEditedText] = useState(initialText);
@@ -65,7 +67,7 @@ export const useTranscriptEditor = ({ transcript, mediaId, canEdit = false }) =>
     setSaveFeedback(
       result.meta.requestStatus === "fulfilled"
         ? "saved"
-        : hebrewForError(result.payload, "השמירה נכשלה")
+        : messageForError(result.payload, t("transcript.saveFailed"))
     );
   };
 

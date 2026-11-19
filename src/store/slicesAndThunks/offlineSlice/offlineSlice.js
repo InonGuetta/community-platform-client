@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import i18n from "../../../i18n/i18n";
 
 // What this device keeps for listening with no network (PRD MOB-2).
 //
@@ -27,7 +28,7 @@ const offlineSlice = createSlice({
           // The title too: the downloads page lists a running download before
           // there is any saved entry to take it from.
           const { id, title } = action.meta.arg;
-          state.progress[id] = { received: 0, total: null, title: title || "שיעור" };
+          state.progress[id] = { received: 0, total: null, title: title || i18n.t("downloads:save.lessonFallback") };
         }
       )
       .addMatcher(

@@ -4,9 +4,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchMyCourses, fetchMyJoinRequests } from "../../../store/slicesAndThunks/coursesSlice/coursesGet";
 import { joinCourseByCode } from "../../../store/slicesAndThunks/coursesSlice/coursesPost";
 import { cancelJoinRequest } from "../../../store/slicesAndThunks/coursesSlice/coursesDelete";
-import { ERROR_CODES, hebrewForError } from "../../../utilities/apiError";
+import { ERROR_CODES, messageForError } from "../../../utilities/apiError";
 import { statuses } from "../../../utilities/constant";
 import { selectMyCourses, selectMyCoursesStatus, selectMyJoinRequests } from "../../../store/selectors/coursesSelectors";
+import { useTranslation } from "react-i18next";
 
 // The student's own courses: the fetch and the selection, so MyCoursesPage.jsx is
 // layout only (the useXxxPageController rule).
@@ -17,6 +18,7 @@ import { selectMyCourses, selectMyCoursesStatus, selectMyJoinRequests } from "..
 export const JOIN_PARAM = "join";
 
 export const useMyCoursesPageController = () => {
+  const { t } = useTranslation("courses");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -66,7 +68,7 @@ export const useMyCoursesPageController = () => {
       dispatch(fetchMyJoinRequests());
       return;
     }
-    setJoinError(hebrewForError(result.payload, "השליחה נכשלה. נסו שוב."));
+    setJoinError(messageForError(result.payload, t("join.failed")));
     // Enrolled after all (by the lecturer, or in another tab): make sure the
     // list shows the course the message just said they are in.
     if (result.payload?.code === ERROR_CODES.ALREADY_ENROLLED) dispatch(fetchMyCourses());

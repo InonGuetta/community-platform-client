@@ -1,5 +1,6 @@
 import { test, expect, describe } from "vitest";
-import { rejectionOf, hebrewForError, ERROR_CODES, ERROR_CODE_HE } from "./apiError";
+import { rejectionOf, messageForError, ERROR_CODES } from "./apiError";
+import errors from "../locales/he/errors.json";
 
 // The single funnel every thunk in the store rejects through — 42 call sites
 // that were 42 copies of the same optional-chain, all of which read the message
@@ -51,12 +52,12 @@ test("message is always a string", () => {
   }
 });
 
-// hebrewForError is what SignIn/SignUp and the toast middleware both call.
-describe("hebrewForError", () => {
+// messageForError is what SignIn/SignUp and the toast middleware both call.
+describe("messageForError", () => {
   test("a known code becomes its Hebrew", () => {
-    expect(hebrewForError({ code: ERROR_CODES.INVALID_CREDENTIALS }, "fb"))
+    expect(messageForError({ code: ERROR_CODES.INVALID_CREDENTIALS }, "fb"))
       .toBe("אימייל או סיסמה שגויים");
-    expect(hebrewForError({ code: ERROR_CODES.EMAIL_TAKEN }, "fb"))
+    expect(messageForError({ code: ERROR_CODES.EMAIL_TAKEN }, "fb"))
       .toBe("האימייל כבר בשימוש");
   });
 
@@ -66,23 +67,25 @@ describe("hebrewForError", () => {
   // as a value, and not as a fallback.
   test("the server's English message is never what comes out", () => {
     const rejection = { message: "Invalid credentials", code: ERROR_CODES.INVALID_CREDENTIALS };
-    expect(hebrewForError(rejection, "ההתחברות נכשלה. נסה שוב.")).not.toContain("Invalid");
+    expect(messageForError(rejection, "ההתחברות נכשלה. נסה שוב.")).not.toContain("Invalid");
 
     // Even with no code at all, the fallback wins — the message is not consulted.
-    expect(hebrewForError({ message: "Something went wrong" }, "ההתחברות נכשלה. נסה שוב."))
+    expect(messageForError({ message: "Something went wrong" }, "ההתחברות נכשלה. נסה שוב."))
       .toBe("ההתחברות נכשלה. נסה שוב.");
   });
 
   test("anything unrecognisable degrades to the fallback instead of throwing", () => {
     for (const input of [null, undefined, "a bare string", {}, { code: "ADDED_LATER" }]) {
-      expect(hebrewForError(input, "גיבוי")).toBe("גיבוי");
+      expect(messageForError(input, "גיבוי")).toBe("גיבוי");
     }
   });
 
   test("every translated value is actually Hebrew, not a leftover English string", () => {
     // A Hebrew character must appear in each; an entry accidentally left in
     // English would otherwise sit there looking translated.
-    for (const [code, text] of Object.entries(ERROR_CODE_HE)) {
+    // Rendered, not raw: INVALID_EMAIL's value only nests auth:emailShape.
+    for (const code of Object.keys(errors.codes)) {
+      const text = messageForError({ code, params: { reason: "noAt" } }, "");
       expect(text, `${code} is not Hebrew`).toMatch(/[֐-׿]/);
     }
   });

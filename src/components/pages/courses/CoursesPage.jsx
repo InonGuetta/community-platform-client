@@ -24,8 +24,10 @@ import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useCoursesPageController from "./useCoursesPageController";
 import { statuses } from "../../../utilities/constant";
+import { useTranslation, Trans } from "react-i18next";
 
 const CoursesPage = () => {
+  const { t } = useTranslation("courses");
   const {
     courses, totalCourses, status, lecturers, isAdmin, canManage, myStudents,
     isLecturer, scope, setScope,
@@ -49,9 +51,9 @@ const CoursesPage = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h4" fontWeight={800} color="primary">קורסים</Typography>
+        <Typography variant="h4" fontWeight={800} color="primary">{t("title")}</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
-          קורס חדש
+          {t("newCourse")}
         </Button>
       </Box>
 
@@ -75,23 +77,23 @@ const CoursesPage = () => {
           onChange={(_, next) => next && setScope(next)}
           sx={{ mb: 2 }}
         >
-          <ToggleButton value="mine">הקורסים שלי</ToggleButton>
-          <ToggleButton value="all">כל הקורסים</ToggleButton>
+          <ToggleButton value="mine">{t("tabs.mine")}</ToggleButton>
+          <ToggleButton value="all">{t("tabs.all")}</ToggleButton>
         </ToggleButtonGroup>
       )}
 
       {totalCourses === 0 ? (
         <NoDataDialog
-          message="עדיין לא הוגדרו קורסים"
-          actionLabel="קורס חדש"
+          message={t("noneDefined")}
+          actionLabel={t("newCourse")}
           onAction={() => setCreateOpen(true)}
         />
       ) : courses.length === 0 ? (
         // Courses exist, none of them this lecturer's. Saying "no courses"
         // here would contradict the switch right above it.
         <NoDataDialog
-          message="עדיין אין לך קורסים משלך. הקורסים של מרצים אחרים נמצאים תחת ״כל הקורסים״."
-          actionLabel="קורס חדש"
+          message={t("noneOwn")}
+          actionLabel={t("newCourse")}
           onAction={() => setCreateOpen(true)}
         />
       ) : (
@@ -104,16 +106,16 @@ const CoursesPage = () => {
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexGrow: 1, flexWrap: "wrap" }}>
-                <Typography fontWeight={700} color="primary">{course.title}</Typography>
-                {!course.is_active && <Chip label="לא פעיל" size="small" color="default" />}
-                <Chip label={course.lecturer_name || "ללא מרצה"} size="small" variant="outlined" />
-                <Chip label={`${course.student_count} תלמידים`} size="small" color="info" variant="outlined" />
-                <Chip label={`${course.media_count} שיעורים`} size="small" color="success" variant="outlined" />
-                {!canManage(course) && <Chip label="צפייה בלבד" size="small" />}
+                <Typography fontWeight={700} color="primary" dir="auto">{course.title}</Typography>
+                {!course.is_active && <Chip label={t("inactive")} size="small" color="default" />}
+                <Chip label={course.lecturer_name || t("noLecturer")} size="small" variant="outlined" />
+                <Chip label={t("students", { count: Number(course.student_count) || 0 })} size="small" color="info" variant="outlined" />
+                <Chip label={t("lessons", { count: Number(course.media_count) || 0 })} size="small" color="success" variant="outlined" />
+                {!canManage(course) && <Chip label={t("viewOnly")} size="small" />}
                 {/* PRD ROST-9 — only the course's manager is sent the count. */}
                 {course.pending_join_count > 0 && (
                   <Chip
-                    label={course.pending_join_count === 1 ? "בקשת הצטרפות אחת" : `${course.pending_join_count} בקשות הצטרפות`}
+                    label={t("joinRequests", { count: course.pending_join_count })}
                     size="small"
                     color="warning"
                   />
@@ -124,12 +126,12 @@ const CoursesPage = () => {
                 // The accordion header is itself a button, so every control
                 // inside it has to stop the click from also toggling the panel.
                 <Box sx={{ display: "flex", gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
-                  <Tooltip title="עריכה">
+                  <Tooltip title={t("edit")}>
                     <IconButton size="small" onClick={() => setEditCourse(course)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="מחיקה">
+                  <Tooltip title={t("delete")}>
                     <IconButton size="small" color="error" onClick={() => setDeleteTarget(course)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -140,7 +142,7 @@ const CoursesPage = () => {
 
             <AccordionDetails>
               {course.description && (
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" dir="auto" sx={{ mb: 2 }}>
                   {course.description}
                 </Typography>
               )}
@@ -153,7 +155,7 @@ const CoursesPage = () => {
                 variant="outlined"
                 sx={{ mb: 2 }}
               >
-                {canManage(course) ? "דף הקורס: סדר השיעורים ומי שמע מה" : "דף הקורס"}
+                {canManage(course) ? t("pageManage") : t("page")}
               </Button>
               {/* Mounted only for the open course: it reads that course's queue
                   of names and addresses, which no other course needs. */}
@@ -174,7 +176,7 @@ const CoursesPage = () => {
                 // and emails, and the server refuses it. The count in the header
                 // is the part that is anybody's business.
                 <Typography variant="body2" color="text.secondary">
-                  רשימת התלמידים גלויה רק למרצה של הקורס.
+                  {t("rosterPrivate")}
                 </Typography>
               )}
             </AccordionDetails>
@@ -205,14 +207,16 @@ const CoursesPage = () => {
         open={Boolean(unenrollTarget)}
         onClose={handleUnenrollCancel}
         onConfirm={handleUnenrollConfirm}
-        title="הסרה מהקורס"
-        confirmLabel="הסרה"
+        title={t("unenroll.title")}
+        confirmLabel={t("unenroll.confirm")}
         message={
           unenrollTarget && (
-            <>
-              להסיר את <strong>{unenrollTarget.student.display_name || unenrollTarget.student.email}</strong> מהקורס{" "}
-              <strong>{unenrollTarget.course?.title}</strong>? הגישה לשיעורי הקורס תיחסם מיד. אפשר לרשום שוב בכל עת.
-            </>
+            <Trans
+              t={t}
+              i18nKey="unenroll.question"
+              values={{ student: unenrollTarget.student.display_name || unenrollTarget.student.email, course: unenrollTarget.course?.title }}
+              components={{ strong: <strong /> }}
+            />
           )
         }
       />

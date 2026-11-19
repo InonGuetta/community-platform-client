@@ -1,0 +1,17 @@
+{
+  "toArchive": "To the archive",
+  "none": "No lessons under this name are open to you.",
+  "video_one": "One video",
+  "video_other": "{{count}} videos",
+  "audio_one": "One audio recording",
+  "audio_other": "{{count}} audio recordings",
+  "text_one": "One book",
+  "text_other": "{{count}} books",
+  "hours_one": "One hour of recordings",
+  "hours_other": "{{count}} hours of recordings",
+  "minutes_one": "One minute of recordings",
+  "minutes_other": "{{count}} minutes of recordings",
+  "items_one": "One item",
+  "items_other": "{{count}} items",
+  "latest": "Latest: {{date}}"
+}

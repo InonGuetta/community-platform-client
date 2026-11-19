@@ -1,0 +1,108 @@
+{
+  "title": "Mon compte",
+  "unverified": "Adresse non vérifiée",
+  "verified": "Adresse vérifiée",
+  "displayName": "Nom affiché",
+  "save": "Enregistrer",
+  "password": {
+    "title": "Changer le mot de passe",
+    "current": "Mot de passe actuel",
+    "new": "Nouveau mot de passe",
+    "confirm": "Confirmer le nouveau mot de passe",
+    "minLength": "Au moins {{n}} caractères",
+    "mismatch": "Les mots de passe ne correspondent pas",
+    "signsOutOthers": "Changer le mot de passe déconnecte tous les autres appareils connectés au compte.",
+    "submit": "Changer le mot de passe",
+    "changed": "Mot de passe modifié",
+    "failed": "Le changement de mot de passe a échoué"
+  },
+  "details": {
+    "saved": "Informations enregistrées",
+    "failed": "L'enregistrement des informations a échoué"
+  },
+  "email": {
+    "title": "Notifications par e-mail et par SMS",
+    "intro": "Toutes les notifications apparaissent dans la cloche en haut de la page. Choisissez ici lesquelles arrivent aussi par e-mail ou par SMS.",
+    "loadFailed": "Vos préférences ne peuvent pas être chargées pour le moment.",
+    "allOff": "Vous avez demandé à ne plus recevoir aucun e-mail de la plateforme.",
+    "restore": "Réactiver les e-mails",
+    "saveFailed": "L'enregistrement de la préférence a échoué",
+    "channelEmail": "E-mail",
+    "channelSms": "SMS",
+    "switchEmail": "{{category}} — par e-mail",
+    "switchSms": "{{category}} — par SMS",
+    "noSms": "Non envoyé par SMS",
+    "smsNeedsPhone": "Pour recevoir des notifications par SMS, ajoutez et vérifiez un numéro de téléphone dans la carte « Numéro de téléphone ».",
+    "quietHours": "Aucun SMS n'est envoyé entre 22 h et 7 h, sauf pour signaler qu'une séance a commencé.",
+    "smsAllOff": "Désactiver tous les SMS"
+  },
+  "role": {
+    "title": "Demande d'autorisation",
+    "pending": "Votre demande d'autorisation {{role}} attend l'approbation d'un administrateur. D'ici là, le compte garde ses autorisations actuelles.",
+    "rejected": "Votre précédente demande d'autorisation {{role}} n'a pas été approuvée.",
+    "rejectedReason": "Votre précédente demande d'autorisation {{role}} n'a pas été approuvée. Motif : {{reason}}",
+    "tryAgainLater": "Vous pourrez soumettre une nouvelle demande après sept jours.",
+    "current": "Votre autorisation actuelle : {{role}}. Une demande d'autorisation supérieure nécessite l'approbation d'un administrateur.",
+    "send": "Envoyer la demande"
+  },
+  "avatar": {
+    "upload": "Téléverser une photo",
+    "change": "Changer de photo",
+    "remove": "Supprimer la photo",
+    "hint": "JPG, PNG ou WebP. Après le choix, vous choisissez la partie de la photo qui sera affichée.",
+    "notImage": "Le fichier ne peut pas être lu comme une image. Vous pouvez téléverser un JPG, PNG ou WebP.",
+    "label": "Photo de profil",
+    "welcome": {
+      "title": "Bienvenue, {{name}} !",
+      "titleNoName": "Bienvenue !",
+      "body": "Voulez-vous ajouter une photo de profil ? Les enseignants et les autres élèves vous reconnaîtront dans les cours et les séances.",
+      "later": "Plus tard",
+      "done": "Terminé",
+      "where": "Vous pouvez ajouter ou changer votre photo à tout moment sur la page « Mon compte »."
+    },
+    "takePhoto": "Prendre une photo",
+    "crop": {
+      "title": "Modifier la photo de profil",
+      "hint": "Faites glisser la photo pour la placer, et zoomez ou dézoomez pour choisir la partie affichée dans le cercle.",
+      "area": "Zone de recadrage — glisser ou flèches pour déplacer, + et − pour zoomer",
+      "zoom": "Zoom",
+      "zoomIn": "Zoomer",
+      "zoomOut": "Dézoomer",
+      "save": "Enregistrer la photo"
+    },
+    "camera": {
+      "title": "Prendre une photo de profil",
+      "starting": "Démarrage de la caméra…",
+      "capture": "Prendre la photo",
+      "denied": "L'accès à la caméra a été bloqué. Vous pouvez l'autoriser dans les paramètres du navigateur, ou téléverser une photo de votre appareil.",
+      "none": "Aucune caméra n'a été trouvée sur cet appareil. Vous pouvez téléverser une photo de votre appareil.",
+      "failed": "La caméra n'a pas pu démarrer. Vous pouvez téléverser une photo de votre appareil."
+    }
+  },
+  "phone": {
+    "title": "Numéro de téléphone",
+    "help": "Pour les notifications par SMS — choisissez lesquelles dans la carte des notifications. Vous seul voyez le numéro ; les administrateurs n'en voient que les quatre derniers chiffres.",
+    "label": "Numéro de mobile",
+    "newLabel": "Nouveau numéro de mobile",
+    "hint": "Un numéro israélien, ou avec l'indicatif du pays (+1…)",
+    "send": "Envoyer le code",
+    "verified": "Vérifié",
+    "change": "Changer de numéro",
+    "remove": "Retirer le numéro",
+    "cancel": "Annuler",
+    "enterCode": "Saisir le code",
+    "pendingText": "Nous avons envoyé un code au <num>{{phone}}</num>. Le numéro sera ajouté une fois le code saisi.",
+    "sendFailed": "Impossible d'envoyer le code pour le moment. Réessayez dans un instant.",
+    "removeTitle": "Retirer votre numéro de téléphone ?",
+    "removeBody": "Les notifications par SMS seront désactivées. Vous pourrez ajouter un numéro à tout moment.",
+    "dialog": {
+      "title": "Saisir le code de vérification",
+      "body": "Nous avons envoyé un code à 6 chiffres au <num>{{phone}}</num>. Il est valable 10 minutes.",
+      "codeLabel": "Code de vérification",
+      "verify": "Vérifier",
+      "resend": "Envoyer un nouveau code",
+      "resendIn": "Nouveau code dans {{seconds}} s",
+      "verifyFailed": "Impossible de vérifier le code pour le moment. Réessayez."
+    }
+  }
+}

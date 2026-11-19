@@ -8,6 +8,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { roles, roleLabels } from "../../../utilities/constant";
 import { useRoleRequest } from "./useRoleRequest";
+import { useTranslation } from "react-i18next";
 
 // Asking to become a lecturer or an admin, from inside the account.
 //
@@ -25,6 +26,7 @@ import { useRoleRequest } from "./useRoleRequest";
 const REQUESTABLE = [roles.lecturer, roles.admin];
 
 const RoleRequestCard = () => {
+  const { t } = useTranslation("profile");
   const { user, choice, setChoice, submitting, submit } = useRoleRequest();
 
   // An admin has nothing to ask for. Asking for a LESSER role is a demotion and
@@ -39,11 +41,10 @@ const RoleRequestCard = () => {
       <Card>
         <CardContent>
           <Typography variant="h6" fontWeight={700} gutterBottom>
-            בקשת הרשאה
+            {t("role.title")}
           </Typography>
           <Alert severity="info">
-            בקשתך להרשאת {roleLabels[user.requested_role] || user.requested_role} ממתינה
-            לאישור מנהל. עד לאישור החשבון פועל עם ההרשאות הנוכחיות.
+            {t("role.pending", { role: roleLabels[user.requested_role] || user.requested_role })}
           </Alert>
         </CardContent>
       </Card>
@@ -58,7 +59,7 @@ const RoleRequestCard = () => {
     <Card>
       <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Typography variant="h6" fontWeight={700}>
-          בקשת הרשאה
+          {t("role.title")}
         </Typography>
 
         {/* The previous answer, with the reason the admin gave. Shown before the
@@ -67,16 +68,15 @@ const RoleRequestCard = () => {
             they have to act on first. */}
         {status === "rejected" && (
           <Alert severity="warning">
-            בקשתך הקודמת להרשאת {roleLabels[user.requested_role] || user.requested_role} לא
-            אושרה.
-            {user.rejection_reason ? ` סיבה: ${user.rejection_reason}` : ""}
-            {" "}ניתן להגיש בקשה חדשה לאחר שבעה ימים.
+            {user.rejection_reason
+              ? t("role.rejectedReason", { role: roleLabels[user.requested_role] || user.requested_role, reason: user.rejection_reason })
+              : t("role.rejected", { role: roleLabels[user.requested_role] || user.requested_role })}
+            {" "}{t("role.tryAgainLater")}
           </Alert>
         )}
 
         <Typography variant="body2" color="text.secondary">
-          ההרשאה הנוכחית שלך: {roleLabels[user.role] || user.role}. בקשה להרשאה גבוהה
-          יותר טעונה אישור של מנהל.
+          {t("role.current", { role: roleLabels[user.role] || user.role })}
         </Typography>
 
         <ToggleButtonGroup
@@ -94,7 +94,7 @@ const RoleRequestCard = () => {
 
         <Box>
           <Button variant="contained" onClick={submit} disabled={submitting}>
-            שליחת בקשה
+            {t("role.send")}
           </Button>
         </Box>
       </CardContent>

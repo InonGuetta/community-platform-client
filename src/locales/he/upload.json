@@ -1,0 +1,20 @@
+{
+  "title": "העלאת מדיה",
+  "chooseFile": "לחץ לבחירת קובץ",
+  "uploading": "מעלה... {{progress}}%",
+  "processing": "מעבד בשרת...",
+  "uploadingShort": "מעלה...",
+  "upload": "העלאה",
+  "fields": {
+    "title": "כותרת",
+    "description": "תיאור",
+    "type": "סוג מדיה",
+    "creatorBlank": "אם יישאר ריק יירשם \"{{name}}\"",
+    "tagsHelper": "עד {{max}} תגיות. אפשר גם לדלג — נציע תגיות אחרי ההעלאה.",
+    "course": "שיוך לקורס",
+    "courseHelper": "ללא קורס — התוכן מוצג לכל התלמידים",
+    "noCourse": "ללא קורס (ספרייה כללית)"
+  },
+  "tagsSaved": "התגיות נשמרו",
+  "tagsFailed": "שמירת התגיות נכשלה"
+}

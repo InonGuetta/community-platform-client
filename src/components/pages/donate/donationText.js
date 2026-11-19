@@ -1,4 +1,5 @@
-import { formatHebrewDate } from "../../../utilities/formatDate";
+import { formatDate } from "../../../utilities/formatDate";
+import i18n from "../../../i18n/i18n";
 
 // The words of the donate page (PRD PAY-1, PAY-2), apart from its layout.
 
@@ -11,33 +12,24 @@ export const formatAmount = (cents, currency = "ILS") => {
   return `${SYMBOL[String(currency).toUpperCase()] ?? ""}${text}`;
 };
 
-export const STATUS_TEXT = {
-  completed: { label: "הושלמה", color: "success" },
-  pending: { label: "ממתינה", color: "warning" },
-  failed: { label: "לא עברה", color: "error" },
-};
+const STATUS_COLOR = { completed: "success", pending: "warning", failed: "error" };
 
-export const statusOf = (status) => STATUS_TEXT[status] ?? { label: status, color: "default" };
+// A donation's status as a chip says it, in the current language.
+export const statusOf = (status) =>
+  STATUS_COLOR[status]
+    ? { label: i18n.t(`donate:status.${status}`), color: STATUS_COLOR[status] }
+    : { label: status, color: "default" };
 
-export const donationLine = (d) => `${formatAmount(d.amount_cents, d.currency)} · ${formatHebrewDate(d.created_at)}`;
+export const donationLine = (d) => `${formatAmount(d.amount_cents, d.currency)} · ${formatDate(d.created_at)}`;
 
 // What the result screen says, by how the payment ended.
-export const RESULT_TEXT = {
-  completed: {
-    title: "תודה רבה!",
-    body: "התרומה התקבלה. קבלה תישלח אליכם במייל.",
-    severity: "success",
-  },
-  pending: {
-    title: "התשלום בבדיקה",
-    body: "התשלום עוד לא אושר סופית. הסטטוס יתעדכן ב״התרומות שלי״ ברגע שיתקבל אישור.",
-    severity: "info",
-  },
-  failed: {
-    title: "התשלום לא עבר",
-    body: "לא נגבה כסף. אפשר לנסות שוב, עם אותו כרטיס או עם כרטיס אחר.",
-    severity: "error",
-  },
-};
+const RESULT_SEVERITY = { completed: "success", pending: "info", failed: "error" };
 
-export const resultText = (status) => RESULT_TEXT[status] ?? RESULT_TEXT.pending;
+export const resultText = (status) => {
+  const known = RESULT_SEVERITY[status] ? status : "pending";
+  return {
+    title: i18n.t(`donate:result.${known}.title`),
+    body: i18n.t(`donate:result.${known}.body`),
+    severity: RESULT_SEVERITY[known],
+  };
+};

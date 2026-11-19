@@ -7,8 +7,10 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import AuthLayout from "./AuthLayout";
 import { notificationsApi } from "../../../api/notificationsApi";
+import { categoryLabel } from "../../../utilities/notificationCategories";
+import { useTranslation } from "react-i18next";
 
-// Where the "הפסקת מיילים מסוג זה" link at the foot of every notification mail
+// Where the "stop this kind of mail" link at the foot of every notification mail
 // lands (PRD NOTIF-6).
 //
 // Reachable without a session, like VerifyEmail: it is followed from an inbox,
@@ -18,17 +20,6 @@ import { notificationsApi } from "../../../api/notificationsApi";
 // Unlike VerifyEmail it does NOT act on arrival. It asks. The mail links here
 // rather than to the API so that nothing happens on a bare GET, and a page that
 // unsubscribed the moment it rendered would only move that problem one step.
-
-// What each category is called on this page — the same names as the profile's
-// switches.
-const CATEGORY_NAMES = {
-  sessions: "מפגשים חיים",
-  new_lessons: "שיעורים חדשים",
-  processing: "עיבוד השיעורים שהעלית",
-  role_requests: "בקשות הרשאה",
-  join_requests: "בקשות הצטרפות לקורסים שלך",
-  enrolments: "תשובות לבקשות הצטרפות",
-};
 
 // The category the link names, read from the token's payload so the question
 // can say what it is about. Display only: nothing is trusted from it, and a
@@ -45,7 +36,9 @@ export const categoryInToken = (token) => {
 const Unsubscribe = () => {
   const [params] = useSearchParams();
   const token = params.get("token") ?? "";
-  const named = CATEGORY_NAMES[categoryInToken(token)];
+  const { t } = useTranslation(["auth", "notifications"]);
+  const category = categoryInToken(token);
+  const named = category ? categoryLabel(category) : null;
   const [state, setState] = useState({ status: token ? "asking" : "error", done: null });
 
   const handleUnsubscribe = async (all) => {
@@ -60,12 +53,12 @@ const Unsubscribe = () => {
 
   if (state.status === "error") {
     return (
-      <AuthLayout title="הקישור אינו תקין">
+      <AuthLayout title={t("unsubscribe.badTitle")}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Alert severity="error">
-            הקישור חסר או פגום. אפשר לבחור אילו מיילים לקבל גם מתוך עמוד החשבון.
+            {t("unsubscribe.bad")}
           </Alert>
-          <Link component={RouterLink} to="/profile" underline="hover">לעמוד החשבון</Link>
+          <Link component={RouterLink} to="/profile" underline="hover">{t("unsubscribe.toProfile")}</Link>
         </Box>
       </AuthLayout>
     );
@@ -73,17 +66,17 @@ const Unsubscribe = () => {
 
   if (state.status === "done") {
     return (
-      <AuthLayout title="המיילים הופסקו">
+      <AuthLayout title={t("unsubscribe.doneTitle")}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Alert severity="success">
             {state.done === "all"
-              ? "לא יישלחו אליך יותר מיילים מהפלטפורמה."
-              : `לא יישלחו אליך יותר מיילים על ${CATEGORY_NAMES[state.done] ?? "סוג זה"}.`}
+              ? t("unsubscribe.doneAll")
+              : t("unsubscribe.doneOne", { category: (state.done ? categoryLabel(state.done) : t("unsubscribe.thisKind")) })}
           </Alert>
           <Typography variant="body2" color="text.secondary">
-            ההתראות ימשיכו להופיע בפעמון באפליקציה. אפשר להחזיר את המיילים בכל עת מעמוד החשבון.
+            {t("unsubscribe.doneHint")}
           </Typography>
-          <Link component={RouterLink} to="/profile" underline="hover">לעמוד החשבון</Link>
+          <Link component={RouterLink} to="/profile" underline="hover">{t("unsubscribe.toProfile")}</Link>
         </Box>
       </AuthLayout>
     );
@@ -91,16 +84,16 @@ const Unsubscribe = () => {
 
   const working = state.status === "working";
   return (
-    <AuthLayout title="הפסקת מיילים">
+    <AuthLayout title={t("unsubscribe.title")}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Typography>
-          {named ? `להפסיק לשלוח לך מיילים על ${named}?` : "להפסיק לשלוח לך מיילים מסוג זה?"}
+          {named ? t("unsubscribe.askNamed", { category: named }) : t("unsubscribe.ask")}
         </Typography>
         <Button variant="contained" onClick={() => handleUnsubscribe(false)} disabled={working}>
-          הפסקת מיילים מסוג זה
+          {t("unsubscribe.stopThis")}
         </Button>
         <Button variant="text" onClick={() => handleUnsubscribe(true)} disabled={working}>
-          הפסקת כל המיילים מהפלטפורמה
+          {t("unsubscribe.stopAll")}
         </Button>
       </Box>
     </AuthLayout>

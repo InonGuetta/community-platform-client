@@ -1,5 +1,6 @@
 import { formatTime } from "./formatTime";
 import { TIME_PARAM, PAGE_PARAM } from "./deepLink";
+import i18n from "../i18n/i18n";
 
 // Where a passage of a lesson is, for the "דיון עם AI" tab — a search hit and
 // a chat citation both carry the same fields (start_time, page_number,
@@ -28,9 +29,9 @@ const placeIn = (item) => {
   }
   if (item?.page_number != null) {
     const page = Number(item.page_number);
-    return { kind: "page", page, label: `עמ' ${page}` };
+    return { kind: "page", page, label: i18n.t("format:place.page", { page }) };
   }
-  return { kind: "none", label: `קטע ${Number(item?.chunk_index ?? 0) + 1}` };
+  return { kind: "none", label: i18n.t("format:place.chunk", { n: Number(item?.chunk_index ?? 0) + 1 }) };
 };
 
 export const placeOf = (item) => {

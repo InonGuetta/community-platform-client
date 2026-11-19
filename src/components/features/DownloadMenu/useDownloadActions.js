@@ -7,6 +7,7 @@ import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { saveForOffline } from "../../../store/slicesAndThunks/offlineSlice/offlineGet";
 import { selectIsOffline, selectOfflineProgressFor } from "../../../store/selectors/offlineSelectors";
 import { transcriptCues } from "../../../utilities/transcriptTiming";
+import { useTranslation } from "react-i18next";
 
 // What the download entries DO for one lecture — building the transcript PDF,
 // keeping the lesson for listening offline, and the state each entry shows —
@@ -16,6 +17,7 @@ import { transcriptCues } from "../../../utilities/transcriptTiming";
  * @param {{ media: any, transcript?: any, hasTranscript?: boolean, onClose?: () => void }} props
  */
 export const useDownloadActions = ({ media, transcript, hasTranscript, onClose }) => {
+  const { t } = useTranslation("media");
   const dispatch = useDispatch();
   const [busy, setBusy] = useState(false);
   const savedOffline = useSelector(selectIsOffline(media.id));
@@ -37,7 +39,7 @@ export const useDownloadActions = ({ media, transcript, hasTranscript, onClose }
     try {
       const text = loadedText || transcriptToText(await transcriptsApi.get(media.id));
       if (!text) {
-        dispatch(notify({ message: "אין תמלול זמין לפריט זה.", severity: "warning" }));
+        dispatch(notify({ message: t("download.noTranscript"), severity: "warning" }));
         return;
       }
       // Both come from the same dynamic import: the filename rule belongs with
@@ -49,10 +51,10 @@ export const useDownloadActions = ({ media, transcript, hasTranscript, onClose }
       await downloadHebrewPdf({
         title: media.title,
         sections: [{ text }],
-        filename: `${safeFileBaseName(media.title, "תמלול")}.pdf`,
+        filename: `${safeFileBaseName(media.title, t("download.transcriptFile"))}.pdf`,
       });
     } catch {
-      dispatch(notify({ message: "יצירת ה-PDF נכשלה. נסה שוב.", severity: "error" }));
+      dispatch(notify({ message: t("download.pdfFailed"), severity: "error" }));
     } finally {
       setBusy(false);
       onClose?.();

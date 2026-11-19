@@ -2,6 +2,62 @@ import js from "@eslint/js";
 import globals from "globals";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
+import i18next from "eslint-plugin-i18next";
+
+// ── Direction: logical properties only (docs/i18n-plan.md) ──────────────────
+//
+// The interface runs right-to-left in Hebrew and Yiddish and left-to-right in
+// English, French and Spanish, with no stylis flip plugin (see theme.js). So a
+// style must name the side a line STARTS or ENDS on, never left or right — one
+// declaration is then right in both directions.
+//
+// Note what MUI does and does not offer: marginInlineStart/End and
+// paddingInlineStart/End are spacing keys (`marginInlineStart: 2` is 16px);
+// there are NO `ms`/`me`/`ps`/`pe` shorthands — MUI passes them through as
+// unknown CSS and the browser drops them, silently. Positions are
+// insetInlineStart/End (`insetInline: 0` for both); text is textAlign
+// "start"/"end".
+//
+// A number measured from the page (getBoundingClientRect, a drag) IS physical,
+// and stays `left` with an eslint-disable comment saying so.
+//
+// Two reaches. A spacing or border name (ml, marginLeft, borderTopLeftRadius…)
+// means a style wherever it appears, so it is refused anywhere in a component —
+// including a style object kept in a constant, which is how MediaActionsBar's
+// icon margins slipped past a rule that looked only inside sx. `left`/`right`
+// and ms/me/ps/pe are also ordinary data keys, so those are refused inside an
+// sx/style attribute or a constant whose name ends in Sx.
+const STYLE_SCOPES = ["JSXAttribute[name.name=/^(sx|style)$/]", "VariableDeclarator[id.name=/Sx$/]"];
+const inStyle = (inner) => STYLE_SCOPES.map((scope) => `${scope} ${inner}`).join(", ");
+const PHYSICAL_SPACING = [
+  "ml", "mr", "pl", "pr", "marginLeft", "marginRight", "paddingLeft", "paddingRight",
+  "borderLeft", "borderRight", "borderLeftColor", "borderRightColor", "borderLeftWidth", "borderRightWidth",
+  "borderLeftStyle", "borderRightStyle", "borderTopLeftRadius", "borderTopRightRadius",
+  "borderBottomLeftRadius", "borderBottomRightRadius",
+];
+const PHYSICAL_MESSAGE = "Physical side in a style: use the logical property (marginInlineStart/End, paddingInlineStart/End, insetInlineStart/End, borderInlineStart/End…) so it is right in both directions. A measured, physical number stays, with an eslint-disable saying so.";
+const LOGICAL_ONLY = [
+  {
+    selector: `Property[key.name=/^(${PHYSICAL_SPACING.join("|")})$/]`,
+    message: PHYSICAL_MESSAGE,
+  },
+  {
+    selector: inStyle("Property[key.name=/^(left|right)$/]"),
+    message: PHYSICAL_MESSAGE,
+  },
+  {
+    selector: inStyle("Property[key.name=/^(ms|me|ps|pe)$/]"),
+    message: "MUI has no ms/me/ps/pe shorthand — the browser drops it silently. Write marginInlineStart/End or paddingInlineStart/End.",
+  },
+  {
+    selector: "Property[key.name=\"textAlign\"][value.value=/^(left|right)$/]",
+    message: "textAlign \"start\"/\"end\", so the text sits on the right side in both directions.",
+  },
+  {
+    selector: "JSXAttribute[name.name=\"textAlign\"][value.value=/^(left|right)$/]",
+    message: "textAlign=\"start\"/\"end\", so the text sits on the right side in both directions.",
+  },
+];
 
 export default [
   { ignores: ["node_modules/**", "dist/**"] },
@@ -107,6 +163,37 @@ export default [
           message: "A .jsx renders what its hook returns: move the dispatch/select into a useXxx.js beside it (CLAUDE.md, \"Where state lives\").",
         }],
       }],
+    },
+  },
+  {
+    // Logical properties only — see LOGICAL_ONLY above. Every component; a
+    // style object in a .js file (theme.js, navStyles.js) is outside its
+    // reach, and theme.js's physical zeroes are deliberate (see there).
+    files: ["src/**/*.jsx"],
+    ignores: ["src/**/*.test.jsx"],
+    rules: { "no-restricted-syntax": ["error", ...LOGICAL_ONLY] },
+  },
+  {
+    // No words written into a component (docs/i18n-plan.md): text a reader
+    // sees is a key in src/locales/<lng>/<namespace>.json, rendered through
+    // t() or <Trans>, so it changes with the interface language. Text BETWEEN
+    // tags is what this catches; punctuation, digits and symbols are not words
+    // and pass. Content — a title, a name, a transcript — arrives as a value
+    // and is never a literal here. Attribute strings are not checked (they are
+    // mostly class names, types and ids); an aria-label goes through t() by
+    // review.
+    files: ["src/**/*.jsx"],
+    ignores: ["src/**/*.test.jsx"],
+    plugins: { i18next },
+    rules: {
+      // `exclude` replaces the plugin's own list, and the plugin builds each
+      // entry with no "u" flag — so no \p{…}: spell the non-words out.
+      // ALL-CAPS tokens (AI, PDF, CSV) and product names (Word) are names,
+      // the same in every language, not sentences.
+      "i18next/no-literal-string": [
+        "error",
+        { mode: "jsx-text-only", words: { exclude: ["[\\s0-9!-/:-@[-`{-~—–·…←→↔•×₪€]+", "[A-Z_-]+", "\\s*Word\\s*"] } },
+      ],
     },
   },
   {

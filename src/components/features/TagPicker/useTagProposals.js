@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { mediaApi } from "../../../api/mediaApi";
-import { hebrewForError, rejectionOf } from "../../../utilities/apiError";
+import { messageForError, rejectionOf } from "../../../utilities/apiError";
 import { logger } from "../../../utilities/logger";
 import { selectUserRole } from "../../../store/selectors/authSelectors";
 import { roles } from "../../../utilities/constant";
+import i18n from "../../../i18n/i18n";
 
 // The new tags an item is waiting for, and the two things that change them.
 //
@@ -34,7 +35,7 @@ export const useTagProposals = (itemId, active) => {
 
   // Resolves with the server's answer. Rejects with `hebrew` set, which is what
   // ProposeTagDialog shows — the server's own message is English and never
-  // reaches the screen (see hebrewForError).
+  // reaches the screen (see messageForError).
   const propose = useCallback(
     async ({ name, parentId }) => {
       try {
@@ -44,7 +45,7 @@ export const useTagProposals = (itemId, active) => {
         }
         return result;
       } catch (err) {
-        throw { hebrew: hebrewForError(rejectionOf(err), "שליחת התגית נכשלה. נסה שוב.") };
+        throw { userMessage: messageForError(rejectionOf(err), i18n.t("tags:propose.sendFailed")) };
       }
     },
     [itemId]

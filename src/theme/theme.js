@@ -66,12 +66,13 @@ const scrollbarStyles = (isDark) => {
   };
 };
 
-// The app is Hebrew-first, so the document flows right-to-left (paired with
-// dir="rtl" on <html>). Built per mode so the ThemeProvider can swap themes.
-export const buildTheme = (mode) => {
+// The direction follows the interface's language (src/i18n), paired with
+// <html dir>, which i18n.js keeps in step. Hebrew-first, so rtl unless told
+// otherwise. Built per mode and direction so the ThemeProvider can swap themes.
+export const buildTheme = (mode, direction = "rtl") => {
   const palette = PALETTES[mode] || PALETTES.light;
   return createTheme({
-    direction: "rtl",
+    direction,
     palette,
     components: {
       // A button's icon sits BESIDE its label, not on top of it.

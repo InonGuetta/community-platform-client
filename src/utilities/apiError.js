@@ -1,7 +1,7 @@
 // Everything the client knows about an API failure: the stable codes, and the
 // one function that turns an axios error into a thunk rejection.
 //
-// Imports nothing, deliberately. axiosInstance and the store's notification
+// Imports nothing but the i18n instance (a leaf itself), deliberately. axiosInstance and the store's notification
 // middleware both depend on this, and axiosInstance is forbidden from reaching
 // the store at any depth (see imports.test.js) — a leaf cannot close that cycle.
 
@@ -12,7 +12,7 @@
 // same two-repository hazard as socketEvents.js, and it fails the same silent
 // way — a code that exists on only one side raises no error anywhere, the
 // lookup below simply misses and the user gets the generic message back.
-// notificationMiddleware.test.js checks that every Hebrew entry is keyed on a
+// notificationMiddleware.test.js checks that every entry in errors.json is keyed on a
 // code listed here, which catches a typo but cannot see across the repos.
 //
 // Why codes at all: the Hebrew used to be keyed on the server's English prose,
@@ -21,6 +21,8 @@
 // axiosInstance's "cannot reach the server" text was reworded and its Hebrew
 // entry stopped matching, so that case had been falling back to the generic
 // message for as long as the wording had differed, with nothing to report it.
+import i18n from "../i18n/i18n";
+
 export const ERROR_CODES = {
   // Generic — the default on every AppError the server throws.
   NOT_FOUND: "NOT_FOUND",
@@ -62,6 +64,26 @@ export const ERROR_CODES = {
   TAG_EXISTS: "TAG_EXISTS",
   TAG_PARENT_NOT_FOUND: "TAG_PARENT_NOT_FOUND",
   TAG_PROPOSAL_DECIDED: "TAG_PROPOSAL_DECIDED",
+  TAG_PROPOSAL_NOT_FOUND: "TAG_PROPOSAL_NOT_FOUND",
+  TAG_NAME_REQUIRED: "TAG_NAME_REQUIRED",
+  TAG_TOO_LONG: "TAG_TOO_LONG",
+  TAG_LIMIT: "TAG_LIMIT",
+  TAG_LIMIT_WITH_PENDING: "TAG_LIMIT_WITH_PENDING",
+  TAG_NOT_APPROVED: "TAG_NOT_APPROVED",
+  TAG_PARENT_INVALID: "TAG_PARENT_INVALID",
+  INVALID_EMAIL: "INVALID_EMAIL",
+  PHONE_INVALID: "PHONE_INVALID",
+  PHONE_NOT_MOBILE: "PHONE_NOT_MOBILE",
+  PHONE_CODE_INVALID: "PHONE_CODE_INVALID",
+  PHONE_CODE_EXPIRED: "PHONE_CODE_EXPIRED",
+  PHONE_CODE_LIMIT: "PHONE_CODE_LIMIT",
+  PHONE_SEND_LIMIT: "PHONE_SEND_LIMIT",
+  PHONE_NOT_VERIFIED: "PHONE_NOT_VERIFIED",
+  SMS_FAILED: "SMS_FAILED",
+  SMS_BUDGET_EXCEEDED: "SMS_BUDGET_EXCEEDED",
+  AVATAR_REQUIRED: "AVATAR_REQUIRED",
+  AVATAR_NOT_IMAGE: "AVATAR_NOT_IMAGE",
+  AVATAR_TOO_LARGE: "AVATAR_TOO_LARGE",
 
   // The transcript pipeline.
   NO_TRANSCRIPT_TEXT: "NO_TRANSCRIPT_TEXT",
@@ -70,6 +92,10 @@ export const ERROR_CODES = {
   UNSUPPORTED_TEXT_FORMAT: "UNSUPPORTED_TEXT_FORMAT",
   UNVIEWABLE_TEXT_FORMAT: "UNVIEWABLE_TEXT_FORMAT",
   DOCUMENT_UNREADABLE: "DOCUMENT_UNREADABLE",
+  OLD_DOC_FORMAT: "OLD_DOC_FORMAT",
+  DOCUMENT_SCANNED: "DOCUMENT_SCANNED",
+  DOCUMENT_TOO_SHORT: "DOCUMENT_TOO_SHORT",
+  DOCUMENT_NO_TEXT: "DOCUMENT_NO_TEXT",
   ALREADY_QUEUED: "ALREADY_QUEUED",
   ALREADY_RUNNING: "ALREADY_RUNNING",
   // The monthly AI budget (server services/servicesAiUsage.js).
@@ -108,122 +134,37 @@ export const ERROR_CODES = {
 // dropped the code — so the code existed on the wire and was thrown away one
 // layer before anything could use it.
 //
-// The shape is `{ message, code }`, and both halves have a job: `code` is what
-// the notification middleware translates, `message` is the English fallback for
-// the cases with no code (a thunk's own default, an unrecognised failure) and is
-// what the slices store in `state.error` for the inline auth alerts.
+// The shape is `{ message, code, params }`: `code` is what the notification
+// middleware translates, `params` the facts its sentence needs ({ max: 20 }),
+// `message` the English fallback for the cases with no code (a thunk's own
+// default, an unrecognised failure) and what the slices store in `state.error`.
 export const rejectionOf = (err, fallback) => ({
   message: err?.response?.data?.message || fallback,
   code: err?.response?.data?.code,
+  ...(err?.response?.data?.params && { params: err.response.data.params }),
 });
 
-// ── The Hebrew ──────────────────────────────────────────────────────────────
+// ── The words ───────────────────────────────────────────────────────────────
 //
 // Keyed on the code, never on the message. The messages are English prose
 // written for a developer reading a log, and they get reworded; the codes are an
 // identifier the server promises not to change.
 //
-// This map used to live in the store's notification middleware, keyed on the
-// prose and matched character for character. The server's AppError header warned
-// in as many words that rewording a message would break the translation with no
-// error anywhere — and by the time it was rewritten it already had, twice.
+// The words live in the "errors" namespace (src/locales/<lng>/errors.json,
+// codes.<CODE>), so each language says them in its own way. They used to be a
+// Hebrew map keyed on the prose and matched character for character, and
+// rewording a message broke the translation with no error anywhere — twice.
 //
-// It sits here rather than in the middleware because the toasts are no longer
-// the only consumer: the sign-in and sign-up forms show their errors inline, and
-// were showing them in English.
-const ERROR_CODE_HE = {
-  [ERROR_CODES.EMAIL_TAKEN]: "האימייל כבר בשימוש",
-  [ERROR_CODES.INVALID_CREDENTIALS]: "אימייל או סיסמה שגויים",
-  // A 401 mid-session: a toast would otherwise blame whatever request happened
-  // to be in flight ("טעינת המדיה נכשלה") instead of the real cause.
-  [ERROR_CODES.UNAUTHORIZED]: "פג תוקף החיבור, יש להתחבר מחדש",
-  [ERROR_CODES.INVALID_TOKEN]: "פג תוקף החיבור, יש להתחבר מחדש",
-  [ERROR_CODES.FORBIDDEN]: "אין לך הרשאה לפעולה זו",
-  [ERROR_CODES.LAST_ACTIVE_ADMIN]:
-    "לא ניתן להסיר את המנהל הפעיל האחרון — יש למנות מנהל אחר קודם",
+// i18n/ imports nothing from components/, store/ or api/ (imports.test.js), so
+// importing it here keeps this file a leaf that axiosInstance may depend on.
 
-  // Each of these tells the user which of three different things to do next,
-  // which is the whole test for whether a code earns its place.
-  [ERROR_CODES.INVALID_RESET_TOKEN]:
-    "הקישור אינו תקף או שפג תוקפו. אפשר לבקש קישור חדש.",
-  [ERROR_CODES.WEAK_PASSWORD]: "הסיסמה חייבת להכיל לפחות 8 תווים",
-  [ERROR_CODES.NO_PASSWORD_SET]:
-    "החשבון הזה מתחבר עם Google ואין לו סיסמה לשינוי",
-  [ERROR_CODES.PAYMENTS_NOT_CONFIGURED]: "התשלומים באתר עוד לא הוגדרו. אפשר לנסות שוב מאוחר יותר.",
-  [ERROR_CODES.RECURRING_UNAVAILABLE]:
-    "תרומה חודשית אינה זמינה עדיין. אפשר לתרום סכום חד-פעמי.",
-
-  [ERROR_CODES.MEDIA_NOT_FOUND]: "המדיה לא נמצאה",
-  [ERROR_CODES.SESSION_NOT_FOUND]: "המפגש לא נמצא",
-  [ERROR_CODES.SESSION_FORBIDDEN]: "המפגש לא נמצא או שאין לך הרשאה",
-  [ERROR_CODES.SESSION_NOT_STARTED]: "המפגש עדיין לא נפתח על ידי המארח",
-  [ERROR_CODES.RECORDING_NOT_FOUND]: "ההקלטה לא נמצאה",
-  [ERROR_CODES.RECORDING_CLOSED]: "ההקלטה כבר הסתיימה",
-  [ERROR_CODES.BOOKMARK_NOT_FOUND]: "הסימנייה לא נמצאה",
-  // The generic "שמירת הסימנייה נכשלה" would send the user to press the same
-  // button again, which is the one thing that cannot work: the text on screen
-  // describes a version of the book that no longer exists.
-  [ERROR_CODES.BOOKMARK_ANCHOR_INVALID]:
-    "הקטע הזה כבר לא קיים בספר — ייתכן שהספר עובד מחדש. רענן את העמוד וסמן שוב.",
-  [ERROR_CODES.NOTE_NOT_FOUND]: "ההערה לא נמצאה",
-  [ERROR_CODES.COURSE_NOT_FOUND]: "הקורס לא נמצא",
-  [ERROR_CODES.TRANSCRIPT_NOT_FOUND]: "התמלול לא נמצא",
-  // Without this the user saw the generic "יצירת הרשימה נכשלה" and retried the
-  // same name, which is the one thing that cannot work.
-  [ERROR_CODES.PLAYLIST_TITLE_TAKEN]: "כבר קיימת רשימה בשם הזה",
-  [ERROR_CODES.TAG_EXISTS]: "התגית כבר קיימת במקום הזה — אפשר לבחור אותה מהרשימה",
-  [ERROR_CODES.TAG_PARENT_NOT_FOUND]: "תגית האב לא נמצאה — ייתכן שנמחקה. יש לבחור שוב",
-  [ERROR_CODES.TAG_PROPOSAL_DECIDED]: "ההצעה כבר הוכרעה, כנראה על ידי מנהל אחר",
-
-  [ERROR_CODES.NO_TRANSCRIPT_TEXT]: "אין טקסט תמלול לתיקון",
-  [ERROR_CODES.NO_TRANSCRIPT_CONTENT]: "אין עדיין תוכן תמלול — הפעל תמלול קודם",
-  [ERROR_CODES.NO_KEY_POINTS]: "ניתוח ה-AI לא הפיק נקודות מפתח",
-  [ERROR_CODES.UNSUPPORTED_TEXT_FORMAT]:
-    "לא ניתן להפיק סיכום מקובץ מסוג זה. נתמכים: PDF, DOCX, TXT.",
-  // The old binary Word format. Saying which action fixes it matters more than
-  // saying what went wrong: the file is fine, it is only unreadable by anything
-  // in this stack, and re-saving it takes a moment.
-  [ERROR_CODES.UNVIEWABLE_TEXT_FORMAT]:
-    "לא ניתן להציג קובץ מסוג .doc. שמרו אותו כ־.docx והעלו מחדש — או הורידו אותו כדי לפתוח במחשב.",
-  // The same sentence the extraction path stores in transcripts.error_message,
-  // so a file that fails both ways says the same thing on both screens.
-  [ERROR_CODES.DOCUMENT_UNREADABLE]:
-    "לא ניתן לקרוא את הקובץ — ייתכן שהוא פגום או מוגן בסיסמה.",
-  [ERROR_CODES.ALREADY_QUEUED]: "הפעולה כבר רצה עבור מדיה זו",
-  [ERROR_CODES.ALREADY_RUNNING]: "הפעולה כבר רצה עבור מדיה זו",
-  // Not this lesson's fault, and not fixed by retrying — said plainly.
-  [ERROR_CODES.AI_BUDGET_EXCEEDED]:
-    "הגעתם לתקרת העלות החודשית של ה‑AI. עיבוד חדש יתאפשר בחודש הבא, או אחרי שמנהל יעלה את התקרה.",
-  // Two different instructions: wait, or ask again. The generic failure would
-  // send someone with an unprocessed lesson to retry a question that cannot work.
-  [ERROR_CODES.AI_NOT_READY]: "השיעור עדיין בעיבוד — אפשר יהיה לשוחח עליו כשהעיבוד יסתיים",
-  [ERROR_CODES.AI_ANSWER_FAILED]: "לא הצלחנו לקבל תשובה כרגע. נסה לשאול שוב.",
-  // Says when it will work again, and what still works now — "try again"
-  // would send the reader into a loop that cannot succeed until midnight.
-  [ERROR_CODES.JOIN_CODE_NOT_FOUND]: "אין קורס פתוח עם הקוד הזה. בדקו את הקוד מול המרצה.",
-  [ERROR_CODES.ALREADY_ENROLLED]: "אתם כבר רשומים לקורס הזה. הוא מופיע ברשימת הקורסים שלכם.",
-  [ERROR_CODES.COURSE_IS_YOURS]: "זה קורס שאתם מלמדים, אין צורך להצטרף אליו.",
-  [ERROR_CODES.JOIN_REQUEST_DECIDED]: "כבר הוחלט על הבקשה הזאת. הרשימה רועננה.",
-  [ERROR_CODES.AI_DAILY_LIMIT]: "הגעת למכסת השאלות היומית בצ'אט. אפשר להמשיך מחר — והחיפוש החכם זמין גם עכשיו.",
-
-  [ERROR_CODES.DB_UNAVAILABLE]: "מסד הנתונים אינו זמין כרגע, נסה שוב",
-  [ERROR_CODES.INTERNAL]: "שגיאת שרת פנימית",
-  [ERROR_CODES.API_UNAVAILABLE]: "לא ניתן להגיע לשרת. ודא שהוא פועל ונסה שוב.",
-  [ERROR_CODES.NETWORK_UNREACHABLE]:
-    "לא ניתן להגיע לשרת. ייתכן שהוא עדיין עולה — המתן רגע ונסה שוב.",
-  [ERROR_CODES.SERVER_UNAVAILABLE]: "השרת אינו זמין כרגע. נסה שוב בעוד רגע.",
-  [ERROR_CODES.BAD_RESPONSE]: "תגובת שרת בלתי צפויה. נסה שוב.",
-};
-
-export { ERROR_CODE_HE };
-
-// The Hebrew for a rejection, or `fallback` when the code is one we have nothing
-// specific to say about. Takes the whole rejection rather than a bare code so
-// callers cannot forget which half to pass — and so a caller that still holds a
-// plain string (or nothing) degrades to the fallback instead of throwing.
+// The words for a rejection, or `fallback` when the code is one there is
+// nothing specific to say about. Takes the whole rejection rather than a bare
+// code so callers cannot forget which half to pass — and so a caller that still
+// holds a plain string (or nothing) degrades to the fallback instead of throwing.
 //
 // NEVER returns the server's English `message`. That message is a developer's
 // log line, and letting it through is how "Invalid credentials" ended up on
 // screen in a Hebrew, right-to-left application.
-export const hebrewForError = (rejection, fallback) =>
-  ERROR_CODE_HE[rejection?.code] || fallback;
+export const messageForError = (rejection, fallback) =>
+  (rejection?.code && i18n.t(`errors:codes.${rejection.code}`, { ...rejection.params, defaultValue: "" })) || fallback;

@@ -9,6 +9,7 @@ import {
   selectPlaylists, selectPlaylistsStatus, selectPlaylistsForMediaId,
 } from "../../../../store/selectors/savesSelectors";
 import { statuses } from "../../../../utilities/constant";
+import i18n from "../../../../i18n/i18n";
 
 // What the save menu does — which of the user's lists this lecture is in,
 // ticking, making, renaming and deleting a list — so that SaveMenu.jsx is
@@ -65,7 +66,7 @@ export const useSaveMenu = ({ open, onClose, mediaId }) => {
     closeTimer.current = setTimeout(onClose, CLOSE_AFTER_ADD_MS);
     const result = await dispatch(addMediaToPlaylist(args));
     if (result.meta.requestStatus === "fulfilled") {
-      dispatch(notify({ message: `השיעור נוסף לרשימה "${playlist.title}"`, severity: "success" }));
+      dispatch(notify({ message: i18n.t("lesson:save.added", { title: playlist.title }), severity: "success" }));
     }
   };
 

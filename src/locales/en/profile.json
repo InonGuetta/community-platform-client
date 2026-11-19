@@ -1,0 +1,108 @@
+{
+  "title": "My account",
+  "unverified": "Address not verified",
+  "verified": "Verified address",
+  "displayName": "Display name",
+  "save": "Save",
+  "password": {
+    "title": "Change password",
+    "current": "Current password",
+    "new": "New password",
+    "confirm": "Confirm new password",
+    "minLength": "At least {{n}} characters",
+    "mismatch": "The passwords do not match",
+    "signsOutOthers": "Changing your password signs out every other device signed in to the account.",
+    "submit": "Change password",
+    "changed": "Password changed",
+    "failed": "Changing the password failed"
+  },
+  "details": {
+    "saved": "Details saved",
+    "failed": "Saving the details failed"
+  },
+  "email": {
+    "title": "Email and SMS notifications",
+    "intro": "Every notification appears in the bell at the top of the page. Here you choose which of them also arrive by email or by SMS.",
+    "loadFailed": "Your preferences cannot be loaded right now.",
+    "allOff": "You asked to stop all email from the platform.",
+    "restore": "Turn email back on",
+    "saveFailed": "Saving the preference failed",
+    "channelEmail": "Email",
+    "channelSms": "SMS",
+    "switchEmail": "{{category}} — by email",
+    "switchSms": "{{category}} — by SMS",
+    "noSms": "Not sent by SMS",
+    "smsNeedsPhone": "To get notifications by SMS, add and verify a phone number in the \"Phone number\" card.",
+    "quietHours": "No SMS is sent between 22:00 and 07:00, except to say a session has started.",
+    "smsAllOff": "Turn off all SMS"
+  },
+  "role": {
+    "title": "Permission request",
+    "pending": "Your request for {{role}} permissions is awaiting an admin's approval. Until then the account keeps its current permissions.",
+    "rejected": "Your previous request for {{role}} permissions was not approved.",
+    "rejectedReason": "Your previous request for {{role}} permissions was not approved. Reason: {{reason}}",
+    "tryAgainLater": "You can submit a new request after seven days.",
+    "current": "Your current permission: {{role}}. A request for a higher permission needs an admin's approval.",
+    "send": "Send request"
+  },
+  "avatar": {
+    "upload": "Upload a picture",
+    "change": "Change picture",
+    "remove": "Remove picture",
+    "hint": "JPG, PNG or WebP. After choosing, you pick which part of the picture is shown.",
+    "notImage": "The file cannot be read as a picture. You can upload a JPG, PNG or WebP.",
+    "label": "Profile picture",
+    "welcome": {
+      "title": "Welcome, {{name}}!",
+      "titleNoName": "Welcome!",
+      "body": "Would you like to add a profile picture? It helps lecturers and classmates recognise you in courses and sessions.",
+      "later": "Later",
+      "done": "Done",
+      "where": "You can add or change your picture at any time on the \"My account\" page."
+    },
+    "takePhoto": "Take a photo",
+    "crop": {
+      "title": "Edit your profile picture",
+      "hint": "Drag the picture to position it, and zoom in or out to choose the part shown in the circle.",
+      "area": "Crop area — drag or use the arrows to move, + and − to zoom",
+      "zoom": "Zoom",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "save": "Save picture"
+    },
+    "camera": {
+      "title": "Take a profile picture",
+      "starting": "Starting the camera…",
+      "capture": "Take photo",
+      "denied": "Access to the camera was blocked. You can allow it in your browser's settings, or upload a picture from your device.",
+      "none": "No camera was found on this device. You can upload a picture from your device.",
+      "failed": "The camera could not be started. You can upload a picture from your device."
+    }
+  },
+  "phone": {
+    "title": "Phone number",
+    "help": "For notifications by SMS — choose which in the notifications card. Only you see the number; site admins see just its last four digits.",
+    "label": "Mobile number",
+    "newLabel": "New mobile number",
+    "hint": "An Israeli number, or with its country code (+1…)",
+    "send": "Send code",
+    "verified": "Verified",
+    "change": "Change number",
+    "remove": "Remove number",
+    "cancel": "Cancel",
+    "enterCode": "Enter code",
+    "pendingText": "We sent a code to <num>{{phone}}</num>. The number is added once you enter it.",
+    "sendFailed": "The code can't be sent right now. Try again in a moment.",
+    "removeTitle": "Remove your phone number?",
+    "removeBody": "SMS notifications will be turned off. You can add a number again at any time.",
+    "dialog": {
+      "title": "Enter the verification code",
+      "body": "We sent a 6-digit code to <num>{{phone}}</num>. It is valid for 10 minutes.",
+      "codeLabel": "Verification code",
+      "verify": "Verify",
+      "resend": "Send a new code",
+      "resendIn": "New code in {{seconds}}s",
+      "verifyFailed": "The code can't be verified right now. Try again."
+    }
+  }
+}

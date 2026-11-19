@@ -10,6 +10,7 @@ import { ARCHIVE_DISCUSSION } from "../../../api/discussionApi";
 import { statuses } from "../../../utilities/constant";
 import { placeHref } from "../../../utilities/discussionPlace";
 import { conversationText } from "../../../utilities/discussionNote";
+import i18n from "../../../i18n/i18n";
 
 // "שאל את הארכיון" (PRD ASK-2): the lesson chat's slice, thunks and pane,
 // keyed by ARCHIVE_DISCUSSION instead of a lesson id — the server answers the
@@ -18,22 +19,12 @@ import { conversationText } from "../../../utilities/discussionNote";
 
 const ARCHIVE = ARCHIVE_DISCUSSION;
 
-export const ARCHIVE_WORDS = {
-  source: "הארכיון",
-  inSource: "בארכיון",
-  intro: "אפשר לשאול שאלה על כל השיעורים והספרים שפתוחים לך. התשובה תתבסס רק על מה שנאמר בהם, ותציין מאיזה שיעור כל דבר — עם קישור למקום המדויק.",
-};
-
 // Offered on an empty conversation. Questions that are worth asking of many
 // lessons at once — the reason to ask the archive rather than one lesson.
 // Each names a subject: the search needs one. "במה המרצים חלוקים?" was tried
 // in the browser and, half the time, the reranker judged every passage
 // irrelevant to it and the archive answered that it found nothing.
-export const ARCHIVE_SUGGESTIONS = [
-  "מה נאמר בשיעורים על תשובה?",
-  "אילו שיעורים עוסקים בתפילה, ומה כל אחד מדגיש?",
-  "מה נאמר על לימוד תורה?",
-];
+export const archiveSuggestions = () => i18n.t("chat:archiveSuggestions", { returnObjects: true });
 
 const useAskArchivePageController = () => {
   const dispatch = useDispatch();
@@ -55,11 +46,11 @@ const useAskArchivePageController = () => {
 
   const copy = useCallback(async (messages) => {
     try {
-      await navigator.clipboard.writeText(conversationText(messages, { mediaTitle: "הארכיון" }));
-      dispatch(notify({ message: "השיחה הועתקה", severity: "success" }));
+      await navigator.clipboard.writeText(conversationText(messages, { mediaTitle: i18n.t("chat:archiveName") }));
+      dispatch(notify({ message: i18n.t("chat:copied"), severity: "success" }));
       return true;
     } catch {
-      dispatch(notify({ message: "לא ניתן להעתיק את השיחה בדפדפן הזה", severity: "warning" }));
+      dispatch(notify({ message: i18n.t("chat:copyFailed"), severity: "warning" }));
       return false;
     }
   }, [dispatch]);

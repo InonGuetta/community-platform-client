@@ -17,6 +17,7 @@ import {
   sourceChipHtml, sourceFromChip, renameSourceChip, SOURCE_CHIP_SELECTOR, MAX_CHIP_NOTE,
   appendToReferences, hasWrittenText, REFERENCES_SELECTOR,
 } from "../../../utilities/noteSource";
+import { useTranslation } from "react-i18next";
 
 // The note body, as a contentEditable rather than a TextField — which is the
 // whole reason the toolbar can do anything. A textarea holds characters; bold is
@@ -146,6 +147,7 @@ const droppedOnText = (editor, range, point) => {
 const RichNoteEditor = forwardRef(({
   html, onChange, onFormatsChange, onFocus, onError, onOpenSource, onRenameSource, placeholder, minHeight = 280,
 }, ref) => {
+  const { t } = useTranslation(["notes", "common"]);
   const editorRef = useRef(null);
   // The editor and the image controls that float over it. Their positions are
   // measured against this, so it is the element they are both inside.
@@ -267,7 +269,7 @@ const RichNoteEditor = forwardRef(({
     editorRef.current?.focus();
   };
 
-  const FRAMED_LABEL = { image: "מחיקת התמונה", source: "מחיקת המקור" };
+  const FRAMED_LABEL = { image: t("editor.deleteImage"), source: t("editor.deleteSource") };
 
   // Renaming a chip — "הפנייה כללית" on a new lesson note, or whatever a
   // dragged bookmark was called. The chip is contenteditable="false", so its
@@ -429,7 +431,7 @@ const RichNoteEditor = forwardRef(({
 
   const insertImage = (file) => {
     if (file.size > MAX_IMAGE_BYTES) {
-      onError?.(`התמונה גדולה מדי (מעל ${Math.round(MAX_IMAGE_BYTES / 1024 / 1024)}MB). נסה תמונה קטנה יותר.`);
+      onError?.(t("editor.imageTooLarge", { mb: Math.round(MAX_IMAGE_BYTES / 1024 / 1024) }));
       return;
     }
     const reader = new FileReader();
@@ -441,7 +443,7 @@ const RichNoteEditor = forwardRef(({
       document.execCommand("insertHTML", false, `<img src="${reader.result}" alt="">`);
       emitChange();
     };
-    reader.onerror = () => onError?.("קריאת התמונה נכשלה.");
+    reader.onerror = () => onError?.(t("editor.imageReadFailed"));
     reader.readAsDataURL(file);
   };
 
@@ -485,7 +487,7 @@ const RichNoteEditor = forwardRef(({
         suppressContentEditableWarning
         role="textbox"
         aria-multiline="true"
-        aria-label="גוף ההערה"
+        aria-label={t("body")}
         onInput={() => {
           emitChange();
           // Typing moves everything below the caret, so a frame measured a
@@ -523,6 +525,11 @@ const RichNoteEditor = forwardRef(({
           p: 2, borderRadius: 1, overflowY: "auto",
           border: "1px solid", borderColor: "divider",
           outline: "none", lineHeight: 1.7,
+          // The note is content, and each of its paragraphs reads in the
+          // direction of its own words: a Hebrew line after one that opens with
+          // "Rashi" is still right to left. dir="auto" on the box would decide
+          // the whole note from its first letter instead.
+          "&, & > *": { unicodeBidi: "plaintext", textAlign: "start" },
           "&:hover": { borderColor: "text.primary" },
           // The brand ring the rest of the app uses on a focused control, as a
           // literal rather than currentColor — which is the TEXT colour here and
@@ -616,6 +623,7 @@ const RichNoteEditor = forwardRef(({
               // getBoundingClientRect, which is physical — and the page is
               // right-to-left, so a logical property would mirror it onto the
               // wrong side of the note.
+              // eslint-disable-next-line no-restricted-syntax -- measured, physical (see above)
               left: framed.left - 2,
               width: framed.width + 4,
               height: framed.height + 4,
@@ -636,6 +644,7 @@ const RichNoteEditor = forwardRef(({
                 // text begins in a right-to-left notebook — so the button sits
                 // at its start, not trailing off its end.
                 top: framed.top,
+                // eslint-disable-next-line no-restricted-syntax -- measured, physical (see above)
                 left: framed.left + framed.width,
                 transform: "translate(-50%, -50%)",
                 bgcolor: "error.main",
@@ -657,14 +666,15 @@ const RichNoteEditor = forwardRef(({
               X. Its centre is a fixed 20px in from the X's, which leaves a clear
               gap between two 13px buttons. */}
           {framed.kind === "source" && (
-            <Tooltip title="שינוי שם ההפניה">
+            <Tooltip title={t("editor.renameReference")}>
               <IconButton
                 size="small"
                 onClick={startRename}
-                aria-label="שינוי שם ההפניה"
+                aria-label={t("editor.renameReference")}
                 sx={{
                   position: "absolute",
                   top: framed.top,
+                  // eslint-disable-next-line no-restricted-syntax -- measured, physical (see above)
                   left: framed.left + framed.width - RENAME_OFFSET_PX,
                   transform: "translate(-50%, -50%)",
                   bgcolor: "primary.main",
@@ -682,13 +692,13 @@ const RichNoteEditor = forwardRef(({
       )}
 
       <Dialog open={Boolean(renaming)} onClose={() => setRenaming(null)} fullWidth maxWidth="xs">
-        <DialogTitle>שינוי שם ההפניה</DialogTitle>
+        <DialogTitle>{t("editor.renameReference")}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             fullWidth
             margin="dense"
-            label="שם ההפניה"
+            label={t("editor.referenceName")}
             value={renaming?.value ?? ""}
             onChange={(e) => setRenaming((prev) => prev && { ...prev, value: e.target.value })}
             onKeyDown={(e) => {
@@ -698,12 +708,12 @@ const RichNoteEditor = forwardRef(({
               }
             }}
             inputProps={{ maxLength: MAX_CHIP_NOTE }}
-            helperText="השאר ריק כדי להסיר את השם מההפניה"
+            helperText={t("editor.clearToRemove")}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRenaming(null)}>ביטול</Button>
-          <Button variant="contained" onClick={finishRename}>שמירה</Button>
+          <Button onClick={() => setRenaming(null)}>{t("common:actions.cancel")}</Button>
+          <Button variant="contained" onClick={finishRename}>{t("save")}</Button>
         </DialogActions>
       </Dialog>
 

@@ -3,10 +3,13 @@ import { Routes, Route, Navigate, useLocation, useParams } from "react-router-do
 import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { buildTheme } from "./theme/theme";
+import { useLanguage } from "./i18n/useLanguage";
+import { useAccountLanguageSync } from "./components/layout/useAccountLanguage";
 import { ColorModeContext } from "./theme/colorMode";
 import Navbar from "./components/layout/navbar/Navbar";
 import PendingRoleBanner from "./components/layout/navbar/PendingRoleBanner";
 import GlobalSnackbar from "./components/features/Notification/GlobalSnackbar";
+import WelcomeAvatarDialog from "./components/features/Avatar/WelcomeAvatarDialog";
 import ProtectedRoute from "./components/pages/auth/ProtectedRoute";
 import SignIn from "./components/pages/auth/SignIn";
 import SignUp from "./components/pages/auth/SignUp";
@@ -48,6 +51,7 @@ const AUTH_PATHS = [
   "/sign-in",
   "/sign-up",
   "/auth/google/callback",
+  "/auth/callback",
   "/forgot-password",
   "/reset-password",
   "/verify-email",
@@ -115,7 +119,11 @@ const App = () => {
   // an older private mode — and this runs while App renders, so an unguarded
   // read left the whole application unmounted: a blank page over a preference.
   const [mode, setMode] = useState(readColorMode);
-  const theme = useMemo(() => buildTheme(mode), [mode]);
+  // The theme's direction follows the interface's language, as <html dir> does.
+  const { direction } = useLanguage();
+  // A signed-in account's language (users.locale) and this browser's, in step.
+  useAccountLanguageSync();
+  const theme = useMemo(() => buildTheme(mode, direction), [mode, direction]);
   const colorMode = useMemo(
     () => ({
       mode,
@@ -160,6 +168,10 @@ const App = () => {
             <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
+          {/* Apple and LinkedIn return here. The page is the same: the server has
+              already set the session cookie, and all that is left is to load the
+              user and go on. */}
+          <Route path="/auth/callback" element={<GoogleCallback />} />
           {/* Recovery, unprotected by necessity: whoever needs these cannot sign
               in. The token in the URL is the credential. */}
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -221,6 +233,8 @@ const App = () => {
           <Route path="*" element={<Navigate to="/archive" replace />} />
         </Routes>
         </PageTransition>
+        {/* A profile picture, offered once right after signing up. */}
+        <WelcomeAvatarDialog />
         <GlobalSnackbar />
       </ThemeProvider>
     </ColorModeContext.Provider>

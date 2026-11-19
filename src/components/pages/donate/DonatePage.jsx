@@ -7,10 +7,12 @@ import PaymentStep from "./PaymentStep";
 import DonationResult from "./DonationResult";
 import MyDonations from "./MyDonations";
 import { useDonatePageController } from "./useDonatePageController";
+import { useTranslation } from "react-i18next";
 
 // A donation, start to finish (PRD PAY-1), and the donor's history (PAY-2).
 // See useDonatePageController for the three steps.
 const DonatePage = () => {
+  const { t } = useTranslation("donate");
   const c = useDonatePageController();
 
   return (
@@ -18,9 +20,9 @@ const DonatePage = () => {
       <Paper sx={{ p: { xs: 2.5, sm: 4 }, maxWidth: 520, width: "100%" }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
           <VolunteerActivismIcon sx={{ fontSize: 48, color: "primary.main", mb: 1 }} />
-          <Typography variant="h5" fontWeight={700}>תמכו בקהילה שלנו</Typography>
+          <Typography variant="h5" fontWeight={700}>{t("title")}</Typography>
           <Typography variant="body2" color="text.secondary" mt={1}>
-            התרומה שלך עוזרת לנו ליצור עוד תוכן ולשמור על הפלטפורמה חינמית לתלמידים.
+            {t("intro")}
           </Typography>
         </Box>
 

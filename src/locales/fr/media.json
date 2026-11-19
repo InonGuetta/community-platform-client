@@ -1,0 +1,59 @@
+{
+  "card": {
+    "draft": "Brouillon",
+    "public": "Public",
+    "download": "Télécharger",
+    "publishedHint": "Visible par les élèves — cliquez pour masquer",
+    "draftHint": "Brouillon — cliquez pour publier aux élèves",
+    "hide": "Masquer aux élèves",
+    "publish": "Publier aux élèves",
+    "editDetails": "Modifier les informations",
+    "editDetailsOf": "Modifier les informations de {{title}}",
+    "editTags": "Modifier les étiquettes",
+    "editTagsOf": "Modifier les étiquettes de {{title}}",
+    "delete": "Supprimer",
+    "allByCreator": "Tous les cours de {{name}}",
+    "length": "Durée : {{length}}",
+    "likes_one": "Un j'aime",
+    "likes_other": "{{count}} j'aime"
+  },
+  "grid": {
+    "empty": "Aucun média trouvé",
+    "noMatches": "Aucun résultat correspondant",
+    "loadingMore": "Chargement...",
+    "loadMore": "Charger plus"
+  },
+  "download": {
+    "audio": "Télécharger l'audio",
+    "video": "Télécharger la vidéo",
+    "text": "Télécharger le document",
+    "audioOnly": "Télécharger l'audio seul",
+    "availableOffline": "Disponible hors ligne",
+    "toOfflineShelf": "Vers l'écoute hors ligne",
+    "savingOffline": "Enregistrement hors ligne…",
+    "savingOfflinePercent": "Enregistrement hors ligne… {{percent}} %",
+    "saveOffline": "Enregistrer pour écouter hors ligne",
+    "captionsFile": "sous-titres",
+    "captions": "Télécharger les sous-titres (VTT)",
+    "preparingPdf": "Préparation du PDF...",
+    "transcriptPdf": "Télécharger la transcription (PDF)",
+    "transcriptFile": "transcription",
+    "noTranscript": "Aucune transcription n'est disponible pour cet élément.",
+    "pdfFailed": "La création du PDF a échoué. Veuillez réessayer."
+  },
+  "player": {
+    "pause": "Pause",
+    "play": "Lecture",
+    "position": "Position dans le cours",
+    "unmute": "Réactiver le son",
+    "mute": "Couper le son",
+    "volume": "Volume",
+    "hideCaptions": "Masquer les sous-titres",
+    "showCaptions": "Afficher les sous-titres",
+    "captions": "Sous-titres",
+    "settings": "Paramètres",
+    "settingsLabel": "Paramètres du lecteur",
+    "speed": "Vitesse de lecture",
+    "lessonFallback": "Cours"
+  }
+}

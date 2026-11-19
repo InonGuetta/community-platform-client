@@ -1,0 +1,77 @@
+{
+  "title": "Mon carnet",
+  "newNote": "Nouvelle note",
+  "noNotes": "Aucune note pour l'instant. Créez une nouvelle note pour commencer.",
+  "noMatchingNotes": "Aucune note ne correspond à la recherche.",
+  "noMatchingNotesShort": "Aucune note correspondante.",
+  "bookmarks": {
+    "title": "Mes signets",
+    "dragHint": "Faites glisser dans une note",
+    "none": "Aucun signet pour l'instant. Marquez des points dans les cours et ils apparaîtront ici.",
+    "noMatch": "Aucun signet correspondant."
+  },
+  "index": {
+    "search": "Rechercher dans le carnet...",
+    "searchLabel": "Rechercher dans le carnet",
+    "selectAll": "Sélectionner toutes les notes affichées",
+    "selected": "{{count}} sélectionnées",
+    "multiSelect": "Sélection multiple",
+    "deleteSelected": "Supprimer la sélection",
+    "selectNote": "Sélectionner la note {{title}}",
+    "notSaved": "Non enregistré"
+  },
+  "export": {
+    "button": "Exporter",
+    "selectedTooltip": "Exporter les {{count}} notes sélectionnées",
+    "allTooltip": "Exporter toutes les notes affichées",
+    "selectedCount": "{{count}} notes sélectionnées",
+    "allCount": "Toutes les notes affichées ({{count}})",
+    "pdf": "Exporter en PDF",
+    "pdfHint": "Texte seul, sans mise en forme ni images",
+    "word": "Exporter en Word",
+    "wordHint": "Avec la mise en forme et les images",
+    "split": "Répartir en plusieurs carnets…",
+    "splitHint": "Choisir combien de fichiers, et ce qui va dans chacun",
+    "summaryFiles": "{{files}} fichiers · {{format}}",
+    "summaryNotes": "{{notes}} notes · {{format}}",
+    "filesCreated": "{{n}} fichiers créés",
+    "failed": "L'export a échoué. Veuillez réessayer.",
+    "exporting": "Export en cours...",
+    "sources": {
+      "title": "Comment inclure les sources ?",
+      "footnotes": "Sources en bas de page",
+      "footnotesHint": "Un petit numéro dans le texte, et la source complète imprimée en bas de la page où elle apparaît",
+      "inline": "Sources dans le texte",
+      "inlineHint": "Chaque source est numérotée et reste à sa place, avec le contenu tel qu'il apparaît dans l'onglet",
+      "none": "Exporter sans aucune source",
+      "noneHint": "Seulement votre écriture, sans les renvois aux cours"
+    },
+    "splitDialog": {
+      "title": "Répartir l'export en plusieurs carnets",
+      "bookName": "Carnet {{n}}",
+      "howMany": "Combien de carnets",
+      "format": "Format d'export",
+      "dragHint": "↔ Faites glisser une note d'un carnet à l'autre, ou vers le haut et le bas dans un carnet",
+      "fileName": "Nom du fichier ({{count}} notes)",
+      "dropHere": "Déposez ici",
+      "empty": "Vide — faites glisser des notes ici, sinon aucun fichier ne sera créé pour lui",
+      "moveUp": "Monter",
+      "moveUpNamed": "Monter {{title}}",
+      "moveDown": "Descendre",
+      "moveDownNamed": "Descendre {{title}}",
+      "bookOf": "Le carnet de {{title}}",
+      "totals": "{{files}} fichiers · {{notes}} notes",
+      "run": "Exporter {{n}} fichiers"
+    }
+  },
+  "delete": {
+    "one": "Voulez-vous vraiment supprimer la note « {{title}} » ?",
+    "many": "Voulez-vous vraiment supprimer {{count}} notes ? Cette action est irréversible."
+  },
+  "notices": {
+    "stillLoading": "La note est encore en cours de chargement. Réessayez dans un instant.",
+    "noneChosen": "Aucune note n'est choisie. Cliquez dans une note puis enregistrez.",
+    "clearSearchToReorder": "Effacez la recherche pour réordonner les notes",
+    "needTwoToReorder": "Il faut au moins deux notes pour réordonner"
+  }
+}

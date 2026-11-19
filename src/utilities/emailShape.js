@@ -11,6 +11,8 @@
 // missing dot. `type="email"` on the input is not enough: browsers accept
 // "user@localhost" and reject nothing a person is likely to mistype.
 
+import i18n from "../i18n/i18n";
+
 const EMAIL_MAX = 254;
 const LOCAL_MAX = 64;
 const LABEL_MAX = 63;
@@ -19,39 +21,41 @@ const LOCAL_ALLOWED = /^[^\s@,;:<>()[\]\\"]+$/u;
 const LABEL = /^[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?$/u;
 const TLD = /^\p{L}{2,}$/u;
 
-/** Returns null when usable, or a Hebrew reason when not. */
+/** Returns null when usable, or the reason it is not, in the interface's language. */
+const reason = (key) => i18n.t(`auth:emailShape.${key}`);
+
 export const emailProblem = (value) => {
-  if (typeof value !== "string" || value.trim() === "") return "יש להזין כתובת אימייל";
+  if (typeof value !== "string" || value.trim() === "") return reason("required");
 
   const email = value.trim();
-  if (email.length > EMAIL_MAX) return "כתובת האימייל ארוכה מדי";
-  if (/\s/.test(email)) return "כתובת אימייל אינה יכולה להכיל רווחים";
+  if (email.length > EMAIL_MAX) return reason("tooLong");
+  if (/\s/.test(email)) return reason("spaces");
 
   const at = email.split("@");
-  if (at.length < 2) return "כתובת אימייל חייבת להכיל @";
-  if (at.length > 2) return "כתובת אימייל יכולה להכיל @ אחד בלבד";
+  if (at.length < 2) return reason("noAt");
+  if (at.length > 2) return reason("manyAt");
 
   const [local, domain] = at;
 
-  if (local.length === 0) return "חסר החלק שלפני ה-@";
-  if (local.length > LOCAL_MAX) return "החלק שלפני ה-@ ארוך מדי";
-  if (!LOCAL_ALLOWED.test(local)) return "החלק שלפני ה-@ מכיל תווים שאינם חוקיים";
-  if (local.startsWith(".") || local.endsWith(".")) return "החלק שלפני ה-@ אינו יכול להתחיל או להסתיים בנקודה";
-  if (local.includes("..")) return "החלק שלפני ה-@ מכיל שתי נקודות רצופות";
+  if (local.length === 0) return reason("noLocal");
+  if (local.length > LOCAL_MAX) return reason("localTooLong");
+  if (!LOCAL_ALLOWED.test(local)) return reason("localInvalid");
+  if (local.startsWith(".") || local.endsWith(".")) return reason("localDotEdge");
+  if (local.includes("..")) return reason("localDoubleDot");
 
-  if (domain.length === 0) return "חסר שם הדומיין אחרי ה-@";
-  if (domain.includes("..")) return "שם הדומיין מכיל שתי נקודות רצופות";
-  if (domain.startsWith(".") || domain.endsWith(".")) return "שם הדומיין אינו יכול להתחיל או להסתיים בנקודה";
+  if (domain.length === 0) return reason("noDomain");
+  if (domain.includes("..")) return reason("domainDoubleDot");
+  if (domain.startsWith(".") || domain.endsWith(".")) return reason("domainDotEdge");
 
   const labels = domain.split(".");
-  if (labels.length < 2) return "חסרה סיומת בדומיין (למשל ‎.com‎)";
+  if (labels.length < 2) return reason("noSuffix");
 
   for (const label of labels) {
-    if (label.length === 0 || label.length > LABEL_MAX) return "שם הדומיין אינו תקין";
-    if (!LABEL.test(label)) return "שם הדומיין מכיל תווים שאינם חוקיים";
+    if (label.length === 0 || label.length > LABEL_MAX) return reason("domainInvalid");
+    if (!LABEL.test(label)) return reason("domainChars");
   }
 
-  if (!TLD.test(labels[labels.length - 1])) return "סיומת הדומיין אינה תקינה (למשל ‎.com‎, ‎.co.il‎)";
+  if (!TLD.test(labels[labels.length - 1])) return reason("suffixInvalid");
 
   return null;
 };

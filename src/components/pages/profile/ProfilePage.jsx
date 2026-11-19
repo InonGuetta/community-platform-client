@@ -4,7 +4,6 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Alert from "@mui/material/Alert";
@@ -12,8 +11,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import { roleLabels } from "../../../utilities/constant";
 import RoleRequestCard from "./RoleRequestCard";
-import EmailPreferencesCard from "./EmailPreferencesCard";
+import NotificationPreferencesCard from "./NotificationPreferencesCard";
+import PhoneCard from "./PhoneCard";
+import LanguageSwitcher from "../../layout/LanguageSwitcher";
+import AvatarEditor from "../../features/Avatar/AvatarEditor";
 import { useProfilePageController, MIN_PASSWORD_LENGTH } from "./useProfilePageController";
+import { useTranslation } from "react-i18next";
 
 // The user's own account, which nobody could edit before this — an admin could
 // change anyone's display name and nobody could change their own.
@@ -25,6 +28,7 @@ import { useProfilePageController, MIN_PASSWORD_LENGTH } from "./useProfilePageC
 // other.
 
 const ProfilePage = () => {
+  const { t } = useTranslation("profile");
   const {
     confirm,
     currentPassword,
@@ -48,35 +52,36 @@ const ProfilePage = () => {
 
   return (
     <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
-      <Typography variant="h4" fontWeight={800} color="primary" sx={{ mb: 3 }}>החשבון שלי</Typography>
+      {/* The title and the cards share one centred column, so the heading sits
+          over the cards rather than at the page's edge. */}
+      <Box sx={{ maxWidth: 640, mx: "auto" }}>
+      <Typography variant="h4" fontWeight={800} color="primary" sx={{ mb: 3 }}>{t("title")}</Typography>
 
-      <Box sx={{ display: "grid", gap: 3, maxWidth: 640 }}>
+      <Box sx={{ display: "grid", gap: 3 }}>
         <Card sx={{ borderRadius: 2 }}>
           <CardContent component="form" onSubmit={handleSaveProfile} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Avatar src={user.avatar_url || undefined} sx={{ width: 56, height: 56 }}>
-                {(user.display_name || user.email || "?").charAt(0)}
-              </Avatar>
-              <Box sx={{ minWidth: 0 }}>
-                {/* The email is shown and NOT editable. Changing an address is a
-                    re-verification flow, not a profile edit, and offering it as a
-                    text field would promise something this screen cannot do. */}
-                <Typography variant="body2" sx={{ wordBreak: "break-all" }}>{user.email}</Typography>
-                <Box sx={{ display: "flex", gap: 0.5, mt: 0.5, flexWrap: "wrap" }}>
-                  <Chip size="small" label={roleLabels[user.role] ?? user.role} />
-                  {user.email_verified ? (
-                    <Chip size="small" color="success" variant="outlined" icon={<VerifiedIcon />} label="כתובת מאומתת" />
-                  ) : (
-                    <Chip size="small" color="warning" variant="outlined" label="כתובת לא אומתה" />
-                  )}
-                </Box>
+            {/* The picture, and the means to upload, change or remove it. */}
+            <AvatarEditor />
+
+            <Box sx={{ minWidth: 0 }}>
+              {/* The email is shown and NOT editable. Changing an address is a
+                  re-verification flow, not a profile edit, and offering it as a
+                  text field would promise something this screen cannot do. */}
+              <Typography variant="body2" sx={{ wordBreak: "break-all" }}>{user.email}</Typography>
+              <Box sx={{ display: "flex", gap: 0.5, mt: 0.5, flexWrap: "wrap" }}>
+                <Chip size="small" label={roleLabels[user.role] ?? user.role} />
+                {user.email_verified ? (
+                  <Chip size="small" color="success" variant="outlined" icon={<VerifiedIcon />} label={t("verified")} />
+                ) : (
+                  <Chip size="small" color="warning" variant="outlined" label={t("unverified")} />
+                )}
               </Box>
             </Box>
 
             <Divider />
 
             <TextField
-              label="שם תצוגה"
+              label={t("displayName")}
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               fullWidth
@@ -90,8 +95,16 @@ const ProfilePage = () => {
               disabled={!nameChanged || savingProfile}
               sx={{ alignSelf: "flex-start", borderRadius: 2, fontWeight: 700 }}
             >
-              {savingProfile ? <CircularProgress size={20} /> : "שמירה"}
+              {savingProfile ? <CircularProgress size={20} /> : t("save")}
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* The interface's language, saved to the account — so the mail the
+            server writes is in it too. */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent>
+            <LanguageSwitcher variant="field" />
           </CardContent>
         </Card>
 
@@ -100,17 +113,20 @@ const ProfilePage = () => {
             admin, who has nothing left to ask for. */}
         <RoleRequestCard />
 
+        {/* A mobile number for SMS (AUTH-13), just above the choices it enables. */}
+        <PhoneCard />
+
         {/* NOTIF-6 — the place every notification mail's footer points back to. */}
-        <EmailPreferencesCard />
+        <NotificationPreferencesCard />
 
         <Card sx={{ borderRadius: 2 }}>
           <CardContent component="form" onSubmit={handleChangePassword} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography variant="h6" fontWeight={700}>שינוי סיסמה</Typography>
+            <Typography variant="h6" fontWeight={700}>{t("password.title")}</Typography>
 
             {passwordError && <Alert severity="error">{passwordError}</Alert>}
 
             <TextField
-              label="הסיסמה הנוכחית"
+              label={t("password.current")}
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -118,28 +134,28 @@ const ProfilePage = () => {
               fullWidth
             />
             <TextField
-              label="סיסמה חדשה"
+              label={t("password.new")}
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               autoComplete="new-password"
               fullWidth
               error={passwordTooShort}
-              helperText={passwordTooShort ? `לפחות ${MIN_PASSWORD_LENGTH} תווים` : " "}
+              helperText={passwordTooShort ? t("password.minLength", { n: MIN_PASSWORD_LENGTH }) : " "}
             />
             <TextField
-              label="אימות סיסמה חדשה"
+              label={t("password.confirm")}
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               autoComplete="new-password"
               fullWidth
               error={passwordMismatch}
-              helperText={passwordMismatch ? "הסיסמאות אינן תואמות" : " "}
+              helperText={passwordMismatch ? t("password.mismatch") : " "}
             />
 
             <Typography variant="caption" color="text.secondary">
-              שינוי הסיסמה מנתק כל מכשיר אחר שמחובר לחשבון.
+              {t("password.signsOutOthers")}
             </Typography>
 
             <Button
@@ -151,10 +167,11 @@ const ProfilePage = () => {
               }
               sx={{ alignSelf: "flex-start", borderRadius: 2, fontWeight: 700 }}
             >
-              {savingPassword ? <CircularProgress size={20} /> : "שינוי סיסמה"}
+              {savingPassword ? <CircularProgress size={20} /> : t("password.submit")}
             </Button>
           </CardContent>
         </Card>
+      </Box>
       </Box>
     </Box>
   );

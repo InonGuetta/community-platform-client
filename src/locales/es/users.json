@@ -1,0 +1,41 @@
+{
+  "title": "Gestión de usuarios",
+  "search": "Buscar usuarios...",
+  "active": "Activo",
+  "inactive": "Inactivo",
+  "edit": "Editar a {{name}}",
+  "cannotToggleSelf": "No puedes cambiar tu propio estado",
+  "deactivateHint": "Pasar a inactivo",
+  "activateHint": "Activar usuario",
+  "deactivate": "Desactivar a {{name}}",
+  "activate": "Activar a {{name}}",
+  "delete": "Eliminar a {{name}}",
+  "form": {
+    "editTitle": "Editar usuario",
+    "createTitle": "Crear usuario",
+    "displayName": "Nombre visible",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "role": "Rol",
+    "save": "Guardar"
+  },
+  "pending": {
+    "title": "Pendientes de aprobación",
+    "requested": "Solicitó: {{role}}",
+    "reasonPlaceholder": "Motivo (opcional): se enviará por correo",
+    "sendReject": "Enviar rechazo",
+    "cannotApproveSelf": "No puedes aprobar tu propia solicitud",
+    "approve": "Aprobar",
+    "reject": "Rechazar"
+  },
+  "add": "Añadir usuario",
+  "headers": {
+    "id": "ID",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "role": "Rol",
+    "status": "Estado",
+    "actions": "Acciones"
+  },
+  "phoneMasked": "Teléfono verificado: {{phone}}"
+}

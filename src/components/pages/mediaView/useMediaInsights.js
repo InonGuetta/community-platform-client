@@ -12,7 +12,8 @@ import { mediaTypes } from "../../../utilities/constant";
 import { nextPollDelay, hasExceededPollWindow } from "../../../utilities/pollingSchedule";
 import { isAiActionBusy, aiActionOutcome, AI_ACTION_FIELDS } from "../../../utilities/aiActionState";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
+import i18n from "../../../i18n/i18n";
 
 // Everything behind the summary / chapters / transcript panels: fetching the
 // transcript, watching it while the workers run, the two on-demand AI actions,
@@ -153,11 +154,11 @@ const useMediaInsights = (mediaId, media) => {
     const say = (outcome, done, failed, errorField) => {
       if (outcome === "done") dispatch(notify({ message: done, severity: "success" }));
       if (outcome === "error") {
-        dispatch(notify({ message: hebrewForError({ code: transcript?.[errorField] }, failed), severity: "error" }));
+        dispatch(notify({ message: messageForError({ code: transcript?.[errorField] }, failed), severity: "error" }));
       }
     };
-    say(aiActionOutcome(before.hebrewFix, hebrewFixStatus), "העברית תוקנה", "תיקון העברית נכשל", AI_ACTION_FIELDS.hebrewFix.error);
-    say(aiActionOutcome(before.headings, headingsStatus), "כותרות המשנה נוצרו", "יצירת כותרות המשנה נכשלה", AI_ACTION_FIELDS.headings.error);
+    say(aiActionOutcome(before.hebrewFix, hebrewFixStatus), i18n.t("lesson:aiActions.hebrewFixed"), i18n.t("lesson:aiActions.hebrewFixFailed"), AI_ACTION_FIELDS.hebrewFix.error);
+    say(aiActionOutcome(before.headings, headingsStatus), i18n.t("lesson:aiActions.headingsMade"), i18n.t("lesson:aiActions.headingsFailed"), AI_ACTION_FIELDS.headings.error);
     // The transcript is read for the error code only, at the moment a status
     // changes; depending on it would re-run this on every poll.
     // eslint-disable-next-line react-hooks/exhaustive-deps

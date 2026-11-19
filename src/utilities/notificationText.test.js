@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
 import { describeNotification, notificationAge } from "./notificationText";
+import notifications from "../locales/he/notifications.json";
 
 describe("describeNotification", () => {
   it("words a role request and links to the users page", () => {
@@ -95,4 +97,30 @@ describe("course join notifications", () => {
     expect(no.title).toBe("הבקשה להצטרף לא אושרה");
     expect([yes.href, no.href]).toEqual(["/my-courses", "/my-courses"]);
   });
+});
+
+// Every type the server can store has its words here. The server's list is read
+// as text (a separate package, like the mirror tests); a type missing a title
+// would render as the generic "התראה".
+describe("every notification type is worded", () => {
+  const SERVER = new URL("../../../community-platform-server/services/servicesNotifications.js", import.meta.url);
+  const source = readFileSync(SERVER, "utf8");
+  const block = source.slice(source.indexOf("NOTIFICATION_TYPES"), source.indexOf("});", source.indexOf("NOTIFICATION_TYPES")));
+  const types = [...block.matchAll(/:\s*"([a-z_]+)"/g)].map((m) => m[1]);
+
+  it("finds the server's types", () => {
+    expect(types.length).toBeGreaterThan(8);
+  });
+
+  it.each(types)("%s has a title and is not the generic one", (type) => {
+    expect(notifications.types[type]?.title, `notifications:types.${type}.title`).toBeTruthy();
+    const n = describeNotification({ type, payload: { title: "ש", courseTitle: "ק", mediaId: 1 } });
+    expect(n.title).not.toBe(notifications.types.unknown.title);
+    expect(`${n.title}${n.body}`).not.toMatch(/types\.|defaults\./);
+  });
+});
+
+it("two hours reads as a word, as Hebrew says it", () => {
+  const now = Date.parse("2026-11-01T12:00:00Z");
+  expect(notificationAge(new Date(now - 2 * 60 * 60_000).toISOString(), now)).toBe("לפני שעתיים");
 });

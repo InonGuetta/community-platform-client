@@ -2,13 +2,32 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { createApiThunk } from "../../createApiThunk";
 import { authApi } from "../../../api/authApi";
 import { rejectionOf } from "../../../utilities/apiError";
+import i18n from "../../../i18n/i18n";
 
 export const login = createApiThunk("auth/login", "Login failed", async ({ email, password }) => {
   return await authApi.login({ email, password });
 });
 
+// A new profile picture, already shrunk to a square by the caller
+// (utilities/avatarImage.js). Typed avatar/*, not auth/*, so its outcome is a
+// toast — the notification middleware leaves auth/* to the sign-in forms.
+export const uploadAvatar = createApiThunk("avatar/upload", "Could not upload the picture", async (image) => {
+  return await authApi.uploadAvatar(image);
+});
+
+// A mobile number (migration 054). Typed phone/*, like avatar/*: no sign-in
+// form shows their outcome. A refusal is said inside the phone card itself (the
+// code dialog's "N attempts left"), so only success has a toast.
+export const startPhoneVerification = createApiThunk("phone/start", "Could not send the code", async (phone) => {
+  return await authApi.startPhoneVerification(phone);
+});
+export const verifyPhone = createApiThunk("phone/verify", "Could not verify the code", async (code) => {
+  return await authApi.verifyPhone(code);
+});
+
+// The new account starts in the language the visitor is reading right now.
 export const register = createApiThunk("auth/register", "Registration failed", async ({ email, password, displayName, requestedRole }) => {
-  return await authApi.register({ email, password, displayName, requestedRole });
+  return await authApi.register({ email, password, displayName, requestedRole, locale: i18n.language });
 });
 
 // Deliberately NOT reported through the slice's error state. The server answers

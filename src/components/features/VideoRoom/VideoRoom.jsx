@@ -17,6 +17,7 @@ import ParticipantGrid from "./ParticipantGrid";
 import ChatPanel from "./ChatPanel";
 import { useVideoRoom } from "./useVideoRoom";
 import { RecordButton, RecordingIndicator, ConsentDialog } from "./RecordingControls";
+import { useTranslation } from "react-i18next";
 
 // Presentation only — every piece of signalling lives in useVideoRoom, and the
 // peer bookkeeping under it in peerMesh, where it can be tested without a
@@ -28,6 +29,7 @@ const controlSx = (active) => ({
 });
 
 const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
+  const { t } = useTranslation("sessions");
   const {
     streams, connected, mediaError, roomError, endSession, leave,
     micOn, cameraOn, hasMic, hasCamera, sharing, toggleMic, toggleCamera, shareScreen,
@@ -67,7 +69,7 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
             every screenshot of a session. */}
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap", minWidth: 0 }}>
           <Typography variant="body2" color="grey.400">
-            {connected ? `${participantCount} משתתפים` : "מתחבר…"}
+            {connected ? t("room.participants", { count: participantCount }) : t("room.connecting")}
           </Typography>
           <RecordingIndicator recording={recording} mySocketId={mySocketId} onAnswer={answerRecording} />
         </Box>
@@ -85,9 +87,9 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
             />
           )}
           {canEndSession ? (
-            <Button size="small" variant="contained" color="error" onClick={endSession}>סיום מפגש</Button>
+            <Button size="small" variant="contained" color="error" onClick={endSession}>{t("room.end")}</Button>
           ) : (
-            <Button size="small" variant="outlined" color="warning" onClick={leave}>עזיבה</Button>
+            <Button size="small" variant="outlined" color="warning" onClick={leave}>{t("room.leave")}</Button>
           )}
         </Box>
       </Box>
@@ -96,7 +98,7 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
         <Box sx={{ p: 2, textAlign: "center" }}>
           <Typography color="error.main" fontWeight={600}>{roomError}</Typography>
           <Button size="small" variant="outlined" onClick={leave} sx={{ mt: 1 }}>
-            חזרה למפגשים
+            {t("room.back")}
           </Button>
         </Box>
       )}
@@ -110,7 +112,7 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
           action={recordNotice.mediaId ? (
             // A new tab: leaving this page would leave the session.
             <Button color="inherit" size="small" href={`/media/${recordNotice.mediaId}`} target="_blank" rel="noopener">
-              לשיעור
+              {t("room.toLesson")}
             </Button>
           ) : undefined}
         >
@@ -143,26 +145,26 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
             enabled mic button that did nothing when pressed. The icon went on
             claiming they were transmitting. The button now says what is true,
             and the tooltip says why. */}
-        <Tooltip title={!hasMic ? "אין מיקרופון זמין" : micOn ? "השתקה" : "ביטול השתקה"}>
+        <Tooltip title={!hasMic ? t("room.noMic") : micOn ? t("room.mute") : t("room.unmute")}>
           <span>
             <IconButton
               onClick={toggleMic}
               disabled={!connected || !hasMic}
               sx={controlSx(hasMic && micOn)}
-              aria-label={!hasMic ? "אין מיקרופון זמין" : micOn ? "השתקה" : "ביטול השתקה"}
+              aria-label={!hasMic ? t("room.noMic") : micOn ? t("room.mute") : t("room.unmute")}
             >
               {hasMic && micOn ? <MicIcon /> : <MicOffIcon />}
             </IconButton>
           </span>
         </Tooltip>
 
-        <Tooltip title={!hasCamera ? "אין מצלמה זמינה" : cameraOn ? "כיבוי מצלמה" : "הפעלת מצלמה"}>
+        <Tooltip title={!hasCamera ? t("room.noCamera") : cameraOn ? t("room.cameraOff") : t("room.cameraOn")}>
           <span>
             <IconButton
               onClick={toggleCamera}
               disabled={!connected || !hasCamera}
               sx={controlSx(hasCamera && cameraOn)}
-              aria-label={!hasCamera ? "אין מצלמה זמינה" : cameraOn ? "כיבוי מצלמה" : "הפעלת מצלמה"}
+              aria-label={!hasCamera ? t("room.noCamera") : cameraOn ? t("room.cameraOff") : t("room.cameraOn")}
             >
               {hasCamera && cameraOn ? <VideocamIcon /> : <VideocamOffIcon />}
             </IconButton>
@@ -171,16 +173,16 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
 
         {/* The one control this platform needs more than the camera: reading a
             page together is what a chavruta does. */}
-        <Tooltip title={sharing ? "הפסקת שיתוף" : "שיתוף מסך"}>
+        <Tooltip title={sharing ? t("room.stopShare") : t("room.share")}>
           <span>
-            <IconButton onClick={shareScreen} disabled={!connected} sx={controlSx(!sharing)} aria-label={sharing ? "הפסקת שיתוף" : "שיתוף מסך"}>
+            <IconButton onClick={shareScreen} disabled={!connected} sx={controlSx(!sharing)} aria-label={sharing ? t("room.stopShare") : t("room.share")}>
               {sharing ? <StopScreenShareIcon /> : <ScreenShareIcon />}
             </IconButton>
           </span>
         </Tooltip>
 
-        <Tooltip title="צ׳אט">
-          <IconButton onClick={openChat} sx={controlSx(!chatOpen)} aria-label="צ׳אט">
+        <Tooltip title={t("room.chat")}>
+          <IconButton onClick={openChat} sx={controlSx(!chatOpen)} aria-label={t("room.chat")}>
             <Badge badgeContent={unread} color="error">
               <ChatIcon />
             </Badge>

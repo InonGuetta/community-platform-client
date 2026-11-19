@@ -1,0 +1,41 @@
+{
+  "title": "User management",
+  "search": "Search users...",
+  "active": "Active",
+  "inactive": "Inactive",
+  "edit": "Edit {{name}}",
+  "cannotToggleSelf": "You cannot change your own status",
+  "deactivateHint": "Make inactive",
+  "activateHint": "Activate user",
+  "deactivate": "Deactivate {{name}}",
+  "activate": "Activate {{name}}",
+  "delete": "Delete {{name}}",
+  "form": {
+    "editTitle": "Edit user",
+    "createTitle": "Create user",
+    "displayName": "Display name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "save": "Save"
+  },
+  "pending": {
+    "title": "Awaiting approval",
+    "requested": "Requested: {{role}}",
+    "reasonPlaceholder": "Reason (optional) — sent by email",
+    "sendReject": "Send refusal",
+    "cannotApproveSelf": "You cannot approve your own request",
+    "approve": "Approve",
+    "reject": "Refuse"
+  },
+  "add": "Add user",
+  "headers": {
+    "id": "ID",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "phoneMasked": "Verified phone: {{phone}}"
+}

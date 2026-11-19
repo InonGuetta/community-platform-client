@@ -27,6 +27,8 @@ import { canManageMedia } from "../../../utilities/permissions";
 // header says why: a shelf and the control that fills it have to look like one
 // thing, and two independent imports stay matched only until one is changed.
 import { likeIcons } from "../../layout/personalShelves";
+import { useTranslation } from "react-i18next";
+import { creatorDisplayName } from "../../../utilities/creatorPage";
 
 const LikeIcon = likeIcons.on;
 
@@ -72,7 +74,10 @@ const CornerBracket = ({ accent, placement }) => {
       viewBox="0 0 80 80"
       sx={{
         position: "absolute", width: 80, height: 80, zIndex: 1, pointerEvents: "none",
-        ...(isTR ? { top: -5, right: -5 } : { bottom: -5, left: -5 }),
+        // The path is drawn for the rtl corner; in ltr the card's corners
+        // mirror, so the bracket does too.
+        ...(isTR ? { top: -5, insetInlineStart: -5 } : { bottom: -5, insetInlineEnd: -5 }),
+        "[dir='ltr'] &": { transform: "scaleX(-1)" },
       }}
     >
       <path d={d} fill="none" stroke={accent} strokeWidth={3} strokeLinecap="round" strokeLinejoin="miter" />
@@ -83,6 +88,7 @@ const CornerBracket = ({ accent, placement }) => {
 // `onOpenCreator` makes the lecturer's name a way to their page (PRD ATTR-10).
 // Absent on that page itself, where the name would lead back to where you are.
 const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails, onOpenCreator }) => {
+  const { t } = useTranslation("media");
   // Recordings only: a book's duration is always null, and lengthLabel says so.
   const length = item.media_type === "text" ? null : lengthLabel(item.duration_seconds);
   const isVideo = item.media_type === "video";
@@ -141,9 +147,10 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
       return {
         position: "relative", zIndex: 2, overflow: "hidden",
         height: "100%", display: "flex", flexDirection: "column", cursor: "pointer",
-        // Sharp (square) top-right & bottom-left corners; rounded top-left & bottom-right.
-        borderTopLeftRadius: "20px", borderTopRightRadius: 0,
-        borderBottomRightRadius: "20px", borderBottomLeftRadius: 0,
+        // Square at the start-top and end-bottom corners, rounded at the other two
+        // (in rtl: square top-right and bottom-left).
+        borderStartEndRadius: "20px", borderStartStartRadius: 0,
+        borderEndStartRadius: "20px", borderEndEndRadius: 0,
         // MUI tints an elevated Paper in dark mode, which made the text half of
         // the card visibly lighter than the media half above it. Dropping the
         // overlay puts both halves on the same surface; a hairline border keeps
@@ -160,7 +167,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
     }}
   >
     {/* Image / icon area */}
-    <Box sx={(theme) => ({ position: "relative", bgcolor: theme.palette.mode === "dark" ? "#161d22" : "#ffffff", height: 180, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", borderTopLeftRadius: "20px", borderTopRightRadius: 0 })}>
+    <Box sx={(theme) => ({ position: "relative", bgcolor: theme.palette.mode === "dark" ? "#161d22" : "#ffffff", height: 180, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", borderStartEndRadius: "20px", borderStartStartRadius: 0 })}>
       {item.thumbnail_url ? (
         <Box component="img" src={item.thumbnail_url} alt={item.title} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : (
@@ -209,7 +216,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
         label={mediaTypeLabels[item.media_type] || item.media_type}
         color={TYPE_COLOR[item.media_type]}
         size="small"
-        sx={{ position: "absolute", top: 8, left: 8, fontWeight: 600 }}
+        sx={{ position: "absolute", top: 8, insetInlineEnd: 8, fontWeight: 600 }}
         onClick={(e) => e.stopPropagation()}
       />
 
@@ -218,9 +225,9 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           their upload isn't in anyone else's archive yet. */}
       {canManage && !isPublished && (
         <Chip
-          label="טיוטה"
+          label={t("card.draft")}
           size="small"
-          sx={{ position: "absolute", top: 42, left: 8, fontWeight: 700, bgcolor: "rgba(0,0,0,0.65)", color: "#fff" }}
+          sx={{ position: "absolute", top: 42, insetInlineEnd: 8, fontWeight: 700, bgcolor: "rgba(0,0,0,0.65)", color: "#fff" }}
           onClick={(e) => e.stopPropagation()}
         />
       )}
@@ -228,19 +235,19 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           it, so a lesson is never public without its owner seeing that it is. */}
       {canManage && isPublished && item.is_public && (
         <Chip
-          label="ציבורי"
+          label={t("card.public")}
           size="small"
           color="secondary"
-          sx={{ position: "absolute", top: 42, left: 8, fontWeight: 700 }}
+          sx={{ position: "absolute", top: 42, insetInlineEnd: 8, fontWeight: 700 }}
           onClick={(e) => e.stopPropagation()}
         />
       )}
 
       {/* Action icons — top right */}
-      <Box sx={{ position: "absolute", top: 6, right: 6, display: "flex", gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
+      <Box sx={{ position: "absolute", top: 6, insetInlineStart: 6, display: "flex", gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
         <IconButton
           onClick={(e) => setDownloadAnchor(e.currentTarget)}
-          aria-label="הורדה"
+          aria-label={t("card.download")}
           aria-haspopup="menu"
           size="small"
           sx={actionButtonSx}
@@ -248,14 +255,14 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           <FileDownloadIcon fontSize="small" />
         </IconButton>
         {canManage && (
-          <Tooltip title={isPublished ? "מוצג לתלמידים — לחץ כדי להסתיר" : "טיוטה — לחץ כדי לפרסם לתלמידים"}>
+          <Tooltip title={isPublished ? t("card.publishedHint") : t("card.draftHint")}>
             {/* span: a disabled IconButton fires no events, so the Tooltip needs
                 a wrapper that still does. */}
             <span>
               <IconButton
                 size="small"
                 color={isPublished ? "success" : "default"}
-                aria-label={isPublished ? "הסתרה מתלמידים" : "פרסום לתלמידים"}
+                aria-label={isPublished ? t("card.hide") : t("card.publish")}
                 onClick={handleTogglePublish}
                 disabled={publishing}
                 sx={actionButtonSx}
@@ -266,10 +273,10 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           </Tooltip>
         )}
         {canManage && onEditDetails && (
-          <Tooltip title="עריכת פרטים">
+          <Tooltip title={t("card.editDetails")}>
             <IconButton
               size="small"
-              aria-label={`עריכת הפרטים של ${item.title}`}
+              aria-label={t("card.editDetailsOf", { title: item.title })}
               onClick={(e) => { e.stopPropagation(); onEditDetails(item); }}
               sx={actionButtonSx}
             >
@@ -278,10 +285,10 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           </Tooltip>
         )}
         {canManage && onEditTags && (
-          <Tooltip title="עריכת תגיות">
+          <Tooltip title={t("card.editTags")}>
             <IconButton
               size="small"
-              aria-label={`עריכת תגיות של ${item.title}`}
+              aria-label={t("card.editTagsOf", { title: item.title })}
               onClick={(e) => { e.stopPropagation(); onEditTags(item); }}
               sx={actionButtonSx}
             >
@@ -293,7 +300,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
           <IconButton
             size="small"
             color="error"
-            aria-label="מחיקה"
+            aria-label={t("card.delete")}
             onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
             sx={actionButtonSx}
           >
@@ -304,7 +311,7 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
     </Box>
 
     {/* Text content */}
-    <CardContent sx={{ flexGrow: 1, textAlign: "right", pt: 1.5, pb: "16px !important", px: 2 }}>
+    <CardContent sx={{ flexGrow: 1, textAlign: "start", pt: 1.5, pb: "16px !important", px: 2 }}>
       {/* primary.main is the navy that reads as a heading on white; on the dark
           card surface the same tone sinks into the background, so dark mode uses
           the lighter step of the brand colour rather than dropping to plain text. */}
@@ -312,12 +319,13 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
         variant="subtitle1"
         fontWeight={800}
         noWrap
+        dir="auto"
         sx={(theme) => ({ mb: 0.5, color: theme.palette.mode === "dark" ? "primary.light" : "primary.main" })}
       >
         {item.title}
       </Typography>
       {item.description && (
-        <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.4 }}>
+        <Typography variant="body2" color="text.secondary" dir="auto" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.4 }}>
           {item.description}
         </Typography>
       )}
@@ -338,13 +346,13 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
               the first belongs on a card. */}
           {item.creator_name && (
             <Chip
-              label={`${creatorPrefixes[item.media_type] || creatorPrefixes.video}: ${item.creator_name}`}
+              label={`${creatorPrefixes[item.media_type] || creatorPrefixes.video}: ${creatorDisplayName(item.creator_name)}`}
               size="small"
               variant="outlined"
               // Clickable only where there is a page: "כללי" is nobody.
               {...(onOpenCreator && hasCreatorPage(item.creator_name) && {
                 clickable: true,
-                "aria-label": `לכל השיעורים של ${item.creator_name}`,
+                "aria-label": t("card.allByCreator", { name: item.creator_name }),
                 // The card is itself a button that opens the lesson.
                 onClick: (e) => { e.stopPropagation(); onOpenCreator(item.creator_name); },
               })}
@@ -359,13 +367,13 @@ const MediaCard = ({ item, onView, user, onDelete, onTogglePublish, onEditTags, 
               label={length}
               size="small"
               variant="outlined"
-              aria-label={`אורך: ${length}`}
+              aria-label={t("card.length", { length })}
             />
           )}
           {item.like_count > 0 && (
             <Box
-              sx={{ display: "flex", alignItems: "center", gap: 0.25, ms: "auto", color: "text.secondary" }}
-              aria-label={`${item.like_count} אהבו`}
+              sx={{ display: "flex", alignItems: "center", gap: 0.25, marginInlineStart: "auto", color: "text.secondary" }}
+              aria-label={t("card.likes", { count: item.like_count })}
             >
               <LikeIcon sx={{ fontSize: 15 }} />
               <Typography variant="caption" fontWeight={700}>{item.like_count}</Typography>

@@ -20,6 +20,7 @@ import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import FormatClearIcon from "@mui/icons-material/FormatClear";
 import FormatSizeIcon from "@mui/icons-material/FormatSize";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useTranslation } from "react-i18next";
 
 // The notebook's formatting strip. Sits at the top of the page, above the notes
 // — and stays there while they scroll, which is what makes it usable on a column
@@ -37,24 +38,24 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 // supported in every browser this app runs in. The editor is where that decision
 // is enacted — see RichNoteEditor.exec — and this file only names the commands.
 const TEXT_COLORS = [
-  { label: "ברירת מחדל", value: "inherit", swatch: "currentColor" },
-  { label: "אדום", value: "#d32f2f" },
-  { label: "כתום", value: "#ed6c02" },
-  { label: "ירוק", value: "#2e7d32" },
-  { label: "כחול", value: "#1976d2" },
-  { label: "סגול", value: "#7b1fa2" },
+  { name: "default", value: "inherit", swatch: "currentColor" },
+  { name: "red", value: "#d32f2f" },
+  { name: "orange", value: "#ed6c02" },
+  { name: "green", value: "#2e7d32" },
+  { name: "blue", value: "#1976d2" },
+  { name: "purple", value: "#7b1fa2" },
 ];
 
 // Highlights are pale on purpose: the text has to stay readable through them,
 // and in dark mode a saturated block behind dark glyphs is unreadable. The
 // first entry removes the highlight rather than painting a white one over it.
 const HIGHLIGHT_COLORS = [
-  { label: "ללא הדגשה", value: "transparent", swatch: "transparent" },
-  { label: "צהוב", value: "#fff59d" },
-  { label: "ירוק", value: "#c8e6c9" },
-  { label: "תכלת", value: "#b3e5fc" },
-  { label: "ורוד", value: "#f8bbd0" },
-  { label: "כתום", value: "#ffe0b2" },
+  { name: "none", value: "transparent", swatch: "transparent" },
+  { name: "yellow", value: "#fff59d" },
+  { name: "green", value: "#c8e6c9" },
+  { name: "lightBlue", value: "#b3e5fc" },
+  { name: "pink", value: "#f8bbd0" },
+  { name: "orange", value: "#ffe0b2" },
 ];
 
 // Sizes in real pixels, not in the seven buckets execCommand thinks in — see
@@ -76,21 +77,23 @@ const MAX_FONT_SIZE_PX = 200;
 const clampFontSize = (value) =>
   Math.min(MAX_FONT_SIZE_PX, Math.max(MIN_FONT_SIZE_PX, Math.round(value)));
 
-const ColorMenu = ({ anchorEl, onClose, colors, onPick, title }) => (
+const ColorMenu = ({ anchorEl, onClose, colors, onPick, title }) => {
+  const { t } = useTranslation("notes");
+  return (
   <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
     <Typography variant="caption" color="text.secondary" sx={{ px: 1.5, pb: 0.5, display: "block" }}>
       {title}
     </Typography>
     <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0.75, px: 1.25, pb: 1.25 }}>
       {colors.map((color) => (
-        <Tooltip key={color.value} title={color.label}>
+        <Tooltip key={color.value} title={t(`toolbar.colors.${color.name}`)}>
           {/* onMouseDown, not onClick: the press must be cancelled before the
               browser moves focus, or the selection in the editor is gone by the
               time the command runs. Same reason as the buttons below. */}
           <Box
             component="button"
             type="button"
-            aria-label={color.label}
+            aria-label={t(`toolbar.colors.${color.name}`)}
             onMouseDown={(e) => { e.preventDefault(); onPick(color.value); }}
             sx={{
               width: 34, height: 34, borderRadius: 1, cursor: "pointer",
@@ -107,7 +110,8 @@ const ColorMenu = ({ anchorEl, onClose, colors, onPick, title }) => (
       ))}
     </Box>
   </Menu>
-);
+  );
+};
 
 // One button in the strip. At module level rather than inside NoteToolbar: a
 // component declared during render is a NEW component type on every render, so
@@ -135,6 +139,7 @@ const ToolButton = ({ title, active, disabled, onPress, children }) => (
 );
 
 const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) => {
+  const { t } = useTranslation("notes");
   const [textColorAnchor, setTextColorAnchor] = useState(null);
   const [highlightAnchor, setHighlightAnchor] = useState(null);
   const [sizeAnchor, setSizeAnchor] = useState(null);
@@ -181,7 +186,7 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
       // role=toolbar so the strip is announced as one control group rather than
       // as a dozen loose buttons between a heading and a link.
       role="toolbar"
-      aria-label="עיצוב ההערה"
+      aria-label={t("toolbar.label")}
       sx={{
         display: "flex", alignItems: "center", flexWrap: "wrap", gap: 0.5,
         px: 1.5, py: 1, borderRadius: 2.5,
@@ -195,12 +200,12 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
       {/* The size sits first and is the only control that shows a VALUE. It is
           the one whose current setting matters before you press it — everything
           else is a toggle you can see the result of. */}
-      <Tooltip title="גודל הטקסט">
+      <Tooltip title={t("toolbar.fontSize")}>
         <span>
           <Button
             disabled={disabled}
             aria-haspopup="menu"
-            aria-label="גודל הטקסט"
+            aria-label={t("toolbar.fontSize")}
             startIcon={<FormatSizeIcon />}
             endIcon={<ExpandMoreIcon />}
             // The menu opens on click; the rows and the field inside it are what
@@ -219,18 +224,18 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
 
       <Divider orientation="vertical" flexItem sx={{ mx: 0.75, my: 0.5 }} />
 
-      <ToolButton {...button("מודגש", "bold", formats.bold)}><FormatBoldIcon /></ToolButton>
-      <ToolButton {...button("נטוי", "italic", formats.italic)}><FormatItalicIcon /></ToolButton>
-      <ToolButton {...button("קו תחתון", "underline", formats.underline)}><FormatUnderlinedIcon /></ToolButton>
-      <ToolButton {...button("קו חוצה", "strikeThrough", formats.strikeThrough)}><StrikethroughSIcon /></ToolButton>
+      <ToolButton {...button(t("toolbar.bold"), "bold", formats.bold)}><FormatBoldIcon /></ToolButton>
+      <ToolButton {...button(t("toolbar.italic"), "italic", formats.italic)}><FormatItalicIcon /></ToolButton>
+      <ToolButton {...button(t("toolbar.underline"), "underline", formats.underline)}><FormatUnderlinedIcon /></ToolButton>
+      <ToolButton {...button(t("toolbar.strike"), "strikeThrough", formats.strikeThrough)}><StrikethroughSIcon /></ToolButton>
 
       <Divider orientation="vertical" flexItem sx={{ mx: 0.75, my: 0.5 }} />
 
-      <Tooltip title="צבע טקסט">
+      <Tooltip title={t("toolbar.textColor")}>
         <span>
           <IconButton
             disabled={disabled}
-            aria-label="צבע טקסט"
+            aria-label={t("toolbar.textColor")}
             aria-haspopup="menu"
             onClick={(e) => setTextColorAnchor(e.currentTarget)}
             onMouseDown={(e) => e.preventDefault()}
@@ -241,11 +246,11 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
         </span>
       </Tooltip>
 
-      <Tooltip title="הדגשה">
+      <Tooltip title={t("toolbar.highlight")}>
         <span>
           <IconButton
             disabled={disabled}
-            aria-label="הדגשה"
+            aria-label={t("toolbar.highlight")}
             aria-haspopup="menu"
             onClick={(e) => setHighlightAnchor(e.currentTarget)}
             onMouseDown={(e) => e.preventDefault()}
@@ -258,16 +263,16 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
 
       <Divider orientation="vertical" flexItem sx={{ mx: 0.75, my: 0.5 }} />
 
-      <ToolButton {...button("רשימת תבליטים", "insertUnorderedList", formats.unorderedList)}>
+      <ToolButton {...button(t("toolbar.bullets"), "insertUnorderedList", formats.unorderedList)}>
         <FormatListBulletedIcon />
       </ToolButton>
-      <ToolButton {...button("רשימה ממוספרת", "insertOrderedList", formats.orderedList)}>
+      <ToolButton {...button(t("toolbar.numbered"), "insertOrderedList", formats.orderedList)}>
         <FormatListNumberedIcon />
       </ToolButton>
 
       <Divider orientation="vertical" flexItem sx={{ mx: 0.75, my: 0.5 }} />
 
-      <ToolButton {...button("ניקוי עיצוב", "removeFormat")}><FormatClearIcon /></ToolButton>
+      <ToolButton {...button(t("toolbar.clear"), "removeFormat")}><FormatClearIcon /></ToolButton>
 
       <Menu
         anchorEl={sizeAnchor}
@@ -301,12 +306,12 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
             type="number"
             size="small"
             autoFocus
-            label="גודל בפיקסלים"
-            inputProps={{ min: MIN_FONT_SIZE_PX, max: MAX_FONT_SIZE_PX, "aria-label": "גודל בפיקסלים" }}
+            label={t("toolbar.pixels")}
+            inputProps={{ min: MIN_FONT_SIZE_PX, max: MAX_FONT_SIZE_PX, "aria-label": t("toolbar.pixels") }}
             sx={{ width: 130 }}
           />
           <Button onClick={applyTypedSize} variant="contained" size="small" sx={{ borderRadius: 1.5 }}>
-            החל
+            {t("toolbar.apply")}
           </Button>
         </Box>
 
@@ -322,7 +327,7 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
             {/* Drawn at the size it sets, so the list SHOWS the sizes rather
                 than describing them. Capped in the row so 72px does not make a
                 menu item taller than the menu. */}
-            <Typography sx={{ fontSize: Math.min(px, 34), lineHeight: 1.2 }}>אבג</Typography>
+            <Typography sx={{ fontSize: Math.min(px, 34), lineHeight: 1.2 }}>{t("toolbar.sample")}</Typography>
             <Typography variant="body2" color="text.secondary">{`${px}px`}</Typography>
           </MenuItem>
         ))}
@@ -332,14 +337,14 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
         anchorEl={textColorAnchor}
         onClose={() => setTextColorAnchor(null)}
         colors={TEXT_COLORS}
-        title="צבע הטקסט"
+        title={t("toolbar.textColorTitle")}
         onPick={(value) => { setTextColorAnchor(null); onCommand("foreColor", value); }}
       />
       <ColorMenu
         anchorEl={highlightAnchor}
         onClose={() => setHighlightAnchor(null)}
         colors={HIGHLIGHT_COLORS}
-        title="צבע ההדגשה"
+        title={t("toolbar.highlightTitle")}
         onPick={(value) => { setHighlightAnchor(null); onCommand("hiliteColor", value); }}
       />
     </Paper>

@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { MAX_TAGS } from "../../../utilities/constant";
-import { ROOT_GROUP, tagOptionsFrom } from "./tagOptions";
+import { rootGroup, tagOptionsFrom } from "./tagOptions";
+import { useTranslation } from "react-i18next";
 
 // Choosing the tags an item carries.
 //
@@ -32,16 +33,18 @@ const TagPicker = ({
   value = [],
   onChange,
   max = MAX_TAGS,
-  label = "תגיות",
-  helperText = `עד ${MAX_TAGS} תגיות. משמשות לסינון ולחיפוש.`,
+  // Absent, the shared words (tags:label, tags:helper).
+  label,
+  helperText,
 }) => {
+  const { t } = useTranslation("tags");
   const options = useMemo(() => tagOptionsFrom(nodes), [nodes]);
 
   return (
     <Autocomplete
       multiple
       options={options}
-      noOptionsText="לא נמצאה תגית כזו — אפשר להוסיף אותה עם «הוסף תגית»"
+      noOptionsText={t("noOptions")}
       value={value}
       onChange={(_, next) => onChange(next.slice(0, max))}
       // An option is an object from the taxonomy; a typed one is a string. Both
@@ -52,13 +55,13 @@ const TagPicker = ({
           ? option === chosen
           : option.id === chosen.id
       }
-      groupBy={(option) => (typeof option === "string" ? ROOT_GROUP : option.path || ROOT_GROUP)}
+      groupBy={(option) => (typeof option === "string" ? rootGroup() : option.path || rootGroup())}
       renderInput={(params) => (
         <TextField
           {...params}
-          label={label}
-          placeholder={value.length >= max ? "" : "סוג התוכן — חיפוש ובחירה מהרשימה"}
-          helperText={helperText}
+          label={label ?? t("label")}
+          placeholder={value.length >= max ? "" : t("placeholder")}
+          helperText={helperText ?? t("helper", { max: MAX_TAGS })}
         />
       )}
     />

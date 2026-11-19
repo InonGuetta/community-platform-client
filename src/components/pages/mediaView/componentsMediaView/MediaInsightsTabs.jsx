@@ -8,6 +8,7 @@ import AISummaryPanel from "./AISummaryPanel";
 import ChaptersPanel from "./ChaptersPanel";
 import TranscriptEditor from "../../../features/TranscriptEditor/TranscriptEditor";
 import FollowAlongTranscript from "./FollowAlongTranscript";
+import { useTranslation } from "react-i18next";
 
 // The summary / chapters / transcript block, shared by the media page and the
 // notebook's source preview so the two cannot drift apart.
@@ -39,6 +40,7 @@ const MediaInsightsTabs = ({
   // No slot, no tab — every other lesson.
   sessionChatPanel = null,
 }) => {
+  const { t } = useTranslation("lesson");
   const {
     transcript, isText, keyPointHeadings,
     canEditTranscript, canGenerateHeadings,
@@ -64,15 +66,15 @@ const MediaInsightsTabs = ({
   // on a *timeline* and seek the player to it — a book has neither — and there is
   // no transcript to edit. Personal notes stay, unchanged.
   const tabs = [
-    { key: "summary", label: "סיכום" },
-    ...(isText ? [] : [{ key: "chapters", label: "פרקים" }]),
-    ...(isText ? [] : [{ key: "transcript", label: "תמלול" }]),
-    ...(notesPanel ? [{ key: "notes", label: "הערות אישיות" }] : []),
-    ...(sessionChatPanel ? [{ key: "sessionChat", label: "צ'אט המפגש" }] : []),
+    { key: "summary", label: t("tabs.summary") },
+    ...(isText ? [] : [{ key: "chapters", label: t("tabs.chapters") }]),
+    ...(isText ? [] : [{ key: "transcript", label: t("tabs.transcript") }]),
+    ...(notesPanel ? [{ key: "notes", label: t("tabs.notes") }] : []),
+    ...(sessionChatPanel ? [{ key: "sessionChat", label: t("tabs.sessionChat") }] : []),
     // Last in the list, which in this right-to-left row is to the LEFT of
     // "הערות אישיות". Offered for books too: a book's text is in the same
     // chunks a recording's transcript is.
-    ...(discussionPanel ? [{ key: "discuss", label: "דיון עם AI" }] : []),
+    ...(discussionPanel ? [{ key: "discuss", label: t("tabs.discuss") }] : []),
   ];
   const activeTab = Math.min(tab, tabs.length - 1);
   const activeKey = tabs[activeTab]?.key;
@@ -122,11 +124,11 @@ const MediaInsightsTabs = ({
             size="small"
             value={transcriptView}
             onChange={(_, next) => next && setTranscriptView(next)}
-            aria-label="תצוגת התמלול"
+            aria-label={t("tabs.transcriptView")}
             sx={{ mb: 1.5, display: "flex", "& .MuiToggleButton-root": { flex: 1, py: 0.25 } }}
           >
-            <ToggleButton value="follow">עם הנגינה</ToggleButton>
-            <ToggleButton value="text">{canEditTranscript ? "טקסט מלא ועריכה" : "טקסט מלא"}</ToggleButton>
+            <ToggleButton value="follow">{t("tabs.follow")}</ToggleButton>
+            <ToggleButton value="text">{canEditTranscript ? t("tabs.fullTextEdit") : t("tabs.fullText")}</ToggleButton>
           </ToggleButtonGroup>
         )}
         {activeKey === "transcript" && captions && transcriptView === "follow" && (

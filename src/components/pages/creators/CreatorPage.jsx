@@ -4,10 +4,11 @@ import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DirectionalIcon from "../../../components/features/DirectionalIcon/DirectionalIcon";
 import ArchiveBrowser from "../archive/componentsArchive/ArchiveBrowser";
 import { useCreatorPageController } from "./useCreatorPageController";
 import { creatorSummary } from "./creatorSummary";
+import { useTranslation } from "react-i18next";
 
 // A lecturer's page (PRD ATTR-10, ARCH-5): everything under one name — the
 // lessons they gave and the books they wrote — with the archive's own filters,
@@ -16,13 +17,14 @@ import { creatorSummary } from "./creatorSummary";
 // By NAME, as the archive attributes: a guest speaker has lessons and no
 // account, and the name on the lesson is what a reader followed here.
 const CreatorPage = () => {
+  const { t } = useTranslation("creators");
   const c = useCreatorPageController();
   const p = c.profile;
 
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)", p: 3 }}>
-      <Button size="small" startIcon={<ArrowForwardIcon />} onClick={c.goToArchive} sx={{ mb: 2 }}>
-        לארכיון
+      <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={c.goToArchive} sx={{ mb: 2 }}>
+        {t("toArchive")}
       </Button>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3, flexWrap: "wrap" }}>
@@ -30,7 +32,7 @@ const CreatorPage = () => {
           {c.name.trim().replace(/^הרב\s+/, "").slice(0, 1)}
         </Avatar>
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography variant="h4" fontWeight={800} color="primary" sx={{ wordBreak: "break-word" }}>
+          <Typography variant="h4" fontWeight={800} color="primary" dir="auto" sx={{ wordBreak: "break-word" }}>
             {c.name}
           </Typography>
           {c.profileStatus === "loading" && <Skeleton width={280} />}
@@ -41,7 +43,7 @@ const CreatorPage = () => {
           )}
           {c.profileStatus === "failed" && (
             <Typography variant="body1" color="text.secondary">
-              לא נמצאו שיעורים בשם הזה שפתוחים לך.
+              {t("none")}
             </Typography>
           )}
           {p?.courses?.length > 0 && (

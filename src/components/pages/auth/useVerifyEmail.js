@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { verifyEmail } from "../../../store/slicesAndThunks/authSlice/authPost";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
+import i18n from "../../../i18n/i18n";
 
 // What the verification link does: spends its single-use token once, and
 // says how that went. VerifyEmail.jsx shows the answer.
@@ -24,14 +25,14 @@ export const useVerifyEmail = () => {
     attempted.current = true;
 
     if (!token) {
-      setState({ status: "error", message: "הקישור חסר או פגום." });
+      setState({ status: "error", message: i18n.t("auth:verify.badLink") });
       return;
     }
     dispatch(verifyEmail(token)).then((result) => {
       setState(
         result.meta.requestStatus === "fulfilled"
           ? { status: "ok", message: null }
-          : { status: "error", message: hebrewForError(result.payload, "האימות נכשל.") }
+          : { status: "error", message: messageForError(result.payload, i18n.t("auth:verify.failed")) }
       );
     });
   }, [dispatch, token]);

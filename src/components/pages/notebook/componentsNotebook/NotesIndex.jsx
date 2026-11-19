@@ -14,7 +14,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { dropIndicatorSx } from "../../../../utilities/useDragReorder";
 import { statuses, listRowSx } from "../../../../utilities/constant";
 import { noteHtmlToPlainText } from "../../../../utilities/noteHtml";
-import { formatHebrewDate } from "../../../../utilities/formatDate";
+import { formatDate } from "../../../../utilities/formatDate";
+import { useTranslation } from "react-i18next";
 
 // The index of the notebook: the search box, the tick-all bar with its bulk
 // delete, and one row per note — a row scrolls to its card, is ticked for a
@@ -39,15 +40,17 @@ const NotesIndex = ({
   status,
   toggleAllVisible,
   toggleSelected,
-}) => (
+}) => {
+  const { t } = useTranslation(["notebook", "notes"]);
+  return (
   <>
     <TextField
       value={search}
       onChange={(e) => setSearch(e.target.value)}
       size="small"
       fullWidth
-      placeholder="חיפוש במחברת..."
-      inputProps={{ "aria-label": "חיפוש במחברת" }}
+      placeholder={t("index.search")}
+      inputProps={{ "aria-label": t("index.searchLabel") }}
       InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>) }}
     />
 
@@ -61,11 +64,11 @@ const NotesIndex = ({
           checked={allVisibleSelected}
           indeterminate={someVisibleSelected && !allVisibleSelected}
           onChange={toggleAllVisible}
-          inputProps={{ "aria-label": "בחירת כל ההערות המוצגות" }}
+          inputProps={{ "aria-label": t("index.selectAll") }}
           sx={{ p: 0.5 }}
         />
         <Typography variant="caption" color="text.secondary">
-          {selectedCount > 0 ? `${selectedCount} נבחרו` : "בחירה מרובה"}
+          {selectedCount > 0 ? t("index.selected", { count: selectedCount }) : t("index.multiSelect")}
         </Typography>
 
         <Box sx={{ flexGrow: 1 }} />
@@ -74,12 +77,12 @@ const NotesIndex = ({
             see the header — and offering it in two places would be two
             things to keep in step for one action. */}
         {selectedCount > 0 && (
-          <Tooltip title="מחיקת הנבחרות">
+          <Tooltip title={t("index.deleteSelected")}>
             <IconButton
               size="small"
               color="error"
               onClick={() => setDeleteTargets(selectedNotes)}
-              aria-label="מחיקת הנבחרות"
+              aria-label={t("index.deleteSelected")}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -93,7 +96,7 @@ const NotesIndex = ({
       <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}><CircularProgress size={28} /></Box>
     ) : filtered.length === 0 ? (
       <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 4 }}>
-        {items.length === 0 ? "עדיין אין הערות. צור הערה חדשה כדי להתחיל." : "לא נמצאו הערות תואמות."}
+        {items.length === 0 ? t("noNotes") : t("noMatchingNotesShort")}
       </Typography>
     ) : (
       <List dense disablePadding sx={{ overflowY: "auto" }}>
@@ -135,13 +138,13 @@ const NotesIndex = ({
                 checked={selectedIds.has(n.id)}
                 onClick={(e) => e.stopPropagation()}
                 onChange={() => toggleSelected(n.id)}
-                inputProps={{ "aria-label": `בחירת ההערה ${n.title?.trim() || "ללא כותרת"}` }}
+                inputProps={{ "aria-label": t("index.selectNote", { title: n.title?.trim() || t("notes:untitledBare") }) }}
                 sx={{ p: 0.5, mt: -0.25, color: "inherit" }}
               />
 
               <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, minWidth: 0, flexGrow: 1 }}>
                 <Typography fontWeight={700} noWrap sx={{ width: "100%" }}>
-                  {n.title?.trim() || "(ללא כותרת)"}
+                  {n.title?.trim() || t("notes:untitled")}
                 </Typography>
                 <Typography variant="body2" noWrap sx={{ width: "100%", opacity: 0.8 }}>
                   {/* The one line of preview is text, not markup — the row
@@ -151,9 +154,9 @@ const NotesIndex = ({
                   {(n.preview ?? noteHtmlToPlainText(n.body)).trim() || "—"}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
-                  <Typography variant="caption" sx={{ opacity: 0.7 }}>{formatHebrewDate(n.updated_at)}</Typography>
+                  <Typography variant="caption" sx={{ opacity: 0.7 }}>{formatDate(n.updated_at)}</Typography>
                   {isDirty(n.id) && (
-                    <Chip size="small" color="warning" label="לא נשמר" sx={{ height: 18, fontSize: "0.65rem" }} />
+                    <Chip size="small" color="warning" label={t("index.notSaved")} sx={{ height: 18, fontSize: "0.65rem" }} />
                   )}
                   {n.media_title && (
                     <Chip size="small" label={n.media_title} sx={{ height: 18, fontSize: "0.65rem", maxWidth: 150 }} />
@@ -167,6 +170,7 @@ const NotesIndex = ({
     )}
     </Box>
   </>
-);
+  );
+};
 
 export default NotesIndex;

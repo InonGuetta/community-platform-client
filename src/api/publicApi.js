@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 import axiosInstance from "../utilities/axiosInstance";
 
 // A lesson its manager made public (PRD COM-3b, COM-4): what a guest with the
@@ -16,6 +17,8 @@ export const publicApi = {
   // The link that is shared. Served by the API as a small page of Open Graph
   // tags — WhatsApp's preview reads those, and runs no JavaScript — which then
   // sends a person on to the guest page, /l/:id.
+  // ?lang= is the sharer's language, for the preview card's own words (the
+  // lesson's title and summary are content and stay as written).
   shareUrl: (id, origin = typeof window !== "undefined" ? window.location.origin : "") =>
-    `${origin}${API_ROOT}/public/share/${id}`,
+    `${origin}${API_ROOT}/public/share/${id}?lang=${i18n.language}`,
 };

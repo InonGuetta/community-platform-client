@@ -15,7 +15,9 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import DialogTitle from "../../../features/Dialogs/DialogTitle";
 import DialogContent from "../../../features/Dialogs/DialogContent";
 import DialogActions from "../../../features/Dialogs/DialogActions";
-import { formatHebrewDateTime } from "../../../../utilities/formatDate";
+import { formatDateTime } from "../../../../utilities/formatDate";
+import { processingReasonText } from "../../../../utilities/processingReason";
+import { useTranslation } from "react-i18next";
 
 // What broke, and the one button that does something about it.
 //
@@ -30,6 +32,7 @@ import { formatHebrewDateTime } from "../../../../utilities/formatDate";
 // for.
 
 const PipelineTrouble = ({ trouble, onReconciled }) => {
+  const { t } = useTranslation(["admin", "common"]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState(null);
@@ -58,7 +61,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
   return (
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, gap: 2, flexWrap: "wrap" }}>
-        <Typography variant="h6" fontWeight={700}>תקלות בצנרת</Typography>
+        <Typography variant="h6" fontWeight={700}>{t("pipeline.title")}</Typography>
         <Button
           size="small"
           variant="outlined"
@@ -66,39 +69,39 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
           onClick={() => setConfirmOpen(true)}
           disabled={running}
         >
-          הרצת סנכרון
+          {t("pipeline.reconcile")}
         </Button>
       </Box>
 
       {queueUnreachable && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          לא ניתן לקרוא את התור. ייתכן ש-Redis אינו זמין — הרשימה כאן אינה מלאה.
+          {t("pipeline.queueUnreadable")}
         </Alert>
       )}
 
       {result && (
         <Alert severity={result.error ? "error" : "success"} sx={{ mb: 2 }} onClose={() => setResult(null)}>
           {result.error
-            ? "הסנכרון נכשל"
-            : `נמצאו ${result.found ?? 0}, הוכנסו לתור ${result.queued?.length ?? 0}` +
-              (result.deferred ? `, ${result.deferred} נדחו להרצה הבאה` : "")}
+            ? t("pipeline.reconcileFailed")
+            : t("pipeline.reconciled", { found: result.found ?? 0, queued: result.queued?.length ?? 0 }) +
+              (result.deferred ? t("pipeline.deferred", { n: result.deferred }) : "")}
         </Alert>
       )}
 
       <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-        עבודות שנכשלו ({failed.length})
+        {t("pipeline.failedJobs", { n: failed.length })}
       </Typography>
       {failed.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>אין עבודות שנכשלו.</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>{t("pipeline.noFailedJobs")}</Typography>
       ) : (
         <Box sx={{ overflowX: "auto", mb: 3 }}>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>תור</TableCell>
-                <TableCell>מדיה</TableCell>
-                <TableCell>סיבה</TableCell>
-                <TableCell>מתי</TableCell>
+                <TableCell>{t("pipeline.queue")}</TableCell>
+                <TableCell>{t("pipeline.media")}</TableCell>
+                <TableCell>{t("pipeline.reason")}</TableCell>
+                <TableCell>{t("pipeline.when")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -107,7 +110,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
                   <TableCell><Chip size="small" label={job.queue} /></TableCell>
                   <TableCell>{job.mediaId ?? "—"}</TableCell>
                   <TableCell sx={{ maxWidth: 380, wordBreak: "break-word" }}>{job.reason || "—"}</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>{formatHebrewDateTime(job.failedAt, "—")}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>{formatDateTime(job.failedAt, "—")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -116,19 +119,19 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
       )}
 
       <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-        מדיה ללא תמלול תקין ({stranded.length})
+        {t("pipeline.stranded", { n: stranded.length })}
       </Typography>
       {stranded.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">כל המדיה תוקתקה או בעיבוד.</Typography>
+        <Typography variant="body2" color="text.secondary">{t("pipeline.noStranded")}</Typography>
       ) : (
         <Box sx={{ overflowX: "auto" }}>
           <Table size="small">
             <TableHead>
               <TableRow>
                 <TableCell>#</TableCell>
-                <TableCell>כותרת</TableCell>
-                <TableCell>מצב</TableCell>
-                <TableCell>שגיאה</TableCell>
+                <TableCell>{t("pipeline.mediaTitle")}</TableCell>
+                <TableCell>{t("pipeline.state")}</TableCell>
+                <TableCell>{t("pipeline.error")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -137,9 +140,9 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
                   <TableCell>{item.id}</TableCell>
                   <TableCell sx={{ maxWidth: 220, wordBreak: "break-word" }}>{item.title}</TableCell>
                   <TableCell>
-                    <Chip size="small" color={item.status === "error" ? "error" : "default"} label={item.status ?? "לא הופעל"} />
+                    <Chip size="small" color={item.status === "error" ? "error" : "default"} label={item.status ?? t("pipeline.neverRun")} />
                   </TableCell>
-                  <TableCell sx={{ maxWidth: 320, wordBreak: "break-word" }}>{item.error_message || "—"}</TableCell>
+                  <TableCell sx={{ maxWidth: 320, wordBreak: "break-word" }}>{processingReasonText(item.error_message, item.error_message ? t("pipeline.reasonUnknown") : "—")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -149,20 +152,19 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
 
       {/* Confirmed because each queued job is a real Whisper bill — the sweep
           bounds itself per run, but an accidental press still costs money.
-          NOT ConfirmingDeletionDialog: that one is titled "אישור מחיקה" with a
-          red "מחיקה" button, and nothing here deletes anything. Bending it to
+          NOT ConfirmingDeletionDialog: that one is titled "confirm deletion" with a
+          red "delete" button, and nothing here deletes anything. Bending it to
           fit would have meant telling an admin they were about to delete. */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle onClose={() => setConfirmOpen(false)}>הרצת סנכרון</DialogTitle>
+        <DialogTitle onClose={() => setConfirmOpen(false)}>{t("pipeline.reconcile")}</DialogTitle>
         <DialogContent>
           <Typography>
-            הפעולה תכניס לתור תמלול עבור מדיה שאין לה תמלול תקין.
-            כל עבודה כזו היא חיוב אמיתי מול Whisper. להמשיך?
+            {t("pipeline.confirmBody")}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)} variant="outlined">ביטול</Button>
-          <Button onClick={handleReconcile} variant="contained">הרצה</Button>
+          <Button onClick={() => setConfirmOpen(false)} variant="outlined">{t("common:actions.cancel")}</Button>
+          <Button onClick={handleReconcile} variant="contained">{t("pipeline.run")}</Button>
         </DialogActions>
       </Dialog>
     </Box>

@@ -9,6 +9,7 @@ import Tooltip from "@mui/material/Tooltip";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import { roleLabels } from "../../../../utilities/constant";
+import { useTranslation } from "react-i18next";
 
 // The people waiting to be told yes or no.
 //
@@ -21,6 +22,7 @@ import { roleLabels } from "../../../../utilities/constant";
 // Oldest first — it is a queue. The server orders it; this only renders.
 
 const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) => {
+  const { t } = useTranslation(["users", "common"]);
   // Which row has its "why" box open. One at a time: two reasons half-typed in
   // two boxes is a way to send the wrong one.
   const [rejecting, setRejecting] = useState(null);
@@ -42,7 +44,7 @@ const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) 
     <Paper variant="outlined" sx={{ p: 2, mb: 3, borderColor: "warning.main" }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
         <Typography variant="subtitle1" fontWeight={700}>
-          ממתינים לאישור
+          {t("pending.title")}
         </Typography>
         <Chip label={pending.length} size="small" color="warning" />
       </Box>
@@ -77,7 +79,7 @@ const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) 
               </Box>
 
               <Chip
-                label={`ביקש: ${roleLabels[user.requested_role] || user.requested_role}`}
+                label={t("pending.requested", { role: roleLabels[user.requested_role] || user.requested_role })}
                 size="small"
                 color="primary"
                 variant="outlined"
@@ -91,18 +93,18 @@ const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) 
                     size="small"
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
-                    placeholder="סיבה (לא חובה) — תישלח במייל"
+                    placeholder={t("pending.reasonPlaceholder")}
                     sx={{ minWidth: 240 }}
                     autoFocus
                   />
                   <Button size="small" color="error" variant="contained" onClick={() => confirmReject(user.id)}>
-                    שלח דחייה
+                    {t("pending.sendReject")}
                   </Button>
-                  <Button size="small" onClick={closeReject}>ביטול</Button>
+                  <Button size="small" onClick={closeReject}>{t("common:actions.cancel")}</Button>
                 </Box>
               ) : (
                 <Box sx={{ display: "flex", gap: 1 }}>
-                  <Tooltip title={isSelf ? "לא ניתן לאשר את הבקשה של עצמך" : ""}>
+                  <Tooltip title={isSelf ? t("pending.cannotApproveSelf") : ""}>
                     <span>
                       <Button
                         size="small"
@@ -112,7 +114,7 @@ const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) 
                         disabled={isSelf}
                         onClick={() => onApprove(user.id)}
                       >
-                        אישור
+                        {t("pending.approve")}
                       </Button>
                     </span>
                   </Tooltip>
@@ -123,7 +125,7 @@ const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) 
                     disabled={isSelf}
                     onClick={() => setRejecting(user.id)}
                   >
-                    דחייה
+                    {t("pending.reject")}
                   </Button>
                 </Box>
               )}

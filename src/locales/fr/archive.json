@@ -1,0 +1,101 @@
+{
+  "title": "Archives des médias",
+  "upload": "Téléverser un média",
+  "tabs": {
+    "archive": "Archives",
+    "smartSearch": "Recherche approfondie intelligente"
+  },
+  "results_one": "Un résultat",
+  "results_other": "{{formatted}} résultats",
+  "showing": " · {{n}} affichés",
+  "sort": {
+    "label": "Trier",
+    "newest": "Les plus récents",
+    "oldest": "Les plus anciens",
+    "title": "Titre du cours (A–Z)",
+    "creator": "Nom de l'enseignant (A–Z)",
+    "liked": "Les plus aimés"
+  },
+  "filter": {
+    "toggle": "Filtrer",
+    "search": "Rechercher...",
+    "type": "Type de contenu",
+    "all": "Tout",
+    "creator": "Enseignant / auteur",
+    "length": "Durée du cours",
+    "from": "Téléversé à partir du",
+    "to": "Téléversé jusqu'au",
+    "clearAll": "Tout effacer"
+  },
+  "selected": {
+    "chosenGroup": "Étiquettes choisies pour le filtre",
+    "removedGroup": "Étiquettes retirées du filtre",
+    "chosenLabel": "Filtré par :",
+    "removedLabel": "Sans :",
+    "chosenSpoken": "Filtré par",
+    "removedSpoken": "Retiré du filtre",
+    "tagCount": "{{count}} étiquettes",
+    "remove": "Retirer {{name}} du filtre",
+    "clear": "Effacer les étiquettes"
+  },
+  "tree": {
+    "back": "Retour",
+    "backToAll": "Retour à toutes les étiquettes",
+    "all": "Toutes les étiquettes",
+    "search": "Rechercher une étiquette...",
+    "searchLabel": "Rechercher une étiquette",
+    "open": "Ouvrir {{name}}",
+    "noMatch": "Aucune étiquette ne correspond à « {{term}} »",
+    "empty": "Aucune étiquette à ce niveau",
+    "tooMany": "{{shown}} étiquettes affichées sur {{total}} — affinez la recherche",
+    "wholeBranch": "Le nombre couvre toute la branche, y compris ce qui en a été retiré",
+    "partial": "Partiellement choisi — certaines catégories de cette branche ont été retirées",
+    "partialSpoken": "Partiellement choisi, {{count}} étiquettes",
+    "inside": "Dans {{path}}",
+    "mark": {
+      "included": "Choisi · cliquez à nouveau pour annuler",
+      "inherited": "Inclus via la catégorie parente choisie · cliquez pour le retirer du filtre",
+      "excluded": "Retiré du filtre · cliquez à nouveau pour rétablir",
+      "inheritedExcluded": "Hors du filtre via une catégorie parente retirée",
+      "contains": "Un élément de cette catégorie est choisi"
+    },
+    "spoken": {
+      "included": "Choisi · cliquez pour annuler",
+      "inherited": "Inclus via une catégorie parente · cliquez pour le retirer du filtre",
+      "excluded": "Retiré du filtre · cliquez pour rétablir",
+      "inheritedExcluded": "Hors du filtre via une catégorie parente · cliquez pour rétablir",
+      "contains": "Un élément à l'intérieur est choisi · cliquez pour tout choisir",
+      "none": "Non choisi · cliquez pour choisir"
+    }
+  },
+  "edit": {
+    "detailsTitle": "Modifier les informations — {{title}}",
+    "currentCourse": "Cours actuel",
+    "tagsTitle": "Étiquettes — {{title}}",
+    "tagsHint": "Les étiquettes déterminent où l'élément sera trouvé dans les filtres et la recherche.",
+    "saving": "Enregistrement...",
+    "save": "Enregistrer"
+  },
+  "notices": {
+    "staleTags": "Certaines étiquettes du filtre n'existent plus et en ont été retirées",
+    "tagsSaved": "Étiquettes mises à jour",
+    "tagsFailed": "La mise à jour des étiquettes a échoué",
+    "detailsSaved": "Informations du cours mises à jour",
+    "detailsFailed": "La mise à jour des informations a échoué",
+    "published": "L'élément a été publié et est visible par les élèves",
+    "hidden": "L'élément a été masqué aux élèves",
+    "publishFailed": "La mise à jour de la publication a échoué"
+  },
+  "smartSearch": {
+    "placeholder": "Recherche approfondie intelligente",
+    "run": "Rechercher",
+    "none": "Aucun résultat correspondant."
+  },
+  "greeting": {
+    "morning": "Bonjour",
+    "afternoon": "Bon après-midi",
+    "evening": "Bonsoir",
+    "night": "Bonne nuit",
+    "named": "{{greeting}}, <name>{{name}}</name>"
+  }
+}

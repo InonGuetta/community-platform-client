@@ -1,0 +1,51 @@
+{
+  "title": "Soutenez notre communauté",
+  "intro": "Votre don nous aide à créer davantage de contenu et à garder la plateforme gratuite pour les élèves.",
+  "form": {
+    "type": "Type de don",
+    "oneTime": "Ponctuel",
+    "monthly": "Mensuel",
+    "monthlySoon": "Les dons mensuels seront bientôt disponibles",
+    "amount": "Montant (₪)",
+    "custom": "Montant personnalisé",
+    "minimum": "Le montant minimum est de {{min}} ₪",
+    "preparing": "Préparation du paiement...",
+    "continue": "Continuer vers le paiement de {{amount}} ₪",
+    "secure": "Paiement sécurisé via Stripe. Vos données de carte sont saisies directement chez Stripe et ne transitent jamais par nous."
+  },
+  "payment": {
+    "of": "Un don de {{amount}}",
+    "processing": "Traitement...",
+    "pay": "Payer {{amount}}",
+    "back": "Retour"
+  },
+  "result": {
+    "retry": "Réessayer",
+    "another": "Faire un autre don",
+    "completed": {
+      "title": "Merci beaucoup !",
+      "body": "Votre don a été reçu. Un reçu vous sera envoyé par e-mail."
+    },
+    "pending": {
+      "title": "Paiement en cours de vérification",
+      "body": "Le paiement n'a pas encore été définitivement confirmé. Son statut sera mis à jour dans « Mes dons » dès qu'il le sera."
+    },
+    "failed": {
+      "title": "Le paiement n'est pas passé",
+      "body": "Aucun montant n'a été prélevé. Vous pouvez réessayer, avec la même carte ou une autre."
+    }
+  },
+  "mine": {
+    "title": "Mes dons"
+  },
+  "status": {
+    "completed": "Effectué",
+    "pending": "En attente",
+    "failed": "Échoué"
+  },
+  "errors": {
+    "start": "Le paiement n'a pas pu démarrer. Veuillez réessayer.",
+    "loadForm": "Le formulaire de paiement n'a pas pu être chargé. Vérifiez votre connexion et réessayez.",
+    "paymentFailed": "Le paiement n'est pas passé. Veuillez réessayer."
+  }
+}

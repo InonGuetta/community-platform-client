@@ -1,0 +1,77 @@
+{
+  "title": "Mi cuaderno",
+  "newNote": "Nota nueva",
+  "noNotes": "Todavía no hay notas. Crea una nota nueva para empezar.",
+  "noMatchingNotes": "Ninguna nota coincide con la búsqueda.",
+  "noMatchingNotesShort": "No se encontraron notas.",
+  "bookmarks": {
+    "title": "Mis marcadores",
+    "dragHint": "Arrástralo a una nota",
+    "none": "Todavía no hay marcadores. Marca momentos en las clases y aparecerán aquí.",
+    "noMatch": "No se encontraron marcadores."
+  },
+  "index": {
+    "search": "Buscar en el cuaderno...",
+    "searchLabel": "Buscar en el cuaderno",
+    "selectAll": "Seleccionar todas las notas mostradas",
+    "selected": "{{count}} seleccionadas",
+    "multiSelect": "Selección múltiple",
+    "deleteSelected": "Eliminar las seleccionadas",
+    "selectNote": "Seleccionar la nota {{title}}",
+    "notSaved": "Sin guardar"
+  },
+  "export": {
+    "button": "Exportar",
+    "selectedTooltip": "Exportar las {{count}} notas seleccionadas",
+    "allTooltip": "Exportar todas las notas mostradas",
+    "selectedCount": "{{count}} notas seleccionadas",
+    "allCount": "Todas las notas mostradas ({{count}})",
+    "pdf": "Exportar a PDF",
+    "pdfHint": "Solo texto, sin formato ni imágenes",
+    "word": "Exportar a Word",
+    "wordHint": "Con el formato y las imágenes",
+    "split": "Dividir en varios cuadernos…",
+    "splitHint": "Elige cuántos archivos y qué va en cada uno",
+    "summaryFiles": "{{files}} archivos · {{format}}",
+    "summaryNotes": "{{notes}} notas · {{format}}",
+    "filesCreated": "Se crearon {{n}} archivos",
+    "failed": "La exportación falló. Inténtalo de nuevo.",
+    "exporting": "Exportando...",
+    "sources": {
+      "title": "¿Cómo incluir las fuentes?",
+      "footnotes": "Fuentes a pie de página",
+      "footnotesHint": "Un número pequeño en el texto, y la fuente completa impresa al pie de la página donde aparece",
+      "inline": "Fuentes dentro del texto",
+      "inlineHint": "Cada fuente va numerada y se queda en su sitio, con el contenido tal como aparece en la pestaña",
+      "none": "Exportar sin ninguna fuente",
+      "noneHint": "Solo lo que escribiste, sin las referencias a las clases"
+    },
+    "splitDialog": {
+      "title": "Dividir la exportación en varios cuadernos",
+      "bookName": "Cuaderno {{n}}",
+      "howMany": "Cuántos cuadernos",
+      "format": "Formato de exportación",
+      "dragHint": "↔ Arrastra una nota entre cuadernos, o arriba y abajo dentro de uno",
+      "fileName": "Nombre del archivo ({{count}} notas)",
+      "dropHere": "Suelta aquí",
+      "empty": "Vacío: arrastra notas aquí, o no se creará ningún archivo para él",
+      "moveUp": "Subir",
+      "moveUpNamed": "Subir {{title}}",
+      "moveDown": "Bajar",
+      "moveDownNamed": "Bajar {{title}}",
+      "bookOf": "El cuaderno de {{title}}",
+      "totals": "{{files}} archivos · {{notes}} notas",
+      "run": "Exportar {{n}} archivos"
+    }
+  },
+  "delete": {
+    "one": "¿Seguro que quieres eliminar la nota «{{title}}»?",
+    "many": "¿Seguro que quieres eliminar {{count}} notas? Esta acción no se puede deshacer."
+  },
+  "notices": {
+    "stillLoading": "La nota todavía se está cargando. Inténtalo de nuevo en un momento.",
+    "noneChosen": "No hay ninguna nota elegida. Haz clic dentro de una nota y luego guarda.",
+    "clearSearchToReorder": "Borra la búsqueda para reordenar las notas",
+    "needTwoToReorder": "Hacen falta al menos dos notas para reordenar"
+  }
+}

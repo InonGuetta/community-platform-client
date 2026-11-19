@@ -1,0 +1,61 @@
+{
+  "label": "Étiquettes",
+  "helper": "Jusqu'à {{max}} étiquettes. Utilisées pour le filtrage et la recherche.",
+  "noOptions": "Aucune étiquette de ce nom — vous pouvez l'ajouter avec « Ajouter une étiquette »",
+  "placeholder": "Type de contenu — rechercher et choisir dans la liste",
+  "rootGroup": "Rubriques principales",
+  "topLevel": "Rubrique principale",
+  "root": "Racine",
+  "propose": {
+    "title": "Ajouter une nouvelle étiquette",
+    "submit": "Envoyer pour approbation",
+    "note": "L'étiquette sera envoyée pour approbation à l'administrateur. Une fois approuvée, elle entrera dans le système et sera ajoutée à ce cours.",
+    "saveFailed": "L'enregistrement a échoué. Veuillez réessayer.",
+    "name": "Nom de l'étiquette",
+    "maxLength": "Jusqu'à {{n}} caractères",
+    "existsHere": "Cette étiquette existe déjà ici — vous pouvez la choisir dans la liste",
+    "existsElsewhere": "Une étiquette de ce nom existe déjà sous : {{places}}. Si c'est celle que vous cherchiez, vous pouvez la choisir directement dans la liste des étiquettes.",
+    "whichParent": "Sous quelle étiquette parente ?",
+    "parentHint": "Cliquer sur une étiquette l'ouvre et la choisit comme parente. « Racine » — une nouvelle rubrique principale.",
+    "placement": "Emplacement de la nouvelle étiquette :",
+    "topLevelPrefix": "Rubrique principale : ",
+    "sendFailed": "L'envoi de l'étiquette a échoué. Veuillez réessayer."
+  },
+  "parent": {
+    "search": "Rechercher une étiquette parente par nom...",
+    "searchLabel": "Rechercher une étiquette parente",
+    "trail": "Position dans l'arbre des étiquettes",
+    "noMatch": "Aucune étiquette de ce nom",
+    "noChildren": "Il n'y a aucune étiquette sous « {{name}} ». La nouvelle sera la première ici.",
+    "below": "{{count}} étiquettes en dessous"
+  },
+  "proposals": {
+    "add": "Ajouter une étiquette",
+    "createHint": "Vous n'avez pas trouvé d'étiquette adaptée ? Vous pouvez en créer une.",
+    "proposeHint": "Vous n'avez pas trouvé d'étiquette adaptée ? Vous pouvez en proposer une à l'approbation de l'administrateur.",
+    "pending": "En attente d'approbation — elles seront ajoutées au cours une fois approuvées :",
+    "under": "Sous : {{place}}",
+    "pendingNamed": "En attente d'approbation : {{name}} ({{place}})",
+    "create": "Créer l'étiquette",
+    "adminNote": "En tant qu'administrateur, l'étiquette sera créée immédiatement et ajoutée à ce cours."
+  },
+  "suggest": {
+    "title": "De quoi parle le cours ?",
+    "uploaded": "« {{title}} » a été téléversé. Les étiquettes déterminent où il sera trouvé dans les filtres et la recherche.",
+    "fromTitle": "Suggestions d'après le titre — cliquez pour ajouter ou retirer :",
+    "suggestion": "Suggestion : {{name}}",
+    "suggestionWithPath": "Suggestion : {{name}} ({{path}})",
+    "toSave": "Étiquettes à enregistrer",
+    "canEdit": "Vous pouvez ajouter ou retirer ici n'importe quelle étiquette, même non suggérée.",
+    "noneFromTitle": "Aucune suggestion n'a été trouvée d'après le titre — vous pouvez choisir à la main.",
+    "skip": "Passer",
+    "save": "Enregistrer les étiquettes",
+    "reasons": {
+      "titleSays": "Le titre dit « {{phrase}} »",
+      "nameInTitle": "Le nom « {{name}} » figure dans le titre",
+      "closestSubject": "« {{word}} » dans le titre — le sujet le plus proche dans l'arbre",
+      "parasha": "et une paracha, d'après le mot « פרשת »",
+      "broader": "la plus large des deux, car le titre ne dit pas « פרשת »"
+    }
+  }
+}

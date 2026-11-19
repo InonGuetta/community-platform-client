@@ -9,6 +9,8 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { useTranslation } from "react-i18next";
+import { formatShortDate } from "../../../../utilities/formatDate";
 
 // Who gave what, which an admin could not see at all.
 //
@@ -21,10 +23,11 @@ const CURRENCY_SYMBOLS = { ILS: "₪", USD: "$", EUR: "€" };
 const money = (cents, currency) =>
   `${CURRENCY_SYMBOLS[String(currency).toUpperCase()] ?? ""}${(cents / 100).toFixed(2)}`;
 
-const STATUS_LABELS = { completed: "הושלם", pending: "ממתין", failed: "נכשל" };
 const STATUS_COLORS = { completed: "success", pending: "warning", failed: "error" };
+const STATUSES = Object.keys(STATUS_COLORS);
 
 const DonationsLedger = ({ donations, totals }) => {
+  const { t } = useTranslation("admin");
   const [filter, setFilter] = useState("");
 
   const rows = filter ? donations.filter((d) => d.status === filter) : donations;
@@ -32,11 +35,11 @@ const DonationsLedger = ({ donations, totals }) => {
   return (
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, gap: 2, flexWrap: "wrap" }}>
-        <Typography variant="h6" fontWeight={700}>תרומות</Typography>
+        <Typography variant="h6" fontWeight={700}>{t("donations.title")}</Typography>
         <ToggleButtonGroup size="small" exclusive value={filter} onChange={(_, v) => setFilter(v ?? "")}>
-          <ToggleButton value="">הכול</ToggleButton>
-          {Object.keys(STATUS_LABELS).map((status) => (
-            <ToggleButton key={status} value={status}>{STATUS_LABELS[status]}</ToggleButton>
+          <ToggleButton value="">{t("donations.all")}</ToggleButton>
+          {STATUSES.map((status) => (
+            <ToggleButton key={status} value={status}>{t(`donations.statuses.${status}`)}</ToggleButton>
           ))}
         </ToggleButtonGroup>
       </Box>
@@ -50,33 +53,33 @@ const DonationsLedger = ({ donations, totals }) => {
             key={total.status}
             color={STATUS_COLORS[total.status] ?? "default"}
             variant="outlined"
-            label={`${STATUS_LABELS[total.status] ?? total.status}: ${money(total.total_cents, "ILS")} (${total.count})`}
+            label={`${t(`donations.statuses.${total.status}`, { defaultValue: total.status })}: ${money(total.total_cents, "ILS")} (${total.count})`}
           />
         ))}
       </Box>
 
       {rows.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">אין תרומות להצגה.</Typography>
+        <Typography variant="body2" color="text.secondary">{t("donations.none")}</Typography>
       ) : (
         <Box sx={{ overflowX: "auto" }}>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>תאריך</TableCell>
-                <TableCell>תורם</TableCell>
-                <TableCell>סכום</TableCell>
-                <TableCell>סוג</TableCell>
-                <TableCell>מצב</TableCell>
+                <TableCell>{t("donations.date")}</TableCell>
+                <TableCell>{t("donations.donor")}</TableCell>
+                <TableCell>{t("donations.amount")}</TableCell>
+                <TableCell>{t("donations.type")}</TableCell>
+                <TableCell>{t("donations.status")}</TableCell>
                 {/* The Stripe reference is what makes this reconcilable — it is
                     the id to paste into their dashboard. */}
-                <TableCell>אסמכתא Stripe</TableCell>
+                <TableCell>{t("donations.stripeRef")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.map((donation) => (
                 <TableRow key={donation.id}>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>
-                    {new Date(donation.created_at).toLocaleDateString("he-IL")}
+                    {formatShortDate(donation.created_at)}
                   </TableCell>
                   <TableCell sx={{ maxWidth: 200, wordBreak: "break-word" }}>
                     {donation.donor_name || donation.donor_email || "—"}
@@ -84,12 +87,12 @@ const DonationsLedger = ({ donations, totals }) => {
                   <TableCell sx={{ whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                     {money(donation.amount_cents, donation.currency)}
                   </TableCell>
-                  <TableCell>{donation.type === "monthly" ? "חודשי" : "חד פעמי"}</TableCell>
+                  <TableCell>{donation.type === "monthly" ? t("donations.monthly") : t("donations.oneTime")}</TableCell>
                   <TableCell>
                     <Chip
                       size="small"
                       color={STATUS_COLORS[donation.status] ?? "default"}
-                      label={STATUS_LABELS[donation.status] ?? donation.status}
+                      label={t(`donations.statuses.${donation.status}`, { defaultValue: donation.status })}
                     />
                   </TableCell>
                   <TableCell sx={{ fontFamily: "monospace", fontSize: "0.75rem", direction: "ltr", unicodeBidi: "isolate" }}>

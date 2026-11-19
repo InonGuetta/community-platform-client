@@ -7,6 +7,8 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import TextQualityNotice from "./TextQualityNotice";
+import { processingReasonText } from "../../../../utilities/processingReason";
+import { useTranslation } from "react-i18next";
 
 // The panel used to render `null` whenever there was no summary — which was
 // tolerable when a summary arrived a minute after a lecture was transcribed, and
@@ -37,12 +39,10 @@ const FAILURE_VISIBLE_MS = 10000;
 
 // 'processing' means different work depending on the source, and telling a
 // lecturer their book is "being transcribed" is both wrong and alarming.
-const progressLabel = (status, isText) => {
-  if (status === "pending") return "ממתין בתור...";
-  if (status === "processing") {
-    return isText ? "מחלץ את הטקסט מהקובץ..." : "מתמלל את ההקלטה...";
-  }
-  return "מפיק סיכום ונקודות מפתח...";
+const progressLabel = (t, status, isText) => {
+  if (status === "pending") return t("summary.queued");
+  if (status === "processing") return t(isText ? "summary.extracting" : "summary.transcribing");
+  return t("summary.analyzing");
 };
 
 const AISummaryPanel = ({
@@ -66,6 +66,7 @@ const AISummaryPanel = ({
   // is this about"), so they sit at the foot of the same tab.
   tags = [],
 }) => {
+  const { t } = useTranslation("lesson");
   const status = transcript?.status;
   const summary = transcript?.ai_summary;
   const keyPoints = transcript?.ai_key_points || [];
@@ -95,7 +96,7 @@ const AISummaryPanel = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="subtitle1" fontWeight={600}>סיכום AI</Typography>
+      <Typography variant="subtitle1" fontWeight={600}>{t("summary.title")}</Typography>
 
       {/* A book only: a recording's transcript is never OCR. canGenerate is
           exactly "may re-process this document", so it is also who can fix it. */}
@@ -104,7 +105,7 @@ const AISummaryPanel = ({
       {running && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1, color: "text.secondary" }}>
           <CircularProgress size={18} />
-          <Typography variant="body2">{progressLabel(status, isText)}</Typography>
+          <Typography variant="body2">{progressLabel(t, status, isText)}</Typography>
         </Box>
       )}
 
@@ -114,35 +115,36 @@ const AISummaryPanel = ({
           action={
             onRetryPolling && (
               <Button color="inherit" size="small" onClick={onRetryPolling}>
-                בדוק שוב
+                {t("summary.checkAgain")}
               </Button>
             )
           }
         >
-          הפסקנו לבדוק אחרי המתנה ארוכה. ייתכן שהתהליך נתקע.
+          {t("summary.stoppedChecking")}
         </Alert>
       )}
 
-      {/* error_message carries the reason the worker recorded. For a document it
+      {/* error_message carries the reason the worker recorded, as a code worded
+          here in the reader's language (utilities/processingReason.js). For a document it
           is usually something the lecturer can act on ("this file is a scan"),
           which is exactly the difference between a dead end and a next step. */}
       {showFailure && (
         <Alert severity="error">
-          {transcript?.error_message || "הפקת הסיכום נכשלה. אפשר לנסות שוב."}
+          {processingReasonText(transcript?.error_message, t("summary.failed"))}
         </Alert>
       )}
 
       {summary && !running && (
-        <Typography variant="body2" color="text.secondary">{summary}</Typography>
+        <Typography variant="body2" color="text.secondary" dir="auto">{summary}</Typography>
       )}
 
       {summary && keyPoints.length > 0 && !running && (
         <>
           <Divider />
-          <Typography variant="subtitle2" fontWeight={600}>נקודות מפתח</Typography>
+          <Typography variant="subtitle2" fontWeight={600}>{t("summary.keyPoints")}</Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
             {keyPoints.map((point, i) => (
-              <Chip key={i} label={point} size="small" variant="outlined" color="primary" />
+              <Chip key={i} label={point} dir="auto" size="small" variant="outlined" color="primary" />
             ))}
           </Box>
         </>
@@ -154,7 +156,7 @@ const AISummaryPanel = ({
       {tags.length > 0 && (
         <>
           <Divider />
-          <Typography variant="subtitle2" fontWeight={600}>תגיות</Typography>
+          <Typography variant="subtitle2" fontWeight={600}>{t("summary.tags")}</Typography>
           <Box data-testid="summary-tags" sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
             {tags.map((tag) => (
               <Chip key={tag} label={tag} size="small" variant="outlined" color="secondary" />
@@ -169,14 +171,14 @@ const AISummaryPanel = ({
       {!summary && !inFlight && !showFailure && (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
           <Typography variant="body2" color="text.secondary">
-            {isText ? "אין סיכום עבור תוכן זה" : "אין עדיין סיכום."}
+            {t("summary.none", { context: isText ? "book" : "lesson" })}
           </Typography>
           {/* Kept beside it rather than instead of it: the first line says what
               the state is, this one says what the button will do — which for a
               document is not obvious, since it extracts the text as well. */}
           {canGenerate && (
             <Typography variant="caption" color="text.disabled">
-              לחץ &apos;הפק סיכום&apos; כדי לחלץ את הטקסט מהקובץ ולסכם אותו.
+              {t("summary.howToBook")}
             </Typography>
           )}
         </Box>
@@ -191,7 +193,7 @@ const AISummaryPanel = ({
           startIcon={running ? <CircularProgress size={14} color="inherit" /> : null}
           sx={{ alignSelf: "flex-start" }}
         >
-          {summary ? "הפק סיכום מחדש" : "הפק סיכום"}
+          {summary ? t("summary.regenerate") : t("summary.generate")}
         </Button>
       )}
     </Box>

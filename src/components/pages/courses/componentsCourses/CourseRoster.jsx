@@ -7,6 +7,7 @@ import Chip from "@mui/material/Chip";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { useCourseRoster, MIN_SEARCH_LENGTH } from "./useCourseRoster";
+import { useTranslation } from "react-i18next";
 
 // The enrolled students of one course, plus the control that adds another.
 //
@@ -30,6 +31,7 @@ import { useCourseRoster, MIN_SEARCH_LENGTH } from "./useCourseRoster";
 // `onUnenroll` receives the whole student, not an id: the page asks before
 // removing anybody (ROST-8), and the question names the person.
 const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll, onExport }) => {
+  const { t } = useTranslation("courses");
   const { enrolled, picked, setPicked, query, setQuery, options, searching, add } = useCourseRoster({ courseId, canEnroll, onEnroll });
 
   return (
@@ -54,11 +56,11 @@ const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll, onExport }) =
             isOptionEqualToValue={(o, v) => o.id === v.id}
             noOptionsText={
               query.trim().length < MIN_SEARCH_LENGTH
-                ? "הקלד לפחות שתי אותיות לחיפוש"
-                : "לא נמצאו משתמשים"
+                ? t("roster.typeMore")
+                : t("roster.noUsers")
             }
             renderInput={(params) => (
-              <TextField {...params} label="חיפוש משתמש להוספה לקורס" />
+              <TextField {...params} label={t("roster.search")} />
             )}
           />
           <Button
@@ -67,7 +69,7 @@ const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll, onExport }) =
             onClick={add}
             disabled={!picked}
           >
-            הוספה
+            {t("roster.add")}
           </Button>
         </Box>
       )}
@@ -75,14 +77,14 @@ const CourseRoster = ({ courseId, canEnroll, onEnroll, onUnenroll, onExport }) =
       {canEnroll && onExport && enrolled.length > 0 && (
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
           <Button size="small" startIcon={<FileDownloadIcon />} onClick={() => onExport(enrolled)}>
-            ייצוא ל‑CSV
+            {t("roster.export")}
           </Button>
         </Box>
       )}
 
       {enrolled.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
-          אין תלמידים רשומים לקורס זה.
+          {t("roster.empty")}
         </Typography>
       ) : (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>

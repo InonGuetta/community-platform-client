@@ -6,15 +6,18 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import UploadIcon from "@mui/icons-material/Upload";
 import ArchiveBrowser from "./componentsArchive/ArchiveBrowser";
+import ArchiveGreeting from "./componentsArchive/ArchiveGreeting";
 import UploadMedia from "../../features/UploadMedia/UploadMedia";
 import SmartSearch from "../../features/SmartSearch/SmartSearch";
 import useArchivePageController from "./useArchivePageController";
 import { useArchiveUpload } from "./useArchiveUpload";
+import { useTranslation } from "react-i18next";
 
 // The filters, the cards and their dialogs are ArchiveBrowser, shared with a
 // lecturer's page (PRD ATTR-10). What is only the archive's is here: the
 // upload button, the smart-search tab and the picture beside them.
 const ArchivePage = () => {
+  const { t } = useTranslation("archive");
   const archive = useArchivePageController();
   const { user, isUploadOpen, canUpload } = useArchiveUpload();
   const [tab, setTab] = useState(0);
@@ -22,9 +25,13 @@ const ArchivePage = () => {
   return (
     <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
       {/* Main content */}
-      <Box sx={{ flexGrow: 1, p: 3 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-          <Typography variant="h4" fontWeight={800} color="primary">ארכיון מדיה</Typography>
+      <Box sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
+        {/* Wraps: the title and the button are as long as the language makes
+            them, and side by side they were wider than a phone in French. */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2, mb: 3 }}>
+          <Typography variant="h4" fontWeight={800} color="primary">{t("title")}</Typography>
+          {/* Between the title and the button: good morning, by name. */}
+          <ArchiveGreeting name={user?.display_name?.trim()} />
           {canUpload && (
             <Button variant="contained" startIcon={<UploadIcon />} onClick={archive.handleOpenUpload}
               sx={{
@@ -33,14 +40,17 @@ const ArchivePage = () => {
                 borderRadius: 2, fontWeight: 700, px: 3, boxShadow: "0 3px 10px rgba(21,151,187,0.35)",
               }}
             >
-              העלאת מדיה
+              {t("upload")}
             </Button>
           )}
         </Box>
 
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
-          <Tab label="ארכיון" />
-          <Tab label="חיפוש עומק חכם" />
+        {/* Scrollable: a tab's label is as long as its language makes it
+            ("Recherche approfondie intelligente"), and fixed tabs wider than a
+            phone widen the whole page with them. */}
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons={false} sx={{ mb: 3 }}>
+          <Tab label={t("tabs.archive")} />
+          <Tab label={t("tabs.smartSearch")} />
         </Tabs>
 
         {tab === 0 && (
@@ -64,7 +74,7 @@ const ArchivePage = () => {
           top: 64,
           alignSelf: "flex-start",
           height: "calc(100vh - 64px)",
-          borderLeft: "1px solid rgba(0,0,0,0.06)",
+          borderInlineEnd: "1px solid rgba(0,0,0,0.06)",
           opacity: 0.5,
         }}
       />

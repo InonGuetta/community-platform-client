@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tagOptionsFrom, ROOT_GROUP } from "./tagOptions";
+import { tagOptionsFrom, rootGroup } from "./tagOptions";
 
 // The list the picker offers, and the one property of it that is not visual
 // taste: MUI draws a group header per RUN of equal group values, so a list whose
@@ -25,7 +25,7 @@ const TREE = [
   { id: 40, name: "שיעור לנוער", parent_id: null },
 ];
 
-const groupsOf = (options) => options.map((o) => o.path || ROOT_GROUP);
+const groupsOf = (options) => options.map((o) => o.path || rootGroup());
 const headerRuns = (groups) => groups.filter((g, i) => g !== groups[i - 1]);
 
 describe("the order the options come in", () => {

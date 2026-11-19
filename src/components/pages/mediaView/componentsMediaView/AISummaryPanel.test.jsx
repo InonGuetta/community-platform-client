@@ -2,6 +2,7 @@
 import { test, expect, describe, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import AISummaryPanel from "./AISummaryPanel";
+import i18n from "../../../../i18n/i18n";
 
 // What the tab says when there is no summary, and for how long it says a
 // failure.
@@ -93,5 +94,19 @@ describe("a document whose summary failed", () => {
 
     act(() => { vi.advanceTimersByTime(60000); });
     expect(alertText()).toBeInTheDocument();
+  });
+});
+
+// The interface changes language; the lesson does not (docs/i18n-plan.md). The
+// summary and its key points carry dir="auto", so a Hebrew summary still reads
+// right to left inside an English page.
+describe("a summary inside an English interface", () => {
+  test("keeps its own direction", async () => {
+    await act(() => i18n.changeLanguage("en"));
+    const done = { status: "done", ai_summary: "סיכום השיעור", ai_key_points: ["נקודה ראשונה"] };
+    render(<AISummaryPanel transcript={done} />);
+    expect(document.documentElement.dir).toBe("ltr");
+    expect(screen.getByText("סיכום השיעור")).toHaveAttribute("dir", "auto");
+    expect(screen.getByText("נקודה ראשונה").closest("[dir]")).toHaveAttribute("dir", "auto");
   });
 });

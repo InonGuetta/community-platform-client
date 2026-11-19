@@ -1,0 +1,39 @@
+{
+  "appName": "Plataforma comunitaria",
+  "language": {
+    "label": "Idioma del sitio",
+    "change": "Cambiar idioma"
+  },
+  "actions": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "close": "Cerrar",
+    "gotIt": "Entendido"
+  },
+  "user": {
+    "fallbackName": "Usuario"
+  },
+  "search": {
+    "placeholder": "Buscar..."
+  },
+  "noData": "No hay nada que mostrar",
+  "floatingWindow": {
+    "closeKeepsTabs": "Cerrar la ventana (tus pestañas se conservan)"
+  },
+  "confirmDelete": {
+    "title": "Confirmar eliminación",
+    "question": "¿Eliminar {{what}} <strong>{{name}}</strong>? Esta acción no se puede deshacer.",
+    "what": {
+      "media": "el elemento multimedia",
+      "user": "el usuario",
+      "course": "el curso",
+      "item": "el elemento"
+    }
+  },
+  "errorBoundary": {
+    "title": "Algo salió mal",
+    "body": "Se produjo un error inesperado al cargar la página. Recargarla suele solucionarlo.",
+    "reload": "Recargar la página",
+    "toArchive": "Volver al archivo"
+  }
+}

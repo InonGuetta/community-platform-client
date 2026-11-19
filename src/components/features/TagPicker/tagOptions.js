@@ -1,4 +1,5 @@
 import { buildTagRelations } from "../../../utilities/tagStates";
+import i18n from "../../../i18n/i18n";
 
 // Turning the taxonomy into a list somebody can pick from.
 //
@@ -13,7 +14,8 @@ import { buildTagRelations } from "../../../utilities/tagStates";
 // — and an empty group is not a group: MUI renders one header per RUN of equal
 // values, so several of them scattered through the list produce repeated empty
 // headers, which it warns about and, with freeSolo typing, hangs on.
-export const ROOT_GROUP = "כותרות ראשיות";
+// The heading tags without a parent are grouped under, in the current language.
+export const rootGroup = () => i18n.t("tags:rootGroup");
 
 export const tagOptionsFrom = (nodes = []) => {
   const relations = buildTagRelations(nodes);
@@ -35,7 +37,7 @@ export const tagOptionsFrom = (nodes = []) => {
       // grouped list whose groups are not contiguous gets a fresh header every
       // time the value changes back, so one branch appears four times under four
       // identical headings.
-      .sort((a, b) => (a.path || ROOT_GROUP).localeCompare(b.path || ROOT_GROUP, "he") || a.name.localeCompare(b.name, "he"))
+      .sort((a, b) => (a.path || rootGroup()).localeCompare(b.path || rootGroup(), "he") || a.name.localeCompare(b.name, "he"))
   );
 };
 

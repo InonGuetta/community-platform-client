@@ -18,7 +18,7 @@ import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 const profileCall = vi.hoisted(() => vi.fn());
 const passwordCall = vi.hoisted(() => vi.fn());
 
-// The mail switches load their own data; EmailPreferencesCard.test.jsx tests
+// The mail switches load their own data; NotificationPreferencesCard.test.jsx tests
 // them. Here they only must not reach the network.
 vi.mock("../../../api/notificationsApi", () => ({
   notificationsApi: { preferences: vi.fn().mockResolvedValue({ categories: [], allOff: false }), setPreference: vi.fn() },

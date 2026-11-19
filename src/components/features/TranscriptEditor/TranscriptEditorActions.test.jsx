@@ -3,7 +3,7 @@ import { test, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import { ERROR_CODES, ERROR_CODE_HE } from "../../../utilities/apiError";
+import { ERROR_CODES, messageForError } from "../../../utilities/apiError";
 import transcriptReducer from "../../../store/slicesAndThunks/transcriptSlice/transcriptSlice";
 
 // The editor's three buttons: saving an edited transcript (and saying whether
@@ -60,7 +60,7 @@ test("a refused save with a code it knows says that instead", async () => {
   transcriptsApi.update.mockRejectedValue(refused(ERROR_CODES.FORBIDDEN));
   renderEditor();
   save();
-  expect(await screen.findByText(ERROR_CODE_HE[ERROR_CODES.FORBIDDEN])).toBeInTheDocument();
+  expect(await screen.findByText(messageForError({ code: ERROR_CODES.FORBIDDEN }))).toBeInTheDocument();
 });
 
 test("starting the pipeline refetches the transcript at once", async () => {

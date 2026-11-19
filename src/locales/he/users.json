@@ -1,0 +1,41 @@
+{
+  "title": "ניהול משתמשים",
+  "search": "חיפוש משתמשים...",
+  "active": "פעיל",
+  "inactive": "לא פעיל",
+  "edit": "עריכת {{name}}",
+  "cannotToggleSelf": "לא ניתן לשנות סטטוס של עצמך",
+  "deactivateHint": "העברה למצב לא פעיל",
+  "activateHint": "הפעלת משתמש",
+  "deactivate": "השבתת {{name}}",
+  "activate": "הפעלת {{name}}",
+  "delete": "מחיקת {{name}}",
+  "form": {
+    "editTitle": "עריכת משתמש",
+    "createTitle": "יצירת משתמש",
+    "displayName": "שם תצוגה",
+    "email": "אימייל",
+    "password": "סיסמה",
+    "role": "תפקיד",
+    "save": "שמירה"
+  },
+  "pending": {
+    "title": "ממתינים לאישור",
+    "requested": "ביקש: {{role}}",
+    "reasonPlaceholder": "סיבה (לא חובה) — תישלח במייל",
+    "sendReject": "שלח דחייה",
+    "cannotApproveSelf": "לא ניתן לאשר את הבקשה של עצמך",
+    "approve": "אישור",
+    "reject": "דחייה"
+  },
+  "add": "הוספת משתמש",
+  "headers": {
+    "id": "ID / מזהה",
+    "name": "שם",
+    "email": "אימייל",
+    "role": "תפקיד",
+    "status": "סטטוס",
+    "actions": "פעולות"
+  },
+  "phoneMasked": "טלפון מאומת: {{phone}}"
+}

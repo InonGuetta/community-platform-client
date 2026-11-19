@@ -4,14 +4,21 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider } from "@mui/material/styles";
 import { buildTheme } from "../../../theme/theme";
+import { useLanguage } from "../../../i18n/useLanguage";
+import LanguageSwitcher from "../../layout/LanguageSwitcher";
 
 // Auth is a branded, always-light landing built on hardcoded light styling.
 // Forcing the light theme here keeps it consistent even when the user has dark
 // mode enabled elsewhere (e.g. MUI's own Alert/inputs won't render dark on the
-// light glass card). Built once at module scope so it's a stable reference.
-const lightTheme = buildTheme("light");
+// light glass card). One per direction, each built the first time it is
+// needed and kept, so moving between the auth pages builds nothing.
+const lightThemes = {};
+const lightThemeFor = (direction) => (lightThemes[direction] ??= buildTheme("light", direction));
 
-const AuthLayout = ({ title, children }) => (
+const AuthLayout = ({ title, children }) => {
+  const { direction } = useLanguage();
+  const lightTheme = lightThemeFor(direction);
+  return (
   <ThemeProvider theme={lightTheme}>
   <Box sx={{
     minHeight: "100vh",
@@ -37,12 +44,17 @@ const AuthLayout = ({ title, children }) => (
       background: "radial-gradient(circle at 85% 18%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 48%)",
     },
   }}>
+    {/* The language, before anyone has signed in — in the top corner where a
+        line of text ends, as the bar's own icons are. */}
+    <Box sx={{ position: "absolute", top: 16, insetInlineEnd: 16, zIndex: 3 }}>
+      <LanguageSwitcher color="#424242" />
+    </Box>
+
     {/* Background image layer - zoomed out 20% */}
     <Box sx={{
       position: "absolute",
       top: "-12.5%",
-      left: "-12.5%",
-      right: "-12.5%",
+      insetInline: "-12.5%",
       bottom: "-12.5%",
       backgroundImage: 'url("/images/entry_image.png")',
       backgroundSize: "cover",
@@ -70,6 +82,7 @@ const AuthLayout = ({ title, children }) => (
       <Box sx={{
         position: "absolute",
         top: -1,
+        // eslint-disable-next-line no-restricted-syntax -- centring, not a side
         left: "50%",
         transform: "translateX(-50%)",
         width: 108,
@@ -89,12 +102,9 @@ const AuthLayout = ({ title, children }) => (
         {children}
       </CardContent>
     </Card>
-
-    <Typography variant="caption" sx={{ mt: 3, color: "#6e6e6e", zIndex: 2 }}>
-      כל השדות הם שדות חובה
-    </Typography>
   </Box>
   </ThemeProvider>
-);
+  );
+};
 
 export default AuthLayout;

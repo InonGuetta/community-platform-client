@@ -1,0 +1,59 @@
+{
+  "card": {
+    "draft": "Borrador",
+    "public": "Público",
+    "download": "Descargar",
+    "publishedHint": "Visible para los alumnos: haz clic para ocultar",
+    "draftHint": "Borrador: haz clic para publicar a los alumnos",
+    "hide": "Ocultar a los alumnos",
+    "publish": "Publicar a los alumnos",
+    "editDetails": "Editar datos",
+    "editDetailsOf": "Editar los datos de {{title}}",
+    "editTags": "Editar etiquetas",
+    "editTagsOf": "Editar las etiquetas de {{title}}",
+    "delete": "Eliminar",
+    "allByCreator": "Todas las clases de {{name}}",
+    "length": "Duración: {{length}}",
+    "likes_one": "Un me gusta",
+    "likes_other": "{{count}} me gusta"
+  },
+  "grid": {
+    "empty": "No se encontró contenido",
+    "noMatches": "No hay resultados que coincidan",
+    "loadingMore": "Cargando...",
+    "loadMore": "Cargar más"
+  },
+  "download": {
+    "audio": "Descargar audio",
+    "video": "Descargar vídeo",
+    "text": "Descargar el documento",
+    "audioOnly": "Descargar solo el audio",
+    "availableOffline": "Disponible sin conexión",
+    "toOfflineShelf": "A escuchar sin conexión",
+    "savingOffline": "Guardando para escuchar sin conexión…",
+    "savingOfflinePercent": "Guardando para escuchar sin conexión… {{percent}} %",
+    "saveOffline": "Guardar para escuchar sin conexión",
+    "captionsFile": "subtítulos",
+    "captions": "Descargar subtítulos (VTT)",
+    "preparingPdf": "Preparando el PDF...",
+    "transcriptPdf": "Descargar la transcripción (PDF)",
+    "transcriptFile": "transcripción",
+    "noTranscript": "No hay transcripción disponible para este elemento.",
+    "pdfFailed": "No se pudo crear el PDF. Inténtalo de nuevo."
+  },
+  "player": {
+    "pause": "Pausa",
+    "play": "Reproducir",
+    "position": "Posición en la clase",
+    "unmute": "Activar sonido",
+    "mute": "Silenciar",
+    "volume": "Volumen",
+    "hideCaptions": "Ocultar subtítulos",
+    "showCaptions": "Mostrar subtítulos",
+    "captions": "Subtítulos",
+    "settings": "Ajustes",
+    "settingsLabel": "Ajustes del reproductor",
+    "speed": "Velocidad de reproducción",
+    "lessonFallback": "Clase"
+  }
+}

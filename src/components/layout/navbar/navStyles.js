@@ -59,7 +59,11 @@ export const barSurfaceSx = (theme) =>
 export const navButtonSx = (isActive) => ({
   ...navLabelSx,
   borderRadius: 0,
-  px: 2,
+  // Narrower padding until the widest screens. A long label wraps onto a
+  // second line first; only a row that still does not fit scrolls
+  // (NavLinksBar).
+  px: { md: 1, xl: 2 },
+  minWidth: "auto",
   bgcolor: isActive ? NAV_ACTIVE : "transparent",
   "&:hover": { bgcolor: NAV_HOVER },
 });

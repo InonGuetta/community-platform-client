@@ -1,5 +1,6 @@
 import { sourceChipHtml, referencesBlockHtml } from "./noteSource";
 import { placeOf } from "./discussionPlace";
+import i18n from "../i18n/i18n";
 
 // An answer from the "דיון עם בינה מלאכותית" chat, saved as a note in the
 // lesson's notebook (PRD ASK-4).
@@ -46,7 +47,7 @@ export const citationChipHtml = (citation, { mediaId, mediaTitle, mediaType }) =
     timestampSeconds: Number.isFinite(citation.start_time) ? citation.start_time : null,
     pageNumber: Number.isInteger(citation.page_number) ? citation.page_number : null,
     mediaTitle,
-    note: `מקור ${citation.n}`,
+    note: i18n.t("format:discussion.source", { n: citation.n }),
     mediaType,
   });
 
@@ -63,7 +64,7 @@ export const answerNote = ({ question, answer, citations = [], mediaId, mediaTit
   return {
     title: asked.slice(0, NOTE_TITLE_MAX),
     body:
-      `<p><b>שאלה:</b> ${escapeHtml(asked)}</p>` +
+      `<p><b>${escapeHtml(i18n.t("format:discussion.question"))}</b> ${escapeHtml(asked)}</p>` +
       paragraphs(answer) +
       (chips ? referencesBlockHtml(chips) : ""),
     mediaId: Number(mediaId),
@@ -111,18 +112,18 @@ export const conversationText = (messages, { mediaTitle } = {}) => {
   const lines = [];
   // Trimmed: seen in the browser, a title stored with a trailing space.
   const title = String(mediaTitle ?? "").trim();
-  if (title) lines.push(`דיון עם בינה מלאכותית — ${title}`, "");
+  if (title) lines.push(i18n.t("format:discussion.title", { title }), "");
   for (const m of messages) {
     if (m.pending || m.streaming) continue;
     if (m.role === "user") {
-      lines.push(`שאלה: ${String(m.content).trim()}`);
+      lines.push(`${i18n.t("format:discussion.question")} ${String(m.content).trim()}`);
       continue;
     }
-    lines.push(`תשובה: ${String(m.content).trim()}`);
+    lines.push(`${i18n.t("format:discussion.answer")} ${String(m.content).trim()}`);
     const sources = [...(m.citations ?? [])]
       .sort((a, b) => Number(a.n) - Number(b.n))
       .map((c) => `[${c.n}] ${placeOf(c).label}`);
-    if (sources.length) lines.push(`מקורות: ${sources.join(" · ")}`);
+    if (sources.length) lines.push(i18n.t("format:discussion.sources", { list: sources.join(" · ") }));
     lines.push("");
   }
   return lines.join("\n").trim();

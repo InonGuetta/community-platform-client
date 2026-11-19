@@ -7,6 +7,7 @@ import { selectUser, selectAuthInitialized, selectAuthUnreachable } from "../../
 import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
 import { rememberReturnTo } from "../../../utilities/returnTo";
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
+import i18n from "../../../i18n/i18n";
 
 // Rendered instead of the page while fetchMe is still in flight. It used to be
 // `null`, which is a blank white screen for the length of a round trip — on a
@@ -24,7 +25,7 @@ const AuthPending = () => (
 const RoleDenied = () => {
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(notify({ message: "אין לך הרשאה לגשת לעמוד זה", severity: "warning" }));
+    dispatch(notify({ message: i18n.t("auth:noPermission"), severity: "warning" }));
   }, [dispatch]);
   return <Navigate to="/archive" replace />;
 };

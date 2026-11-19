@@ -16,6 +16,7 @@ vi.mock("../../../api/adminApi", () => ({
   adminApi: { overview: (...args) => overview(...args), reconcile: (...args) => reconcile(...args) },
 }));
 vi.mock("./componentsAdmin/AiUsagePanel", () => ({ default: () => <div data-testid="ai-usage" /> }));
+vi.mock("./componentsAdmin/SmsUsagePanel", () => ({ default: () => <div data-testid="sms-usage" /> }));
 vi.mock("./componentsAdmin/TagProposals", () => ({ default: () => <div data-testid="tag-proposals" /> }));
 
 import AdminDashboard from "./AdminDashboard";
@@ -48,10 +49,13 @@ describe("the overview", () => {
     expect(overview).toHaveBeenCalledTimes(1);
   });
 
-  test("a failed load is said out loud, in the server's words", async () => {
-    overview.mockRejectedValue({ response: { data: { message: "אין הרשאה" } } });
+  // The words for the error's code — never the server's own message, which is
+  // English prose written for a log.
+  test("a failed load is said out loud, in the words for its code", async () => {
+    overview.mockRejectedValue({ response: { data: { message: "Forbidden", code: "FORBIDDEN" } } });
     renderDashboard();
-    expect(await screen.findByText("אין הרשאה — הנתונים המוצגים עשויים להיות לא מעודכנים.")).toBeInTheDocument();
+    expect(await screen.findByText("אין לך הרשאה לפעולה זו — הנתונים המוצגים עשויים להיות לא מעודכנים.")).toBeInTheDocument();
+    expect(screen.queryByText(/Forbidden/)).not.toBeInTheDocument();
   });
 
   test("…or in its own when the server gave none", async () => {

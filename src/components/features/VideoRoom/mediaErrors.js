@@ -1,26 +1,14 @@
+import i18n from "../../../i18n/i18n";
 // Turning a getUserMedia failure into something a person can act on.
 //
 // Previously there was no catch at all: a denied permission produced an
 // unhandled rejection, the room was never joined, and the user stared at an
 // empty grid with nothing explaining why.
 
-const MESSAGE_BY_NAME = {
-  NotAllowedError:
-    "הגישה למצלמה ולמיקרופון נחסמה. אפשר להמשיך בצפייה בלבד, או לאשר את ההרשאה בדפדפן ולרענן.",
-  NotFoundError:
-    "לא נמצאו מצלמה או מיקרופון. הצטרפת בצפייה והאזנה בלבד.",
-  NotReadableError:
-    "המצלמה או המיקרופון תפוסים על ידי יישום אחר. סגור אותו ורענן, או המשך בצפייה בלבד.",
-  OverconstrainedError:
-    "המצלמה אינה תומכת בהגדרות הנדרשות. הצטרפת בצפייה בלבד.",
-  AbortError:
-    "הגישה למצלמה הופסקה. הצטרפת בצפייה בלבד.",
-};
+// The browser errors this names (sessions:media.<name>); any other gets the
+// fallback.
+const KNOWN_ERRORS = ["NotAllowedError", "NotFoundError", "NotReadableError", "OverconstrainedError", "AbortError"];
 
-const INSECURE_CONTEXT =
-  "וידאו דורש חיבור מאובטח (HTTPS). בכתובת הנוכחית הדפדפן חוסם גישה למצלמה.";
-
-const FALLBACK = "לא ניתן לגשת למצלמה ולמיקרופון. הצטרפת בצפייה בלבד.";
 
 // Browsers only expose navigator.mediaDevices in a secure context, so on plain
 // HTTP over a LAN address it is simply missing — and the resulting error says
@@ -30,6 +18,6 @@ export const mediaDevicesUnavailable = (navigatorRef = globalThis.navigator) =>
   !navigatorRef?.mediaDevices?.getUserMedia;
 
 export const describeMediaError = (error, { secureContext = true } = {}) => {
-  if (!secureContext) return INSECURE_CONTEXT;
-  return MESSAGE_BY_NAME[error?.name] || FALLBACK;
+  if (!secureContext) return i18n.t("sessions:media.insecure");
+  return i18n.t(KNOWN_ERRORS.includes(error?.name) ? `sessions:media.${error.name}` : "sessions:media.fallback");
 };

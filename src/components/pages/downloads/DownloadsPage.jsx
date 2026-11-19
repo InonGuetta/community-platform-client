@@ -17,7 +17,7 @@ import OfflinePlayer from "./OfflinePlayer";
 import { useDownloadsPageController } from "./useDownloadsPageController";
 import { lessonByline, lessonDetails, progressLabel, storageLine } from "./downloadsText";
 import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
-import { countLabel } from "../../../utilities/countLabel";
+import { useTranslation } from "react-i18next";
 import { percentOf } from "../../../utilities/offlineStore";
 
 // "הורדות להאזנה" (PRD MOB-2): the lessons this device keeps for listening with
@@ -28,28 +28,32 @@ import { percentOf } from "../../../utilities/offlineStore";
 // draws entirely from the device and links to a lesson's own page only when
 // there is a network to open it with.
 
-const OfflineNotice = ({ onRetry }) => (
+const OfflineNotice = ({ onRetry }) => {
+  const { t } = useTranslation("downloads");
+  return (
   <Alert
     severity="info"
     icon={<CloudOffOutlinedIcon />}
-    action={<Button color="inherit" size="small" onClick={onRetry}>נסו שוב</Button>}
+    action={<Button color="inherit" size="small" onClick={onRetry}>{t("retry")}</Button>}
     sx={{ mb: 3 }}
   >
-    אין חיבור לשרת. השיעורים שהורדתם זמינים כאן להאזנה.
+    {t("offline")}
   </Alert>
-);
+  );
+};
 
 const DownloadingRow = ({ entry, onCancel }) => {
+  const { t } = useTranslation("downloads");
   const percent = percentOf(entry.received, entry.total);
   return (
     <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography fontWeight={600} noWrap title={entry.title}>{entry.title}</Typography>
-          <Typography variant="body2" color="text.secondary">מוריד… {progressLabel(entry)}</Typography>
+          <Typography fontWeight={600} noWrap dir="auto" title={entry.title}>{entry.title}</Typography>
+          <Typography variant="body2" color="text.secondary">{t("downloading", { progress: progressLabel(entry) })}</Typography>
         </Box>
-        <Tooltip title="ביטול ההורדה">
-          <IconButton onClick={() => onCancel(entry.id)} aria-label={`ביטול ההורדה של ${entry.title}`}>
+        <Tooltip title={t("cancel")}>
+          <IconButton onClick={() => onCancel(entry.id)} aria-label={t("cancelNamed", { title: entry.title })}>
             <CloseIcon />
           </IconButton>
         </Tooltip>
@@ -64,6 +68,7 @@ const DownloadingRow = ({ entry, onCancel }) => {
 };
 
 const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
+  const { t } = useTranslation("downloads");
   const byline = lessonByline(item);
   return (
     <Paper
@@ -77,12 +82,12 @@ const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
         borderColor: isPlaying ? "secondary.main" : "divider",
       }}
     >
-      <Tooltip title={isPlaying ? "מתנגן עכשיו" : "האזנה"}>
+      <Tooltip title={isPlaying ? t("playing") : t("listen")}>
         <span>
           <IconButton
             onClick={() => onPlay(item.id)}
             disabled={isPlaying}
-            aria-label={`האזנה ל${item.title}`}
+            aria-label={t("listenTo", { title: item.title })}
             sx={{ bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" }, "&.Mui-disabled": { bgcolor: "secondary.main", color: "secondary.contrastText" } }}
           >
             {isPlaying ? <GraphicEqRoundedIcon /> : <PlayArrowRoundedIcon />}
@@ -90,19 +95,19 @@ const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
         </span>
       </Tooltip>
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography fontWeight={600} noWrap title={item.title}>{item.title}</Typography>
+        <Typography fontWeight={600} noWrap dir="auto" title={item.title}>{item.title}</Typography>
         {byline && <Typography variant="body2" color="text.secondary" noWrap>{byline}</Typography>}
         <Typography variant="caption" color="text.secondary">{lessonDetails(item)}</Typography>
       </Box>
       {!offline && (
-        <Tooltip title="לדף השיעור">
-          <IconButton onClick={() => onOpen(item.id)} aria-label={`לדף השיעור ${item.title}`}>
+        <Tooltip title={t("toLesson")}>
+          <IconButton onClick={() => onOpen(item.id)} aria-label={t("toLessonNamed", { title: item.title })}>
             <OpenInNewIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
-      <Tooltip title="מחיקה מהמכשיר">
-        <IconButton onClick={() => onRemove(item.id)} aria-label={`מחיקת ${item.title} מהמכשיר`}>
+      <Tooltip title={t("remove")}>
+        <IconButton onClick={() => onRemove(item.id)} aria-label={t("removeNamed", { title: item.title })}>
           <DeleteOutlineIcon />
         </IconButton>
       </Tooltip>
@@ -111,8 +116,9 @@ const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
 };
 
 const DownloadsPage = () => {
+  const { t } = useTranslation(["downloads", "nav"]);
   const c = useDownloadsPageController();
-  const { Icon } = DOWNLOADS_SHELF;
+  const { Icon, labelKey } = DOWNLOADS_SHELF;
   const empty = c.loaded && c.items.length === 0 && c.downloading.length === 0;
 
   return (
@@ -121,23 +127,23 @@ const DownloadsPage = () => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
           <Icon color="primary" sx={{ fontSize: 34 }} />
           <Typography variant="h4" fontWeight={800} color="primary" sx={{ flex: 1 }}>
-            {DOWNLOADS_SHELF.label}
+            {t(`nav:${labelKey}`)}
           </Typography>
           {c.items.length > 0 && (
-            <Button color="error" onClick={c.askClear} endIcon={<DeleteOutlineIcon />}>מחיקת הכל</Button>
+            <Button color="error" onClick={c.askClear} endIcon={<DeleteOutlineIcon />}>{t("removeAllButton")}</Button>
           )}
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           {c.items.length > 0
-            ? `${countLabel(c.items.length, "שיעור אחד", "שיעורים")} במכשיר · ${storageLine(c.totalSize, c.estimate)}`
-            : "שיעורים שמורים במכשיר הזה ומתנגנים גם בלי רשת."}
+            ? t("summary", { count: c.items.length, storage: storageLine(c.totalSize, c.estimate) })
+            : t("intro")}
         </Typography>
 
         {c.offline && <OfflineNotice onRetry={c.retry} />}
 
         {!c.supported && (
           <Alert severity="warning" sx={{ mb: 3 }}>
-            הדפדפן הזה לא מאפשר לשמור שיעורים להאזנה בלי רשת. נסו דפדפן עדכני, כמו Chrome או Safari.
+            {t("unsupported")}
           </Alert>
         )}
 
@@ -162,11 +168,11 @@ const DownloadsPage = () => {
 
         {empty && (
           <Paper variant="outlined" sx={{ p: 4, textAlign: "center", borderRadius: 3, borderStyle: "dashed" }}>
-            <Typography fontWeight={700} sx={{ mb: 1 }}>עוד לא הורדתם שיעורים</Typography>
+            <Typography fontWeight={700} sx={{ mb: 1 }}>{t("emptyTitle")}</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: c.offline ? 0 : 2 }}>
-              בדף של שיעור שמע או וידאו, לחצו על ״הורדה״ ובחרו ״שמירה להאזנה בלי רשת״.
+              {t("emptyHow")}
             </Typography>
-            {!c.offline && <Button variant="contained" onClick={c.goToArchive}>לארכיון</Button>}
+            {!c.offline && <Button variant="contained" onClick={c.goToArchive}>{t("toArchive")}</Button>}
           </Paper>
         )}
       </Box>
@@ -175,12 +181,12 @@ const DownloadsPage = () => {
         open={c.confirmClear}
         onClose={c.cancelClear}
         onConfirm={c.clearAll}
-        title="מחיקת כל ההורדות"
-        confirmLabel="מחיקת הכל"
+        title={t("removeAll.title")}
+        confirmLabel={t("removeAll.confirm")}
         message={
           c.items.length === 1
-            ? "למחוק מהמכשיר את השיעור שהורדתם? אפשר להוריד אותו שוב כשיש רשת."
-            : `למחוק מהמכשיר את כל ${c.items.length} השיעורים שהורדתם? אפשר להוריד אותם שוב כשיש רשת.`
+            ? t("removeAll.one")
+            : t("removeAll.many", { count: c.items.length })
         }
       />
     </Box>

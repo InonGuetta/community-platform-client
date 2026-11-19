@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 // "כמה יש", written the way Hebrew actually writes it.
 //
 // The number-then-plural form that works in English ("1 items" is merely
@@ -12,7 +13,7 @@
 // caller knows the gender of its own word; this does not have to guess.
 export const countLabel = (count, one, many) => {
   const n = Number(count) || 0;
-  if (n <= 0) return `אין ${many}`;
+  if (n <= 0) return i18n.t("format:countNone", { many });
   if (n === 1) return one;
   return `${n} ${many}`;
 };

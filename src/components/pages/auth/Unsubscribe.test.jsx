@@ -3,6 +3,9 @@ import { it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
 import { notificationsApi } from "../../../api/notificationsApi";
 import Unsubscribe, { categoryInToken } from "./Unsubscribe";
 
@@ -21,14 +24,18 @@ beforeEach(() => {
   notificationsApi.unsubscribe.mockResolvedValue({ category: "sessions" });
 });
 
+// Inside a store, as in the app: the page's layout carries the language
+// switcher, which saves a signed-in account's choice.
 const renderAt = (token) =>
   render(
+    <Provider store={configureStore({ reducer: { auth: authReducer } })}>
     <MemoryRouter
       initialEntries={[token === null ? "/unsubscribe" : `/unsubscribe?token=${encodeURIComponent(token)}`]}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
       <Unsubscribe />
     </MemoryRouter>
+    </Provider>
   );
 
 it("asks first, naming the kind of mail, and sends nothing on arrival", () => {

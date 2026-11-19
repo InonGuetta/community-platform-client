@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { selectUser } from "../../../store/selectors/authSelectors";
 
 // One personal shelf (likes, saves...): the fetch and the selection for the
 // shelf it is given, so CollectionPage.jsx is layout only (the
 // useXxxPageController rule).
 export const useCollectionPageController = ({ shelf }) => {
-  const { label, collection } = shelf;
+  const { labelKey, collection } = shelf;
+  // The shelf names its words as keys into "nav" (personalShelves.js).
+  const { t } = useTranslation("nav");
+  const label = t(labelKey);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -26,9 +30,9 @@ export const useCollectionPageController = ({ shelf }) => {
   // Nothing loose to show is not the same as nothing saved at all: with every
   // item filed away, the ordinary empty state would tell the user they have
   // saved nothing while their lists sit right underneath saying otherwise.
-  const emptyMessage = items.length && !shown.length && collection.emptyFilteredMessage
-    ? collection.emptyFilteredMessage
-    : collection.emptyMessage;
+  const emptyMessage = t(items.length && !shown.length && collection.emptyFilteredKey
+    ? collection.emptyFilteredKey
+    : collection.emptyKey);
 
   return {
     collection,

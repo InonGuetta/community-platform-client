@@ -2,6 +2,7 @@ import TableBody from "@mui/material/TableBody";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Chip from "@mui/material/Chip";
+import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
@@ -10,13 +11,16 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import { roleLabels } from "../../../../utilities/constant";
+import { useTranslation } from "react-i18next";
 
 const ROLE_COLOR = { admin: "error", lecturer: "warning", student: "default" };
 
 const SKELETON_ROWS = 5;
 const SKELETON_COLS = 6;
 
-const UsersTableContent = ({ users, onEdit, onDelete, onToggleActive, canToggleActive = false, currentUserId, loading = false }) => (
+const UsersTableContent = ({ users, onEdit, onDelete, onToggleActive, canToggleActive = false, currentUserId, loading = false }) => {
+  const { t } = useTranslation("users");
+  return (
   <TableBody>
     {loading && users.length === 0 ? (
       Array.from({ length: SKELETON_ROWS }).map((_, r) => (
@@ -31,39 +35,49 @@ const UsersTableContent = ({ users, onEdit, onDelete, onToggleActive, canToggleA
       <TableRow key={user.id} hover sx={{ opacity: user.is_active ? 1 : 0.4 }}>
         <TableCell>{user.id}</TableCell>
         <TableCell>{user.display_name || "—"}</TableCell>
-        <TableCell>{user.email}</TableCell>
+        <TableCell>
+          {user.email}
+          {/* A verified number, masked by the server (AUTH-13): whether the
+              member has one, never the number itself. */}
+          {user.phone_masked && (
+            <Box component="span" dir="ltr" sx={{ display: "block", color: "text.secondary", fontSize: "0.75rem" }} aria-label={t("phoneMasked", { phone: user.phone_masked })}>
+              {user.phone_masked}
+            </Box>
+          )}
+        </TableCell>
         <TableCell>
           <Chip label={roleLabels[user.role] || user.role} color={ROLE_COLOR[user.role]} size="small" />
         </TableCell>
         <TableCell>
-          <Chip label={user.is_active ? "פעיל" : "לא פעיל"} color={user.is_active ? "success" : "default"} size="small" />
+          <Chip label={user.is_active ? t("active") : t("inactive")} color={user.is_active ? "success" : "default"} size="small" />
         </TableCell>
         <TableCell>
           {/* Named after the person: a row of bare icons reads "button, button,
               button" to a screen reader (PRD MOB-7 review). */}
-          <IconButton size="small" onClick={() => onEdit(user)} aria-label={`עריכת ${user.display_name || user.email}`}><EditIcon fontSize="small" /></IconButton>
+          <IconButton size="small" onClick={() => onEdit(user)} aria-label={t("edit", { name: user.display_name || user.email })}><EditIcon fontSize="small" /></IconButton>
           {/* Admin-only active toggle. Disabled on your own row so an admin can't
               lock themselves out by deactivating their own account. */}
           {canToggleActive && (
-            <Tooltip title={user.id === currentUserId ? "לא ניתן לשנות סטטוס של עצמך" : (user.is_active ? "העברה למצב לא פעיל" : "הפעלת משתמש")}>
+            <Tooltip title={user.id === currentUserId ? t("cannotToggleSelf") : (user.is_active ? t("deactivateHint") : t("activateHint"))}>
               <span>
                 <IconButton
                   size="small"
                   color={user.is_active ? "success" : "default"}
                   disabled={user.id === currentUserId}
                   onClick={() => onToggleActive(user)}
-                  aria-label={`${user.is_active ? "השבתת" : "הפעלת"} ${user.display_name || user.email}`}
+                  aria-label={t(user.is_active ? "deactivate" : "activate", { name: user.display_name || user.email })}
                 >
                   {user.is_active ? <ToggleOnIcon fontSize="small" /> : <ToggleOffIcon fontSize="small" />}
                 </IconButton>
               </span>
             </Tooltip>
           )}
-          <IconButton size="small" color="error" onClick={() => onDelete(user)} aria-label={`מחיקת ${user.display_name || user.email}`}><DeleteIcon fontSize="small" /></IconButton>
+          <IconButton size="small" color="error" onClick={() => onDelete(user)} aria-label={t("delete", { name: user.display_name || user.email })}><DeleteIcon fontSize="small" /></IconButton>
         </TableCell>
       </TableRow>
     )))}
   </TableBody>
-);
+  );
+};
 
 export default UsersTableContent;

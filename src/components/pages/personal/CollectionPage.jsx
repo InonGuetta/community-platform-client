@@ -2,9 +2,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import PlaylistsSection from "./PlaylistsSection";
-import { countLabel } from "../../../utilities/countLabel";
 import { useCollectionPageController } from "./useCollectionPageController";
 import { creatorPath } from "../../../utilities/creatorPage";
+import { useTranslation } from "react-i18next";
 
 // One page for every personal collection, driven by the shelf handed to it.
 //
@@ -22,6 +22,7 @@ import { creatorPath } from "../../../utilities/creatorPage";
 // not a management screen.
 
 const CollectionPage = ({ shelf }) => {
+  const { t } = useTranslation("personal");
   const {
     collection,
     emptyMessage,
@@ -39,7 +40,7 @@ const CollectionPage = ({ shelf }) => {
           <Typography variant="h4" fontWeight={800} color="primary">{label}</Typography>
           {shown.length > 0 && (
             <Typography variant="body2" color="text.secondary">
-              {countLabel(shown.length, "פריט אחד", "פריטים")}
+              {t("items", { count: shown.length })}
             </Typography>
           )}
         </Box>
@@ -51,7 +52,7 @@ const CollectionPage = ({ shelf }) => {
           onOpenCreator={(name) => navigate(creatorPath(name))}
           user={user}
           emptyMessage={emptyMessage}
-          emptyActionLabel="לארכיון"
+          emptyActionLabel={t("toArchive")}
           onEmptyAction={() => navigate("/archive")}
         />
 

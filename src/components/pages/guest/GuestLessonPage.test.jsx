@@ -110,7 +110,7 @@ describe("sharing a lesson", () => {
 
 describe("the public link", () => {
   it("is the API's share page, which previews and then redirects", () => {
-    expect(publicApi.shareUrl(7, "https://app.test")).toBe("https://app.test/api/public/share/7");
+    expect(publicApi.shareUrl(7, "https://app.test")).toBe("https://app.test/api/public/share/7?lang=he");
     expect(publicApi.streamUrl(7)).toBe("/api/public/media/7/stream");
   });
 });

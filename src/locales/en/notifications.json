@@ -1,0 +1,96 @@
+{
+  "categories": {
+    "sessions": {
+      "label": "Live sessions",
+      "help": "When your lecturer schedules a session, a quarter of an hour before it starts, and when it starts"
+    },
+    "new_lessons": {
+      "label": "New lessons",
+      "help": "When a new lesson is published in one of your courses"
+    },
+    "processing": {
+      "label": "Processing of lessons you uploaded",
+      "help": "When the transcript and summary are ready, or when processing fails"
+    },
+    "role_requests": {
+      "label": "Permission requests",
+      "help": "When a user asks to become a lecturer or an admin"
+    },
+    "join_requests": {
+      "label": "Requests to join your courses",
+      "help": "When someone enters the join code of a course you teach"
+    },
+    "enrolments": {
+      "label": "Answers to join requests",
+      "help": "When the lecturer approves or refuses your request to join a course"
+    },
+    "account": {
+      "label": "My account",
+      "help": "When something happens to your account — for example, your phone number is verified on another account"
+    }
+  },
+  "withHost": " with {{name}}",
+  "sessionBody": "\"{{title}}\"{{host}}",
+  "defaults": {
+    "someone": "A user",
+    "lesson": "The lesson",
+    "aLesson": "Lesson",
+    "session": "Live session",
+    "course": "The course",
+    "aCourse": "a course"
+  },
+  "types": {
+    "role_request": {
+      "title": "New permission request",
+      "body": "A request for {{role}} permissions from {{who}}"
+    },
+    "processing_done": {
+      "title": "Processing finished",
+      "body": "\"{{title}}\" is ready: the transcript and summary are available"
+    },
+    "processing_error": {
+      "title": "Processing failed",
+      "bodyWithReason": "\"{{title}}\": {{reason}}",
+      "body": "\"{{title}}\". You can try again from the lesson's page"
+    },
+    "session_scheduled": {
+      "title": "Session scheduled",
+      "body": "\"{{title}}\"{{host}}{{when}}"
+    },
+    "session_reminder": {
+      "title": "The session starts in about a quarter of an hour"
+    },
+    "session_starting": {
+      "title": "The session has started"
+    },
+    "course_join_request": {
+      "title": "Request to join a course",
+      "body": "{{who}} asks to join \"{{course}}\""
+    },
+    "course_join_approved": {
+      "title": "You were accepted into the course",
+      "body": "\"{{course}}\": its lessons are open to you now"
+    },
+    "course_join_rejected": {
+      "title": "Your request to join was not approved",
+      "body": "\"{{course}}\""
+    },
+    "new_lesson": {
+      "title": "New lesson in a course"
+    },
+    "phone_moved": {
+      "title": "Phone number removed from your account",
+      "body": "The number {{phone}} was verified on another account. SMS notifications are off"
+    },
+    "unknown": {
+      "title": "Notification"
+    }
+  },
+  "age": {
+    "now": "Just now",
+    "minutes_one": "A minute ago",
+    "minutes_other": "{{count}} minutes ago",
+    "hours_one": "An hour ago",
+    "hours_other": "{{count}} hours ago"
+  }
+}

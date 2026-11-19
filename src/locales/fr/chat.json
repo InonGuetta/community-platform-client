@@ -1,0 +1,56 @@
+{
+  "suggestions": [
+    "Quel est le point principal ?",
+    "Résume-le en trois points",
+    "Quelles sources ont été citées ?"
+  ],
+  "archiveSuggestions": [
+    "Que disent les cours sur le repentir ?",
+    "Quels cours traitent de la prière, et sur quoi chacun insiste-t-il ?",
+    "Que dit-on de l'étude de la Torah ?"
+  ],
+  "citation": "Source {{n}}, {{place}}",
+  "waiting": {
+    "writing": "Rédaction de la réponse…",
+    "searching_lesson": "Recherche dans le cours…",
+    "searching_book": "Recherche dans le livre…",
+    "searching_archive": "Recherche dans les archives…",
+    "reading_lesson": "Lecture du cours…",
+    "reading_book": "Lecture du livre…",
+    "reading_archive": "Lecture des archives…"
+  },
+  "save": {
+    "saving": "Enregistrement…",
+    "saved": "Enregistré dans le carnet",
+    "failed": "L'enregistrement a échoué — réessayez",
+    "save": "Enregistrer dans le carnet"
+  },
+  "copy": "Copier la conversation",
+  "quota": {
+    "none": "Vous avez utilisé vos {{limit}} questions du jour. Vous pourrez continuer demain — et la recherche intelligente est disponible dès maintenant.",
+    "one": "Il vous reste une question aujourd'hui sur {{limit}}",
+    "many": "Il vous reste {{remaining}} questions aujourd'hui sur {{limit}}"
+  },
+  "intro_lesson": "Posez n'importe quelle question sur le cours. La réponse s'appuiera uniquement sur ce qui y a été dit, avec un renvoi à l'endroit exact.",
+  "intro_book": "Posez n'importe quelle question sur le livre. La réponse s'appuiera uniquement sur ce qui y est écrit, avec un renvoi à l'endroit exact.",
+  "intro_archive": "Posez une question sur tous les cours et livres qui vous sont ouverts. La réponse s'appuiera uniquement sur ce qui y a été dit, et indiquera de quel cours vient chaque point — avec un lien vers l'endroit exact.",
+  "placeholder_lesson": "Posez une question sur le cours…",
+  "placeholder_book": "Posez une question sur le livre…",
+  "placeholder_archive": "Posez une question sur les archives…",
+  "loading": "Chargement de la conversation",
+  "retry": "Réessayer",
+  "loadFailed": "Le chargement de la conversation a échoué.",
+  "newChat": "Nouvelle conversation",
+  "log": "Conversation",
+  "askFailed": "Aucune réponse n'a été reçue. Essayez de reposer la question.",
+  "question": "Question",
+  "send": "Envoyer",
+  "disclaimer": "Les réponses sont générées par une IA et peuvent se tromper — cliquez sur une source pour vérifier.",
+  "askArchive": {
+    "title": "Interroger les archives",
+    "subtitle": "Une question sur tous les cours — avec une source exacte pour chaque affirmation."
+  },
+  "archiveName": "Les archives",
+  "copied": "Conversation copiée",
+  "copyFailed": "La conversation ne peut pas être copiée dans ce navigateur"
+}

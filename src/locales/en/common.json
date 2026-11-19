@@ -1,0 +1,39 @@
+{
+  "appName": "Community Platform",
+  "language": {
+    "label": "Site language",
+    "change": "Change language"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "close": "Close",
+    "gotIt": "Got it"
+  },
+  "user": {
+    "fallbackName": "User"
+  },
+  "search": {
+    "placeholder": "Search..."
+  },
+  "noData": "Nothing to show",
+  "floatingWindow": {
+    "closeKeepsTabs": "Close the window (your tabs are kept)"
+  },
+  "confirmDelete": {
+    "title": "Confirm deletion",
+    "question": "Delete {{what}} <strong>{{name}}</strong>? This cannot be undone.",
+    "what": {
+      "media": "the media item",
+      "user": "the user",
+      "course": "the course",
+      "item": "the item"
+    }
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "body": "An unexpected error occurred while loading the page. Reloading the page usually fixes it.",
+    "reload": "Reload the page",
+    "toArchive": "Back to the archive"
+  }
+}

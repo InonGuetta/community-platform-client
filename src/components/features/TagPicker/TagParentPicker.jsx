@@ -9,10 +9,11 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Typography from "@mui/material/Typography";
 import SearchIcon from "@mui/icons-material/Search";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import DirectionalIcon from "../DirectionalIcon/DirectionalIcon";
 import HomeIcon from "@mui/icons-material/Home";
 import { buildTagRelations } from "../../../utilities/tagStates";
 import { pathOf } from "./tagOptions";
+import { useTranslation } from "react-i18next";
 
 // Choosing where in the tree a new tag goes.
 //
@@ -31,6 +32,7 @@ import { pathOf } from "./tagOptions";
 const MAX_RESULTS = 30;
 
 const TagParentPicker = ({ nodes, value = null, onChange }) => {
+  const { t } = useTranslation("tags");
   const relations = useMemo(() => buildTagRelations(nodes), [nodes]);
   const [query, setQuery] = useState("");
 
@@ -59,8 +61,8 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
         fullWidth
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="חיפוש תגית אב לפי שם..."
-        inputProps={{ "aria-label": "חיפוש תגית אב" }}
+        placeholder={t("parent.search")}
+        inputProps={{ "aria-label": t("parent.searchLabel") }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -72,7 +74,7 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
       />
 
       {!trimmed && (
-        <Breadcrumbs separator="←" sx={{ mb: 0.5, fontSize: "0.85rem" }} aria-label="מיקום בעץ התגיות">
+        <Breadcrumbs separator="←" sx={{ mb: 0.5, fontSize: "0.85rem" }} aria-label={t("parent.trail")}>
           <Link
             component="button"
             type="button"
@@ -81,7 +83,7 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
             sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, fontWeight: value == null ? 700 : 400 }}
           >
             <HomeIcon sx={{ fontSize: 16 }} />
-            ראשי
+            {t("root")}
           </Link>
           {trail.map((id) => (
             <Link
@@ -110,7 +112,7 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
         {trimmed ? (
           matches.length === 0 ? (
             <Typography variant="body2" color="text.secondary" sx={{ p: 1.5 }}>
-              לא נמצאה תגית בשם הזה
+              {t("parent.noMatch")}
             </Typography>
           ) : (
             <List dense disablePadding>
@@ -118,8 +120,8 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
                 <ListItemButton key={node.id} onClick={() => go(node.id)}>
                   <ListItemText
                     primary={node.name}
-                    secondary={path || "כותרת ראשית"}
-                    sx={{ textAlign: "right" }}
+                    secondary={path || t("topLevel")}
+                    sx={{ textAlign: "start" }}
                   />
                 </ListItemButton>
               ))}
@@ -127,7 +129,7 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
           )
         ) : children.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ p: 1.5 }}>
-            אין תגיות מתחת ל«{relations.byId.get(value)?.name}». התגית החדשה תהיה הראשונה כאן.
+            {t("parent.noChildren", { name: relations.byId.get(value)?.name })}
           </Typography>
         ) : (
           <List dense disablePadding>
@@ -137,10 +139,10 @@ const TagParentPicker = ({ nodes, value = null, onChange }) => {
                 <ListItemButton key={node.id} onClick={() => go(node.id)}>
                   <ListItemText
                     primary={node.name}
-                    secondary={below > 0 ? `${below} תגיות מתחת` : null}
-                    sx={{ textAlign: "right" }}
+                    secondary={below > 0 ? t("parent.below", { count: below }) : null}
+                    sx={{ textAlign: "start" }}
                   />
-                  {below > 0 && <ChevronLeftIcon fontSize="small" color="action" />}
+                  {below > 0 && <DirectionalIcon toward="forward" shape="chevron" fontSize="small" color="action" />}
                 </ListItemButton>
               );
             })}

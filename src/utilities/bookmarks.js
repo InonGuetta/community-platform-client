@@ -1,4 +1,5 @@
 import { formatTime } from "./formatTime";
+import i18n from "../i18n/i18n";
 
 // What a bookmark IS, for every screen that shows one.
 //
@@ -109,11 +110,11 @@ export const placeLabel = (bookmark) => {
   // fall through to the recording branch — where formatTime(null) is "0:00", and
   // every mark made in a sefer would wear a timestamp it does not have. That is
   // the same failure this function was written to fix, one anchor kind later.
-  if (isPageBookmark(bookmark)) return `עמ׳ ${bookmark.page_number}`;
-  if (!isTextBookmark(bookmark)) return `בזמן ${formatTime(bookmark?.timestamp_seconds)}`;
-  if (isOrphaned(bookmark)) return "המיקום אינו זמין עוד";
-  if (Number.isInteger(bookmark?.page_number)) return `עמ׳ ${bookmark.page_number}`;
-  return "במיקום בטקסט";
+  if (isPageBookmark(bookmark)) return i18n.t("format:place.page", { page: bookmark.page_number });
+  if (!isTextBookmark(bookmark)) return i18n.t("format:place.atTime", { time: formatTime(bookmark?.timestamp_seconds) });
+  if (isOrphaned(bookmark)) return i18n.t("format:place.orphaned");
+  if (Number.isInteger(bookmark?.page_number)) return i18n.t("format:place.page", { page: bookmark.page_number });
+  return i18n.t("format:place.inText");
 };
 
 // The same answer, sized for a chip.
@@ -124,11 +125,11 @@ export const placeLabel = (bookmark) => {
 // Same pattern, for the same reason, as CHIP_LABEL_CHARS beside MAX_CHIP_TITLE
 // in noteSource.js: a display form and a full form, deliberately different.
 export const placeShortLabel = (bookmark) => {
-  if (isPageBookmark(bookmark)) return `עמ׳ ${bookmark.page_number}`;
+  if (isPageBookmark(bookmark)) return i18n.t("format:place.page", { page: bookmark.page_number });
   if (!isTextBookmark(bookmark)) return formatTime(bookmark?.timestamp_seconds);
-  if (isOrphaned(bookmark)) return "לא זמין";
-  if (Number.isInteger(bookmark?.page_number)) return `עמ׳ ${bookmark.page_number}`;
-  return "בטקסט";
+  if (isOrphaned(bookmark)) return i18n.t("format:place.orphanedShort");
+  if (Number.isInteger(bookmark?.page_number)) return i18n.t("format:place.page", { page: bookmark.page_number });
+  return i18n.t("format:place.inTextShort");
 };
 
 // What the row says, on its two lines.

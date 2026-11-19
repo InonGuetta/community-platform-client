@@ -1,0 +1,20 @@
+{
+  "title": "Subir contenido",
+  "chooseFile": "Haz clic para elegir un archivo",
+  "uploading": "Subiendo... {{progress}} %",
+  "processing": "Procesando en el servidor...",
+  "uploadingShort": "Subiendo...",
+  "upload": "Subir",
+  "fields": {
+    "title": "Título",
+    "description": "Descripción",
+    "type": "Tipo de contenido",
+    "creatorBlank": "Si se deja vacío, se registrará «{{name}}»",
+    "tagsHelper": "Hasta {{max}} etiquetas. También puedes saltarte esto: sugeriremos etiquetas después de la subida.",
+    "course": "Curso",
+    "courseHelper": "Sin curso: el contenido se muestra a todos los alumnos",
+    "noCourse": "Sin curso (biblioteca general)"
+  },
+  "tagsSaved": "Etiquetas guardadas",
+  "tagsFailed": "No se pudieron guardar las etiquetas"
+}

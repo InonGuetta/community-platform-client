@@ -14,6 +14,7 @@ import DialogTitle from "../../../features/Dialogs/DialogTitle";
 import DialogContent from "../../../features/Dialogs/DialogContent";
 import DialogActions from "../../../features/Dialogs/DialogActions";
 import { SOURCE_STYLES } from "../../../../utilities/noteFootnotes";
+import { useTranslation } from "react-i18next";
 
 // The last question before a document is written: what to do with the lectures
 // its notes cite.
@@ -34,26 +35,25 @@ const CHOICES = [
   {
     style: SOURCE_STYLES.footnotes,
     icon: <VerticalAlignBottomIcon />,
-    title: "מקורות בתחתית העמוד",
-    detail: "מספר קטן בתוך הטקסט, והמקור המלא נדפס בתחתית העמוד שבו הוא מופיע",
+    key: "footnotes",
   },
   {
     style: SOURCE_STYLES.inline,
     icon: <FormatQuoteIcon />,
-    title: "מקורות בתוך הטקסט",
-    detail: "כל מקור ממוספר ונשאר במקומו, עם התוכן כפי שהוא מופיע בכרטיסייה",
+    key: "inline",
   },
   {
     style: SOURCE_STYLES.none,
     icon: <NotInterestedIcon />,
-    title: "ייצוא ללא מקורות כלל",
-    detail: "רק הכתיבה שלך, בלי ההפניות לשיעורים",
+    key: "none",
   },
 ];
 
-const ExportSourcesDialog = ({ open, current, summary, exporting, onChoose, onClose }) => (
+const ExportSourcesDialog = ({ open, current, summary, exporting, onChoose, onClose }) => {
+  const { t } = useTranslation(["notebook", "common"]);
+  return (
   <Dialog open={open} onClose={exporting ? undefined : onClose} maxWidth="sm" fullWidth>
-    <DialogTitle onClose={exporting ? undefined : onClose}>איך לכלול את המקורות?</DialogTitle>
+    <DialogTitle onClose={exporting ? undefined : onClose}>{t("export.sources.title")}</DialogTitle>
 
     <DialogContent>
       {/* What is about to be written, so the choice is made against something
@@ -65,7 +65,7 @@ const ExportSourcesDialog = ({ open, current, summary, exporting, onChoose, onCl
       )}
 
       <List disablePadding sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {CHOICES.map(({ style, icon, title, detail }) => (
+        {CHOICES.map(({ style, icon, key, title = t(`export.sources.${key}`), detail = t(`export.sources.${key}Hint`) }) => (
           <ListItemButton
             key={style}
             // Guarded here as well as by `disabled`. A ListItemButton is a div,
@@ -104,15 +104,16 @@ const ExportSourcesDialog = ({ open, current, summary, exporting, onChoose, onCl
       {exporting && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
           <CircularProgress size={18} />
-          <Typography variant="caption" color="text.secondary">מייצא...</Typography>
+          <Typography variant="caption" color="text.secondary">{t("export.exporting")}</Typography>
         </Box>
       )}
     </DialogContent>
 
     <DialogActions>
-      <Button onClick={onClose} variant="outlined" disabled={exporting}>ביטול</Button>
+      <Button onClick={onClose} variant="outlined" disabled={exporting}>{t("common:actions.cancel")}</Button>
     </DialogActions>
   </Dialog>
-);
+  );
+};
 
 export default ExportSourcesDialog;

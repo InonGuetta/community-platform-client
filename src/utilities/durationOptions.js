@@ -1,4 +1,5 @@
 import { mediaTypes } from "./constant";
+import i18n from "../i18n/i18n";
 
 // The archive's length filter: four ranges, chosen one at a time.
 //
@@ -18,15 +19,17 @@ import { mediaTypes } from "./constant";
 
 const MINUTE = 60;
 
-// Labelled in minutes, as numbers: a range is read at a glance as "0–15", where
-// "רבע שעה עד חצי שעה" had to be read word by word. The en dash is the range
-// mark, and the minutes go first so the line reads in the same direction as
-// the rest of the RTL menu.
+// Labelled in minutes, as numbers: a range is read at a glance as "0–15",
+// where words ("a quarter to half an hour") had to be read one by one. The en
+// dash is the range mark. `label` is a getter, so it is worded in whatever
+// language is current when the menu renders.
+const option = (value, bounds) => ({ value, ...bounds, get label() { return i18n.t(`format:duration.${value}`); } });
+
 export const DURATION_OPTIONS = [
-  { value: "short", label: "0–15 דקות", max: 15 * MINUTE },
-  { value: "medium", label: "15–30 דקות", min: 15 * MINUTE, max: 30 * MINUTE },
-  { value: "long", label: "30–60 דקות", min: 30 * MINUTE, max: 60 * MINUTE },
-  { value: "xlong", label: "מעל 60 דקות", min: 60 * MINUTE },
+  option("short", { max: 15 * MINUTE }),
+  option("medium", { min: 15 * MINUTE, max: 30 * MINUTE }),
+  option("long", { min: 30 * MINUTE, max: 60 * MINUTE }),
+  option("xlong", { min: 60 * MINUTE }),
 ];
 
 const BY_VALUE = new Map(DURATION_OPTIONS.map((option) => [option.value, option]));
@@ -59,10 +62,12 @@ export const lengthApplies = (selectedTypes = []) =>
 export const lengthLabel = (seconds) => {
   const total = Number(seconds);
   if (!Number.isFinite(total) || total <= 0) return null;
-  if (total < MINUTE) return `${Math.round(total)} שנ׳`;
+  if (total < MINUTE) return i18n.t("format:duration.seconds", { n: Math.round(total) });
   const minutes = Math.round(total / MINUTE);
-  if (minutes < 60) return `${minutes} דק׳`;
+  if (minutes < 60) return i18n.t("format:duration.minutes", { n: minutes });
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
-  return rest === 0 ? `${hours} שע׳` : `${hours} שע׳ ${rest} דק׳`;
+  return rest === 0
+    ? i18n.t("format:duration.hours", { h: hours })
+    : i18n.t("format:duration.hoursMinutes", { h: hours, m: rest });
 };

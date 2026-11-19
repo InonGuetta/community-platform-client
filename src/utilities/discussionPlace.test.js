@@ -16,7 +16,7 @@ describe("where a passage is", () => {
 
   test("a book's passage is its page", () => {
     expect(placeOf({ start_time: null, page_number: 47, chunk_index: 3 }))
-      .toEqual({ kind: "page", page: 47, label: "עמ' 47" });
+      .toEqual({ kind: "page", page: 47, label: "עמ׳ 47" });
   });
 
   test("text with neither is labelled by position, and opens nothing", () => {

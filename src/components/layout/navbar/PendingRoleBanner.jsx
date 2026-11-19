@@ -1,4 +1,5 @@
 import Alert from "@mui/material/Alert";
+import { useTranslation } from "react-i18next";
 import { useAccount } from "./useAccount";
 import { roleLabels, roles } from "../../../utilities/constant";
 
@@ -21,6 +22,7 @@ import { roleLabels, roles } from "../../../utilities/constant";
 
 const PendingRoleBanner = () => {
   const { user } = useAccount();
+  const { t } = useTranslation("nav");
 
   const status = user?.approval_status;
   const requested = user?.requested_role;
@@ -35,15 +37,14 @@ const PendingRoleBanner = () => {
   if (status === "pending") {
     return (
       <Alert severity="info" square sx={{ borderRadius: 0 }}>
-        בקשתך להרשאת {roleName} ממתינה לאישור מנהל. עד לאישור החשבון פועל עם
-        הרשאות תלמיד.
+        {t("roleBanner.pending", { role: roleName })}
       </Alert>
     );
   }
 
   return (
     <Alert severity="warning" square sx={{ borderRadius: 0 }}>
-      בקשתך להרשאת {roleName} לא אושרה. החשבון ממשיך לפעול כרגיל עם הרשאות תלמיד.
+      {t("roleBanner.rejected", { role: roleName })}
     </Alert>
   );
 };

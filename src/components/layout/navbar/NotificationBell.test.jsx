@@ -53,13 +53,13 @@ const renderNavbar = (role = "lecturer") => {
 
 it("shows the unread count on the bell", async () => {
   renderNavbar();
-  expect(await screen.findByRole("button", { name: "התראות, 1 שלא נקראו" })).toBeTruthy();
+  expect(await screen.findByRole("button", { name: "התראות, אחת שלא נקראה" })).toBeTruthy();
 });
 
 it("lists the notifications in words, and a click reads it and goes there", async () => {
   const user = userEvent.setup();
   renderNavbar();
-  await user.click(await screen.findByRole("button", { name: /התראות, 1/ }));
+  await user.click(await screen.findByRole("button", { name: /התראות, אחת/ }));
 
   const menu = await screen.findByRole("menu");
   expect(within(menu).getByText("העיבוד הסתיים")).toBeTruthy();
@@ -75,7 +75,7 @@ it("lists the notifications in words, and a click reads it and goes there", asyn
 it("does not mark an already-read notification again", async () => {
   const user = userEvent.setup();
   renderNavbar();
-  await user.click(await screen.findByRole("button", { name: /התראות, 1/ }));
+  await user.click(await screen.findByRole("button", { name: /התראות, אחת/ }));
   await user.click(within(await screen.findByRole("menu")).getByText("בקשת הרשאה חדשה"));
   expect(notificationsApi.markRead).not.toHaveBeenCalled();
   expect(screen.getByTestId("where").textContent).toBe("/users");
@@ -84,7 +84,7 @@ it("does not mark an already-read notification again", async () => {
 it("marks everything read in one press", async () => {
   const user = userEvent.setup();
   renderNavbar();
-  await user.click(await screen.findByRole("button", { name: /התראות, 1/ }));
+  await user.click(await screen.findByRole("button", { name: /התראות, אחת/ }));
   await user.click(await screen.findByRole("button", { name: "סימון הכל כנקרא" }));
   expect(notificationsApi.markAllRead).toHaveBeenCalledTimes(1);
   await waitFor(() => expect(screen.queryByRole("button", { name: "סימון הכל כנקרא" })).toBeNull());

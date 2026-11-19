@@ -6,6 +6,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { mediaApi } from "../../../../api/mediaApi";
 import { pdfStates } from "../../../../utilities/constant";
+import { useTranslation } from "react-i18next";
 
 // Lazy, and that is the whole reason it is a separate module. pdf.js is ~130KB
 // gzipped plus a worker of its own; the archive, the notebook and the player
@@ -93,6 +94,7 @@ const PdfViewer = lazy(() => import("./PdfViewer"));
 // one format wide.
 const SANDBOXED_FORMATS = { pdf: false };
 const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) => {
+  const { t } = useTranslation("lesson");
   const [loaded, setLoaded] = useState(false);
   // Reported by the viewer below. Starts as "loading" rather than unknown,
   // because that is what it is: the lazy chunk has not even arrived yet.
@@ -133,7 +135,7 @@ const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) =
         rel="noopener noreferrer"
         sx={{ textTransform: "none" }}
       >
-        פתיחה בכרטיסייה חדשה
+        {t("textViewer.newTab")}
       </Button>
     </Box>
   );
@@ -142,8 +144,7 @@ const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) =
     return (
       <Box>
         <Alert severity="info">
-          {`לא ניתן להציג כאן קובץ מסוג .${media?.file_ext || "?"}. אפשר להוריד אותו מ„הורדה” שבתחתית הפאנל` +
-            (media?.file_ext === "doc" ? ", או לשמור אותו כ־.docx ולהעלות מחדש." : ".")}
+          {t(media?.file_ext === "doc" ? "textViewer.cannotShowDoc" : "textViewer.cannotShow", { ext: media?.file_ext || "?" })}
         </Alert>
         {escapeHatch}
       </Box>
@@ -205,11 +206,11 @@ const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) =
           both can reach its own sandbox attribute and remove it. */}
       <Box
         component="iframe"
-        src={mediaApi.streamUrl(mediaId)}
+        src={mediaApi.documentFrameUrl(mediaId)}
         {...(SANDBOXED_FORMATS[media?.file_ext] === false
           ? {}
           : { sandbox: "allow-scripts" })}
-        title="תצוגת המסמך"
+        title={t("textViewer.frameTitle")}
         onLoad={() => setLoaded(true)}
         width="100%"
         height={650}

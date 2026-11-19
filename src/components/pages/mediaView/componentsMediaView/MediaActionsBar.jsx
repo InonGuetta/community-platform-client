@@ -16,6 +16,7 @@ import usePublicLink from "../usePublicLink";
 // it fills have to look like the same thing, and two independent imports stayed
 // matched only for as long as nobody changed one of them.
 import { likeIcons, saveIcons, LIKE_COLOUR, SAVE_COLOUR } from "../../../layout/personalShelves";
+import { useTranslation } from "react-i18next";
 
 // The like / save / download / share row, and the overlays behind it.
 //
@@ -31,9 +32,8 @@ const pillSizeSx = { flex: 1, minWidth: 100, maxWidth: 170 };
 
 // Pill-shaped outlined actions. The label carries the meaning and the icon only
 // reinforces it, which is why these are Buttons rather than the bare IconButtons
-// they replaced. `endIcon` rather than `startIcon`: the app runs RTL without the
-// stylis flip plugin, so MUI's physical start/end margins do not swap and this
-// is what puts the icon on the label's left, as in the rest of the UI.
+// they replaced. `endIcon`: the icon comes AFTER the label, at the end of the
+// line in either direction — on its left in Hebrew, its right in English.
 const pillButtonSx = {
   borderRadius: 999,
   px: 2.5,
@@ -49,10 +49,9 @@ const pillButtonSx = {
   // The bounds are what keep that from turning into four banners on a wide panel
   // or four slivers in the notebook's narrow window.
   ...pillSizeSx,
-  // The icon sits to the LEFT of the label here, so the gap between the two is
-  // its margin-RIGHT; MUI's default puts the spacing on the left, which in this
-  // unflipped RTL context pushes it against the text instead of away from it.
-  "& .MuiButton-endIcon": { ml: -0.25, mr: 0.75, "& svg": { fontSize: 22 } },
+  // The gap between label and icon is the icon's inline-START margin, in
+  // either direction; the small negative end margin pulls it toward the edge.
+  "& .MuiButton-endIcon": { marginInlineStart: 0.75, marginInlineEnd: -0.25, "& svg": { fontSize: 22 } },
   "&:hover": { borderColor: "text.disabled", bgcolor: "action.hover" },
 };
 
@@ -125,8 +124,8 @@ const saveMainSx = () => ({
   fontWeight: 600,
   color: "text.primary",
   "& .MuiButton-endIcon": {
-    ml: -0.25,
-    mr: 0.75,
+    marginInlineStart: 0.75,
+    marginInlineEnd: -0.25,
     color: savedColour,
     "& svg": { fontSize: 22 },
   },
@@ -149,6 +148,7 @@ const MediaActionsBar = ({
   isSaved = false,
   onToggleSave,
 }) => {
+  const { t } = useTranslation("lesson");
   const [shareOpen, setShareOpen] = useState(false);
   // A lesson its manager made public is shared by its public link (PRD COM-3b).
   const publicLink = usePublicLink(media);
@@ -181,7 +181,7 @@ const MediaActionsBar = ({
           endIcon={isLiked ? <likeIcons.on /> : <likeIcons.off />}
           sx={{ ...pillButtonSx, ...(isLiked && likedSx) }}
         >
-          {isLiked ? "אהבתי" : "לייק"}
+          {isLiked ? t("actions.liked") : t("actions.like")}
         </Button>
 
         {/* Saving is two actions that belong together, so they share one pill
@@ -197,16 +197,16 @@ const MediaActionsBar = ({
             endIcon={isSaved ? <saveIcons.on /> : <saveIcons.off />}
             sx={saveMainSx()}
           >
-            {isSaved ? "נשמר" : "שמירה"}
+            {isSaved ? t("actions.saved") : t("actions.save")}
           </Button>
           {/* A hairline between the halves, so it is visible that the caret is
               its own target and a click there will not toggle the save. */}
           <Divider orientation="vertical" flexItem sx={{ borderColor: "inherit", opacity: 0.5 }} />
-          <Tooltip title="הוספה לרשימת שיעורים">
+          <Tooltip title={t("actions.addToList")}>
             <IconButton
               onClick={(e) => setSaveAnchor(e.currentTarget)}
               aria-haspopup="menu"
-              aria-label="הוספה לרשימת שיעורים"
+              aria-label={t("actions.addToList")}
               sx={{ borderRadius: 0, px: 0.5, color: "inherit" }}
             >
               <ExpandLessIcon />
@@ -221,7 +221,7 @@ const MediaActionsBar = ({
           endIcon={<FileDownloadOutlinedIcon />}
           sx={pillButtonSx}
         >
-          הורדה
+          {t("actions.download")}
         </Button>
         <Button
           onClick={() => setShareOpen(true)}
@@ -229,7 +229,7 @@ const MediaActionsBar = ({
           endIcon={<ShareOutlinedIcon />}
           sx={pillButtonSx}
         >
-          שיתוף
+          {t("actions.share")}
         </Button>
       </Box>
 

@@ -1,0 +1,265 @@
+{
+  "published": "Published on: ",
+  "draftUploaded": "Draft · uploaded on: ",
+  "tabs": {
+    "summary": "Summary",
+    "chapters": "Chapters",
+    "transcript": "Transcript",
+    "notes": "Personal notes",
+    "sessionChat": "Session chat",
+    "discuss": "Discussion with AI",
+    "transcriptView": "Transcript view",
+    "follow": "Follow playback",
+    "fullText": "Full text",
+    "fullTextEdit": "Full text and editing"
+  },
+  "summary": {
+    "title": "AI summary",
+    "queued": "Waiting in the queue...",
+    "extracting": "Extracting the text from the file...",
+    "transcribing": "Transcribing the recording...",
+    "analyzing": "Producing the summary and key points...",
+    "checkAgain": "Check again",
+    "stoppedChecking": "We stopped checking after a long wait. The process may be stuck.",
+    "failed": "Producing the summary failed. You can try again.",
+    "keyPoints": "Key points",
+    "tags": "Tags",
+    "none_book": "There is no summary for this content",
+    "none_lesson": "No summary yet.",
+    "howToBook": "Click 'Produce summary' to extract the text from the file and summarise it.",
+    "generate": "Produce summary",
+    "regenerate": "Produce the summary again"
+  },
+  "chapters": {
+    "title": "Subheadings by key points",
+    "generating": "Generating...",
+    "regenerate": "Generate again",
+    "generate": "Generate subheadings",
+    "howTo": "Click 'Generate subheadings' to divide the transcript into headings by the key points.",
+    "notYet": "Subheadings will be available once the transcript and summary are ready."
+  },
+  "follow": {
+    "estimated": "The timing in this lesson is estimated, so the highlighted sentence may be a few seconds early or late.",
+    "toPlaying": "To what's playing"
+  },
+  "aiActions": {
+    "hebrewFixed": "The Hebrew was corrected",
+    "hebrewFixFailed": "Hebrew correction failed",
+    "headingsMade": "The subheadings were created",
+    "headingsFailed": "Creating the subheadings failed"
+  },
+  "notes": {
+    "title": "Bookmarks and notes",
+    "howToMarkBook": "To mark: select the line in the book and click \"Save\"",
+    "addAtTime": "Add a note at the current time",
+    "atTime": "at {{time}}",
+    "save": "Save",
+    "note": "Note",
+    "saveNote": "Save the note",
+    "cancelEdit": "Cancel editing",
+    "editNote": "Edit the note",
+    "deleteBookmark": "Delete bookmark"
+  },
+  "save": {
+    "listName": "List name",
+    "title": "Add to a lesson list",
+    "loadFailed": "Loading the lists failed. Try opening it again.",
+    "noLists": "You have no lists yet. You can create one here.",
+    "update": "Update",
+    "lessons_zero": "No lessons",
+    "lessons_one": "One lesson",
+    "lessons_other": "{{count}} lessons",
+    "rename": "Rename the list {{title}}",
+    "delete": "Delete the list {{title}}",
+    "create": "Create",
+    "newList": "New list",
+    "deleteQuestion": "Delete the list <strong>{{title}}</strong>? The lessons themselves stay saved; only the list is deleted.",
+    "added": "The lesson was added to the list \"{{title}}\""
+  },
+  "discussion": {
+    "modes": "Discussion type",
+    "search": "Smart search",
+    "chat": "Discussion with AI",
+    "history": "History",
+    "caption": {
+      "search_lesson": "Search by meaning within this lesson only",
+      "search_book": "Search by meaning within this book only",
+      "history_lesson": "Your previous conversations about this lesson",
+      "history_book": "Your previous conversations about this book",
+      "chat_lesson": "Answers are based on this lesson only, with a reference to the source",
+      "chat_book": "Answers are based on this book only, with a reference to the source"
+    },
+    "notReady": {
+      "processing": "The lesson is still being processed. You'll be able to search it and discuss it once processing finishes.",
+      "error": "Processing the lesson failed, so there is no text to discuss yet. The lecturer can run the processing again.",
+      "empty": "This lesson has no transcript or text yet, so there is nothing to search or discuss.",
+      "unavailable": "We couldn't load the lesson's text. Try refreshing the page."
+    },
+    "answerSaved": "The answer was saved to the lesson's notebook"
+  },
+  "smartSearch": {
+    "strongMatch": "Strong match",
+    "playFrom": "Play from {{place}}",
+    "openAt_book": "Open the book at {{place}}",
+    "openAt_lesson": "Open the file at {{place}}",
+    "placeholder_book": "What would you like to find in the book? For example: what is said about repentance",
+    "placeholder_lesson": "What would you like to find in the lesson? For example: what is said about repentance",
+    "label": "Search the lesson",
+    "clear": "Clear search",
+    "run": "Search",
+    "failed": "The search failed. Please try again.",
+    "intro": "The search finds passages by meaning, not only by exact words.",
+    "introPlay": " Clicking a result plays from that moment.",
+    "introOpen": " Clicking a result opens the page.",
+    "none": "No suitable passages were found. Try phrasing it differently, or ask in \"Discussion with AI\" mode."
+  },
+  "history": {
+    "questions_one": "One question",
+    "questions_other": "{{count}} questions",
+    "untitled": "Conversation",
+    "current": "Current conversation",
+    "delete": "Delete conversation",
+    "deleteNamed": "Delete the conversation \"{{title}}\"",
+    "deleteTitle": "Delete the conversation?",
+    "deleteBody": "The questions and answers in the conversation will be deleted and cannot be restored. Answers you saved to the notebook stay there.",
+    "deleteConfirm": "Delete",
+    "backToList": "Back to the list",
+    "backToChat": "Back to the conversation",
+    "resume": "Continue this conversation",
+    "resumeFailed": "We couldn't continue the conversation. Please try again.",
+    "loading": "Loading the conversation",
+    "openFailed": "Opening the conversation failed.",
+    "previous": "Previous conversation",
+    "loadingList": "Loading the history",
+    "retry": "Try again",
+    "listFailed": "Loading the history failed.",
+    "empty_lesson": "There are no previous conversations about this lesson yet. A conversation will appear here after its first question.",
+    "empty_book": "There are no previous conversations about this book yet. A conversation will appear here after its first question.",
+    "deleteFailed": "Deleting the conversation failed. Please try again."
+  },
+  "pdf": {
+    "prev": "Previous page",
+    "next": "Next page",
+    "pageNumber": "Page number",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "fit": "Fit to width",
+    "cannotShow": "The file cannot be displayed. You can open it in a new tab.",
+    "markPassage": "Save a bookmark on the selected passage",
+    "untilPageEnd": "The selection will be saved up to the end of the page."
+  },
+  "preview": {
+    "lessonFallback": "Lesson",
+    "prev": "Previous source",
+    "next": "Next source",
+    "openPage": "Open on the lesson's page",
+    "closeTab": "Close the current tab",
+    "closeAll": "Close the window and all its tabs",
+    "loadFailed": "The lesson cannot be loaded."
+  },
+  "aiTags": {
+    "title": "Suggested tags",
+    "approveAll": "Approve all",
+    "dismissAll": "Dismiss all",
+    "request": "Suggest tags",
+    "none": "No suggestions are waiting. You can ask for suggestions from the tag tree based on the lesson's summary.",
+    "add": "Add to the lesson",
+    "addNamed": "Add the tag {{name}}",
+    "dismiss": "Dismiss",
+    "dismissNamed": "Dismiss the tag {{name}}",
+    "requestFailed": "Suggesting tags failed",
+    "noneFound": "No suitable tags were found in the tree",
+    "approveFailed": "Adding the tags failed",
+    "added_one": "The tag was added to the lesson",
+    "added_other": "The tags were added to the lesson",
+    "dismissFailed": "Dismissing the suggestion failed"
+  },
+  "share": {
+    "title": "Share",
+    "mailApp": "Mail app",
+    "copyLink": "Copy link",
+    "publicLink": "Public link: opens without an account too",
+    "publicHint": "Whoever receives the link sees the lesson and its summary, without the notebook or the chat. The rest of the archive stays closed.",
+    "draftWarning": "The lesson is a draft, so the public link won't open until it is published.",
+    "alreadyPublic": "This lesson is open without an account, so you can share it with anyone.",
+    "fromTime": "Share from the current time ({{time}})",
+    "copied": "Link copied",
+    "copyManually": "It cannot be copied automatically. The link: {{url}}",
+    "nowPublic": "The lesson is now open to anyone with the link",
+    "noLongerPublic": "The lesson is no longer open without an account",
+    "publicFailed": "Changing the public link failed"
+  },
+  "sessionChat": {
+    "loading": "Loading the chat",
+    "failed": "Loading the session's chat failed.",
+    "empty": "No messages were written in the chat during the recording.",
+    "label": "The session's chat",
+    "intro": "The messages written in the chat during the recording. Clicking the time plays the moment they were written.",
+    "playFrom": "Play from {{time}}",
+    "participant": "Participant"
+  },
+  "textViewer": {
+    "newTab": "Open in a new tab",
+    "cannotShow": "A .{{ext}} file cannot be displayed here. You can download it from \"Download\" at the bottom of the panel.",
+    "cannotShowDoc": "A .{{ext}} file cannot be displayed here. You can download it from \"Download\" at the bottom of the panel, or save it as .docx and upload it again.",
+    "frameTitle": "Document view"
+  },
+  "actions": {
+    "liked": "Liked",
+    "like": "Like",
+    "saved": "Saved",
+    "save": "Save",
+    "addToList": "Add to a lesson list",
+    "download": "Download",
+    "share": "Share"
+  },
+  "notebook": {
+    "title": "My notebook for this lesson",
+    "all": "To the whole notebook",
+    "newNote": "New note for the lesson",
+    "empty": "There are no notes for this lesson yet. Click \"New note for the lesson\" to start writing.",
+    "deleteQuestion": "Are you sure you want to delete the note \"{{title}}\"?",
+    "untitled": "Untitled"
+  },
+  "track": {
+    "now": "Now",
+    "nextStarts": "The next lesson, \"{{title}}\", will start in {{seconds}} seconds",
+    "place": "Lesson {{index}} of {{count}} in the course",
+    "next": "Next: {{title}}"
+  },
+  "bookmark": {
+    "save": "Save bookmark",
+    "marked": "The marked passage",
+    "note": "Note (optional)"
+  },
+  "textQuality": {
+    "readable": "Only about {{quality}}% of the text extracted from the book is readable, probably because of faulty text recognition (OCR) in the file. The summary, search and chat cover only the readable part.",
+    "howToFix": " To improve this, upload a PDF with better text recognition."
+  },
+  "transcript": {
+    "title": "Transcript",
+    "status": {
+      "pending": "Waiting",
+      "processing": "Transcribing",
+      "analyzing": "Summarising",
+      "done": "Ready",
+      "error": "Error",
+      "none": "No transcript"
+    },
+    "emptyCanRun": "No transcript yet. Click 'Run transcription' to start.",
+    "empty": "No transcript yet.",
+    "fixing": "Correcting...",
+    "fixHebrew": "Correct the Hebrew",
+    "running": "Running...",
+    "run": "Run transcription",
+    "checkAgain": "Check again",
+    "stoppedChecking": "We stopped checking after a long wait. The transcription may be stuck.",
+    "readyAnalyzing": "The transcript is ready. Producing the summary and key points...",
+    "transcribingHint": "Transcribing the audio with Whisper. It usually takes 1–3 minutes for a 30-minute recording.",
+    "fixInBackground": "The Hebrew is being corrected in the background. The text will update when the correction finishes.",
+    "saved": "Transcript saved",
+    "saving": "Saving...",
+    "save": "Save transcript",
+    "saveFailed": "Saving failed"
+  }
+}

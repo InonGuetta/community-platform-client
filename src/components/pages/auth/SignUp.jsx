@@ -9,20 +9,19 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import { register } from "../../../store/slicesAndThunks/authSlice/authPost";
-import { authApi } from "../../../api/authApi";
-import { hebrewForError } from "../../../utilities/apiError";
+import { messageForError } from "../../../utilities/apiError";
 import { emailProblem } from "../../../utilities/emailShape";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { roles, roleLabels } from "../../../utilities/constant";
 import AuthLayout from "./AuthLayout";
-import { GoogleIcon, EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, googleButtonSx, dividerSx } from "./authShared";
+import { EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, dividerSx } from "./authShared";
+import SocialSignIn from "./SocialSignIn";
 import { useAuthSubmit } from "./useAuthSubmit";
-
-// See SignIn: never fall back to the server's English message.
-const FALLBACK = "ההרשמה נכשלה. נסה שוב.";
+import { useTranslation } from "react-i18next";
 
 const SignUp = () => {
+  const { t } = useTranslation("auth");
   const { error, isSubmitting, submit } = useAuthSubmit(register);
   // requestedRole, not role — this is an APPLICATION. The server creates every
   // account as a student whatever is sent here and stores the request separately;
@@ -35,7 +34,7 @@ const SignUp = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   // Shown only after the field has been left, not while it is being typed in:
-  // "חסרה סיומת בדומיין" appears on every keystroke otherwise, and an error that
+  // a missing-domain error appears on every keystroke otherwise, and an error that
   // is wrong until you finish is an error people learn to ignore.
   const [emailTouched, setEmailTouched] = useState(false);
   const emailError = emailTouched ? emailProblem(form.email) : null;
@@ -53,8 +52,8 @@ const SignUp = () => {
   };
 
   return (
-    <AuthLayout title="הרשמה">
-      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{hebrewForError(error, FALLBACK)}</Alert>}
+    <AuthLayout title={t("signUp.title")}>
+      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{messageForError(error, t("signUp.failed"))}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
         {/* Exclusive by construction — ToggleButtonGroup with `exclusive`, so
@@ -64,7 +63,7 @@ const SignUp = () => {
             with nothing chosen. */}
         <Box>
           <Typography variant="body2" sx={{ mb: 1, color: "text.secondary" }}>
-            אני נרשם כ־
+            {t("signUp.registeringAs")}
           </Typography>
           <ToggleButtonGroup
             value={form.requestedRole}
@@ -84,13 +83,12 @@ const SignUp = () => {
               bug in the signup rather than as a step that is still pending. */}
           {form.requestedRole !== roles.student && (
             <Alert severity="info" sx={{ mt: 1.5, borderRadius: 2 }}>
-              הרשמה כ{roleLabels[form.requestedRole]} טעונה אישור מנהל. עד לאישור
-              החשבון ייפתח עם הרשאות תלמיד.
+              {t("signUp.needsApproval", { role: roleLabels[form.requestedRole] })}
             </Alert>
           )}
         </Box>
         <TextField
-          label="שם תצוגה"
+          label={t("fields.displayName")}
           name="displayName"
           variant="standard"
           value={form.displayName}
@@ -103,7 +101,7 @@ const SignUp = () => {
         />
 
         <TextField
-          label="אימייל"
+          label={t("fields.email")}
           name="email"
           type="email"
           variant="standard"
@@ -120,7 +118,7 @@ const SignUp = () => {
         />
 
         <TextField
-          label="סיסמה"
+          label={t("fields.password")}
           name="password"
           type={showPassword ? "text" : "password"}
           variant="standard"
@@ -134,7 +132,7 @@ const SignUp = () => {
             ...inputBaseSx,
             endAdornment: form.password ? (
               <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"} sx={{ p: 0.5 }}>
+                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" aria-label={showPassword ? t("fields.hidePassword") : t("fields.showPassword")} sx={{ p: 0.5 }}>
                   {showPassword ? <EyeIcon /> : <EyeCrossedIcon />}
                 </IconButton>
               </InputAdornment>
@@ -143,26 +141,21 @@ const SignUp = () => {
         />
 
         <Button type="submit" variant="contained" fullWidth disabled={isSubmitting} sx={submitButtonSx}>
-          {isSubmitting ? "..." : "הרשמה"}
+          {isSubmitting ? "..." : t("signUp.submit")}
         </Button>
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", my: 3 }}>
         <Divider sx={dividerSx} />
-        <Typography sx={{ mx: 2, color: "#6e6e6e", fontSize: "0.8rem" }}>או</Typography>
+        <Typography sx={{ mx: 2, color: "#6e6e6e", fontSize: "0.8rem" }}>{t("or")}</Typography>
         <Divider sx={dividerSx} />
       </Box>
 
-      <Button variant="outlined" fullWidth startIcon={<GoogleIcon />}
-        onClick={() => { window.location.href = authApi.googleLoginUrl; }}
-        sx={googleButtonSx}
-      >
-        הרשמה עם Google
-      </Button>
+      <SocialSignIn mode="signUp" />
 
       <Typography textAlign="center" mt={4} variant="body2" color="#757575">
-        כבר יש לך חשבון?{" "}
-        <Link to="/sign-in" style={{ color: "#424242", fontWeight: 500, textDecoration: "none" }}>התחברות</Link>
+        {t("signUp.hasAccount")}{" "}
+        <Link to="/sign-in" style={{ color: "#424242", fontWeight: 500, textDecoration: "none" }}>{t("signUp.toSignIn")}</Link>
       </Typography>
     </AuthLayout>
   );

@@ -1,0 +1,13 @@
+{
+  "signIn": "Sign in",
+  "signUp": "Sign up",
+  "openDocument": "Open the document",
+  "closedTitle": "This lesson is not open to the public",
+  "closedBody": "The link may be wrong, or the lecturer has closed the lesson. The community's lessons are open to registered members.",
+  "toArchive": "To the archive",
+  "about": "About the lesson",
+  "fullHint": "The full lesson page also has a notebook, bookmarks and a discussion with AI.",
+  "toFull": "To the full lesson page",
+  "joinPitch": "Community members take notes on the lesson, save bookmarks and ask the AI about it — and on hundreds more lessons.",
+  "join": "Join the community"
+}

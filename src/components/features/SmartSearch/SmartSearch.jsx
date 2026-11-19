@@ -11,6 +11,8 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { formatTime } from "../../../utilities/formatTime";
 import { creatorPrefixes } from "../../../utilities/constant";
 import { useSmartSearch } from "./useSmartSearch";
+import { useTranslation } from "react-i18next";
+import { creatorDisplayName } from "../../../utilities/creatorPage";
 
 // ts_headline returns the snippet with <b>…</b> around matches; render as plain
 // text to avoid injecting transcript-derived HTML into the DOM.
@@ -38,6 +40,7 @@ const BORDER_COLOR = { strong: "success.main", medium: "#b8860b", normal: "trans
 // text via OpenAI on the server. Clicking a result jumps to the player at the
 // matching segment's start_time (onOpenResult is wired by the page).
 const SmartSearch = ({ onOpenResult }) => {
+  const { t } = useTranslation("archive");
   const { results, value, setValue, loading, searched, runSearch, handleKeyDown } = useSmartSearch();
 
   return (
@@ -46,10 +49,10 @@ const SmartSearch = ({ onOpenResult }) => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="חיפוש עומק חכם"
+        placeholder={t("smartSearch.placeholder")}
         fullWidth
         // A placeholder is not a name, and is gone once something is typed.
-        inputProps={{ "aria-label": "חיפוש עומק חכם" }}
+        inputProps={{ "aria-label": t("smartSearch.placeholder") }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -58,7 +61,7 @@ const SmartSearch = ({ onOpenResult }) => {
           ),
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton onClick={runSearch} edge="end" aria-label="חיפוש" disabled={loading}>
+              <IconButton onClick={runSearch} edge="end" aria-label={t("smartSearch.run")} disabled={loading}>
                 {loading ? <CircularProgress size={20} /> : <SearchIcon />}
               </IconButton>
             </InputAdornment>
@@ -75,7 +78,7 @@ const SmartSearch = ({ onOpenResult }) => {
 
       {!loading && searched && results.length === 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ py: 3, textAlign: "center" }}>
-          לא נמצאו תוצאות תואמות.
+          {t("smartSearch.none")}
         </Typography>
       )}
 
@@ -90,8 +93,8 @@ const SmartSearch = ({ onOpenResult }) => {
               sx={{
                 p: 2,
                 cursor: "pointer",
-                borderLeft: "4px solid",
-                borderLeftColor: BORDER_COLOR[tier],
+                borderInlineEnd: "4px solid",
+                borderInlineEndColor: BORDER_COLOR[tier],
                 transition: "box-shadow 0.15s, transform 0.15s",
                 "&:hover": { boxShadow: 4, transform: "translateY(-1px)" },
               }}
@@ -100,14 +103,14 @@ const SmartSearch = ({ onOpenResult }) => {
                 {/* minWidth 0, or the flex item refuses to shrink and noWrap
                     pushes the chips off the row instead of truncating. */}
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="subtitle1" fontWeight={700} color={TITLE_COLOR[tier]} noWrap>
+                  <Typography variant="subtitle1" fontWeight={700} color={TITLE_COLOR[tier]} noWrap dir="auto">
                     {r.media_title}
                   </Typography>
                   {/* Who said it, labelled the way the archive card labels it — two
                       shiurim with the same title are otherwise one line twice. */}
                   {r.creator_name && (
                     <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                      {`${creatorPrefixes[r.media_type] || creatorPrefixes.video}: ${r.creator_name}`}
+                      {`${creatorPrefixes[r.media_type] || creatorPrefixes.video}: ${creatorDisplayName(r.creator_name)}`}
                     </Typography>
                   )}
                 </Box>

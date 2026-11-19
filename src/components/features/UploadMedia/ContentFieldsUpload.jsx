@@ -7,10 +7,11 @@ import {
   mediaTypes,
   mediaTypeLabels,
   creatorLabels,
-  defaultCreatorName,
   creatorNameMaxLength,
   MAX_TAGS,
 } from "../../../utilities/constant";
+import { useTranslation } from "react-i18next";
+import { creatorDisplayName } from "../../../utilities/creatorPage";
 
 // `courses` may be empty — no courses defined yet, or a student somehow reaching
 // this — in which case the field is hidden rather than shown with one useless
@@ -30,26 +31,30 @@ import {
 // changing it afterwards would send a recording down the book pipeline. The tags
 // have their own dialog, which carries what this form cannot: proposing a new
 // tag for approval.
-const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [], knownTags = [], editing = false }) => (
+const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [], knownTags = [], editing = false }) => {
+  const { t } = useTranslation(["upload", "format"]);
+  return (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
     <TextField
-      label="כותרת"
+      label={t("fields.title")}
       value={values.title}
       onChange={(e) => onChange("title", e.target.value)}
       required
       fullWidth
+      inputProps={{ dir: "auto" }}
     />
     <TextField
-      label="תיאור"
+      label={t("fields.description")}
       value={values.description}
       onChange={(e) => onChange("description", e.target.value)}
       multiline
       rows={3}
       fullWidth
+      inputProps={{ dir: "auto" }}
     />
     {!editing && (
       <TextField
-        label="סוג מדיה"
+        label={t("fields.type")}
         value={values.mediaType}
         onChange={(e) => onChange("mediaType", e.target.value)}
         select
@@ -68,6 +73,7 @@ const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [
     <Autocomplete
       freeSolo
       options={knownCreators}
+      getOptionLabel={(option) => creatorDisplayName(option)}
       value={values.creatorName}
       onChange={(_, next) => onChange("creatorName", next ?? "")}
       onInputChange={(_, next) => onChange("creatorName", next)}
@@ -75,8 +81,8 @@ const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [
         <TextField
           {...params}
           label={creatorLabels[values.mediaType] || creatorLabels.video}
-          placeholder={defaultCreatorName}
-          helperText={`אם יישאר ריק יירשם "${defaultCreatorName}"`}
+          placeholder={t("format:creatorNone")}
+          helperText={t("fields.creatorBlank", { name: t("format:creatorNone") })}
           slotProps={{ htmlInput: { ...params.inputProps, maxLength: creatorNameMaxLength } }}
           fullWidth
         />
@@ -101,26 +107,27 @@ const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [
         // will not submit until they decide is a form they abandon. The archive
         // still needs the tag, so it is asked for again — with suggestions — once
         // the file is safely stored.
-        helperText={`עד ${MAX_TAGS} תגיות. אפשר גם לדלג — נציע תגיות אחרי ההעלאה.`}
+        helperText={t("fields.tagsHelper", { max: MAX_TAGS })}
       />
     )}
 
     {courses.length > 0 && (
       <TextField
-        label="שיוך לקורס"
+        label={t("fields.course")}
         value={values.courseId}
         onChange={(e) => onChange("courseId", e.target.value)}
         select
         fullWidth
-        helperText="ללא קורס — התוכן מוצג לכל התלמידים"
+        helperText={t("fields.courseHelper")}
       >
-        <MenuItem value="">ללא קורס (ספרייה כללית)</MenuItem>
+        <MenuItem value="">{t("fields.noCourse")}</MenuItem>
         {courses.map((c) => (
           <MenuItem key={c.id} value={c.id}>{c.title}</MenuItem>
         ))}
       </TextField>
     )}
   </Box>
-);
+  );
+};
 
 export default ContentFieldsUpload;

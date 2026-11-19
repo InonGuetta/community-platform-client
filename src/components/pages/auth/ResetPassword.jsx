@@ -1,4 +1,3 @@
-import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -7,10 +6,9 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
-import Link from "@mui/material/Link";
 import AuthLayout from "./AuthLayout";
 import { useResetPassword } from "./useResetPassword";
-import { floatingLabelSx, inputBaseSx, submitButtonSx, EyeIcon, EyeCrossedIcon } from "./authShared";
+import { EyeIcon, EyeCrossedIcon, AuthFootnote, AuthLink } from "./authShared";
 import { useTranslation } from "react-i18next";
 
 // The other half of the reset, opened from the link in the message. The token
@@ -34,9 +32,9 @@ const ResetPassword = () => {
       <AuthLayout title={t("reset.badLinkTitle")}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Alert severity="error">{t("reset.badLink")}</Alert>
-          <Link component={RouterLink} to="/forgot-password" underline="hover">
-            {t("reset.requestNew")}
-          </Link>
+          <AuthFootnote sx={{ mt: 1 }}>
+            <AuthLink to="/forgot-password" accent>{t("reset.requestNew")}</AuthLink>
+          </AuthFootnote>
         </Box>
       </AuthLayout>
     );
@@ -47,7 +45,7 @@ const ResetPassword = () => {
 
   return (
     <AuthLayout title={t("reset.title")}>
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {error && <Alert severity="error">{error}</Alert>}
 
         <TextField
@@ -57,13 +55,10 @@ const ResetPassword = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoFocus
-          variant="standard"
           fullWidth
           error={tooShort}
           helperText={tooShort ? t("fields.minLength", { n: MIN_PASSWORD_LENGTH }) : " "}
-          sx={floatingLabelSx}
           InputProps={{
-            ...inputBaseSx,
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={() => setShow((v) => !v)} edge="end" aria-label={show ? t("fields.hidePassword") : t("fields.showPassword")}>
@@ -83,18 +78,17 @@ const ResetPassword = () => {
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           required
-          variant="standard"
           fullWidth
           error={mismatch}
           helperText={mismatch ? t("fields.mismatch") : " "}
-          sx={floatingLabelSx}
-          InputProps={inputBaseSx}
         />
 
         <Button
           type="submit"
+          variant="contained"
+          fullWidth
+          sx={{ minHeight: 48, mt: 1 }}
           disabled={busy || mismatch || tooShort || password.length === 0 || confirm.length === 0}
-          sx={submitButtonSx}
         >
           {busy ? <CircularProgress size={20} /> : t("reset.save")}
         </Button>

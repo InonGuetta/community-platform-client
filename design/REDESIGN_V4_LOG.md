@@ -209,3 +209,20 @@
 `componentsMediaView/{PdfViewer,PdfToolbar,PdfPage,TextViewer,AISummaryPanel}.jsx`.
 ### פתוח
 `npm run verify` ירוק; `npm run e2e` 5/5. לא צולם בדפדפן; השוואה מול `new-27`, dark ומובייל – 8ב.
+
+---
+
+## שלב 5א – התחברות, הרשמה, איפוס סיסמה (01, 30, 31) (2026-11-19, sonnet)
+
+### מה השתנה
+- `AuthLayout`: רקע שני גרדיאנטים (בהיר וכהה, `AUTH` ב-`tokens.js`), כרטיס 440 ברדיוס 32 עם blur וצל `auth`, לוגו כהה 48, H1 display 40, `intro` אופציונלי. כבר לא כופה theme בהיר (D-110). ה-header המינימלי משלב 2 בשימוש, ואין dock (`App.jsx` כבר לא מציג אותו ב-`AUTH_PATHS`).
+- שדות רגילים מה-theme, כפתור מלא, מפריד "או", כפתורי ספקים outline עם ריבוע לוגו (D-111, D-112); הרשמה עם `SegmentedControl` ו-`*` על השדות הנדרשים (D-113); איפוס/אימות/הסרה באותו כרטיס (D-114). אין מחרוזות חדשות ואין מפתחות שנמחקו.
+### קבצים
+`pages/auth/{AuthLayout,authShared,SocialSignIn,SignIn,SignUp,ForgotPassword,ResetPassword,VerifyEmail,Unsubscribe}.jsx`, `theme/tokens.js` (`AUTH`).
+### בדיקות
+- `authPagesFlow.test.jsx`: "sign-in/sign-up offers Google, then Apple, then LinkedIn" read each button's `textContent`, which now includes the logo square's "G" / "in". The helper takes the name without `aria-hidden` children; the assertion (three providers, same order, same words) is unchanged. `ResetPassword.test.jsx`, `Unsubscribe.test.jsx` passed untouched.
+- `npm run verify`: lint, whole suite (1891), build and `check:chunks` green after that one fix. `npm run e2e`: 5/5 (journey he/en/yi, language, phone).
+### על ה-flake
+בריצת e2e הראשונה נפלו כל 5, לא בגלל `/sign-up` אלא כי שרת ה-Vite שרץ כבר הגיש את `SocialSignIn.jsx` כמודול ריק (נקרא באמצע כתיבה) – "does not provide an export named 'default'", והדף לא עלה. `touch` על הקבצים תיקן, והריצה השנייה ירוקה. השינוי שלנו לא גרם ל"לא ניתן להגיע לשרת". אם זה חוזר אחרי כתיבת קבצים – קודם `curl` על המודול.
+### פתוח
+לא צולם בדפדפן; השוואה מול `new-01/30/31`, dark, LTR ומובייל – 8ב. אימות הטלפון (`PhoneCard`) נשאר ל-5ב. D-110 עד D-114 (המספור ממשיך אחרי D-109 שכבר נתפס בשלב 4ב).

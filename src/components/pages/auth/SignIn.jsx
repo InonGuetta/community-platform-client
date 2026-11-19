@@ -1,17 +1,14 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import InputAdornment from "@mui/material/InputAdornment";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import { login } from "../../../store/slicesAndThunks/authSlice/authPost";
 import { messageForError } from "../../../utilities/apiError";
 import AuthLayout from "./AuthLayout";
-import { EyeIcon, EyeCrossedIcon, floatingLabelSx, inputBaseSx, submitButtonSx, dividerSx } from "./authShared";
+import { EyeIcon, EyeCrossedIcon, OrDivider, AuthFootnote, AuthLink } from "./authShared";
 import SocialSignIn from "./SocialSignIn";
 import { useAuthSubmit } from "./useAuthSubmit";
 import { useOAuthError } from "./useOAuthError";
@@ -35,37 +32,31 @@ const SignIn = () => {
 
   return (
     <AuthLayout title={t("signIn.title")}>
-      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{messageForError(error, t("signIn.failed"))}</Alert>}
-      {!error && oauthError && <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>{oauthError}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{messageForError(error, t("signIn.failed"))}</Alert>}
+      {!error && oauthError && <Alert severity="warning" sx={{ mb: 2 }}>{oauthError}</Alert>}
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <TextField
           label={t("fields.email")}
           name="email"
           type="email"
-          variant="standard"
           value={form.email}
           onChange={handleChange}
           required
           fullWidth
-          sx={floatingLabelSx}
-          InputProps={inputBaseSx}
-          InputLabelProps={{ required: !form.email }}
+          InputLabelProps={{ required: false }}
         />
 
         <TextField
           label={t("fields.password")}
           name="password"
           type={showPassword ? "text" : "password"}
-          variant="standard"
           value={form.password}
           onChange={handleChange}
           required
           fullWidth
-          sx={floatingLabelSx}
-          InputLabelProps={{ required: !form.password }}
+          InputLabelProps={{ required: false }}
           InputProps={{
-            ...inputBaseSx,
             endAdornment: form.password ? (
               <InputAdornment position="end">
                 <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" aria-label={showPassword ? t("fields.hidePassword") : t("fields.showPassword")} sx={{ p: 0.5 }}>
@@ -76,32 +67,26 @@ const SignIn = () => {
           }}
         />
 
-        <Button type="submit" variant="contained" fullWidth disabled={isSubmitting} sx={submitButtonSx}>
+        <Button type="submit" variant="contained" fullWidth disabled={isSubmitting} sx={{ minHeight: 48, mt: 1 }}>
           {isSubmitting ? "..." : t("signIn.submit")}
         </Button>
       </Box>
 
-      <Box sx={{ display: "flex", alignItems: "center", my: 3 }}>
-        <Divider sx={dividerSx} />
-        <Typography sx={{ mx: 2, color: "#6e6e6e", fontSize: "0.8rem" }}>{t("or")}</Typography>
-        <Divider sx={dividerSx} />
-      </Box>
+      <OrDivider>{t("or")}</OrDivider>
 
       <SocialSignIn mode="signIn" />
 
       {/* The way back in for someone who cannot get in, which is the one place
           it is any use — a user who has forgotten their password is looking at
           this screen when they find out. */}
-      <Typography textAlign="center" mt={3} variant="body2">
-        <Link to="/forgot-password" style={{ color: "#5a5a5a", textDecoration: "none" }}>
-          {t("signIn.forgot")}
-        </Link>
-      </Typography>
+      <AuthFootnote sx={{ mt: 3.5, mb: 1 }}>
+        <AuthLink to="/forgot-password" accent>{t("signIn.forgot")}</AuthLink>
+      </AuthFootnote>
 
-      <Typography textAlign="center" mt={2} variant="body2" color="#757575">
+      <AuthFootnote sx={{ mt: 1 }}>
         {t("signIn.noAccount")}{" "}
-        <Link to="/sign-up" style={{ color: "#424242", fontWeight: 500, textDecoration: "none" }}>{t("signIn.toSignUp")}</Link>
-      </Typography>
+        <AuthLink to="/sign-up">{t("signIn.toSignUp")}</AuthLink>
+      </AuthFootnote>
     </AuthLayout>
   );
 };

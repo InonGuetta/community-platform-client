@@ -29,7 +29,6 @@ const AuthLayout = ({ title, children }) => {
     position: "relative",
     overflow: "hidden",
     px: 2,
-    fontFamily: "system-ui, -apple-system, sans-serif",
     "&::before": {
       content: '""',
       position: "absolute",

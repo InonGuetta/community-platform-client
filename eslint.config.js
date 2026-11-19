@@ -60,7 +60,9 @@ const LOGICAL_ONLY = [
 ];
 
 export default [
-  { ignores: ["node_modules/**", "dist/**"] },
+  // design/ holds the redesign's reference material (mockups and the scripts
+  // copied out of them, gitignored), not code of the app.
+  { ignores: ["node_modules/**", "dist/**", "design/**"] },
   js.configs.recommended,
   {
     files: ["src/**/*.{js,jsx}"],

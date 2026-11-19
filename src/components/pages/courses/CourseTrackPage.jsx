@@ -92,7 +92,7 @@ const CourseTrackPage = () => {
   }
 
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
+    <Box sx={{ bgcolor: "background.default" }}>
       <Box sx={{ maxWidth: 860, mx: "auto", p: { xs: 2, sm: 3 } }}>
         <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={c.goToMyCourses} sx={{ mb: 2 }}>
           {t("track.myCourses")}

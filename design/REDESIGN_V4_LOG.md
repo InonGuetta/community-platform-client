@@ -64,3 +64,41 @@
 - לא נבדק בדפדפן אמיתי (אין צילום בשלב הזה). הסיכון העיקרי: שדות עם label בתוך toolbars צפופים גבוהים יותר עכשיו (label מעל), ו-`<Paper>` רגילים בדפים קיבלו רדיוס 24 וגבול – מכוון (D-51), ויתוקן דף-דף בשלבים.
 - `FilterBar` דורס את עיצוב ה-SearchBar וה-Select ב-`sx` משלו – 3א.
 - דפי ה-auth: שדות `standard` עם label קטן קבוע מעל (D-53) עד 5א.
+
+---
+
+## שלב 2 – מעטפת (2026-11-19, opus)
+
+### מה השתנה
+- **`navConfig` אחד** (`layout/navConfig.js`, D-64): 5 קישורים ראשיים, 3 פריטי dock, מדפים + "החשבון שלי", פריטי ניהול לפי תפקיד, `isActive` (D-31). `navLinks.js` נמחק.
+- **`AppHeader`** (`layout/navbar/AppHeader.jsx`): sticky, 48px, זכוכית, 1180 פנימי; לוגו + שם + 5 קישורים (מ-md), פעמון (נקודה, D-71) ואווטאר עם chevron. מתחת ל-md: המבורגר. `variant="minimal"` (לוגו, שם, גלובוס) – מוצג מ-`AuthLayout` ולכל מי שלא מחובר (D-11, D-70). הלוגיקה ב-`useAppShell.js`.
+- **`AvatarMenu`** (272, מ-navConfig, בסדר של קומפוננטה 2): כותרת → החשבון שלי, מדפים, החשבון שלי, מתג "תצוגת מנהל" + קבוצת ניהול (עם ה-pill של בקשות התפקיד), שפת האתר (פותח את `LanguageMenu`, שיוצא עכשיו מ-`LanguageSwitcher.jsx` עם `onChosen`), התקנה, מתג "מצב כהה", התנתקות.
+- **`NavDrawer`** (מסך 19): modal מצד ההתחלה, 400px, backdrop + blur, אווטאר 80 עם gradient, badge תפקיד, אותן קבוצות + 5 הקישורים. נסגר בניווט ומעצמו מ-md (D-05, D-69).
+- **`Dock`**: זכוכית, 3 אייקונים עם gradient (SVG מהמוקאפ ב-`dockIcons.jsx`), הגדלה + tooltip בדסקטופ, תוויות במובייל, נקודה לפעיל; לא מסומן כלום ב-`/courses`. מוצג רק למחובר, לא ב-auth, באורח ובחדר מפגש (D-24, D-76).
+- **תצוגת מנהל** (D-66): `adminView.js` + `useAdminView.js` + `AdminOnly.jsx`, provider ב-`App.jsx`. הוחל על קבוצת הניהול ועל כפתור ההעלאה בארכיון.
+- **"מצב כהה"** עבר מה-header לתפריט ולמגירה כ-`role="switch"` (D-67).
+- **`PageContainer` + `pageWidth.js`**: App עוטף כל route במעטפת – 1180/1080/full, 16/24 בצדדים, 32/48 למעלה, 160 למטה (בלי dock: 32/48). `shellGeometry.js`: `HEADER_HEIGHT = 48`, `DOCK_CLEARANCE`, `DOCK_OFFSET`, `viewportBelowHeader`.
+- **64→48:** `SessionRoom`, `NotebookPage` מ-`HEADER_HEIGHT`; ב-8 דפים ה-`minHeight` הוסר (D-72). `GlobalSnackbar` מעל ה-dock (D-75).
+- **תמונות:** עמודת התמונה של הארכיון, תמונת הרקע והשטיפות של `AuthLayout` הוסרו; הכרטיס עבר ל-paper (D-73). כל 6 הקבצים ב-`public/images/` נמחקו (אף אחד לא בשימוש).
+- **שם המותג** (D-26, D-74): "קול תבונה" (he/yi), "Kol Tevuna" (en/fr/es); `check-locale-chunks.mjs` מזהה לפי `common:language.change` באותו commit; `index.html`, manifest.
+- **מחרוזות חדשות** (דרך `add-translation`, 5 שפות, yi טיוטה): `nav:mainNav`, `nav:adminView`, `nav:groups.admin`, `nav:links.upload`, `nav:accountMenu.open`/`openPending_*`, `nav:dock.{label,ask,myCourses}`. נמחקו: `nav:personal`, `nav:colorMode.toLight/toggle` (D-78).
+- טוקנים חדשים ב-`tokens.js`: `DOCK`, `SHELL`.
+- **נמחקו:** `Navbar.jsx`, `NavLinksBar.jsx`, `PersonalMenu.jsx`, `UserDrawer.jsx`, `navStyles.js`, `navLinks.js`, `Navbar.test.jsx`.
+
+### כל קישור מהניווט הישן – איפה הוא עכשיו
+ארכיון, שאל, הקורסים שלי, מפגשים, תרומה → header (md+), מגירה, ו-3 מהם ב-dock · 5 המדפים → תפריט ומגירה · `/profile` → כותרת התפריט + "החשבון שלי" + מגירה · ניהול קורסים / משתמשים / ניהול → קבוצת ניהול (תפריט + מגירה, מאחורי המתג; ב-URL תמיד) · שפה, התקנה, מצב כהה, התנתקות → תפריט ומגירה · פעמון → header בכל רוחב.
+
+### בדיקות
+- `npm run verify` ירוק (lint, כל הבדיקות, build, check:chunks).
+- חדשות: `AppHeader.test.jsx` (מחליף את `Navbar.test.jsx`: תפקידים, תפריט, מגירה = תפריט + 5, תצוגת מנהל, מצב כהה, העלאה מהתפריט, בקשות תפקיד), `Dock.test.jsx`, `navConfig.test.js`, `pageWidth.test.js`, `adminView.test.jsx`. עודכנו: `NotificationBell.test.jsx`, `accountState.test.jsx` (התנתקות מהתפריט ומהמגירה), `shellKeys.test.js`, `i18n.test.jsx`, `useMediaSession.test.js` (השם החדש).
+- **`npm run e2e` ירוק – 5/5** (journey he/en/yi, language, phone). `e2e/language.spec.js` עודכן: השפה נבחרת אחרי התחברות מתפריט האווטאר; המגירה נמדדת ב-viewport של 600px (ההמבורגר רק מתחת ל-md), נסגרת ב-Esc, והצד התהפך (עברית → right, אנגלית → left; D-05).
+- ה-e2e תפס באג שהבדיקות לא ראו: `user` שימש ב-`App.jsx` לפני שהוגדר (TDZ – כל הדפים נפלו ל-ErrorBoundary). תוקן. אין בדיקת unit שמרנדרת את `App` כולו.
+- צולם בדפדפן (1440 ו-390, עברית): header, תפריט, מגירה, dock, דף התחברות – תואם את 02/19.
+- ה-API ו-Vite כבר רצו כשהשלב התחיל (לא הופעלו על ידי השלב), ולכן לא נעצרו בסופו. Memurai רץ.
+- **אין סקריפט חדש ב-`package.json`** – אין סקיל לעדכן.
+
+### מה נשאר פתוח
+- `admin-only` על badges ו-⋯ – 3א (`MediaTile`); badge בעמוד הפריט – 4א. המנגנון: `useAdminView().showAdmin` או `<AdminOnly>`.
+- padding כפול בדפים שלא עוצבו (ה-`p: 3` הישן בתוך `PageContainer`) – כל שלב מוריד בדפים שלו (D-13). המחברת גוללת זמנית (D-72) – 5ב.
+- Breakpoint 900 ולא 768 (D-68) – לבדוק ב-8ב.
+- אייקוני האפליקציה עדיין navy; שם המותג בשרת (מיילים, דף שיתוף) – שאלה פתוחה משלב 0.

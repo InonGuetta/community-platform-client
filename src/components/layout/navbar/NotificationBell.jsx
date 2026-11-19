@@ -15,12 +15,9 @@ import { useTranslation } from "react-i18next";
 
 // The notification centre (PRD NOTIF-4): a bell with the unread count, and a
 // menu of the latest thirty. Presentation only — the polling, the marking and
-// the navigation are in useNotificationBell, which Navbar calls once and passes
-// down, because the same hook also feeds the admin's "משתמשים" badge.
-
-// The count as the badge shows it. "99+" past that: a bigger number tells
-// nobody anything a badge can, and widens the bar.
-const MAX_BADGE = 99;
+// the navigation are in useNotificationBell, which useAppShell calls once and
+// AppHeader passes down, because the same hook also feeds the admin's
+// "משתמשים" pill.
 
 const NotificationBell = ({ items, unread, anchor, open, onOpen, onClose, onSelect, onMarkAllRead }) => {
   // The panel hangs from the bell toward the end of the line — into the page,
@@ -35,10 +32,16 @@ const NotificationBell = ({ items, unread, anchor, open, onOpen, onClose, onSele
         aria-label={unread > 0 ? t("bell.unread", { count: unread }) : t("bell.title")}
         aria-haspopup="menu"
         aria-expanded={open}
-        sx={{ color: "primary.main" }}
+        sx={{ color: "surface.ink2", p: 0.75 }}
       >
-        <Badge badgeContent={unread} color="error" max={MAX_BADGE}>
-          {unread > 0 ? <NotificationsIcon /> : <NotificationsNoneIcon />}
+        {/* A red dot when anything is unread (component 1); how many is in
+            the button's name. */}
+        <Badge
+          variant="dot"
+          invisible={unread === 0}
+          sx={{ "& .MuiBadge-dot": { bgcolor: "surface.danger", width: 8, height: 8, borderRadius: "50%", border: "2px solid", borderColor: "background.default", boxSizing: "content-box" } }}
+        >
+          {unread > 0 ? <NotificationsIcon sx={{ fontSize: 20 }} /> : <NotificationsNoneIcon sx={{ fontSize: 20 }} />}
         </Badge>
       </IconButton>
     </Tooltip>

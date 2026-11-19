@@ -7,12 +7,12 @@
     "donate": "תרומה",
     "manageCourses": "ניהול קורסים",
     "users": "משתמשים",
-    "admin": "ניהול"
+    "admin": "ניהול",
+    "upload": "העלאת מדיה"
   },
   "pendingRequests_one": "{{label}}, בקשה אחת ממתינה",
   "pendingRequests_two": "{{label}}, {{count}} בקשות ממתינות",
   "pendingRequests_other": "{{label}}, {{count}} בקשות ממתינות",
-  "personal": "תוכן אישי",
   "shelves": {
     "notebook": "המחברת שלי",
     "likes": "התוכן שאהבתי",
@@ -27,9 +27,7 @@
     "continue": "עדיין לא התחלת לצפות בשיעור"
   },
   "colorMode": {
-    "toLight": "מצב בהיר",
-    "toDark": "מצב כהה",
-    "toggle": "החלפת מצב תצוגה"
+    "toDark": "מצב כהה"
   },
   "myAccount": "החשבון שלי",
   "drawer": {
@@ -56,5 +54,21 @@
     "step1": "1. בספארי, לחצו על כפתור השיתוף <icon/> בתחתית המסך.",
     "step2": "2. בחרו ״הוספה למסך הבית״.",
     "step3": "3. לחצו ״הוספה״. האפליקציה תופיע במסך הבית ותיפתח בלי שורת הכתובת."
+  },
+  "mainNav": "ניווט ראשי",
+  "adminView": "תצוגת מנהל",
+  "groups": {
+    "admin": "ניהול"
+  },
+  "accountMenu": {
+    "open": "תפריט החשבון",
+    "openPending_one": "תפריט החשבון, בקשה אחת ממתינה",
+    "openPending_two": "תפריט החשבון, {{count}} בקשות ממתינות",
+    "openPending_other": "תפריט החשבון, {{count}} בקשות ממתינות"
+  },
+  "dock": {
+    "label": "ניווט מהיר",
+    "ask": "שאל",
+    "myCourses": "קורסים"
   }
 }

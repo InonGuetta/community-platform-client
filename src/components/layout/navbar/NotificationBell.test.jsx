@@ -10,10 +10,11 @@ import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
 import inboxReducer from "../../../store/slicesAndThunks/inboxSlice/inboxSlice";
 import { buildTheme } from "../../../theme/theme";
 import { notificationsApi } from "../../../api/notificationsApi";
-import Navbar from "./Navbar";
+import AppHeader from "./AppHeader";
 
-// The bell in the real navbar, against a mocked API: the count, the list, what a
-// click does, and the admin's counter on "משתמשים" (PRD NOTIF-4, REG-11).
+// The bell in the real header, against a mocked API: the count, the list, what a
+// click does, and the admin's counter on "משתמשים" in the avatar menu
+// (PRD NOTIF-4, REG-11; D-08).
 
 vi.mock("../../../api/notificationsApi", () => ({
   notificationsApi: { list: vi.fn(), markRead: vi.fn(), markAllRead: vi.fn() },
@@ -35,14 +36,14 @@ beforeEach(() => {
 // Where a click landed, read off the router rather than a mocked navigate.
 const Where = () => <div data-testid="where">{useLocation().pathname}</div>;
 
-const renderNavbar = (role = "lecturer") => {
+const renderHeader = (role = "lecturer") => {
   const store = configureStore({ reducer: { auth: authReducer, inbox: inboxReducer } });
   store.dispatch({ type: "auth/login/fulfilled", payload: { user: { id: 3, display_name: "רב", role } } });
   render(
     <Provider store={store}>
       <ThemeProvider theme={buildTheme("light")}>
         <MemoryRouter initialEntries={["/archive"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <Navbar />
+          <AppHeader />
           <Routes><Route path="*" element={<Where />} /></Routes>
         </MemoryRouter>
       </ThemeProvider>
@@ -52,13 +53,13 @@ const renderNavbar = (role = "lecturer") => {
 };
 
 it("shows the unread count on the bell", async () => {
-  renderNavbar();
+  renderHeader();
   expect(await screen.findByRole("button", { name: "התראות, אחת שלא נקראה" })).toBeTruthy();
 });
 
 it("lists the notifications in words, and a click reads it and goes there", async () => {
   const user = userEvent.setup();
-  renderNavbar();
+  renderHeader();
   await user.click(await screen.findByRole("button", { name: /התראות, אחת/ }));
 
   const menu = await screen.findByRole("menu");
@@ -74,7 +75,7 @@ it("lists the notifications in words, and a click reads it and goes there", asyn
 
 it("does not mark an already-read notification again", async () => {
   const user = userEvent.setup();
-  renderNavbar();
+  renderHeader();
   await user.click(await screen.findByRole("button", { name: /התראות, אחת/ }));
   await user.click(within(await screen.findByRole("menu")).getByText("בקשת הרשאה חדשה"));
   expect(notificationsApi.markRead).not.toHaveBeenCalled();
@@ -83,7 +84,7 @@ it("does not mark an already-read notification again", async () => {
 
 it("marks everything read in one press", async () => {
   const user = userEvent.setup();
-  renderNavbar();
+  renderHeader();
   await user.click(await screen.findByRole("button", { name: /התראות, אחת/ }));
   await user.click(await screen.findByRole("button", { name: "סימון הכל כנקרא" }));
   expect(notificationsApi.markAllRead).toHaveBeenCalledTimes(1);
@@ -93,21 +94,25 @@ it("marks everything read in one press", async () => {
 it("says so when there is nothing yet", async () => {
   notificationsApi.list.mockResolvedValue({ items: [], unread: 0 });
   const user = userEvent.setup();
-  renderNavbar();
+  renderHeader();
   await waitFor(() => expect(notificationsApi.list).toHaveBeenCalled());
   await user.click(screen.getByRole("button", { name: "התראות" }));
   expect(await screen.findByText(/אין התראות עדיין/)).toBeTruthy();
 });
 
-it("puts the waiting role requests on the admin's users link", async () => {
+it("puts the waiting role requests on the admin's users item", async () => {
   notificationsApi.list.mockResolvedValue({ items: [], unread: 0, pendingRoleRequests: 2 });
-  renderNavbar("admin");
-  expect(await screen.findAllByLabelText("משתמשים, 2 בקשות ממתינות")).not.toHaveLength(0);
+  const user = userEvent.setup();
+  renderHeader("admin");
+  await user.click(await screen.findByRole("button", { name: "תפריט החשבון, 2 בקשות ממתינות" }));
+  expect(within(screen.getByRole("menu")).getByLabelText("משתמשים, 2 בקשות ממתינות")).toBeTruthy();
 });
 
 it("shows no counter on the users link when nobody is waiting", async () => {
   notificationsApi.list.mockResolvedValue({ items: [], unread: 0, pendingRoleRequests: 0 });
-  renderNavbar("admin");
+  const user = userEvent.setup();
+  renderHeader("admin");
   await waitFor(() => expect(notificationsApi.list).toHaveBeenCalled());
+  await user.click(screen.getByRole("button", { name: "תפריט החשבון" }));
   expect(screen.queryByLabelText(/בקשות ממתינות/)).toBeNull();
 });

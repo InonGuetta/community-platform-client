@@ -34,7 +34,7 @@ const CollectionPage = ({ shelf }) => {
   } = useCollectionPageController({ shelf });
 
   return (
-    <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
+    <Box sx={{ display: "flex", bgcolor: "background.default" }}>
       <Box sx={{ flexGrow: 1, p: 3 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Typography variant="h4" fontWeight={800} color="primary">{label}</Typography>

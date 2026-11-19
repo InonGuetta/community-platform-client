@@ -7,11 +7,11 @@
     "donate": "Donar",
     "manageCourses": "Gestionar cursos",
     "users": "Usuarios",
-    "admin": "Administración"
+    "admin": "Administración",
+    "upload": "Subir contenido"
   },
   "pendingRequests_one": "{{label}}, una solicitud pendiente",
   "pendingRequests_other": "{{label}}, {{count}} solicitudes pendientes",
-  "personal": "Mi contenido",
   "shelves": {
     "notebook": "Mi cuaderno",
     "likes": "Contenido que me gustó",
@@ -26,9 +26,7 @@
     "continue": "Todavía no has empezado a ver ninguna clase"
   },
   "colorMode": {
-    "toLight": "Modo claro",
-    "toDark": "Modo oscuro",
-    "toggle": "Cambiar el modo de visualización"
+    "toDark": "Modo oscuro"
   },
   "myAccount": "Mi cuenta",
   "drawer": {
@@ -54,5 +52,20 @@
     "step1": "1. En Safari, toca el botón de compartir <icon/> en la parte inferior de la pantalla.",
     "step2": "2. Elige «Añadir a pantalla de inicio».",
     "step3": "3. Toca «Añadir». La aplicación aparecerá en la pantalla de inicio y se abrirá sin la barra de direcciones."
+  },
+  "mainNav": "Navegación principal",
+  "adminView": "Vista de administrador",
+  "groups": {
+    "admin": "Administración"
+  },
+  "accountMenu": {
+    "open": "Menú de la cuenta",
+    "openPending_one": "Menú de la cuenta, una solicitud pendiente",
+    "openPending_other": "Menú de la cuenta, {{count}} solicitudes pendientes"
+  },
+  "dock": {
+    "label": "Navegación rápida",
+    "ask": "Preguntar",
+    "myCourses": "Cursos"
   }
 }

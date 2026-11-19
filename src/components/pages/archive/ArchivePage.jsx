@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 
 // The filters, the cards and their dialogs are ArchiveBrowser, shared with a
 // lecturer's page (PRD ATTR-10). What is only the archive's is here: the
-// upload button, the smart-search tab and the picture beside them.
+// upload button and the smart-search tab.
 const ArchivePage = () => {
   const { t } = useTranslation("archive");
   const archive = useArchivePageController();
@@ -23,9 +23,8 @@ const ArchivePage = () => {
   const [tab, setTab] = useState(0);
 
   return (
-    <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
-      {/* Main content */}
-      <Box sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
+    <Box>
+      <Box sx={{ minWidth: 0 }}>
         {/* Wraps: the title and the button are as long as the language makes
             them, and side by side they were wider than a phone in French. */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2, mb: 3 }}>
@@ -59,25 +58,6 @@ const ArchivePage = () => {
 
         {tab === 1 && <SmartSearch onOpenResult={archive.handleOpenResult} />}
       </Box>
-
-      {/* Left side image (rendered last so it sits on the left under RTL) */}
-      <Box
-        component="img"
-        src="/images/central_image.png"
-        alt=""
-        sx={{
-          flexShrink: 0,
-          width: { xs: 0, md: "24%" },
-          display: { xs: "none", md: "block" },
-          objectFit: "cover",
-          position: "sticky",
-          top: 64,
-          alignSelf: "flex-start",
-          height: "calc(100vh - 64px)",
-          borderInlineEnd: "1px solid rgba(0,0,0,0.06)",
-          opacity: 0.5,
-        }}
-      />
 
       <UploadMedia open={isUploadOpen} />
     </Box>

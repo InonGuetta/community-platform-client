@@ -11,9 +11,7 @@ import NotesIndex from "./componentsNotebook/NotesIndex";
 import BookmarksSidebar from "./componentsNotebook/BookmarksSidebar";
 import NotesColumn from "./componentsNotebook/NotesColumn";
 import { useTranslation } from "react-i18next";
-
-// The sticky navbar's height, which this page's own height is measured against.
-const NAVBAR_HEIGHT = 64;
+import { HEADER_HEIGHT } from "../../layout/shellGeometry";
 
 // Layout only. What the page does lives in useNotebookPageController; its four
 // sections are in componentsNotebook/ (NotebookHeader, NotesIndex,
@@ -85,14 +83,14 @@ const NotebookPage = () => {
       sx={{
         display: "flex", flexDirection: "column", gap: 2, p: 3,
         bgcolor: "background.default",
-        minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+        minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
         // From md up the PAGE does not scroll — the column of notes does. That
         // is what keeps the formatting strip and the notes list in place while
         // the user moves down a long notebook, without either of them having to
         // be positioned by hand against a header of a height nobody can predict
         // once it starts wrapping. Below md the two stack and the page scrolls
         // normally, where a pinned strip would eat most of a phone's screen.
-        height: { md: `calc(100vh - ${NAVBAR_HEIGHT}px)` },
+        height: { md: `calc(100vh - ${HEADER_HEIGHT}px)` },
         overflow: { md: "hidden" },
       }}
     >

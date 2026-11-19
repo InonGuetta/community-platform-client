@@ -122,7 +122,7 @@ const DownloadsPage = () => {
   const empty = c.loaded && c.items.length === 0 && c.downloading.length === 0;
 
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
+    <Box sx={{ bgcolor: "background.default" }}>
       <Box sx={{ maxWidth: 820, mx: "auto", p: { xs: 2, sm: 3 } }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
           <Icon color="primary" sx={{ fontSize: 34 }} />

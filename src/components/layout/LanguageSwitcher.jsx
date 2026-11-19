@@ -14,18 +14,20 @@ import { useLanguage } from "../../i18n/useLanguage";
 import { useDirection, menuOrigins } from "../../i18n/useDirection";
 import { useChooseLanguage } from "./useAccountLanguage";
 
-// Where a person picks the interface's language: the bar, the drawer, the
-// sign-in pages and the profile. One component, three shapes, so the list and
-// what choosing does cannot differ between them.
+// Where a person picks the interface's language: the avatar menu and the
+// drawer ("שפת האתר"), the sign-in pages' header and the profile. One list, so
+// what it offers and what choosing does cannot differ between them.
 //
 // Every language is shown in ITSELF, with its own lang and dir, so someone who
 // cannot read the current interface still finds their own.
 //
-//   variant="icon"  — a globe that opens the list (the bar, the sign-in pages)
-//   variant="list"  — a row in a List that opens it (the drawer)
+//   variant="icon"  — a globe that opens the list (the sign-in pages' header)
+//   variant="list"  — a row in a List that opens it
 //   variant="field" — a select with a label (the profile)
+// The avatar menu and the drawer open LanguageMenu from a row of their own.
+// `onChosen` runs after a language is picked — the menu it hangs from closes.
 
-const LanguageMenu = ({ anchor, onClose }) => {
+export const LanguageMenu = ({ anchor, onClose, onChosen }) => {
   const { language, languages } = useLanguage();
   const { start } = useDirection();
   const choose = useChooseLanguage();
@@ -44,6 +46,7 @@ const LanguageMenu = ({ anchor, onClose }) => {
           selected={code === language}
           onClick={() => {
             onClose();
+            onChosen?.();
             void choose(code);
           }}
         >

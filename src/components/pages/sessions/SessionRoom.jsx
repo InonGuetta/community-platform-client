@@ -5,6 +5,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import VideoRoom from "../../features/VideoRoom/VideoRoom";
 import { useSessionRoomController } from "./useSessionRoomController";
 import { useTranslation } from "react-i18next";
+import { viewportBelowHeader } from "../../layout/shellGeometry";
 
 // The room, reached by session ID rather than by room token.
 //
@@ -51,7 +52,7 @@ const SessionRoom = () => {
   }
 
   return (
-    <Box sx={{ height: "calc(100vh - 64px)", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ height: viewportBelowHeader, display: "flex", flexDirection: "column" }}>
       {/* userId is not passed: the server takes the identity from the signed
           token rather than from anything the client claims. */}
       <VideoRoom

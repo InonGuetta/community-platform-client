@@ -6,7 +6,11 @@ import { buildTheme } from "./theme/theme";
 import { useLanguage } from "./i18n/useLanguage";
 import { useAccountLanguageSync } from "./components/layout/useAccountLanguage";
 import { ColorModeContext } from "./theme/colorMode";
-import Navbar from "./components/layout/navbar/Navbar";
+import AppHeader from "./components/layout/navbar/AppHeader";
+import Dock from "./components/layout/navbar/Dock";
+import PageContainer from "./components/layout/PageContainer";
+import { pageWidthFor } from "./components/layout/pageWidth";
+import { AdminViewContext, readAdminView, saveAdminView } from "./components/layout/adminView";
 import PendingRoleBanner from "./components/layout/navbar/PendingRoleBanner";
 import GlobalSnackbar from "./components/features/Notification/GlobalSnackbar";
 import WelcomeAvatarDialog from "./components/features/Avatar/WelcomeAvatarDialog";
@@ -43,7 +47,7 @@ import { fetchMe } from "./store/slicesAndThunks/authSlice/authGet";
 import { claimOfflineLessons } from "./store/slicesAndThunks/offlineSlice/offlineGet";
 import { selectUser } from "./store/selectors/authSelectors";
 
-// Pages that render WITHOUT the navigation bar: they are reached by someone who
+// Pages that render WITHOUT the header, the dock and the page container: they are reached by someone who
 // is not signed in, and the recovery three by someone who by definition cannot
 // be — a nav bar full of links they would be redirected away from is noise on
 // the one screen that has to be simple.
@@ -64,6 +68,10 @@ const AUTH_PATHS = [
 // no navigation bar whose every link would send a guest to sign in.
 const GUEST_LESSON_ROUTE = "/l/:id";
 const isGuestPath = (pathname) => pathname.startsWith("/l/");
+
+// The live session room (/sessions/:id) lays out the whole screen, and the
+// dock would sit over its video controls (D-24).
+const isSessionRoom = (pathname) => /^\/sessions\/[^/]+/.test(pathname);
 
 // Mac-style page transition: each time the route changes, the new page slides
 // in gradually from the side with a fade. Keying off the pathname remounts this
@@ -106,12 +114,17 @@ const saveColorMode = (mode) => {
   }
 };
 
+// Every page in the shell sits in the one column (PageContainer, D-13); the
+// sign-in pages and a guest's lesson lay themselves out.
+const ShellColumn = ({ on, children, ...column }) => (on ? <PageContainer {...column}>{children}</PageContainer> : children);
+
 const CreatorPageByName = () => <CreatorPage key={useParams().name} />;
 
 const App = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const { pathname } = location;
+  const user = useSelector(selectUser);
 
   // Opt-in dark mode: defaults to light (existing experience unchanged) and only
   // flips when the user toggles it. Persisted so the choice survives reloads.
@@ -137,6 +150,26 @@ const App = () => {
     [mode]
   );
 
+  // "תצוגת מנהל" (D-07): a display preference, on by default, per browser.
+  // useAdminView adds who may use it; this only holds the choice.
+  const [adminEnabled, setAdminEnabled] = useState(readAdminView);
+  const adminView = useMemo(
+    () => ({
+      enabled: adminEnabled,
+      toggle: () =>
+        setAdminEnabled((prev) => {
+          saveAdminView(!prev);
+          return !prev;
+        }),
+    }),
+    [adminEnabled]
+  );
+
+  // The shell — header, the banner under it, the page column and the dock — on
+  // every page but the sign-in ones and a guest's lesson, which have their own.
+  const withShell = !AUTH_PATHS.includes(pathname) && !isGuestPath(pathname);
+  const withDock = withShell && Boolean(user) && !isSessionRoom(pathname);
+
   useEffect(() => {
     // The httpOnly cookie isn't readable from JS, so we always ask the server who we are
     // on first mount. fetchMe.rejected flips `initialized` true so unauth pages still render.
@@ -145,25 +178,27 @@ const App = () => {
 
   // The lessons saved on this device for listening offline belong to whoever is
   // signed in — or are deleted, when someone else saved them (PRD MOB-2).
-  const userId = useSelector(selectUser)?.id;
+  const userId = user?.id;
   useEffect(() => {
     if (userId != null) dispatch(claimOfflineLessons(userId));
   }, [dispatch, userId]);
 
   return (
     <ColorModeContext.Provider value={colorMode}>
+      <AdminViewContext.Provider value={adminView}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {/* Directly under the bar, on every signed-in page, and outside the
-            page-transition wrapper so it does not slide in and out on every
-            navigation — it is a standing state, not page content. */}
-        {!AUTH_PATHS.includes(pathname) && !isGuestPath(pathname) && (
+        {/* The banner sits directly under the header, on every signed-in page,
+            and outside the page-transition wrapper so it does not slide in and
+            out on every navigation — it is a standing state, not page content. */}
+        {withShell && (
           <>
-            <Navbar />
+            <AppHeader />
             <PendingRoleBanner />
           </>
         )}
         <PageTransition pathname={pathname}>
+          <ShellColumn on={withShell} width={pageWidthFor(pathname)} dockClearance={withDock}>
           <Routes location={location}>
             <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
@@ -232,11 +267,14 @@ const App = () => {
           <Route path={DOWNLOADS_SHELF.path} element={<ProtectedRoute offlineOk><DownloadsPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/archive" replace />} />
         </Routes>
+          </ShellColumn>
         </PageTransition>
+        {withDock && <Dock />}
         {/* A profile picture, offered once right after signing up. */}
         <WelcomeAvatarDialog />
         <GlobalSnackbar />
       </ThemeProvider>
+      </AdminViewContext.Provider>
     </ColorModeContext.Provider>
   );
 };

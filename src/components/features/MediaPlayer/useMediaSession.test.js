@@ -19,7 +19,7 @@ describe("the lock screen's words", () => {
 
   it("falls back to the platform's name for a lesson in no course, and puts a thumbnail first", () => {
     const meta = mediaSessionMetadata({ title: "א", thumbnail_url: "/t.jpg" });
-    expect(meta.album).toBe("פלטפורמת הקהילה");
+    expect(meta.album).toBe("קול תבונה");
     expect(meta.artwork[0]).toEqual({ src: "/t.jpg" });
   });
 });

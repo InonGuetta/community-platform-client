@@ -11,7 +11,7 @@ import { buildTheme } from "../../../theme/theme";
 
 // What the signed-in account's state shows and does outside its own page: the
 // banner for a pending or refused role request, the card that asks for one on
-// the profile, and signing out from the bar — which takes the lessons kept for
+// the profile, and signing out from the avatar menu — which takes the lessons kept for
 // offline listening with it, then signs out, then goes to sign-in.
 
 const authApi = vi.hoisted(() => ({ logout: vi.fn(), requestRole: vi.fn() }));
@@ -26,7 +26,7 @@ vi.mock("../../../utilities/offlineStore", async (importOriginal) => ({
 }));
 
 import PendingRoleBanner from "./PendingRoleBanner";
-import Navbar from "./Navbar";
+import AppHeader from "./AppHeader";
 import RoleRequestCard from "../../pages/profile/RoleRequestCard";
 
 const withUser = (user, ui) => {
@@ -90,8 +90,18 @@ test("signing out clears the offline lessons, then signs out, then goes to sign-
   const order = [];
   clearOffline.mockImplementation(async () => { order.push("offline"); return []; });
   authApi.logout.mockImplementation(async () => { order.push("logout"); });
-  withUser({ id: 1, role: "student", display_name: "דוד" }, <Navbar />);
-  // Sign-out lives only in the drawer, so open it first.
+  withUser({ id: 1, role: "student", display_name: "דוד" }, <AppHeader />);
+  fireEvent.click(screen.getByRole("button", { name: "תפריט החשבון" }));
+  fireEvent.click(await screen.findByRole("menuitem", { name: "התנתקות" }));
+  expect(await screen.findByText("דף ההתחברות")).toBeInTheDocument();
+  expect(order).toEqual(["offline", "logout"]);
+});
+
+test("signing out from the drawer does the same", async () => {
+  const order = [];
+  clearOffline.mockImplementation(async () => { order.push("offline"); return []; });
+  authApi.logout.mockImplementation(async () => { order.push("logout"); });
+  withUser({ id: 1, role: "student", display_name: "דוד" }, <AppHeader />);
   fireEvent.click(screen.getByRole("button", { name: "פתיחת תפריט אישי" }));
   fireEvent.click(await screen.findByRole("button", { name: "התנתקות" }));
   expect(await screen.findByText("דף ההתחברות")).toBeInTheDocument();

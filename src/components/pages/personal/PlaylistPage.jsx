@@ -32,7 +32,7 @@ const PlaylistPage = () => {
   const { t } = useTranslation(["personal", "nav"]);
 
   return (
-    <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
+    <Box sx={{ display: "flex", bgcolor: "background.default" }}>
       <Box sx={{ flexGrow: 1, p: 3 }}>
         {/* "Back" by meaning: DirectionalIcon points it right in Hebrew and
             left in English. */}

@@ -22,7 +22,7 @@ const CreatorPage = () => {
   const p = c.profile;
 
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)", p: 3 }}>
+    <Box sx={{ bgcolor: "background.default", p: 3 }}>
       <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={c.goToArchive} sx={{ mb: 2 }}>
         {t("toArchive")}
       </Button>

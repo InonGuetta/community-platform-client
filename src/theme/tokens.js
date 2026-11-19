@@ -122,3 +122,27 @@ export const FONT_DISPLAY = '"Heebo", "Assistant", "Segoe UI", Arial, sans-serif
 
 // The mockups' width limits (part B, "Layout"; decision 7).
 export const CONTENT_WIDTH = { wide: 1180, narrow: 1080 };
+
+// The dock (component 4): its glass, and the gradient of each of its icons.
+export const DOCK = {
+  glass: { light: "rgba(255,255,255,.55)", dark: "rgba(17,24,39,.6)" },
+  edge: { light: "rgba(255,255,255,.7)", dark: "rgba(255,255,255,.08)" },
+  dot: { light: "rgba(0,0,0,.55)", dark: "rgba(255,255,255,.6)" },
+  shadow: "0 0 0 .5px rgba(0,0,0,.12), 0 18px 40px -8px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.8)",
+  iconShadow: "0 4px 10px -2px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35)",
+  tip: "rgba(30,30,32,.82)",
+  gradient: {
+    archive: "linear-gradient(160deg, #818cf8, #4338ca)",
+    ask: "linear-gradient(160deg, #38bdf8, #2563eb)",
+    myCourses: "linear-gradient(160deg, #fb923c, #e11d48)",
+  },
+};
+
+// The header's hairline (component 1), and the drawer's avatar and backdrop
+// (component 3).
+export const SHELL = {
+  headerEdge: { light: "rgba(0,0,0,.08)", dark: "rgba(255,255,255,.08)" },
+  drawerAvatar: "linear-gradient(135deg, #6366f1, #312e81)",
+  drawerShadow: "0 0 80px rgba(0,0,0,.3)",
+  backdrop: "rgba(0,0,0,.25)",
+};

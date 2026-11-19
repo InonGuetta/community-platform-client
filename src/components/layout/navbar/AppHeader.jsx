@@ -1,0 +1,246 @@
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import Box from "@mui/material/Box";
+import Avatar from "@mui/material/Avatar";
+import ButtonBase from "@mui/material/ButtonBase";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { CONTENT_WIDTH, RADIUS, SHELL } from "../../../theme/tokens";
+import { HEADER_HEIGHT } from "../shellGeometry";
+import { isActive } from "../navConfig";
+import LanguageSwitcher from "../LanguageSwitcher";
+import NotificationBell from "./NotificationBell";
+import InstallHelpDialog from "./InstallHelpDialog";
+import AvatarMenu from "./AvatarMenu";
+import NavDrawer from "./NavDrawer";
+import useAppShell from "./useAppShell";
+import { avatarInitial } from "./useAccount";
+import { BrandWaveIcon } from "./dockIcons";
+
+// The top header (design/REDESIGN_V4.md, component 1): sticky, 48px, glass.
+// At the start the brand and the five places everyone browses; at the end the
+// bell and the avatar, which opens the avatar menu. Below md the five links
+// give way to a hamburger that opens the side drawer — the only menu on a phone
+// (decision 2). Everything else the old bar held (the personal shelves, the
+// management links, the language, the colour mode, installing, signing out) is
+// in the avatar menu and the drawer, both built from navConfig.
+//
+// variant="minimal": the brand and the language only — the sign-in pages
+// (decision 5, rendered by AuthLayout) and anyone not signed in.
+
+const Frame = ({ children }) => (
+  <Box
+    component="header"
+    sx={(theme) => ({
+      position: "sticky",
+      top: 0,
+      zIndex: theme.zIndex.appBar,
+      height: HEADER_HEIGHT,
+      bgcolor: "surface.glass",
+      backdropFilter: "saturate(180%) blur(20px)",
+      WebkitBackdropFilter: "saturate(180%) blur(20px)",
+      borderBottom: `1px solid ${SHELL.headerEdge[theme.palette.mode]}`,
+    })}
+  >
+    <Box
+      sx={{
+        maxWidth: CONTENT_WIDTH.wide,
+        height: "100%",
+        marginInline: "auto",
+        paddingInline: { xs: 2, md: 3 },
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 2,
+      }}
+    >
+      {children}
+    </Box>
+  </Box>
+);
+
+const Brand = () => {
+  const { t } = useTranslation("common");
+  return (
+    <Box
+      component={Link}
+      to="/archive"
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        minWidth: 0,
+        color: "text.primary",
+        textDecoration: "none",
+        fontWeight: 800,
+        fontSize: 17,
+        letterSpacing: "-0.01em",
+      }}
+    >
+      <Box
+        component="span"
+        aria-hidden
+        sx={{
+          width: 24,
+          height: 24,
+          flexShrink: 0,
+          borderRadius: "7px",
+          bgcolor: "text.primary",
+          color: "background.paper",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <BrandWaveIcon sx={{ fontSize: 14 }} />
+      </Box>
+      <Box component="span" sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {t("appName")}
+      </Box>
+    </Box>
+  );
+};
+
+const MinimalHeader = () => (
+  <Frame>
+    <Brand />
+    <LanguageSwitcher color="surface.ink2" />
+  </Frame>
+);
+
+const PrimaryLinks = ({ links, pathname }) => {
+  const { t } = useTranslation("nav");
+  return (
+    <Box component="nav" aria-label={t("mainNav")} sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 3 }}>
+      {links.map((link) => {
+        const active = isActive(link, pathname);
+        return (
+          <Box
+            key={link.id}
+            component={Link}
+            to={link.to}
+            aria-current={active ? "page" : undefined}
+            sx={{
+              fontSize: 13,
+              whiteSpace: "nowrap",
+              textDecoration: "none",
+              color: active ? "text.primary" : "surface.ink2",
+              fontWeight: active ? 700 : 400,
+              transition: "color .2s",
+              "&:hover": { color: "text.primary" },
+            }}
+          >
+            {t(link.labelKey)}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};
+
+// The avatar and its chevron: opens the avatar menu. A small dot when role
+// requests are waiting and the admin group is on (D-08) — the number is in
+// the button's name.
+const AvatarButton = ({ shell }) => {
+  const { t } = useTranslation("nav");
+  const { user, menuAnchor, openMenu, pendingRoleRequests } = shell;
+  const label = pendingRoleRequests > 0 ? t("accountMenu.openPending", { count: pendingRoleRequests }) : t("accountMenu.open");
+  return (
+    <ButtonBase
+      onClick={openMenu}
+      aria-label={label}
+      aria-haspopup="menu"
+      aria-expanded={Boolean(menuAnchor)}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.75,
+        borderRadius: `${RADIUS.pill}px`,
+        paddingBlock: "4px",
+        paddingInlineStart: "4px",
+        paddingInlineEnd: "8px",
+        color: "surface.ink2",
+        transition: "background-color .2s",
+        "&:hover": { bgcolor: "surface.fill" },
+      }}
+    >
+      <Box sx={{ position: "relative", display: "flex" }}>
+        <Avatar
+          src={user?.avatar_url || undefined}
+          alt=""
+          sx={{ width: 28, height: 28, bgcolor: "primary.main", color: "primary.contrastText", fontSize: 12, fontWeight: 700 }}
+        >
+          {avatarInitial(user)}
+        </Avatar>
+        {pendingRoleRequests > 0 && (
+          <Box
+            component="span"
+            aria-hidden
+            sx={{
+              position: "absolute",
+              top: -1,
+              insetInlineEnd: -1,
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              bgcolor: "surface.danger",
+              border: "2px solid",
+              borderColor: "background.default",
+            }}
+          />
+        )}
+      </Box>
+      <KeyboardArrowDownIcon sx={{ fontSize: 14 }} />
+    </ButtonBase>
+  );
+};
+
+const SignedInHeader = () => {
+  const { t } = useTranslation("nav");
+  const shell = useAppShell();
+  const { user, pathname, config, bell, installer, drawerOpen, openDrawer } = shell;
+
+  // Before fetchMe has answered, and for anyone signed out, only the brand and
+  // the language (component 1: "משתמש לא מחובר").
+  if (!user) return <MinimalHeader />;
+
+  return (
+    <>
+      <Frame>
+        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 4 }, minWidth: 0 }}>
+          <IconButton
+            onClick={openDrawer}
+            aria-label={drawerOpen ? t("drawer.close") : t("drawer.open")}
+            aria-expanded={drawerOpen}
+            sx={{ display: { xs: "inline-flex", md: "none" }, color: "text.primary", marginInlineStart: -1 }}
+          >
+            <MenuIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+          <Brand />
+          <PrimaryLinks links={config.primary} pathname={pathname} />
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexShrink: 0 }}>
+          <NotificationBell
+            items={bell.items}
+            unread={bell.unread}
+            anchor={bell.anchor}
+            open={bell.open}
+            onOpen={bell.handleOpen}
+            onClose={bell.handleClose}
+            onSelect={bell.handleSelect}
+            onMarkAllRead={bell.handleMarkAllRead}
+          />
+          <AvatarButton shell={shell} />
+        </Box>
+      </Frame>
+      <AvatarMenu shell={shell} />
+      <NavDrawer shell={shell} />
+      <InstallHelpDialog open={installer.iosHelpOpen} onClose={installer.closeIosHelp} />
+    </>
+  );
+};
+
+const AppHeader = ({ variant = "full" }) => (variant === "minimal" ? <MinimalHeader /> : <SignedInHeader />);
+
+export default AppHeader;

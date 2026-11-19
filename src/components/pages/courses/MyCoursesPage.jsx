@@ -50,7 +50,7 @@ const MyCoursesPage = () => {
   }
 
   return (
-    <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
+    <Box sx={{ p: 3, bgcolor: "background.default" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, mb: 3, flexWrap: "wrap" }}>
         <Typography variant="h4" fontWeight={800} color="primary">{t("mine.title")}</Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>

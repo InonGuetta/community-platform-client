@@ -51,7 +51,7 @@ const ProfilePage = () => {
   if (!user) return null;
 
   return (
-    <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
+    <Box sx={{ p: 3, bgcolor: "background.default" }}>
       {/* The title and the cards share one centred column, so the heading sits
           over the cards rather than at the page's edge. */}
       <Box sx={{ maxWidth: 640, mx: "auto" }}>

@@ -7,11 +7,11 @@
     "donate": "Faire un don",
     "manageCourses": "Gérer les cours",
     "users": "Utilisateurs",
-    "admin": "Administration"
+    "admin": "Administration",
+    "upload": "Téléverser un média"
   },
   "pendingRequests_one": "{{label}}, une demande en attente",
   "pendingRequests_other": "{{label}}, {{count}} demandes en attente",
-  "personal": "Mon contenu",
   "shelves": {
     "notebook": "Mon carnet",
     "likes": "Contenu que j'ai aimé",
@@ -26,9 +26,7 @@
     "continue": "Vous n'avez encore commencé aucun cours"
   },
   "colorMode": {
-    "toLight": "Mode clair",
-    "toDark": "Mode sombre",
-    "toggle": "Changer le mode d'affichage"
+    "toDark": "Mode sombre"
   },
   "myAccount": "Mon compte",
   "drawer": {
@@ -54,5 +52,20 @@
     "step1": "1. Dans Safari, touchez le bouton de partage <icon/> en bas de l'écran.",
     "step2": "2. Choisissez « Sur l'écran d'accueil ».",
     "step3": "3. Touchez « Ajouter ». L'application apparaîtra sur l'écran d'accueil et s'ouvrira sans barre d'adresse."
+  },
+  "mainNav": "Navigation principale",
+  "adminView": "Vue administrateur",
+  "groups": {
+    "admin": "Administration"
+  },
+  "accountMenu": {
+    "open": "Menu du compte",
+    "openPending_one": "Menu du compte, une demande en attente",
+    "openPending_other": "Menu du compte, {{count}} demandes en attente"
+  },
+  "dock": {
+    "label": "Navigation rapide",
+    "ask": "Interroger",
+    "myCourses": "Cours"
   }
 }

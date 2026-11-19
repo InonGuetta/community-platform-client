@@ -1,5 +1,4 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import PageHeader from "../../features/PageHeader/PageHeader";
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import PlaylistsSection from "./PlaylistsSection";
 import { useCollectionPageController } from "./useCollectionPageController";
@@ -30,37 +29,33 @@ const CollectionPage = ({ shelf }) => {
     navigate,
     shown,
     status,
+    subtitle,
     user,
   } = useCollectionPageController({ shelf });
 
   return (
-    <Box sx={{ display: "flex", bgcolor: "background.default" }}>
-      <Box sx={{ flexGrow: 1, p: 3 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-          <Typography variant="h4" fontWeight={800} color="primary">{label}</Typography>
-          {shown.length > 0 && (
-            <Typography variant="body2" color="text.secondary">
-              {t("items", { count: shown.length })}
-            </Typography>
-          )}
-        </Box>
+    <>
+      <PageHeader
+        kicker={shown.length > 0 ? t("items", { count: shown.length }) : undefined}
+        title={label}
+        subtitle={subtitle}
+      />
 
-        <MediaGrid
-          items={shown}
-          status={status}
-          onView={(id) => navigate(`/media/${id}`)}
-          onOpenCreator={(name) => navigate(creatorPath(name))}
-          user={user}
-          emptyMessage={emptyMessage}
-          emptyActionLabel={t("toArchive")}
-          onEmptyAction={() => navigate("/archive")}
-        />
+      <MediaGrid
+        items={shown}
+        status={status}
+        onView={(id) => navigate(`/media/${id}`)}
+        onOpenCreator={(name) => navigate(creatorPath(name))}
+        user={user}
+        emptyMessage={emptyMessage}
+        emptyActionLabel={t("toArchive")}
+        onEmptyAction={() => navigate("/archive")}
+      />
 
-        {/* The user's own lists, under everything kept loose — see the shelf's
-            `showsLists`. Only the saved shelf has any; likes are not filed. */}
-        {collection.showsLists && <PlaylistsSection />}
-      </Box>
-    </Box>
+      {/* The user's own lists, under everything kept loose — see the shelf's
+          `showsLists`. Only the saved shelf has any; likes are not filed. */}
+      {collection.showsLists && <PlaylistsSection />}
+    </>
   );
 };
 

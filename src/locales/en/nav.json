@@ -25,6 +25,11 @@
     "savedAllInLists": "Everything you saved is organised in the lists below",
     "continue": "You haven't started watching a lesson yet"
   },
+  "shelfSubtitle": {
+    "continue": "Pick up where you left off",
+    "likes": "Everything you liked",
+    "saved": "Everything you saved, in one place"
+  },
   "colorMode": {
     "toDark": "Dark mode"
   },

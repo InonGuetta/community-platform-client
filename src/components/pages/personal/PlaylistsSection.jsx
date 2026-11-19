@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
+import ButtonBase from "@mui/material/ButtonBase";
+import Collapse from "@mui/material/Collapse";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
 import Alert from "@mui/material/Alert";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import { statuses } from "../../../utilities/constant";
@@ -15,44 +14,24 @@ import { savedListPath } from "../../layout/personalShelves";
 import { usePlaylistsSection } from "./usePlaylistsSection";
 import { useTranslation } from "react-i18next";
 
-// How many more the arrow reveals each time.
-//
-// MediaGrid lays its cards out three to a row on a wide screen (md={4}), so this
-// is that same three said once more, where the counting is done. The two have to
-// agree on a desktop: a step of three against a grid that fits four would reveal
-// a fourth card the arrow never counted.
-//
-// On a phone the grid is one card per row and this is still three — three cards
-// per press rather than one row per press. That is deliberate: the alternative
-// is counting rows per breakpoint, which means this component watching the
-// window in order to decide how much a button does.
-const PER_ROW = 3;
+// How many placeholder rows stand in while the lists load.
+const PLACEHOLDER_ROWS = 3;
 
-// The user's own lists — each one a heading with its own lectures underneath.
+// One saved list, as a row that folds (D-36, mockups 07/28): the title in bold,
+// the count in the mute colour, a chevron — and under it, once opened, the
+// lectures in the same cards they appear in everywhere else. Closed by default,
+// so a user with many lists sees all their names at once instead of a page of
+// cards; each row opens by itself.
 //
-// It used to be a card per list and nothing else: a name, a count, and a click
-// through to see what was in it. That is a table of contents, not a shelf. What
-// the page is for is seeing what you saved, so each list now shows its most
-// recent lectures in the same cards they appear in everywhere else, and the
-// whole list is still a click away for when there is more than fits.
-//
-// The cards are the archive's MediaGrid, like every other shelf on this page: a
-// lecture a user filed should look and behave exactly as it does where they
-// found it — same menu, same badges, same click.
+// The cards are the archive's MediaGrid: a lecture a user filed should look and
+// behave exactly as it does where they found it — same menu, same badges, same
+// click.
 const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
   const { t } = useTranslation("personal");
+  const panelId = useId();
+  const [open, setOpen] = useState(false);
+  // Newest first (ORDER BY added_at DESC); all that arrived is shown on opening.
   const items = playlist.items || [];
-
-  // How many cards are open, for THIS list. Per shelf and not per page: two
-  // lists on one screen are two separate things to page through, and a single
-  // counter would open them in lockstep.
-  //
-  // The items arrive newest first (ORDER BY added_at DESC), so the first
-  // PER_ROW of them are the most recently added.
-  const [visibleCount, setVisibleCount] = useState(PER_ROW);
-  const shown = items.slice(0, visibleCount);
-  const hasMore = shown.length < items.length;
-  const showMore = () => setVisibleCount((n) => n + PER_ROW);
 
   // The server caps how many lectures ride along with a list. Past that the list
   // has a page of its own, which was built for exactly this.
@@ -64,53 +43,59 @@ const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
   const beyondWhatArrived = playlist.item_count > items.length;
 
   return (
-    <Box sx={{ mb: 4 }}>
-      {/* The title on the right and the arrow on the left — in RTL that is
-          start and end of one row, so space-between puts each at its edge. */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, mb: 1.5 }}>
+    <Box sx={{ mt: 4 }}>
+      <ButtonBase
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls={panelId}
+        sx={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1.5,
+          py: 1.5,
+          textAlign: "start",
+          borderRadius: 1,
+        }}
+      >
         <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5, flexWrap: "wrap", minWidth: 0 }}>
-          <Typography variant="subtitle1" fontWeight={800} dir="auto">{playlist.title}</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="display" component="span" dir="auto" sx={{ fontSize: 24, overflowWrap: "anywhere" }}>
+            {playlist.title}
+          </Typography>
+          <Typography component="span" sx={{ fontSize: 14, color: "text.secondary" }}>
             {t("lessons", { count: Number(playlist.item_count) || 0 })}
           </Typography>
+        </Box>
+        <KeyboardArrowDownRoundedIcon
+          aria-hidden
+          sx={{ flexShrink: 0, transition: "transform .2s", transform: open ? "rotate(180deg)" : "none" }}
+        />
+      </ButtonBase>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }} />
+
+      <Collapse in={open} unmountOnExit id={panelId}>
+        <Box sx={{ pt: 3 }}>
           {/* Offered only when there is something here it cannot show. A link to
               "the whole list" beside a list that is already whole is a question
               the reader has to answer for nothing. */}
           {beyondWhatArrived && (
-            <Button size="small" onClick={onOpenList} sx={{ textTransform: "none" }}>
+            <Button size="small" onClick={onOpenList} sx={{ mb: 2 }}>
               {t("fullList")}
             </Button>
           )}
+          {items.length === 0 ? (
+            // Either genuinely empty, or holding only lectures this viewer may
+            // not see — the server applies the same visibility rule here as
+            // everywhere. Both are "nothing to show you", and neither is an error.
+            <Typography variant="body2" color="text.disabled">
+              {t("emptyList")}
+            </Typography>
+          ) : (
+            <MediaGrid items={items} status={statuses.succeeded} onView={onView} user={user} />
+          )}
         </Box>
-
-        {/* Absent when everything already fits in one row; disabled once every
-            card that arrived is open. The span keeps the Tooltip working on a
-            disabled button, which fires no pointer events of its own. */}
-        {items.length > PER_ROW && (
-          <Tooltip title={hasMore ? t("more") : t("noMore")}>
-            <span>
-              <IconButton
-                onClick={showMore}
-                disabled={!hasMore}
-                aria-label={t("showMore", { title: playlist.title })}
-              >
-                <KeyboardArrowDownRoundedIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
-        )}
-      </Box>
-
-      {items.length === 0 ? (
-        // Either genuinely empty, or holding only lectures this viewer may not
-        // see — the server applies the same visibility rule here as everywhere.
-        // Both are "nothing to show you", and neither is an error.
-        <Typography variant="body2" color="text.disabled">
-          {t("emptyList")}
-        </Typography>
-      ) : (
-        <MediaGrid items={shown} status={statuses.succeeded} onView={onView} user={user} />
-      )}
+      </Collapse>
     </Box>
   );
 };
@@ -122,23 +107,21 @@ const PlaylistsSection = () => {
   const { playlists, status, user, loading } = usePlaylistsSection();
 
   return (
-    <Box sx={{ mt: 5 }}>
-      <Typography variant="h6" fontWeight={800} color="primary" sx={{ mb: 2 }}>
+    <Box sx={{ mt: { xs: 8, md: 10 } }}>
+      <Typography variant="display" component="h2" sx={{ fontSize: 32 }}>
         {t("lists.title")}
       </Typography>
 
       {status === statuses.failed ? (
-        <Alert severity="error">{t("lists.loadFailed")}</Alert>
+        <Alert severity="error" sx={{ mt: 3 }}>{t("lists.loadFailed")}</Alert>
       ) : loading ? (
-        <Grid container spacing={3}>
-          {Array.from({ length: PER_ROW }).map((_, i) => (
-            <Grid item xs={12} sm={6} md={4} key={i}>
-              <Skeleton variant="rounded" height={260} />
-            </Grid>
+        <Box sx={{ mt: 3, display: "grid", gap: 2 }}>
+          {Array.from({ length: PLACEHOLDER_ROWS }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={48} />
           ))}
-        </Grid>
+        </Box>
       ) : playlists.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
           {t("lists.none")}
         </Typography>
       ) : (

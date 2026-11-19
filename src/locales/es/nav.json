@@ -25,6 +25,11 @@
     "savedAllInLists": "Todo lo que guardaste está ordenado en las listas de abajo",
     "continue": "Todavía no has empezado a ver ninguna clase"
   },
+  "shelfSubtitle": {
+    "continue": "Sigue donde lo dejaste",
+    "likes": "Todo lo que te ha gustado",
+    "saved": "Todo lo que guardaste, en un solo lugar"
+  },
   "colorMode": {
     "toDark": "Modo oscuro"
   },

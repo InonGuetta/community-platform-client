@@ -42,6 +42,7 @@ export const useCollectionPageController = ({ shelf }) => {
     navigate,
     shown,
     status,
+    subtitle: collection.subtitleKey ? t(collection.subtitleKey) : null,
     user,
   };
 };

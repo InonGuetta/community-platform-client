@@ -135,3 +135,12 @@
 - **לשלב 3ב:** `CollectionPage`, `PlaylistPage`, `PlaylistsSection`, `CreatorPage` כבר מציגים `MediaTile` (דרך `MediaGrid`), אבל עדיין עם הכותרות, ה-`p: 3` וה-`bgcolor` הישנים. `PlaylistsSection` עדיין סופר "3 בשורה" (`PER_ROW`) מול גריד של 4 ב-lg – יתוקן במבנה המתקפל (D-36). בדפים האישיים ⋯ = הורדה בלבד (D-14), כי לא מועברים handlers.
 - הלב באריח מול האגודל בעמוד הפריט (D-79) – להכריע ב-4א.
 - לא צולם בדפדפן בשלב הזה מעבר ל-e2e; השוואה ויזואלית מול `new-02`/`new-29` – 8ב.
+
+## שלב 3ב – 03, 04, 06, 07/28, 25
+
+- **מה השתנה:** `CollectionPage` (המשך צפייה, אהבתי, תוכן שמור) ו-`PlaylistPage` – `PageHeader` (kicker עם מונה, כותרת משנה) והסרת עטיפות `p: 3`/`bgcolor`; `PlaylistsSection` – שורות מתקפלות במקום "שלושה בשורה" והחץ "עוד" (D-36, D-92); `CreatorPage` – אווטאר גדול עם gradient, `h1` display, `BackLink` (D-93). מסך 03 כבר נעשה ב-3א (D-90) ולא נגעו בו. D-91..D-93.
+- **קבצים:** `pages/personal/{CollectionPage,PlaylistPage,PlaylistsSection,useCollectionPageController}.jsx/js`, `pages/creators/CreatorPage.jsx`, `layout/personalShelves.js` (`subtitleKey`), locales `nav.json` (+`shelfSubtitle`) ו-`personal.json` (−`more`/`noMore`/`showMore`) בחמש שפות.
+- **בדיקות:** `PlaylistsSection.test.jsx` נכתבה מחדש (מבנה: שורה מתקפלת במקום חץ ו"שלוש בשורה"; אותה התנהגות – שם, מונה, סדר, ריק, "לרשימה המלאה", שתי רשימות בלתי תלויות). `PlaylistsSectionLoading` ללא שינוי.
+- **סקריפטים:** אין שינוי ב-`package.json`.
+- **פתוח:** השוואה ויזואלית – 8ב.
+- **שער:** lint, build ו-`check:chunks` ירוקים; בריצת `verify` מלאה תחת עומס נפל מבחן אחד של `language` (timeout), שעבר בהרצה בודדת (4/4 קבצים). **`npm run e2e` ירוק – 5/5.**

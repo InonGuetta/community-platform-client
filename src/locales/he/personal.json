@@ -8,9 +8,6 @@
   "items_two": "{{count}} פריטים",
   "items_other": "{{count}} פריטים",
   "fullList": "לרשימה המלאה",
-  "more": "עוד שיעורים",
-  "noMore": "אין עוד שיעורים",
-  "showMore": "הצג עוד שיעורים מתוך {{title}}",
   "emptyList": "אין בה שיעורים להצגה.",
   "lists": {
     "title": "רשימות שמורות",

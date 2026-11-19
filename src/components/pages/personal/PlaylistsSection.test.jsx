@@ -50,43 +50,45 @@ const show = (playlists) => {
 };
 
 const cards = () => screen.queryAllByText(/^שיעור \d+$/);
-const arrow = (name = /הצג עוד שיעורים/) => screen.queryByRole("button", { name });
+// A list's row: the button that folds it, found by the list's own name.
+const row = (title = "שיעורי מוסר") => screen.getByRole("button", { name: new RegExp(title) });
+const open = (title) => fireEvent.click(row(title));
 
 describe("what a saved list shows", () => {
-  test("its own name, as the heading", () => {
+  test("its own name and how many lectures it holds, as a row", () => {
     show([list()]);
     expect(screen.getByText("שיעורי מוסר")).toBeInTheDocument();
+    expect(screen.getByText("9 שיעורים")).toBeInTheDocument();
   });
 
-  // The whole point of the change: the lectures themselves, not a count and a
-  // link to go and look at them.
-  test("and the lectures inside it, three to a row", () => {
+  // D-36: closed until asked, so a user with many lists sees every name at once.
+  test("closed by default, with no lectures drawn", () => {
     show([list()]);
-    expect(cards()).toHaveLength(3);
+    expect(row()).toHaveAttribute("aria-expanded", "false");
+    expect(cards()).toHaveLength(0);
   });
 
-  // They arrive newest first from the server (ORDER BY added_at DESC) and this
-  // grid reads right to left, so the most recent is the top-right card.
+  // The whole point of the original change, kept: the lectures themselves, not a
+  // count and a link to go and look at them.
+  test("opening it shows every lecture that arrived", () => {
+    show([list()]);
+    open();
+    expect(row()).toHaveAttribute("aria-expanded", "true");
+    expect(cards()).toHaveLength(9);
+  });
+
+  // They arrive newest first from the server (ORDER BY added_at DESC).
   test("in the order they arrived, newest first", () => {
-    show([list()]);
+    show([list({ items: lectures(3), item_count: 3 })]);
+    open();
     expect(cards().map((el) => el.textContent)).toEqual(["שיעור 1", "שיעור 2", "שיעור 3"]);
   });
 
-  test("a press opens one more row of three", () => {
+  test("a second press folds it again", () => {
     show([list()]);
-    fireEvent.click(arrow());
-    expect(cards()).toHaveLength(6);
-  });
-
-  test("a final part-row is shown whole", () => {
-    show([list({ items: lectures(4), item_count: 4 })]);
-    fireEvent.click(arrow());
-    expect(cards()).toHaveLength(4);
-  });
-
-  test("no arrow when everything already fits on one row", () => {
-    show([list({ items: lectures(3), item_count: 3 })]);
-    expect(arrow()).toBeNull();
+    open();
+    open();
+    expect(row()).toHaveAttribute("aria-expanded", "false");
   });
 });
 
@@ -96,20 +98,21 @@ describe("two lists on one page", () => {
     { id: 2, title: "בדיקה שהרשימה עובדת", items: lectures(6, 100), item_count: 6 },
   ];
 
-  test("each gets its own heading and its own lectures", () => {
+  test("each gets its own row", () => {
     show(two());
     expect(screen.getByText("שיעורי מוסר")).toBeInTheDocument();
     expect(screen.getByText("בדיקה שהרשימה עובדת")).toBeInTheDocument();
-    expect(cards()).toHaveLength(6);   // three from each
+    expect(cards()).toHaveLength(0);
   });
 
-  // Per shelf and not per page: two lists are two separate things to page
-  // through, and a single counter would open them in lockstep.
+  // Per row and not per page: two lists are two separate things to open, and a
+  // single flag would open them in lockstep.
   test("opening one does not open the other", () => {
     show(two());
-    fireEvent.click(arrow(/הצג עוד שיעורים מתוך שיעורי מוסר/));
+    open("שיעורי מוסר");
 
-    expect(cards()).toHaveLength(9);   // six from the first, three from the second
+    expect(cards()).toHaveLength(9);
+    expect(row("בדיקה שהרשימה עובדת")).toHaveAttribute("aria-expanded", "false");
   });
 });
 
@@ -119,6 +122,7 @@ describe("the edges of a list", () => {
   // "nothing to show you", and neither is an error.
   test("a list with nothing to show says so, and is not an error", () => {
     show([list({ items: [], item_count: 0 })]);
+    open();
     expect(screen.getByText("אין בה שיעורים להצגה.")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).toBeNull();
   });
@@ -127,6 +131,7 @@ describe("the edges of a list", () => {
   // of its own, which was built for exactly this.
   test("a list longer than what arrived offers its own page", () => {
     show([list({ items: lectures(12), item_count: 300 })]);
+    open();
     expect(screen.getByRole("button", { name: "לרשימה המלאה" })).toBeInTheDocument();
   });
 
@@ -134,6 +139,7 @@ describe("the edges of a list", () => {
   // the reader has to answer for nothing.
   test("and a list that is already whole does not", () => {
     show([list()]);
+    open();
     expect(screen.queryByRole("button", { name: "לרשימה המלאה" })).toBeNull();
   });
 
@@ -142,6 +148,7 @@ describe("the edges of a list", () => {
   // offered "the whole list" and then opened a page showing the same cards.
   test("a list whose hidden lectures are filtered out does not promise more", () => {
     show([list({ items: lectures(2), item_count: 2 })]);
+    open();
     expect(screen.queryByRole("button", { name: "לרשימה המלאה" })).toBeNull();
     expect(screen.getByText("2 שיעורים")).toBeInTheDocument();
   });
@@ -149,30 +156,5 @@ describe("the edges of a list", () => {
   test("no lists at all is a sentence, not an empty page", () => {
     show([]);
     expect(screen.getByText(/עדיין אין לך רשימות/)).toBeInTheDocument();
-  });
-});
-
-describe("the arrow", () => {
-  // In the heading row, on the opposite edge from the title — so it comes
-  // before the cards in the DOM, not after them.
-  test("sits in the heading, above the cards", () => {
-    show([list()]);
-    const first = cards()[0];
-    expect(arrow().compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  });
-
-  // Once every card that arrived is open there is nothing left for it to do.
-  test("is disabled once everything is open", () => {
-    show([list({ items: lectures(6), item_count: 6 })]);
-    expect(arrow()).toBeEnabled();
-
-    fireEvent.click(arrow());
-    expect(cards()).toHaveLength(6);
-    expect(arrow()).toBeDisabled();
-  });
-
-  test("it says which list it belongs to", () => {
-    show([list()]);
-    expect(arrow()).toHaveAttribute("aria-label", "הצג עוד שיעורים מתוך שיעורי מוסר");
   });
 });

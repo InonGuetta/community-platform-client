@@ -64,6 +64,7 @@ export const LIKES_SHELF = {
     fetch: fetchLikedMedia,
     selectSlice: (state) => state.likes,
     emptyKey: "shelfEmpty.likes",
+    subtitleKey: "shelfSubtitle.likes",
   },
 };
 
@@ -76,6 +77,7 @@ export const SAVED_SHELF = {
     fetch: fetchSavedMedia,
     selectSlice: (state) => state.saves,
     emptyKey: "shelfEmpty.saved",
+    subtitleKey: "shelfSubtitle.saved",
     // Saving is two things at once — filing a lecture in a list also saves it
     // generally (see the server's addToPlaylist) — so an unfiltered grid showed
     // every filed lecture loose at the top AND again inside its list. The top of
@@ -112,6 +114,7 @@ export const CONTINUE_SHELF = {
     fetch: fetchContinueWatching,
     selectSlice: (state) => state.media.continueWatching,
     emptyKey: "shelfEmpty.continue",
+    subtitleKey: "shelfSubtitle.continue",
   },
 };
 

@@ -25,6 +25,11 @@
     "savedAllInLists": "Tout ce que vous avez enregistré est rangé dans les listes ci-dessous",
     "continue": "Vous n'avez encore commencé aucun cours"
   },
+  "shelfSubtitle": {
+    "continue": "Reprenez là où vous vous êtes arrêté",
+    "likes": "Tout ce que vous avez aimé",
+    "saved": "Tout ce que vous avez enregistré, au même endroit"
+  },
   "colorMode": {
     "toDark": "Mode sombre"
   },

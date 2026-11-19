@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
+import PageHeader from "../../features/PageHeader/PageHeader";
+import SectionCard from "../../features/SectionCard/SectionCard";
 import DonateForm from "./DonateForm";
 import PaymentStep from "./PaymentStep";
 import DonationResult from "./DonationResult";
@@ -16,16 +15,9 @@ const DonatePage = () => {
   const c = useDonatePageController();
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 }, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-      <Paper sx={{ p: { xs: 2.5, sm: 4 }, maxWidth: 520, width: "100%" }}>
-        <Box sx={{ textAlign: "center", mb: 3 }}>
-          <VolunteerActivismIcon sx={{ fontSize: 48, color: "primary.main", mb: 1 }} />
-          <Typography variant="h5" fontWeight={700}>{t("title")}</Typography>
-          <Typography variant="body2" color="text.secondary" mt={1}>
-            {t("intro")}
-          </Typography>
-        </Box>
-
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <PageHeader kicker={t("kicker")} title={t("title")} subtitle={t("intro")} align="center" />
+      <SectionCard component="div" sx={{ maxWidth: 560, width: "100%", mb: 3 }}>
         {c.step === "amount" && <DonateForm onContinue={c.startPayment} starting={c.starting} error={c.error} />}
         {c.step === "pay" && (
           <PaymentStep
@@ -38,8 +30,7 @@ const DonatePage = () => {
           />
         )}
         {c.step === "done" && <DonationResult donation={c.result} onAgain={c.startOver} />}
-      </Paper>
-
+      </SectionCard>
       <MyDonations history={c.history} />
     </Box>
   );

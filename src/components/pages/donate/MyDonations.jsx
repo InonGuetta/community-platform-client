@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import SectionCard from "../../features/SectionCard/SectionCard";
 import Chip from "@mui/material/Chip";
 import { donationLine, statusOf } from "./donationText";
 import { useTranslation } from "react-i18next";
@@ -11,8 +11,7 @@ const MyDonations = ({ history }) => {
   const { t } = useTranslation("donate");
   if (history.status !== "ready" || history.items.length === 0) return null;
   return (
-    <Paper sx={{ p: 3, maxWidth: 520, width: "100%" }}>
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>{t("mine.title")}</Typography>
+    <SectionCard title={t("mine.title")} sx={{ maxWidth: 560, width: "100%" }}>
       <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 1 }}>
         {history.items.map((d) => {
           const s = statusOf(d.status);
@@ -24,7 +23,7 @@ const MyDonations = ({ history }) => {
           );
         })}
       </Box>
-    </Paper>
+    </SectionCard>
   );
 };
 

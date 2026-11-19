@@ -1,8 +1,7 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import SectionCard from "../../features/SectionCard/SectionCard";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import useNotificationPreferences from "./useNotificationPreferences";
@@ -28,10 +27,9 @@ const NotificationPreferencesCard = () => {
   const columns = smsOffered ? `1fr ${SWITCH_COLUMN}px ${SWITCH_COLUMN}px` : `1fr ${SWITCH_COLUMN}px`;
 
   return (
-    <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        <Typography variant="h6" fontWeight={700}>{t("email.title")}</Typography>
-        <Typography variant="body2" color="text.secondary">{t("email.intro")}</Typography>
+    <SectionCard title={t("email.title")}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+        <Typography color="text.secondary" sx={{ mt: -2 }}>{t("email.intro")}</Typography>
 
         {status === "failed" && <Alert severity="error">{t("email.loadFailed")}</Alert>}
 
@@ -53,7 +51,7 @@ const NotificationPreferencesCard = () => {
 
         {status === "ready" && (
           <Box role="table" aria-label={t("email.title")}>
-            <Box role="row" sx={{ display: "grid", gridTemplateColumns: columns, alignItems: "end", pb: 0.5, borderBottom: 1, borderColor: "divider" }}>
+            <Box role="row" sx={{ display: "grid", gridTemplateColumns: columns, alignItems: "end", pb: 1, borderBottom: 1, borderColor: "divider" }}>
               <Box role="columnheader" />
               <Typography role="columnheader" variant="caption" fontWeight={700} sx={{ textAlign: "center" }}>{t("email.channelEmail")}</Typography>
               {smsOffered && (
@@ -71,12 +69,12 @@ const NotificationPreferencesCard = () => {
                 <Box
                   key={key}
                   role="row"
-                  sx={{ display: "grid", gridTemplateColumns: columns, alignItems: "center", py: 0.75, borderBottom: 1, borderColor: "divider" }}
+                  sx={{ display: "grid", gridTemplateColumns: columns, alignItems: "center", py: 2, borderBottom: 1, borderColor: "divider", "&:last-of-type": { borderBottom: 0 } }}
                 >
                   <Box role="rowheader" sx={{ minWidth: 0, paddingInlineEnd: 1 }}>
-                    <Typography variant="body2" fontWeight={600} color={on ? "text.primary" : "text.disabled"}>{label}</Typography>
+                    <Typography sx={{ fontSize: 15, fontWeight: 700 }} color={on ? "text.primary" : "text.disabled"}>{label}</Typography>
                     {help && (
-                      <Typography variant="caption" color={on ? "text.secondary" : "text.disabled"} sx={{ display: "block" }}>{help}</Typography>
+                      <Typography sx={{ display: "block", fontSize: 13, mt: 0.25 }} color={on ? "text.secondary" : "text.disabled"}>{help}</Typography>
                     )}
                   </Box>
                   <Box role="cell" sx={{ display: "flex", justifyContent: "center", opacity: allOff ? 0.5 : 1 }}>
@@ -115,8 +113,8 @@ const NotificationPreferencesCard = () => {
             {anySms && <Button size="small" onClick={handleSmsAllOff}>{t("email.smsAllOff")}</Button>}
           </Box>
         )}
-      </CardContent>
-    </Card>
+      </Box>
+    </SectionCard>
   );
 };
 

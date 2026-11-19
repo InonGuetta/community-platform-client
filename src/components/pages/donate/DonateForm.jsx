@@ -1,12 +1,13 @@
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import ButtonBase from "@mui/material/ButtonBase";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import Tooltip from "@mui/material/Tooltip";
+import SegmentedControl from "../../features/SegmentedControl/SegmentedControl";
+import { RADIUS } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 
 const PRESET_AMOUNTS = [50, 100, 250, 500];
@@ -32,55 +33,68 @@ const DonateForm = ({ onContinue, starting = false, error = null }) => {
         {/* "חודשי" stays disabled, and the server refuses it too: a standing
             order needs a Stripe Subscription (PRD PAY-4), and until then
             choosing it would charge once under a monthly label. */}
-        <ToggleButtonGroup value={type} exclusive onChange={(_, v) => v && setType(v)} size="small">
-          <ToggleButton value="one_time">{t("form.oneTime")}</ToggleButton>
-          <Tooltip title={t("form.monthlySoon")}>
-            <span>
-              <ToggleButton value="monthly" disabled>{t("form.monthly")}</ToggleButton>
-            </span>
-          </Tooltip>
-        </ToggleButtonGroup>
+        <SegmentedControl
+          label={t("form.type")}
+          value={type}
+          onChange={setType}
+          options={[
+            { value: "one_time", label: t("form.oneTime") },
+            { value: "monthly", label: t("form.monthly"), disabled: true, tooltip: t("form.monthlySoon") },
+          ]}
+        />
       </Box>
-
       <Box>
         <Typography variant="subtitle2" mb={1}>{t("form.amount")}</Typography>
-        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
-          {PRESET_AMOUNTS.map((a) => (
-            <Button
-              key={a}
-              variant={amount === a && !customAmount ? "contained" : "outlined"}
-              onClick={() => { setAmount(a); setCustomAmount(""); }}
-              size="small"
-            >
-              ₪{a}
-            </Button>
-          ))}
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: `repeat(${PRESET_AMOUNTS.length}, 1fr)` }, gap: 1.5, mb: 2 }}>
+          {PRESET_AMOUNTS.map((a) => {
+            const selected = amount === a && !customAmount;
+            return (
+              <ButtonBase
+                key={a}
+                aria-pressed={selected}
+                onClick={() => { setAmount(a); setCustomAmount(""); }}
+                sx={{
+                  height: 56,
+                  borderRadius: `${RADIUS.menu}px`,
+                  border: "2px solid",
+                  borderColor: selected ? "primary.main" : "divider",
+                  bgcolor: selected ? "surface.accentSoft" : "background.paper",
+                  color: selected ? "primary.main" : "text.primary",
+                  fontSize: 18,
+                  fontWeight: 700,
+                  transition: "border-color .2s, background-color .2s, color .2s",
+                  "&:hover": { borderColor: selected ? "primary.main" : "surface.lineStrong" },
+                }}
+              >
+                ₪{a}
+              </ButtonBase>
+            );
+          })}
         </Box>
         <TextField
           label={t("form.custom")}
           type="number"
           value={customAmount}
           onChange={(e) => { setCustomAmount(e.target.value); setAmount(0); }}
-          size="small"
           inputProps={{ min: MIN_AMOUNT }}
           helperText={customAmount && !valid ? t("form.minimum", { min: MIN_AMOUNT }) : " "}
           error={Boolean(customAmount) && !valid}
-          sx={{ width: 180 }}
+          fullWidth
         />
       </Box>
-
       {error && <Alert severity="error">{error}</Alert>}
 
       <Button
         variant="contained"
         size="large"
+        startIcon={<LockOutlinedIcon />}
         onClick={() => onContinue({ amountCents: Math.round(finalAmount * 100), type })}
         disabled={starting || !valid}
       >
         {starting ? t("form.preparing") : t("form.continue", { amount: valid ? finalAmount : "" })}
       </Button>
 
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" color="text.secondary" sx={{ textAlign: "center" }}>
         {t("form.secure")}
       </Typography>
     </Box>

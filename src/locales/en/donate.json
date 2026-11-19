@@ -1,5 +1,6 @@
 {
   "title": "Support our community",
+  "kicker": "Donate",
   "intro": "Your donation helps us create more content and keep the platform free for students.",
   "form": {
     "type": "Donation type",

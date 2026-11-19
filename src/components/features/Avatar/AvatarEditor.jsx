@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import { SHELL } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 import { useAvatarEditor } from "./useAvatarEditor";
 import AvatarCropDialog from "./AvatarCropDialog";
@@ -17,8 +18,9 @@ import CameraDialog from "./CameraDialog";
 // picture offered right after signing up.
 //
 // `layout="column"` centres it under a heading (the welcome dialog); the
-// default sits it in a row beside the account's details.
-const AvatarEditor = ({ size = 72, layout = "row" }) => {
+// default sits it in a row beside the account's details — `details` is
+// whatever the page puts above the buttons (the profile: email and badges).
+const AvatarEditor = ({ size = 72, layout = "row", details = null }) => {
   const { t } = useTranslation("profile");
   const { user, hasPicture, busy, fileRef, captureRef, chooseFile, takePhoto, onFileChosen, remove, camera, crop } =
     useAvatarEditor();
@@ -31,7 +33,7 @@ const AvatarEditor = ({ size = 72, layout = "row" }) => {
         <Avatar
           src={user.avatar_url || undefined}
           alt={t("avatar.label")}
-          sx={{ width: size, height: size, fontSize: size / 2.6, fontWeight: 700 }}
+          sx={{ width: size, height: size, fontSize: size / 2.6, fontWeight: 700, color: "#fff", background: SHELL.drawerAvatar }}
         >
           {(user.display_name || user.email || "?").charAt(0).toUpperCase()}
         </Avatar>
@@ -55,16 +57,17 @@ const AvatarEditor = ({ size = 72, layout = "row" }) => {
         </IconButton>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: column ? "center" : "flex-start", gap: 0.5, minWidth: 0 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: column ? "center" : "flex-start", gap: details ? 1.5 : 0.5, minWidth: 0 }}>
+        {details}
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: column ? "center" : "flex-start" }}>
-          <Button size="small" variant="outlined" startIcon={<FileUploadOutlinedIcon />} onClick={chooseFile} disabled={busy} sx={{ borderRadius: 2 }}>
+          <Button size="small" variant="soft" startIcon={<FileUploadOutlinedIcon />} onClick={chooseFile} disabled={busy}>
             {hasPicture ? t("avatar.change") : t("avatar.upload")}
           </Button>
-          <Button size="small" variant="outlined" startIcon={<PhotoCameraIcon />} onClick={takePhoto} disabled={busy} sx={{ borderRadius: 2 }}>
+          <Button size="small" variant="soft" startIcon={<PhotoCameraIcon />} onClick={takePhoto} disabled={busy}>
             {t("avatar.takePhoto")}
           </Button>
           {hasPicture && (
-            <Button size="small" color="error" onClick={remove} disabled={busy} sx={{ borderRadius: 2 }}>
+            <Button size="small" variant="outlined" color="error" onClick={remove} disabled={busy}>
               {t("avatar.remove")}
             </Button>
           )}

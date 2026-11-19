@@ -1,9 +1,8 @@
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import SectionCard from "../../features/SectionCard/SectionCard";
+import StatusBadge from "../../features/StatusBadge/StatusBadge";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import Alert from "@mui/material/Alert";
 import Dialog from "@mui/material/Dialog";
@@ -12,7 +11,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import CircularProgress from "@mui/material/CircularProgress";
-import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import { Trans, useTranslation } from "react-i18next";
 import PhoneCodeDialog from "./PhoneCodeDialog";
@@ -28,18 +26,14 @@ const PhoneCard = () => {
   const number = (value) => <Box component="bdi" dir="ltr" sx={{ fontWeight: 700 }}>{formatPhone(value)}</Box>;
 
   return (
-    <Card sx={{ borderRadius: 2 }}>
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <PhoneIphoneIcon color="primary" />
-          <Typography variant="h6" fontWeight={700}>{t("phone.title")}</Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary">{t("phone.help")}</Typography>
+    <SectionCard title={t("phone.title")}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: -2 }}>{t("phone.help")}</Typography>
 
         {card.phone && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
             <Typography variant="body1">{number(card.phone)}</Typography>
-            <Chip size="small" color="success" variant="outlined" icon={<VerifiedIcon />} label={t("phone.verified")} />
+            <StatusBadge tone="success" icon={<VerifiedIcon />}>{t("phone.verified")}</StatusBadge>
             {!card.editing && (
               <Box sx={{ display: "flex", gap: 1, marginInlineStart: "auto" }}>
                 <Button size="small" onClick={card.startEdit}>{t("phone.change")}</Button>
@@ -77,14 +71,14 @@ const PhoneCard = () => {
               inputProps={{ type: "tel", inputMode: "tel", autoComplete: "tel", dir: "ltr", maxLength: 40 }}
             />
             <Box sx={{ display: "flex", gap: 1, pt: 1 }}>
-              <Button type="submit" variant="contained" disabled={!card.number.trim() || card.sending} sx={{ fontWeight: 700, borderRadius: 2 }}>
+              <Button type="submit" variant="contained" disabled={!card.number.trim() || card.sending}>
                 {card.sending ? <CircularProgress size={20} /> : t("phone.send")}
               </Button>
               {card.phone && <Button onClick={card.cancelEdit} disabled={card.sending}>{t("phone.cancel")}</Button>}
             </Box>
           </Box>
         )}
-      </CardContent>
+      </Box>
 
       <PhoneCodeDialog
         open={card.dialogOpen}
@@ -112,7 +106,7 @@ const PhoneCard = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Card>
+    </SectionCard>
   );
 };
 

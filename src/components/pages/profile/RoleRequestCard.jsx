@@ -1,11 +1,9 @@
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import SectionCard from "../../features/SectionCard/SectionCard";
+import SegmentedControl from "../../features/SegmentedControl/SegmentedControl";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { roles, roleLabels } from "../../../utilities/constant";
 import { useRoleRequest } from "./useRoleRequest";
 import { useTranslation } from "react-i18next";
@@ -38,16 +36,11 @@ const RoleRequestCard = () => {
 
   if (status === "pending") {
     return (
-      <Card>
-        <CardContent>
-          <Typography variant="h6" fontWeight={700} gutterBottom>
-            {t("role.title")}
-          </Typography>
-          <Alert severity="info">
-            {t("role.pending", { role: roleLabels[user.requested_role] || user.requested_role })}
-          </Alert>
-        </CardContent>
-      </Card>
+      <SectionCard title={t("role.title")}>
+        <Alert severity="info">
+          {t("role.pending", { role: roleLabels[user.requested_role] || user.requested_role })}
+        </Alert>
+      </SectionCard>
     );
   }
 
@@ -56,12 +49,8 @@ const RoleRequestCard = () => {
   const options = REQUESTABLE.filter((role) => role !== user.role);
 
   return (
-    <Card>
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Typography variant="h6" fontWeight={700}>
-          {t("role.title")}
-        </Typography>
-
+    <SectionCard title={t("role.title")}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {/* The previous answer, with the reason the admin gave. Shown before the
             form rather than after: somebody who was declined needs to know that
             before deciding whether to ask again, and the reason is usually what
@@ -74,31 +63,23 @@ const RoleRequestCard = () => {
             {" "}{t("role.tryAgainLater")}
           </Alert>
         )}
-
         <Typography variant="body2" color="text.secondary">
           {t("role.current", { role: roleLabels[user.role] || user.role })}
         </Typography>
-
-        <ToggleButtonGroup
+        <SegmentedControl
+          label={t("role.title")}
           value={choice}
-          exclusive
-          size="small"
-          // `|| choice` keeps a selection: clicking the active button would
-          // otherwise deselect it and submit nothing.
-          onChange={(_, next) => setChoice(next || choice)}
-        >
-          {options.map((role) => (
-            <ToggleButton key={role} value={role}>{roleLabels[role]}</ToggleButton>
-          ))}
-        </ToggleButtonGroup>
-
+          options={options.map((role) => ({ value: role, label: roleLabels[role] }))}
+          // The chosen one stays chosen: SegmentedControl only reports a change.
+          onChange={setChoice}
+        />
         <Box>
           <Button variant="contained" onClick={submit} disabled={submitting}>
             {t("role.send")}
           </Button>
         </Box>
-      </CardContent>
-    </Card>
+      </Box>
+    </SectionCard>
   );
 };
 

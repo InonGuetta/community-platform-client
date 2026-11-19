@@ -9,6 +9,7 @@ import Alert from "@mui/material/Alert";
 import CloseIcon from "@mui/icons-material/Close";
 import { useOfflinePlayer, PLAYBACK_RATES } from "./useOfflinePlayer";
 import { lessonByline } from "./downloadsText";
+import { RADIUS } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 
 // The player on the downloads page: the browser's own audio controls, which
@@ -20,7 +21,7 @@ const OfflinePlayer = ({ item, onClose }) => {
   const byline = lessonByline(item);
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 3, borderColor: "secondary.main" }}>
+    <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: `${RADIUS.menu}px`, borderColor: "primary.main" }}>
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, mb: 1 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" fontWeight={700} noWrap dir="auto" title={item.title}>{item.title}</Typography>

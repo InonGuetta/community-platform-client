@@ -222,6 +222,9 @@ const ChatPane = ({
   // The archive page opens a citation in its own lesson, and is about the
   // archive: subject "archive". Otherwise the subject follows isText.
   opener = null, subject: givenSubject = null,
+  // The archive page draws "שיחה חדשה" / "העתק שיחה" in its own header and
+  // floats the question box `inputBottom` above the screen's edge.
+  hideActions = false, inputBottom = 0,
 }) => {
   const { t } = useTranslation("chat");
   const { rtl } = useDirection();
@@ -281,7 +284,7 @@ const ChatPane = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 1 }}>
-      {!empty && (
+      {!empty && !hideActions && (
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
           <CopyConversationButton
             onCopy={chat.copy && (() => chat.copy(chat.messages))}
@@ -365,7 +368,8 @@ const ChatPane = ({
           // On a phone the panel is not height-capped and the whole page
           // scrolls; sticky keeps the box reachable under a long thread.
           position: "sticky",
-          bottom: 0,
+          bottom: inputBottom,
+          zIndex: 1,
           bgcolor: "background.paper",
           border: "1px solid",
           borderColor: "divider",

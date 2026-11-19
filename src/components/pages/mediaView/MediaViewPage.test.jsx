@@ -2,10 +2,11 @@
 import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 
 // The page is a pure function of what its controller returns — that is what
 // pulling the dispatches and selectors out bought, and it is why this file needs
-// no store, no router and no network. Mock the one module and the whole page
+// no store and no network (a router only for the header's links). Mock the one module and the whole page
 // becomes a table-driven test.
 //
 // What is worth asserting here is the branching that the eye cannot check: which
@@ -74,6 +75,7 @@ vi.mock("./componentsMediaView/AIDiscussion/AIDiscussionPanel", () => ({
 import MediaViewPage from "./MediaViewPage";
 
 const audio = { id: 7, title: "שיעור בהלכות שבת", media_type: "audio", duration_seconds: 3600 };
+const video = { id: 8, title: "שיחה ליום כיפור", media_type: "video", duration_seconds: 1200 };
 const book = { id: 9, title: "ספר", media_type: "text" };
 
 const state = (over = {}) => ({
@@ -104,7 +106,7 @@ const state = (over = {}) => ({
 const renderPage = (over = {}) => {
   const value = state(over);
   controller.mockReturnValue(value);
-  render(<MediaViewPage />);
+  render(<MemoryRouter><MediaViewPage /></MemoryRouter>);
   return value;
 };
 
@@ -167,6 +169,58 @@ describe("which tabs a media type offers", () => {
     renderPage({ media: book, isText: true });
     expect(screen.getByTestId("text-viewer")).toBeInTheDocument();
     expect(screen.queryByTestId("player")).not.toBeInTheDocument();
+  });
+});
+
+// Redesign v4 (screens 20, 26): back link, kicker, the title as the one H1,
+// "מרצה: X" — and the draft / public badge only when the controller says this
+// viewer may see it ("תצוגת מנהל" on, and allowed to manage the lesson).
+describe("the lesson header", () => {
+  test("leads back to the archive and names the kind of lesson", () => {
+    renderPage({ media: { ...audio, creator_name: "הרב כהן" } });
+    expect(screen.getByRole("link", { name: /הארכיון/ })).toHaveAttribute("href", "/archive");
+    expect(screen.getByText("שיעור שמע")).toBeInTheDocument();
+    expect(screen.getByText(/מרצה:/)).toHaveTextContent("מרצה: הרב כהן");
+  });
+
+  test("the title is the page's heading, without a trailing full stop", () => {
+    renderPage({ media: { ...audio, title: "שמירת הברית." } });
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(/^שמירת הברית$/);
+  });
+
+  test("a video is a video lesson", () => {
+    renderPage({ media: video });
+    expect(screen.getByText("שיעור וידאו")).toBeInTheDocument();
+  });
+
+  test("a draft shows its badge when the viewer may see it", () => {
+    renderPage({ media: { ...audio, is_published: false }, showStatusBadge: true });
+    expect(screen.getByText("טיוטה")).toBeInTheDocument();
+  });
+
+  test("and not with the admin view off, or to anyone else", () => {
+    renderPage({ media: { ...audio, is_published: false }, showStatusBadge: false });
+    expect(screen.queryByText("טיוטה")).not.toBeInTheDocument();
+  });
+
+  test("a public lesson says so, to the same viewers", () => {
+    renderPage({ media: { ...audio, is_published: true, is_public: true }, showStatusBadge: true });
+    expect(screen.getByText("ציבורי")).toBeInTheDocument();
+  });
+});
+
+// The cover art stands over the audio player card; a video has its picture.
+describe("the media column", () => {
+  test("an audio lesson shows its cover art above the player", () => {
+    renderPage({ media: audio });
+    expect(screen.getByTestId("cover-art")).toBeInTheDocument();
+    expect(screen.getByTestId("player")).toBeInTheDocument();
+  });
+
+  test("a video shows no cover art", () => {
+    renderPage({ media: video });
+    expect(screen.queryByTestId("cover-art")).not.toBeInTheDocument();
+    expect(screen.getByTestId("player")).toBeInTheDocument();
   });
 });
 

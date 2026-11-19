@@ -1,14 +1,13 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback } from "react";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
-import Divider from "@mui/material/Divider";
 import MediaPlayer from "../../features/MediaPlayer/MediaPlayer";
-import { stageHeightForWidth } from "../../features/MediaPlayer/stageGeometry";
+import CoverArt from "../../features/MediaTile/CoverArt";
 import TextViewer from "./componentsMediaView/TextViewer";
 import { mediaApi } from "../../../api/mediaApi";
+import LessonHeader from "./componentsMediaView/LessonHeader";
 import MediaInsightsTabs from "./componentsMediaView/MediaInsightsTabs";
 import NotesPanel from "./componentsMediaView/NotesPanel";
 import MediaActionsBar from "./componentsMediaView/MediaActionsBar";
@@ -18,27 +17,52 @@ import CourseTrackBar from "./componentsMediaView/CourseTrackBar";
 import AiTagSuggestions from "./componentsMediaView/AiTagSuggestions";
 import SessionChatPanel from "./componentsMediaView/SessionChatPanel";
 import useMediaViewPageController from "./useMediaViewPageController";
-import { creatorPrefixes } from "../../../utilities/constant";
-import { creatorPath, hasCreatorPage } from "../../../utilities/creatorPage";
-import Link from "@mui/material/Link";
-import { Link as RouterLink } from "react-router-dom";
 import { formatDate } from "../../../utilities/formatDate";
+import { mediaTypes } from "../../../utilities/constant";
+import { HEADER_HEIGHT } from "../../layout/shellGeometry";
+import { RADIUS, SHADOW } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
-import { creatorDisplayName } from "../../../utilities/creatorPage";
 
 // Presentation only. Everything that dispatches, selects or derives from server
 // data lives in useMediaViewPageController — see its header for where that line
 // is drawn and why this file used to sit on the wrong side of it.
 //
-// What remains here is state no other file could want: which tab is open and
-// the measured height of the media block. The actions row under the panel —
-// like, download, share, and the overlays they open — is MediaActionsBar, shared
-// with the notebook's source preview so the two cannot drift apart.
+// Redesign v4 (screens 20 and 26; the book, 27, is stage 4ב): the lesson's
+// header, then a 12-column grid —
+//
+//   audio  5 = the cover art, square, with the player card under it
+//          7 = the tabs card
+//   video  7 = the player (radius 28, the heavy shadow) and its upload date
+//          5 = the tabs card
+//
+// — and under the grid the meta line, the description and the lesson's own
+// notebook. The columns stack on a phone: audio from md (as its mockup), video
+// and books from lg, where five columns are still wide enough for the tabs.
+//
+// The tabs card no longer takes its height from the player (D-22): its panel
+// area stops at 70vh and scrolls inside, so a long transcript keeps the line
+// being played in view without moving the page. The actions row under the
+// panel — like, save, download, share, and the overlays they open — is
+// MediaActionsBar, shared with the notebook's source preview so the two cannot
+// drift apart.
+
+// A CSS grid, not MUI's Grid (D-45): its negative margins land on the wrong
+// side without a stylis flip.
+const columns = (bp) => ({ xs: "minmax(0, 1fr)", [bp]: "repeat(12, minmax(0, 1fr))" });
+
+// Where the date line sits, in each layout: under the player of a video or a
+// book (13px), or in the meta line under the grid for audio (14px), as drawn.
+const dateSx = { color: "text.secondary", textAlign: "start" };
+
+// The player or the reader, when a jump scrolls it to the top: clear of the
+// sticky header.
+const scrollTargetSx = { scrollMarginTop: `${HEADER_HEIGHT + 16}px` };
+
 const MediaViewPage = () => {
   const { t } = useTranslation("lesson");
   const controller = useMediaViewPageController();
   const {
-    media, bookmarks, transcript,
+    media, bookmarks, transcript, showStatusBadge,
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
     readerPage, handleReaderPageChange,
     seekOnReady, currentTime, handlePlayerProgress,
@@ -54,43 +78,9 @@ const MediaViewPage = () => {
   // Stays here rather than in the controller: a ref has to be created in the
   // component that renders the element it points at.
   const playerRef = useRef(null);
-
-  // Cap the side panel to the media block's height so a long list (e.g. many
-  // chapters) scrolls inside the panel instead of stretching it past the player.
-  //
-  // The WIDTH is measured too, and it is what saves the layout for audio. An
-  // audio lecture's block is now a ~50px control bar rather than a 16:9 stage,
-  // and a panel matching that height had no room left for its own content: the
-  // tab row and the actions row do not shrink, so the scrolling middle was
-  // squeezed to zero and the summary, chapters, notes and transcript were all
-  // rendered at no height at all.
+  // What a jump from below the fold brings back into view: the player, or the
+  // reader of a book.
   const mediaBoxRef = useRef(null);
-  const [mediaBox, setMediaBox] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const el = mediaBoxRef.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver((entries) => {
-      for (const e of entries) {
-        setMediaBox({ width: e.contentRect.width, height: e.contentRect.height });
-      }
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [media?.id, media?.media_type]);
-
-  // Match the block, but never fall below the height a STAGE would have at this
-  // width. The player reserves that frame for audio as well as video, so today
-  // the measurement already carries it and this floor changes nothing — it is a
-  // guard, not the mechanism.
-  //
-  // Kept because the failure it prevents is silent and disproportionate: the tab
-  // row and the actions row do not shrink, so the moment the block is shorter
-  // than the two of them the scrolling content between is squeezed to nothing
-  // and the summary, chapters, notes and transcript all render at zero height on
-  // a page that otherwise looks perfectly normal. One Math.max against the
-  // player's own geometry costs nothing and rules out the whole class.
-  const panelHeight = Math.max(mediaBox.height, stageHeightForWidth(mediaBox.width));
 
   // Used by Chapters and Notes to jump the player to a specific timestamp
   // from a sibling component.
@@ -129,181 +119,186 @@ const MediaViewPage = () => {
     );
   }
 
+  const isAudio = !isText && media.media_type === mediaTypes.audio;
+  const bp = isAudio ? "md" : "lg";
+
+  // The upload's date — media_items keeps no separate publication date. A draft
+  // says so rather than claiming to be published, since the people who can see
+  // one are exactly the people who know it is not.
+  const date = formatDate(media.created_at);
+  const dateLine = (sx) => date && (
+    <Typography data-testid="media-date" sx={{ ...dateSx, ...sx }}>
+      {media.is_published === false ? t("draftUploaded") : t("published")}
+      {date}
+    </Typography>
+  );
+
+
+  const player = (
+    <MediaPlayer
+      ref={playerRef}
+      url={mediaApi.streamUrl(media.id)}
+      media={media}
+      // Only so the player's settings menu can offer the transcript
+      // PDF without fetching one it already has.
+      transcript={transcript}
+      // Captions (PRD MOB-5): the same cues the transcript tab follows the
+      // lesson with.
+      captions={captions}
+      onProgress={handlePlayerProgress}
+      onEnded={handlePlayerEnded}
+      seekOnReady={seekOnReady}
+    />
+  );
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: 1, mb: 2 }}>
-        <Typography variant="h5" fontWeight={700} dir="auto">{media.title}</Typography>
-        {/* "מרצה" or "מחבר" by media type — one column, worded for what it is.
-            Always present: creator_name is NOT NULL and reads "כללי" when nobody
-            said, so this never collapses into a title that looks unattributed by
-            accident rather than on purpose. */}
-        {media.creator_name && (
-          <Typography variant="body2" color="text.secondary">
-            {creatorPrefixes[media.media_type] || creatorPrefixes.video}:{" "}
-            {/* Their other lessons are one click away (PRD ATTR-10). */}
-            {hasCreatorPage(media.creator_name) ? (
-              <Link component={RouterLink} to={creatorPath(media.creator_name)} color="inherit" underline="hover" fontWeight={600}>
-                {media.creator_name}
-              </Link>
-            ) : (
-              creatorDisplayName(media.creator_name)
-            )}
-          </Typography>
-        )}
+    <>
+      <LessonHeader media={media} showStatusBadge={showStatusBadge} />
+
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: columns(bp),
+          gap: 4,
+          alignItems: "start",
+        }}
+      >
+        <Box sx={{ gridColumn: { [bp]: isAudio ? "span 5" : "span 7" }, minWidth: 0 }}>
+          {isAudio ? (
+            <>
+              {/* The lesson's cover — the archive tile's art, at the size of
+                  the column (part B: the item wrap, radius 10, its shadow). */}
+              <Box
+                sx={{
+                  position: "relative",
+                  aspectRatio: "1 / 1",
+                  borderRadius: `${RADIUS.cover}px`,
+                  overflow: "hidden",
+                  boxShadow: SHADOW.cover,
+                }}
+              >
+                <CoverArt item={media} />
+              </Box>
+              <Box ref={mediaBoxRef} sx={{ mt: 2.5, ...scrollTargetSx }}>
+                {player}
+              </Box>
+            </>
+          ) : (
+            <Box ref={mediaBoxRef} sx={scrollTargetSx}>
+              {isText ? (
+                // The book, as it was uploaded, and nothing else. The
+                // extracted text stays where it was always useful — the
+                // search and the summary — and is not offered as a second,
+                // OCR-read version of the page beside the original.
+                <TextViewer
+                  media={media}
+                  bookmarks={bookmarks}
+                  onAddBookmark={handleCreateTextBookmark}
+                  jumpTo={readerTarget?.bookmark ?? null}
+                  onPageChange={handleReaderPageChange}
+                />
+              ) : (
+                player
+              )}
+            </Box>
+          )}
+
+          {!isAudio && dateLine({ fontSize: 13, mt: 1.5 })}
+
+          {/* Its place in its course, and the way on (PRD CRS-1, CRS-3), in a
+              card under the player (D-23). A book has no "next" to run on to. */}
+          {!isText && <CourseTrackBar track={courseTrack} />}
+        </Box>
+
+        <Paper
+          sx={{
+            gridColumn: { [bp]: isAudio ? "span 7" : "span 5" },
+            minWidth: 0,
+            p: { xs: 3, md: 4 },
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <MediaInsightsTabs
+            mediaId={media.id}
+            tags={media.tags}
+            insights={controller}
+            onSeek={seekPlayer}
+            // D-22: the panel stops growing here and scrolls inside the card.
+            // On a phone the card grows with what is in it.
+            contentMaxHeight={{ md: "70vh" }}
+            // The transcript tab follows the lesson as it plays (PRD MOB-6).
+            captions={captions}
+            currentTime={currentTime}
+            // Recorded in a live session (PRD REC-3): its chat, in a tab of
+            // its own; a message's time plays the moment it was written.
+            sessionChatPanel={media.session_id ? <SessionChatPanel mediaId={media.id} onSeek={seekPlayer} /> : null}
+            // Proposed tags (PRD ARCH-4): for whoever may tag this lesson,
+            // once it has a summary to propose them from.
+            tagSuggestionsPanel={
+              canEditTranscript && transcript?.ai_summary ? (
+                <AiTagSuggestions mediaId={media.id} onTagged={refreshMedia} />
+              ) : null
+            }
+            notesPanel={
+              <NotesPanel
+                bookmarks={bookmarks}
+                currentTime={currentTime}
+                // Not passed for a book: there is no playhead to read a
+                // position off, so the panel hides its form entirely and
+                // points at the reader instead. Withheld rather than merely
+                // unused, so the panel cannot grow a path back to it.
+                onCreateBookmark={isText ? undefined : handleCreateBookmark}
+                // A bookmark in a book scrolls the reader; one on a recording
+                // seeks the player. Same click, two coordinate spaces, and the
+                // panel picks by which field the bookmark carries.
+                onSeek={isText ? undefined : seekPlayer}
+                onSeekText={isText ? jumpToBookmark : undefined}
+                isText={isText}
+              />
+            }
+            discussionPanel={
+              <AIDiscussionPanel
+                mediaId={media.id}
+                // Its title and type name the source chips of an answer
+                // saved to the notebook.
+                media={media}
+                transcript={transcript}
+                isText={isText}
+                // A hit in a recording seeks the player; one in a book turns
+                // the reader to its page. Each kind gets only the one that
+                // fits, so a hit cannot try to seek a player that is absent.
+                onSeek={isText ? undefined : seekFromNotebook}
+                onOpenPage={isText ? openPageFromDiscussion : undefined}
+              />
+            }
+          />
+
+          {/* The same bar the notebook's source preview renders — it owns the
+              divider above it, and the share dialog, the lists menu and the
+              download menu behind it. */}
+          <MediaActionsBar
+            media={media}
+            transcript={transcript}
+            currentTime={currentTime}
+            isText={isText}
+            isLiked={isLiked}
+            onToggleLike={toggleLike}
+            isSaved={isSaved}
+            onToggleSave={toggleSave}
+          />
+        </Paper>
       </Box>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Box ref={mediaBoxRef}>
-            {isText ? (
-              // The book, as it was uploaded, and nothing else.
-              //
-              // There used to be a second view here beside it — the extracted
-              // text, laid out line by line, with the toggle to switch between
-              // them. It is gone. What it offered that the original does not is
-              // reflowed text; what it cost is that the words in it are the
-              // OCR's reading of the page, and in this archive that reading is
-              // frequently wrong. A reader comparing two versions of a sefer,
-              // one of which is unreliable, is a reader doing proofreading they
-              // did not ask for. The original is the book; the extracted text
-              // stays where it was always useful — the search and the summary.
-              <TextViewer
-                media={media}
-                bookmarks={bookmarks}
-                onAddBookmark={handleCreateTextBookmark}
-                jumpTo={readerTarget?.bookmark ?? null}
-                onPageChange={handleReaderPageChange}
-              />
-            ) : (
-              <MediaPlayer
-                ref={playerRef}
-                url={mediaApi.streamUrl(media.id)}
-                media={media}
-                // Only so the player's settings menu can offer the transcript
-                // PDF without fetching one it already has.
-                transcript={transcript}
-                // Captions over the stage (PRD MOB-5): the same cues the
-                // transcript tab follows the lesson with.
-                captions={captions}
-                onProgress={handlePlayerProgress}
-                onEnded={handlePlayerEnded}
-                seekOnReady={seekOnReady}
-              />
-            )}
-          </Box>
-          {/* Outside the measured box on purpose: the side panel takes its
-              height from that box, and a line of text inside it would make the
-              panel a line taller than the player it sits beside.
-
-              The date is the upload's — media_items keeps no separate
-              publication date. A draft says so rather than claiming to be
-              published, since the people who can see one are exactly the
-              people who know it is not. */}
-          {formatDate(media.created_at) && (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              data-testid="media-date"
-              // "start" is the right-hand side in this right-to-left page —
-              // under the start of the player, where the title above it begins.
-              sx={{ mt: 1, textAlign: "start" }}
-            >
-              {media.is_published === false ? t("draftUploaded") : t("published")}
-              {formatDate(media.created_at)}
-            </Typography>
-          )}
-          {/* Its place in its course, and the way on (PRD CRS-1, CRS-3). Also
-              outside the measured box, for the same reason as the date. */}
-          {!isText && <CourseTrackBar track={courseTrack} />}
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              // On desktop, the height worked out above; content scrolls inside.
-              // On mobile (stacked) let it size naturally.
-              height: { xs: "auto", md: panelHeight ? `${panelHeight}px` : "100%" },
-            }}
-          >
-            <MediaInsightsTabs
-              mediaId={media.id}
-              tags={media.tags}
-              insights={controller}
-              onSeek={seekPlayer}
-              // The transcript tab follows the lesson as it plays (PRD MOB-6).
-              captions={captions}
-              currentTime={currentTime}
-              // Proposed tags (PRD ARCH-4): for whoever may tag this lesson,
-              // once it has a summary to propose them from.
-              // Recorded in a live session (PRD REC-3): its chat, in a tab of
-              // its own; a message's time plays the moment it was written.
-              sessionChatPanel={media.session_id ? <SessionChatPanel mediaId={media.id} onSeek={seekPlayer} /> : null}
-              tagSuggestionsPanel={
-                canEditTranscript && transcript?.ai_summary ? (
-                  <AiTagSuggestions mediaId={media.id} onTagged={refreshMedia} />
-                ) : null
-              }
-              notesPanel={
-                <NotesPanel
-                  bookmarks={bookmarks}
-                  currentTime={currentTime}
-                  // Not passed for a book: there is no playhead to read a
-                  // position off, so the panel hides its form entirely and
-                  // points at the reader instead. Withheld rather than merely
-                  // unused, so the panel cannot grow a path back to it.
-                  onCreateBookmark={isText ? undefined : handleCreateBookmark}
-                  // A bookmark in a book scrolls the reader; one on a recording
-                  // seeks the player. Same click, two coordinate spaces, and the
-                  // panel picks by which field the bookmark carries.
-                  onSeek={isText ? undefined : seekPlayer}
-                  onSeekText={isText ? jumpToBookmark : undefined}
-                  isText={isText}
-                />
-              }
-              discussionPanel={
-                <AIDiscussionPanel
-                  mediaId={media.id}
-                  // Its title and type name the source chips of an answer
-                  // saved to the notebook.
-                  media={media}
-                  transcript={transcript}
-                  isText={isText}
-                  // A hit in a recording seeks the player; one in a book turns
-                  // the reader to its page. Each kind gets only the one that
-                  // fits, so a hit cannot try to seek a player that is absent.
-                  onSeek={isText ? undefined : seekFromNotebook}
-                  onOpenPage={isText ? openPageFromDiscussion : undefined}
-                />
-              }
-            />
-
-            {/* The same bar the notebook's source preview renders — it owns the
-                divider that pins it under the scrolling tab content, and the
-                share dialog and download menu behind it. */}
-            <MediaActionsBar
-              media={media}
-              transcript={transcript}
-              currentTime={currentTime}
-              isText={isText}
-              isLiked={isLiked}
-              onToggleLike={toggleLike}
-              isSaved={isSaved}
-              onToggleSave={toggleSave}
-            />
-          </Paper>
-        </Grid>
-      </Grid>
+      {isAudio && dateLine({ fontSize: 14, mt: 4 })}
 
       {media.description && (
-        <Box sx={{ mt: 3 }}>
-          <Divider sx={{ mb: 2 }} />
-          <Typography variant="body1" color="text.secondary" dir="auto">
-            {media.description}
-          </Typography>
-        </Box>
+        <Typography
+          dir="auto"
+          sx={{ fontSize: 17, mt: isAudio && date ? 1 : 4 }}
+        >
+          {media.description}
+        </Typography>
       )}
 
       <LessonNotebook
@@ -315,7 +310,7 @@ const MediaViewPage = () => {
         onSeek={seekFromNotebook}
         onJumpTo={jumpFromNotebook}
       />
-    </Box>
+    </>
   );
 };
 

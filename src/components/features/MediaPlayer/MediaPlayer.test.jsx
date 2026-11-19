@@ -8,25 +8,21 @@ import { MemoryRouter } from "react-router-dom";
 import notificationReducer from "../../../store/slicesAndThunks/snackbarSlice";
 import offlineReducer from "../../../store/slicesAndThunks/offlineSlice/offlineSlice";
 import { buildTheme } from "../../../theme/theme";
-import { mediaTypeAccents } from "../../../utilities/constant";
+import { COLORS } from "../../../theme/tokens";
 
-// The accents are authored as hex; getComputedStyle answers in rgb(). Converted
-// here so the tests can name the shared constant rather than restate its value —
-// a test that hard-codes #ef6c00 stops meaning "the same orange as the archive"
-// the moment the archive's orange changes.
+// The accent is authored as hex; getComputedStyle answers in rgb(). Converted
+// here so the tests can name the token rather than restate its value.
 const hexToRgb = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
   return `rgb(${r}, ${g}, ${b})`;
 };
 
-// The stage a lecture is shown on depends on whether there is anything to show.
-// A video gets a black 16:9 frame; an audio lecture gets the control bar alone,
-// because the frame around it was empty — and an empty black rectangle taking up
-// most of the page is the kind of thing that looks deliberate and is not.
+// The shape a lecture is shown in depends on whether there is anything to show.
+// A video gets a black 16:9 frame; an audio lecture gets a player card (Redesign
+// v4, D-21) — its picture is the cover art the page draws above it.
 //
-// Worth testing rather than eyeballing: both cases render the same components
-// with the same props, and the difference is entirely in computed CSS. Nothing
-// about the markup changes if the black comes back.
+// Worth testing rather than eyeballing: much of the difference is in computed
+// CSS, and nothing about the markup changes if the black comes back.
 
 // ReactPlayer reaches for a real media element and a network stream. What it
 // renders is not what is under test — that the element keeps its box, and how
@@ -75,21 +71,16 @@ const paintedBackgrounds = (container) =>
 describe("an audio lecture", () => {
   test("paints no black surface at all", () => {
     const { container } = renderPlayer("audio");
-
-    expect(getComputedStyle(container.firstChild).backgroundColor).toBe("rgba(0, 0, 0, 0)");
     expect(paintedBackgrounds(container)).not.toContain("rgb(0, 0, 0)");
   });
 
-  // It keeps the frame a video would have, empty, and stands its bar in the
-  // middle of it. Two things depend on that: the bar lines up with the centre of
-  // the side panel beside it, and the panel — which is sized from this block —
-  // has a height worth having. What was removed is the black, not the space.
-  test("keeps a stage's worth of space and centres the bar in it", () => {
+  // A card, not an empty stage: nothing reserves a 16:9 frame any more, since
+  // the tabs card no longer takes its height from the player (D-22).
+  test("is a card with no stage", () => {
     const { container } = renderPlayer("audio");
-    const stage = getComputedStyle(container.firstChild.firstChild);
-
-    expect(stage.aspectRatio).toBe("16/9");
-    expect(stage.alignItems).toBe("center");
+    expect(screen.getByTestId("player-card")).toBeInTheDocument();
+    const ratios = [...container.querySelectorAll("*")].map((el) => getComputedStyle(el).aspectRatio);
+    expect(ratios).not.toContain("16/9");
   });
 
   // The element stays in the DOM and keeps a box — it is a <video> even for
@@ -97,13 +88,39 @@ describe("an audio lecture", () => {
   // paint nothing. `width: 1` would NOT do this: MUI reads a bare number between
   // 0 and 1 as a percentage, so it would mean 100%.
   test("keeps the media element rendered, at no visible size", () => {
-    const { container, getByTestId } = renderPlayer("audio");
+    const { getByTestId } = renderPlayer("audio");
     expect(getByTestId("player")).toBeInTheDocument();
 
-    const wrapper = getComputedStyle(container.firstChild.firstChild.firstChild);
+    const wrapper = getComputedStyle(getByTestId("player-element"));
     expect(wrapper.width).toBe("1px");
     expect(wrapper.height).toBe("1px");
     expect(wrapper.opacity).toBe("0");
+  });
+
+  // D-21: play, the line and its times, and a row of the secondary buttons —
+  // nothing the old bar offered is gone.
+  test("offers play, the position, the times, volume and settings", () => {
+    renderPlayer("audio");
+    expect(screen.getByRole("button", { name: "נגינה" })).toBeInTheDocument();
+    expect(screen.getByRole("slider", { name: "מיקום בשיעור" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "השתקה" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "הגדרות נגן" })).toBeInTheDocument();
+    expect(screen.getByTestId("player-controls")).toHaveTextContent("1:40");
+  });
+
+  // An audio lecture's controls ARE the player. Nothing in its card fades.
+  test("never hides its controls, however long it plays", async () => {
+    vi.useFakeTimers();
+    try {
+      renderPlayer("audio");
+      fireEvent.click(screen.getByRole("button", { name: "נגינה" }));
+      await act(async () => { vi.advanceTimersByTime(10000); });
+
+      expect(screen.queryByTestId("player-bar")).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "השהיה" })).toBeVisible();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
@@ -112,20 +129,20 @@ describe("an audio lecture", () => {
 describe("the video picture", () => {
   const stageOf = (container) => container.firstChild.firstChild;
   const pictureOf = (container) => stageOf(container).firstChild;
-  const barOf = (container) => stageOf(container).lastChild;
+  const barOf = () => screen.getByTestId("player-bar");
 
   // The bar is an overlay, and one that never leaves is part of the picture.
   test("the bar is showing while paused, and hides once playback runs", async () => {
     vi.useFakeTimers();
     try {
       const { container } = renderPlayer("video");
-      expect(getComputedStyle(barOf(container)).visibility).toBe("visible");
+      expect(getComputedStyle(barOf()).visibility).toBe("visible");
 
       // The picture is the play target, so clicking it starts playback.
       fireEvent.click(pictureOf(container));
       await act(async () => { vi.advanceTimersByTime(3000); });
 
-      expect(getComputedStyle(barOf(container)).visibility).toBe("hidden");
+      expect(getComputedStyle(barOf()).visibility).toBe("hidden");
     } finally {
       vi.useRealTimers();
     }
@@ -137,10 +154,10 @@ describe("the video picture", () => {
       const { container } = renderPlayer("video");
       fireEvent.click(pictureOf(container));
       await act(async () => { vi.advanceTimersByTime(3000); });
-      expect(getComputedStyle(barOf(container)).visibility).toBe("hidden");
+      expect(getComputedStyle(barOf()).visibility).toBe("hidden");
 
       await act(async () => { fireEvent.pointerMove(stageOf(container)); });
-      expect(getComputedStyle(barOf(container)).visibility).toBe("visible");
+      expect(getComputedStyle(barOf()).visibility).toBe("visible");
     } finally {
       vi.useRealTimers();
     }
@@ -157,37 +174,17 @@ describe("the video picture", () => {
     fireEvent.click(picture);
     expect(screen.getByRole("button", { name: "נגינה" })).toBeInTheDocument();
   });
-
-  // An audio lecture's bar IS the player. Hiding it would leave an empty frame.
-  test("an audio bar never hides, however long it plays", async () => {
-    vi.useFakeTimers();
-    try {
-      const { container } = renderPlayer("audio");
-      fireEvent.click(screen.getByRole("button", { name: "נגינה" }));
-      await act(async () => { vi.advanceTimersByTime(10000); });
-
-      expect(getComputedStyle(barOf(container)).visibility).toBe("visible");
-    } finally {
-      vi.useRealTimers();
-    }
-  });
 });
 
-// The played portion says what KIND of lecture this is, using the same accent
-// the archive card paints a video's corner brackets with. It was a fixed blue on
-// everything, video included.
+// The played portion is the accent, for every kind of lecture (Redesign v4,
+// part B). It used to take the media type's colour from mediaTypeAccents.
 describe("the progress colour", () => {
   const trackColour = (container) =>
     getComputedStyle(container.querySelector(".MuiSlider-track")).backgroundColor;
 
-  test("a video runs orange, the archive's video accent", () => {
-    const { container } = renderPlayer("video");
-    expect(trackColour(container)).toBe(hexToRgb(mediaTypeAccents.video));
-  });
-
-  test("an audio lecture runs its own accent instead", () => {
-    const { container } = renderPlayer("audio");
-    expect(trackColour(container)).toBe(hexToRgb(mediaTypeAccents.audio));
+  test.each(["video", "audio"])("a %s runs in the accent", (type) => {
+    const { container } = renderPlayer(type);
+    expect(trackColour(container)).toBe(hexToRgb(COLORS.light.accent));
   });
 });
 
@@ -217,6 +214,15 @@ describe("the downloads in the settings menu", () => {
     expect(screen.getByText("הורדת שמע")).toBeInTheDocument();
     expect(screen.queryByText("הורדת תמלול (PDF)")).not.toBeInTheDocument();
   });
+
+  // The speeds are in the same menu, in both shapes of the player.
+  test("an audio card's menu sets the speed", () => {
+    renderPlayer("audio");
+    openSettings();
+    fireEvent.click(screen.getByRole("menuitem", { name: "1.5X" }));
+    openSettings();
+    expect(screen.getByRole("menuitem", { name: "1.5X" })).toHaveClass("Mui-selected");
+  });
 });
 
 describe("a video lecture", () => {
@@ -230,11 +236,17 @@ describe("a video lecture", () => {
     expect(stage.aspectRatio).toBe("16/9");
     expect(stage.alignItems).toBe("flex-end");
   });
+
+  // Redesign v4, part B: the video player's radius is 28.
+  test("rounds its corners at the player's radius", () => {
+    const { container } = renderPlayer("video");
+    expect(getComputedStyle(container.firstChild).borderRadius).toBe("28px");
+  });
 });
 
-// Captions over the stage (PRD MOB-5): a button in the bar when the lesson has
-// any, and the line being said drawn over the picture — or over a recording's
-// empty stage, since an <audio> shows no captions of its own.
+// Captions (PRD MOB-5): a button in the bar when the lesson has any, and the
+// line being said drawn over the picture — or inside a recording's player card,
+// since an <audio> shows no captions of its own.
 describe("captions", () => {
   const captions = {
     precise: true,

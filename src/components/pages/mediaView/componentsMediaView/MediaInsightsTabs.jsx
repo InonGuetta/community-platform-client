@@ -39,6 +39,9 @@ const MediaInsightsTabs = ({
   // A lesson recorded in a live session: that session's chat (PRD REC-3).
   // No slot, no tab — every other lesson.
   sessionChatPanel = null,
+  // The tallest the panel area may grow before it scrolls — a responsive sx
+  // value such as { md: "70vh" }. None: it grows with its content.
+  contentMaxHeight,
 }) => {
   const { t } = useTranslation("lesson");
   const {
@@ -81,13 +84,20 @@ const MediaInsightsTabs = ({
 
   return (
     <>
-      <Tabs value={activeTab} onChange={(_, v) => setTab(v)} variant="fullWidth" sx={{ mb: 2, flexShrink: 0 }}>
-        {/* minWidth 0 and tighter padding: five tabs share a third of the
-            page, and MUI's default 90px minimum would push the last one off. */}
-        {tabs.map((t) => <Tab key={t.key} label={t.label} sx={{ minWidth: 0, px: 1 }} />)}
+      {/* Redesign v4 (component 10): the theme draws the row — a hairline
+          under it, 15px bold labels, a 2px accent indicator — and scrolls it
+          sideways when the five do not fit, rather than squeezing them into
+          equal slivers as the old full-width row did. */}
+      <Tabs value={activeTab} onChange={(_, v) => setTab(v)} sx={{ mb: 3, flexShrink: 0 }}>
+        {tabs.map((t) => <Tab key={t.key} label={t.label} />)}
       </Tabs>
 
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+      {/* D-22: the page caps this area (`contentMaxHeight`) so a long
+          transcript or chapter list scrolls inside the card, and the
+          follow-along transcript keeps the playing line in view without
+          moving the whole page. The notebook's floating preview passes no cap
+          and the panel grows with its content, as before. */}
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", maxHeight: contentMaxHeight }}>
         {activeKey === "summary" && (
           <AISummaryPanel
             transcript={transcript}

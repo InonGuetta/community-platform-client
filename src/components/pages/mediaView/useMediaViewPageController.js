@@ -14,11 +14,14 @@ import useMediaLike from "./useMediaLike";
 import useMediaSave from "./useMediaSave";
 import useCourseTrackForLesson from "./useCourseTrackForLesson";
 import { transcriptCues } from "../../../utilities/transcriptTiming";
+import { selectUser } from "../../../store/selectors/authSelectors";
+import { useAdminView } from "../../layout/useAdminView";
+import { showsStatusBadge } from "../../features/MediaTile/tileActions";
 
 // Everything on this page that dispatches, selects or derives from the server's
 // data. The page component keeps only what is genuinely presentational — which
-// tab is open, whether a dialog is showing, the measured height of the media
-// block — and receives the rest from here.
+// tab is open, whether a dialog is showing, which layout a media type gets —
+// and receives the rest from here.
 //
 // The split had drifted: the component held seven pieces of state, dispatched
 // six thunks of its own and read two selectors directly, so "page logic lives in
@@ -206,8 +209,16 @@ const useMediaViewPageController = () => {
   const isText = insights.isText;
   const captions = useMemo(() => (isText ? null : transcriptCues(transcript)), [isText, transcript]);
 
+  // ── The draft / public badge in the header (D-07, D-66) ────────────────────
+  //
+  // Admin-only in the mockups: shown while "תצוגת מנהל" is on, to whoever may
+  // manage this lesson — the archive tile's own rule, so the two agree.
+  const user = useSelector(selectUser);
+  const { showAdmin } = useAdminView();
+  const showStatusBadge = Boolean(media) && showsStatusBadge({ user, item: media, showAdmin });
+
   return {
-    media, bookmarks,
+    media, bookmarks, showStatusBadge,
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
     readerPage, handleReaderPageChange: setReaderPage,
     seekOnReady, currentTime, handlePlayerProgress,

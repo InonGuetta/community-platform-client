@@ -1,6 +1,12 @@
 {
   "published": "פורסם בתאריך: ",
   "draftUploaded": "טיוטה · הועלה בתאריך: ",
+  "backToArchive": "הארכיון",
+  "kicker": {
+    "audio": "שיעור שמע",
+    "video": "שיעור וידאו",
+    "text": "ספר"
+  },
   "tabs": {
     "summary": "סיכום",
     "chapters": "פרקים",

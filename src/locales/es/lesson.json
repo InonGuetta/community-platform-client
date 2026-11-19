@@ -1,6 +1,12 @@
 {
   "published": "Publicado el: ",
   "draftUploaded": "Borrador · subido el: ",
+  "backToArchive": "El archivo",
+  "kicker": {
+    "audio": "Clase de audio",
+    "video": "Clase en vídeo",
+    "text": "Libro"
+  },
   "tabs": {
     "summary": "Resumen",
     "chapters": "Capítulos",

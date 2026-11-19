@@ -1,6 +1,12 @@
 {
   "published": "Publié le : ",
   "draftUploaded": "Brouillon · téléversé le : ",
+  "backToArchive": "Les archives",
+  "kicker": {
+    "audio": "Cours audio",
+    "video": "Cours vidéo",
+    "text": "Livre"
+  },
   "tabs": {
     "summary": "Résumé",
     "chapters": "Chapitres",

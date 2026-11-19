@@ -4,7 +4,6 @@ import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import { alpha } from "@mui/material/styles";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -15,7 +14,8 @@ import usePublicLink from "../usePublicLink";
 // The same icons the personal shelves are labelled with — a button and the shelf
 // it fills have to look like the same thing, and two independent imports stayed
 // matched only for as long as nobody changed one of them.
-import { likeIcons, saveIcons, LIKE_COLOUR, SAVE_COLOUR } from "../../../layout/personalShelves";
+import { likeIcons, saveIcons, SAVE_COLOUR } from "../../../layout/personalShelves";
+import { RADIUS } from "../../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 
 // The like / save / download / share row, and the overlays behind it.
@@ -25,111 +25,31 @@ import { useTranslation } from "react-i18next";
 // place it is described. A change here lands on both, which is the point — two
 // copies of a pill row drift the first time one of them is adjusted.
 //
-// Shared by the three plain pills and by the save control, which is a composite
-// and therefore cannot inherit the Button styling — but must still take the same
-// share of the row, or it would be the one item that sizes itself.
-const pillSizeSx = { flex: 1, minWidth: 100, maxWidth: 170 };
-
-// Pill-shaped outlined actions. The label carries the meaning and the icon only
-// reinforces it, which is why these are Buttons rather than the bare IconButtons
-// they replaced. `endIcon`: the icon comes AFTER the label, at the end of the
-// line in either direction — on its left in Hebrew, its right in English.
-const pillButtonSx = {
-  borderRadius: 999,
-  px: 2.5,
-  py: 0.9,
-  fontSize: "0.95rem",
-  fontWeight: 600,
-  textTransform: "none",
-  color: "text.primary",
-  borderColor: "divider",
-  // Equal shares of the row, so the pills come out the same width whatever their
-  // labels say — "לייק" is half the length of "שיתוף" and, left to size
-  // themselves, the row read as four unrelated buttons rather than one control.
-  // The bounds are what keep that from turning into four banners on a wide panel
-  // or four slivers in the notebook's narrow window.
-  ...pillSizeSx,
-  // The gap between label and icon is the icon's inline-START margin, in
-  // either direction; the small negative end margin pulls it toward the edge.
-  "& .MuiButton-endIcon": { marginInlineStart: 0.75, marginInlineEnd: -0.25, "& svg": { fontSize: 22 } },
-  "&:hover": { borderColor: "text.disabled", bgcolor: "action.hover" },
-};
-
-// Only the liked state takes a colour; unliked stays the same neutral pill as
-// its two neighbours so the row does not read as one permanently-highlighted
-// button. Green comes from the palette rather than a hex so it keeps its
-// contrast in dark mode, where the theme already carries a lighter step — and
-// the hover tint is derived from that same value instead of a made-up
-// `success.lighter`, which is not a key MUI defines.
-const likedSx = {
-  color: LIKE_COLOUR,
-  borderColor: LIKE_COLOUR,
-  "&:hover": {
-    borderColor: LIKE_COLOUR,
-    bgcolor: (theme) => alpha(theme.palette.success.main, 0.08),
-  },
-};
+// Redesign v4 (screen 20): a row of `soft` pills under a hairline, the icon
+// leading the label, starting from the reader's side and wrapping when the card
+// is narrow. "אהבתי" turns `tinted-success` once pressed (D-25).
 
 // Saving is a split control: the wide half toggles the general save, the narrow
-// half opens the lists. One outline drawn on the CONTAINER rather than on each
-// half, so the two read as one pill and not as two buttons that happen to touch.
-//
-// The bookmark itself is purple in BOTH states — it is the mark that means
-// "saved" on this site, and it is the same purple the saved shelf is drawn in
-// throughout the nav, so the button and the shelf it fills are recognisably one
-// thing. Purple rather than the like button's green: two adjacent pills in the
-// same colour would read as saying the same thing, and these two say different
-// things. Imported alongside the icons rather than named again here, for the
-// same reason the icons are.
-//
-// What the SAVED state changes is the outline and the caret beside it, not the
-// LABEL. That is the difference from the like pill above, and it is deliberate:
-// this control has a second half sitting inside the same outline, and colouring
-// the text as well made the whole thing read as pressed rather than as filed.
-const savedColour = SAVE_COLOUR;
-
-// The OUTLINE, though, stays the app's teal — deliberately not the bookmark's
-// purple. The icon says what this control is and is drawn the same either way;
-// the outline is the only thing that says whether this particular lecture is
-// filed, and in teal that state reads as a state rather than as more of the icon.
-// Two separate values on purpose: they are answering two different questions.
-const savedBorderColour = "secondary.main";
-
-const savePillSx = (isSaved) => ({
-  ...pillSizeSx,
-  display: "flex",
+// half opens the lists. One soft pill drawn on the CONTAINER rather than on each
+// half, so the two read as one control and not as two buttons that happen to
+// touch. The bookmark is the saved shelf's purple (palette.personal, D-25) — the
+// mark that means "saved" on this site — and is drawn filled once saved.
+const savePillSx = {
+  display: "inline-flex",
   alignItems: "stretch",
   overflow: "hidden",
-  borderRadius: 999,
-  border: "1px solid",
-  borderColor: isSaved ? savedBorderColour : "divider",
-  // Inherited by the caret half, which is the second thing that lights up.
-  color: isSaved ? savedColour : "text.secondary",
-  "&:hover": { borderColor: isSaved ? savedBorderColour : "text.disabled" },
-});
-
-// The wide half. Text-variant, so the container's outline is the only border.
-//
-// The LABEL is pinned to text.primary while the icon carries the purple — the
-// icon has to be coloured explicitly because MUI's endIcon otherwise inherits
-// the button's own text colour, which is exactly the one being held neutral.
-const saveMainSx = () => ({
-  flex: 1,
-  minWidth: 0,
-  px: 1.5,
-  py: 0.9,
-  borderRadius: 0,
-  textTransform: "none",
-  fontSize: "0.95rem",
-  fontWeight: 600,
+  borderRadius: `${RADIUS.pill}px`,
+  bgcolor: "surface.fill",
   color: "text.primary",
-  "& .MuiButton-endIcon": {
-    marginInlineStart: 0.75,
-    marginInlineEnd: -0.25,
-    color: savedColour,
-    "& svg": { fontSize: 22 },
-  },
-});
+};
+
+// Both halves light up on their own under the pointer, so it is visible that
+// the caret is a target of its own and a click there will not toggle the save.
+const saveHalfSx = {
+  borderRadius: 0,
+  color: "inherit",
+  "&:hover": { bgcolor: "surface.fillHover" },
+};
 
 /**
  * `transcript` is optional — it only decides whether the download menu offers a
@@ -159,27 +79,22 @@ const MediaActionsBar = ({
     <>
       {/* flexShrink: 0 so that, pinned under a scrolling panel, a long summary
           or chapter list never pushes these actions out of reach. */}
-      <Divider sx={{ mt: 1, flexShrink: 0 }} />
-      {/* Centred as a group, with one `gap` doing the spacing so the gaps are
-          equal by construction rather than by eye. Wrapping is the escape hatch
-          for a narrow panel: four pills at their minimum width, on two centred
-          rows, still beat four squashed ones on a single line. */}
+      <Divider sx={{ mt: 3, flexShrink: 0 }} />
       <Box
         sx={{
           display: "flex",
-          justifyContent: "center",
           flexWrap: "wrap",
-          gap: 1.5,
-          pt: 1.5,
+          gap: 1,
+          pt: 2.5,
           flexShrink: 0,
         }}
       >
         <Button
           onClick={onToggleLike}
-          variant="outlined"
+          variant={isLiked ? "tinted-success" : "soft"}
           aria-pressed={isLiked}
-          endIcon={isLiked ? <likeIcons.on /> : <likeIcons.off />}
-          sx={{ ...pillButtonSx, ...(isLiked && likedSx) }}
+          startIcon={isLiked ? <likeIcons.on /> : <likeIcons.off />}
+          sx={{ px: 2.5 }}
         >
           {isLiked ? t("actions.liked") : t("actions.like")}
         </Button>
@@ -190,24 +105,27 @@ const MediaActionsBar = ({
             list of the user's own is the caret next to it. A menu on the whole
             pill would have put a choice in front of the common case every time;
             two separate pills would have said they were unrelated. */}
-        <Box sx={savePillSx(isSaved)}>
+        <Box sx={savePillSx}>
           <Button
             onClick={onToggleSave}
             aria-pressed={isSaved}
-            endIcon={isSaved ? <saveIcons.on /> : <saveIcons.off />}
-            sx={saveMainSx()}
+            startIcon={isSaved ? <saveIcons.on /> : <saveIcons.off />}
+            sx={{
+              ...saveHalfSx,
+              paddingInlineStart: 2.5,
+              paddingInlineEnd: 1.5,
+              "& .MuiButton-startIcon": { color: SAVE_COLOUR },
+            }}
           >
             {isSaved ? t("actions.saved") : t("actions.save")}
           </Button>
-          {/* A hairline between the halves, so it is visible that the caret is
-              its own target and a click there will not toggle the save. */}
-          <Divider orientation="vertical" flexItem sx={{ borderColor: "inherit", opacity: 0.5 }} />
+          <Divider orientation="vertical" flexItem sx={{ my: 1.25 }} />
           <Tooltip title={t("actions.addToList")}>
             <IconButton
               onClick={(e) => setSaveAnchor(e.currentTarget)}
               aria-haspopup="menu"
               aria-label={t("actions.addToList")}
-              sx={{ borderRadius: 0, px: 0.5, color: "inherit" }}
+              sx={{ ...saveHalfSx, paddingInlineStart: 0.75, paddingInlineEnd: 1.25 }}
             >
               <ExpandLessIcon />
             </IconButton>
@@ -217,17 +135,15 @@ const MediaActionsBar = ({
         <Button
           onClick={(e) => setDownloadAnchor(e.currentTarget)}
           aria-haspopup="menu"
-          variant="outlined"
-          endIcon={<FileDownloadOutlinedIcon />}
-          sx={pillButtonSx}
+          variant="soft"
+          startIcon={<FileDownloadOutlinedIcon />}
         >
           {t("actions.download")}
         </Button>
         <Button
           onClick={() => setShareOpen(true)}
-          variant="outlined"
-          endIcon={<ShareOutlinedIcon />}
-          sx={pillButtonSx}
+          variant="soft"
+          startIcon={<ShareOutlinedIcon />}
         >
           {t("actions.share")}
         </Button>

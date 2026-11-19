@@ -144,3 +144,36 @@
 - **סקריפטים:** אין שינוי ב-`package.json`.
 - **פתוח:** השוואה ויזואלית – 8ב.
 - **שער:** lint, build ו-`check:chunks` ירוקים; בריצת `verify` מלאה תחת עומס נפל מבחן אחד של `language` (timeout), שעבר בהרצה בודדת (4/4 קבצים). **`npm run e2e` ירוק – 5/5.**
+
+---
+
+## שלב 4א – עמוד שמע ווידאו: layout, נגן, מיכל הטאבים, שורת פעולות, מחברת (2026-11-19, opus)
+
+### מה השתנה
+- **`LessonHeader`** חדש (`pages/mediaView/componentsMediaView/`): `BackLink` "הארכיון" → kicker accent לפי סוג (`lesson:kicker.*`) + badge "טיוטה"/"ציבורי" admin-only (`showStatusBadge` מה-controller = `showsStatusBadge` של האריח + `useAdminView`) → H1 display (שמע 48/64, וידאו/ספר 40/56, בלי נקודה בסוף – `lessonTitle.js`) → "מרצה: X" עם הקישור לדף היוצר (D-96, D-97).
+- **`MediaViewPage`**: בלי `p: 3` ובלי MUI Grid; CSS grid של 12 – שמע 5/7 מ-md (CoverArt מרובע + כרטיס נגן | כרטיס טאבים), וידאו וספר 7/5 מ-lg (נגן + תאריך | טאבים). מתחת: מטא (תאריך בשמע), תיאור 17px, כרטיס המחברת. מדידת `panelHeight` (ResizeObserver + `stageHeightForWidth`) יצאה; לתוכן הטאבים `maxHeight: 70vh` מ-md (D-22, D-98).
+- **נגן (D-21, D-94):** `PlayerControls` עם `variant` – `"card"` לשמע (play 56 accent, פס 6px `ltr`, זמנים 13px `ltr`, שורת 36px: עוצמה, כתוביות, הגדרות = מהירות + הורדות) ו-`"overlay"` לווידאו (הבר הקיים). `MediaPlayer` לשמע = כרטיס עם ה-`<audio>` המוסתר והכתובית בתוכו; לווידאו stage 16:9 ברדיוס 28 עם `SHADOW.player`. המילוי = accent בשניהם (במקום `mediaTypeAccents`). `seekOnReady`, `onProgress` (שמירת מיקום), `seekTo` דרך ref, `useMediaSession`, `captionsOn` – לא זזו. `stageGeometry.js` + בדיקתו נמחקו.
+- **`MediaInsightsTabs`:** רק המיכל – בלי `fullWidth`, ה-theme מצייר וגולל; prop `contentMaxHeight` (D-101). תוכן הפאנלים לא נגע (4ג).
+- **`MediaActionsBar` (D-99):** pills `soft` מיושרים להתחלה, אייקון לפני התווית; "לייק" `tinted-success` כשלחוץ; שמירה + caret הרשימות ב-pill אחד. משותף לחלון המקור במחברת.
+- **לב (D-95):** `likeIcons` → לב (עמוד הפריט, מדף "התוכן שאהבתי" במגירה; האריח כבר היה לב). סוגר את D-79.
+- **`LessonNotebook`, `CourseTrackBar` (D-100):** כרטיסי `Paper` בסגנון החדש; כותרת display 26, כפתורים soft/primary, מונה כ-`StatusBadge`, מצב ריק טקסט 15px.
+- **מחרוזות** (דרך `add-translation`, 5 שפות, yi טיוטה): `lesson:backToArchive`, `lesson:kicker.{audio,video,text}`. לא נמחקו מפתחות (כל הקיימים עדיין בשימוש).
+- **סקיל:** `redesign-screen` קיבל שורות ל-`LessonHeader` ולשני ה-variants של הנגן (commit נפרד בריפו השורש, ענף `i18n`).
+
+### קבצים
+`src/components/pages/mediaView/{MediaViewPage.jsx,MediaViewPage.test.jsx,useMediaViewPageController.js}`, `componentsMediaView/{LessonHeader.jsx,lessonTitle.js,lessonTitle.test.js,MediaInsightsTabs.jsx,MediaActionsBar.jsx,LessonNotebook.jsx,CourseTrackBar.jsx}`, `src/components/features/MediaPlayer/{MediaPlayer.jsx,PlayerControls.jsx,MediaPlayer.test.jsx}` (−`stageGeometry.js`, −`stageGeometry.test.js`), `src/components/layout/personalShelves.js`, `src/locales/*/lesson.json`, `design/REDESIGN_V4_{DECISIONS,LOG}.md`.
+
+### בדיקות
+- **נכתבו מחדש (מבנה, לא התנהגות):** `MediaPlayer.test.jsx` – לשמע: "stage 16:9 עם בר ממורכז" → "כרטיס בלי stage", האלמנט 1×1 נמצא לפי `data-testid`, הבר "לא נעלם" → הפקדים לא נעלמים; צבע ההתקדמות → accent בשני הסוגים (במקום כתום/כחול). נוספו: הכרטיס מציע play/מיקום/זמנים/עוצמה/הגדרות, מהירות מתפריט הכרטיס, רדיוס 28 לווידאו. `MediaViewPage.test.jsx` – עטוף ב-`MemoryRouter` (ה-BackLink); נוספו: header (קישור לארכיון, kicker, H1 בלי נקודה, badge רק עם `showStatusBadge`, "ציבורי"), עטיפה רק לשמע. כל 25 הבדיקות הקיימות עברו בלי שינוי (תוויות לייק/שמירה, caret, טאבים, תאריך).
+- **חדשה:** `lessonTitle.test.js`. **נמחקה:** `stageGeometry.test.js` (הפונקציה יצאה).
+- `SourcePreviewDialogBookmarks`, `LessonNotebook*`, `SaveMenu*`, `ShareDialogActions` – עברו בלי שינוי.
+- **`npm run verify` ירוק** – 170 קובצי בדיקה, 1890 בדיקות, build, check:chunks (אזהרת lint ישנה אחת ב-`useAdminDashboardController.js`). בריצה הראשונה נפל `PdfViewer.test.jsx` ("a file that will not open", `loading` במקום `error`) תחת עומס – קובץ שהשלב לא נגע בו; עבר לבד (16/16), והריצה המלאה השנייה ירוקה.
+- **`npm run e2e` ירוק – 5/5** בריצה אחת (journey he/en/yi – כולל heading בשם השיעור, `lesson:actions.share` והקישור הציבורי בעמוד החדש; language; phone). ה-e2e לא מנגן מדיה; ניגון, הסתרת הבר בווידאו ו-seek נבדקו ביחידה ובדפדפן.
+- נבדק בדפדפן (1510px, עברית, מנהל): שמע (`/media/100`) – עטיפה, כרטיס נגן עם כתובית, טאבים עם גלילה פנימית, שורת פעולות, מטא, מחברת; וידאו (`/media/46`, טיוטה) – badge, נגן ברדיוס 28, ניגון והסתרת הבר, תאריך מתחת לנגן. מובייל לא צולם (חלון הדפדפן לא השתנה בגודל) – העמודות נערמות ב-xs דרך `gridTemplateColumns`.
+- ה-API, Vite ו-Memurai כבר רצו כשהשלב התחיל – לא הופעלו ולא נעצרו על ידו. **אין סקריפט חדש ב-`package.json`.**
+
+### מה נשאר פתוח
+- **4ג:** תוכן הטאבים (סיכום: נקודות מפתח כרשימה, תגיות מוצעות בקופסת `fill-2`; פרקים; תמלול; הערות; דיון; `ChatPane`). המיכל כבר נותן `maxHeight` וגלילה – לא להוסיף גלילה פנימית נוספת בפאנל.
+- **4ב:** ענף `isText` כבר ב-layout של 7/5 מ-lg עם `LessonHeader` (kicker "ספר", H1 40/56) ותאריך 13px מתחת למציג; `TextViewer` עצמו, הקישור "פתיחה בכרטיסייה חדשה" וכפתור "הפקת סיכום מחדש" – 4ב.
+- `mediaTypeAccents` עדיין בשימוש במחברת (`RichNoteEditor`, `BookmarksSidebar`) – 5ג.
+- השוואה מול `new-20`/`new-26` במובייל – 8ב.

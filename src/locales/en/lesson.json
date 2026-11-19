@@ -1,6 +1,12 @@
 {
   "published": "Published on: ",
   "draftUploaded": "Draft · uploaded on: ",
+  "backToArchive": "The archive",
+  "kicker": {
+    "audio": "Audio lesson",
+    "video": "Video lesson",
+    "text": "Book"
+  },
   "tabs": {
     "summary": "Summary",
     "chapters": "Chapters",

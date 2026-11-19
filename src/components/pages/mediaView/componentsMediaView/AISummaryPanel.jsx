@@ -190,7 +190,7 @@ const AISummaryPanel = ({
 
       {canGenerate && (
         <Button
-          variant="contained"
+          variant={summary ? "soft" : "contained"}
           size="small"
           onClick={onGenerate}
           disabled={running}

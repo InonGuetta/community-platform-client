@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { AUTH, RADIUS, SHADOW } from "../../../theme/tokens";
+import { AUTH, RADIUS, SHADOW, WHITE } from "../../../theme/tokens";
 import AppHeader from "../../layout/navbar/AppHeader";
 import { BrandWaveIcon } from "../../layout/navbar/dockIcons";
 
@@ -54,7 +54,7 @@ const AuthLayout = ({ title, intro, children }) => (
             mb: 3,
             borderRadius: "14px",
             bgcolor: AUTH.logo,
-            color: "#fff",
+            color: WHITE,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

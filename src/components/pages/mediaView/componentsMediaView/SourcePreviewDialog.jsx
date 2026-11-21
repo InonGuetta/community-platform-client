@@ -57,11 +57,9 @@ const NOTE_PREVIEW_WORDS = 7;
 // The navigation arrows: big, turquoise, thickened, and lifted off the bar by a
 // soft shadow.
 //
-// The colour is `secondary` — the app's teal — rather than `primary`, whose
-// light-mode value is a dark navy that read as near-black. Taking it from the
-// palette rather than hard-coding a hex is what makes it adapt in dark mode on
-// its own: the theme already carries a lighter teal there, which is exactly the
-// value that stays legible on a dark bar.
+// The colour is `primary` (the v4 indigo), taken from the palette rather than
+// hard-coded, so it adapts in dark mode on its own: the theme carries a lighter
+// indigo there, which is what stays legible on a dark bar.
 //
 // Two filters stacked, doing different jobs. MUI's chevrons are a thin stroke
 // and there is no bold variant of an icon font, so the weight comes from a pair
@@ -70,7 +68,7 @@ const NOTE_PREVIEW_WORDS = 7;
 // reads as a lift rather than as an outline.
 const arrowSx = {
   flexShrink: 0,
-  color: "secondary.main",
+  color: "primary.main",
   "& svg": {
     filter:
       "drop-shadow(0 0 0.7px currentColor) drop-shadow(0 0 0.7px currentColor) drop-shadow(0 2px 3px rgba(0,0,0,0.28))",

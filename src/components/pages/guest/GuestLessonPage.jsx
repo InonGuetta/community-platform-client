@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import PageHeader from "../../features/PageHeader/PageHeader";
 import { useGuestLessonPageController } from "./useGuestLessonPageController";
 import { creatorPrefixes, defaultCreatorName } from "../../../utilities/constant";
 import { formatTime } from "../../../utilities/formatTime";
@@ -76,7 +77,7 @@ const GuestLessonPage = () => {
 
         {lesson && (
           <>
-            <Typography variant="h4" fontWeight={800} color="primary" dir="auto" sx={{ mb: 0.5 }}>{lesson.title}</Typography>
+            <PageHeader title={<bdi dir="auto">{lesson.title}</bdi>} sx={{ mb: 2 }} />
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center", mb: 2 }}>
               {lesson.creator_name && lesson.creator_name !== defaultCreatorName && (
                 <Typography color="text.secondary">

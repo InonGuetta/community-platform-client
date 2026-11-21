@@ -2,6 +2,9 @@ import { Component } from "react";
 import { captureError } from "../../../utilities/monitoring";
 import i18n from "../../../i18n/i18n";
 import { directionOf } from "../../../i18n/languages";
+import { COLORS, WHITE, RADIUS } from "../../../theme/tokens";
+
+const C = COLORS.light;
 
 // React has no hook equivalent for error boundaries — this has to stay a class.
 //
@@ -21,27 +24,27 @@ const styles = {
     justifyContent: "center",
     padding: "24px",
     fontFamily: "system-ui, -apple-system, 'Segoe UI', Arial, sans-serif",
-    background: "#f5f7f9",
-    color: "#1a4a66",
+    background: C.bg,
+    color: C.ink,
   },
   card: {
     maxWidth: "520px",
     width: "100%",
-    background: "#ffffff",
-    borderRadius: "12px",
+    background: C.paper,
+    borderRadius: `${RADIUS.card}px`,
     padding: "32px",
     textAlign: "center",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+    boxShadow: "0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04)",
   },
   title: { margin: "0 0 12px", fontSize: "1.5rem", fontWeight: 800 },
-  text: { margin: "0 0 24px", fontSize: "0.95rem", lineHeight: 1.6, color: "#4a6b7d" },
+  text: { margin: "0 0 24px", fontSize: "0.95rem", lineHeight: 1.6, color: C.mute },
   actions: { display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" },
   button: {
     padding: "10px 24px",
     borderRadius: "8px",
     border: "none",
-    background: "#1597bb",
-    color: "#ffffff",
+    background: C.accent,
+    color: WHITE,
     fontSize: "0.9rem",
     fontWeight: 700,
     cursor: "pointer",
@@ -49,9 +52,9 @@ const styles = {
   secondaryButton: {
     padding: "10px 24px",
     borderRadius: "8px",
-    border: "1px solid #1597bb",
+    border: `1px solid ${C.accent}`,
     background: "transparent",
-    color: "#1597bb",
+    color: C.accent,
     fontSize: "0.9rem",
     fontWeight: 700,
     cursor: "pointer",
@@ -59,13 +62,13 @@ const styles = {
   details: {
     marginTop: "24px",
     padding: "12px",
-    background: "#fbeaea",
+    background: C.error.bg,
     borderRadius: "8px",
     textAlign: "start",
     direction: "ltr",
     fontFamily: "monospace",
     fontSize: "0.75rem",
-    color: "#8b2f2f",
+    color: C.error.fg,
     whiteSpace: "pre-wrap",
     overflowX: "auto",
   },

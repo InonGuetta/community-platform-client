@@ -17,6 +17,7 @@ import { dropIndicatorSx } from "../../../../utilities/useDragReorder";
 import { statuses } from "../../../../utilities/constant";
 import { noteHtmlToPlainText } from "../../../../utilities/noteHtml";
 import { formatDate } from "../../../../utilities/formatDate";
+import StatusBadge from "../../../features/StatusBadge/StatusBadge";
 import { useTranslation } from "react-i18next";
 
 // The index of the notebook: the search box, the tick-all bar with its bulk
@@ -156,7 +157,7 @@ const NotesIndex = ({
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
                   <Typography sx={{ fontSize: 12, color: "text.secondary", flexShrink: 0 }}>{formatDate(n.updated_at)}</Typography>
                   {isDirty(n.id) && (
-                    <Chip size="small" label={t("index.notSaved")} sx={{ ...META_CHIP_SX, bgcolor: "badge.warning.bg", color: "badge.warning.fg" }} />
+                    <StatusBadge size="small" tone="warning">{t("index.notSaved")}</StatusBadge>
                   )}
                   {n.media_title && (
                     <Chip size="small" label={n.media_title} sx={{ ...META_CHIP_SX, maxWidth: 150, bgcolor: "surface.accentSoft", color: "primary.main" }} />

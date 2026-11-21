@@ -3,11 +3,10 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Alert from "@mui/material/Alert";
 import CloseIcon from "@mui/icons-material/Close";
 import { useOfflinePlayer, PLAYBACK_RATES } from "./useOfflinePlayer";
+import SegmentedControl from "../../features/SegmentedControl/SegmentedControl";
 import { lessonByline } from "./downloadsText";
 import { RADIUS } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
@@ -49,19 +48,14 @@ const OfflinePlayer = ({ item, onClose }) => {
           />
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1, flexWrap: "wrap" }}>
             <Typography variant="body2" color="text.secondary">{t("player.speed")}</Typography>
-            <ToggleButtonGroup
+            <SegmentedControl
               size="small"
-              exclusive
+              semantics="radio"
               value={rate}
-              onChange={(_, next) => next && changeRate(next)}
-              aria-label={t("player.speedLabel")}
-            >
-              {PLAYBACK_RATES.map((value) => (
-                <ToggleButton key={value} value={value} sx={{ px: 1.25, py: 0.25 }}>
-                  {`×${value}`}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
+              onChange={changeRate}
+              label={t("player.speedLabel")}
+              options={PLAYBACK_RATES.map((value) => ({ value, label: `×${value}` }))}
+            />
           </Box>
         </>
       )}

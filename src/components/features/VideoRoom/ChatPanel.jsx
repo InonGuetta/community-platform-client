@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import SendIcon from "@mui/icons-material/Send";
 import { useTranslation } from "react-i18next";
 import { intlLocale } from "../../../i18n/i18n";
+import { ROOM } from "../../../theme/tokens";
 
 // Text alongside the video, for the half of a chavruta that does not fit in
 // speech: a source reference, a page number, a question asked without
@@ -41,14 +42,14 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: "grey.900" }}>
-      <Typography variant="subtitle2" sx={{ p: 1.5, color: "grey.300", borderBottom: "1px solid", borderColor: "grey.800" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: ROOM.bar }}>
+      <Typography variant="subtitle2" sx={{ p: 1.5, color: ROOM.ink2, borderBottom: "1px solid", borderColor: ROOM.line }}>
         {t("chat.title")}
       </Typography>
 
       <Box sx={{ flex: 1, overflowY: "auto", p: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
         {messages.length === 0 && (
-          <Typography variant="caption" color="grey.500">
+          <Typography variant="caption" sx={{ color: ROOM.mute }}>
             {t("chat.empty")}
           </Typography>
         )}
@@ -64,8 +65,8 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
               sx={{
                 alignSelf: mine ? "flex-start" : "flex-end",
                 maxWidth: "85%",
-                bgcolor: mine ? "primary.dark" : "grey.800",
-                color: "grey.100",
+                bgcolor: mine ? "primary.dark" : ROOM.fill,
+                color: ROOM.ink,
                 px: 1.25,
                 py: 0.75,
                 borderRadius: 1.5,
@@ -75,14 +76,14 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
                   two, alignment alone could not say. The name comes from the
                   server's verified row, never from the sender's payload. */}
               {!mine && (
-                <Typography variant="caption" sx={{ color: "grey.400", display: "block", fontWeight: 600 }}>
+                <Typography variant="caption" sx={{ color: ROOM.mute, display: "block", fontWeight: 600 }}>
                   {message.displayName || t("chat.participant")}
                 </Typography>
               )}
               <Typography variant="body2" dir="auto" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
                 {message.text}
               </Typography>
-              <Typography variant="caption" sx={{ color: "grey.500", display: "block", textAlign: "start" }}>
+              <Typography variant="caption" sx={{ color: ROOM.mute, display: "block", textAlign: "start" }}>
                 {timeOf(message.at)}
               </Typography>
             </Box>
@@ -91,7 +92,7 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
         <Box ref={endRef} />
       </Box>
 
-      <Box component="form" onSubmit={submit} sx={{ p: 1, borderTop: "1px solid", borderColor: "grey.800" }}>
+      <Box component="form" onSubmit={submit} sx={{ p: 1, borderTop: "1px solid", borderColor: ROOM.line }}>
         <TextField
           value={draft}
           onChange={(e) => setDraft(e.target.value.slice(0, CHAT_MAX_CHARS))}
@@ -106,11 +107,11 @@ const ChatPanel = ({ messages, onSend, myUserId }) => {
             if (e.key === "Enter" && !e.shiftKey) submit(e);
           }}
           InputProps={{
-            sx: { color: "grey.100", bgcolor: "grey.850" },
+            sx: { color: ROOM.ink, bgcolor: ROOM.fill },
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton type="submit" size="small" disabled={!draft.trim()} aria-label={t("chat.send")}>
-                  <SendIcon fontSize="small" sx={{ color: draft.trim() ? "primary.light" : "grey.600" }} />
+                  <SendIcon fontSize="small" sx={{ color: draft.trim() ? "primary.light" : ROOM.placeholder }} />
                 </IconButton>
               </InputAdornment>
             ),

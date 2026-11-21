@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import { SHELL } from "../../../theme/tokens";
+import { SHELL, WHITE } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 import { useAvatarEditor } from "./useAvatarEditor";
 import AvatarCropDialog from "./AvatarCropDialog";
@@ -33,7 +33,7 @@ const AvatarEditor = ({ size = 72, layout = "row", details = null }) => {
         <Avatar
           src={user.avatar_url || undefined}
           alt={t("avatar.label")}
-          sx={{ width: size, height: size, fontSize: size / 2.6, fontWeight: 700, color: "#fff", background: SHELL.drawerAvatar }}
+          sx={{ width: size, height: size, fontSize: size / 2.6, fontWeight: 700, color: WHITE, background: SHELL.drawerAvatar }}
         >
           {(user.display_name || user.email || "?").charAt(0).toUpperCase()}
         </Avatar>

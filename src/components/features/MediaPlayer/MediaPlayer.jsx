@@ -4,7 +4,7 @@ import ReactPlayer from "react-player";
 import Box from "@mui/material/Box";
 import PlayerControls from "./PlayerControls";
 import { mediaTypes } from "../../../utilities/constant";
-import { RADIUS, SHADOW } from "../../../theme/tokens";
+import { RADIUS, SHADOW, CARD_SHELL_SX, WHITE } from "../../../theme/tokens";
 import { captionAt } from "../../../utilities/transcriptTiming";
 
 // A video's stage: the picture's own shape. Audio has no stage any more — it
@@ -254,10 +254,7 @@ const MediaPlayer = forwardRef((
         data-testid="player-card"
         sx={{
           position: "relative",
-          bgcolor: "background.paper",
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: `${RADIUS.card}px`,
+          ...CARD_SHELL_SX,
           p: 2.5,
         }}
       >
@@ -380,7 +377,7 @@ const MediaPlayer = forwardRef((
                 py: 0.5,
                 borderRadius: 1,
                 bgcolor: "rgba(0,0,0,0.72)",
-                color: "#fff",
+                color: WHITE,
                 textAlign: "center",
                 lineHeight: 1.5,
                 fontSize: { xs: "0.95rem", sm: "1.15rem" },

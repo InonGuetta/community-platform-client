@@ -8,7 +8,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import { describeNotification, notificationAge } from "../../../utilities/notificationText";
 import { useDirection, menuOrigins } from "../../../i18n/useDirection";
 import { useTranslation } from "react-i18next";
@@ -41,7 +40,7 @@ const NotificationBell = ({ items, unread, anchor, open, onOpen, onClose, onSele
           invisible={unread === 0}
           sx={{ "& .MuiBadge-dot": { bgcolor: "surface.danger", width: 8, height: 8, borderRadius: "50%", border: "2px solid", borderColor: "background.default", boxSizing: "content-box" } }}
         >
-          {unread > 0 ? <NotificationsIcon sx={{ fontSize: 20 }} /> : <NotificationsNoneIcon sx={{ fontSize: 20 }} />}
+          <NotificationsNoneIcon sx={{ fontSize: 20 }} />
         </Badge>
       </IconButton>
     </Tooltip>

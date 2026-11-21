@@ -527,6 +527,8 @@ const RichNoteEditor = forwardRef(({
         sx={{
           flexGrow: 1, width: "100%", minHeight,
           p: 0, overflowY: "auto",
+          // No outline of its own: the focus shows on the note's card, whose
+          // border turns accent while the caret is inside (NoteCard, isActive).
           outline: "none",
           fontSize: 16, lineHeight: 1.9, color: "surface.ink2",
           // The note is content, and each of its paragraphs reads in the

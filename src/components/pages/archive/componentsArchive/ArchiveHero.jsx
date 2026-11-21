@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { mediaTypeLabels } from "../../../../utilities/constant";
 import { lengthLabel } from "../../../../utilities/durationOptions";
 import { creatorDisplayName } from "../../../../utilities/creatorPage";
-import { RADIUS, HERO } from "../../../../theme/tokens";
+import { RADIUS, HERO, WHITE } from "../../../../theme/tokens";
 
 // The archive's banner (decision 1, step 3): the newest published lesson
 // (featuredItem.js; D-01), on an indigo gradient with rings, radius 28.
@@ -41,7 +41,7 @@ const ArchiveHero = ({ item, onOpen }) => {
         height: { xs: 300, md: 340 },
         mb: { xs: 5, md: 7 },
         bgcolor: HERO.base,
-        color: "#fff",
+        color: WHITE,
       }}
     >
       {/* The rings sit toward the end of the line, away from the text — so in
@@ -90,13 +90,13 @@ const ArchiveHero = ({ item, onOpen }) => {
           <Button
             onClick={press}
             startIcon={<PlayArrowRoundedIcon />}
-            sx={{ bgcolor: "#fff", color: "#1d1d1f", "&:hover": { bgcolor: "#fff", transform: "scale(1.03)" } }}
+            sx={{ bgcolor: WHITE, color: "text.primary", "&:hover": { bgcolor: WHITE, transform: "scale(1.03)" } }}
           >
             {t(ACTION_KEY[item.media_type] || "hero.read")}
           </Button>
           <Button
             onClick={press}
-            sx={{ bgcolor: HERO.ghost, color: "#fff", fontWeight: 600, backdropFilter: "blur(8px)", "&:hover": { bgcolor: HERO.ghostHover } }}
+            sx={{ bgcolor: HERO.ghost, color: WHITE, fontWeight: 600, backdropFilter: "blur(8px)", "&:hover": { bgcolor: HERO.ghostHover } }}
           >
             {t("hero.details")}
           </Button>

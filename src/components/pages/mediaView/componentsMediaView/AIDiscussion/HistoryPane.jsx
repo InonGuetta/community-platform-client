@@ -3,7 +3,6 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
-import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -21,6 +20,7 @@ import { statuses } from "../../../../../utilities/constant";
 import { messageForError } from "../../../../../utilities/apiError";
 import { formatDate } from "../../../../../utilities/formatDate";
 import { MessageBubble, placeOpener, answerSaver, CopyConversationButton } from "../../../../features/ChatPane/ChatPane";
+import StatusBadge from "../../../../features/StatusBadge/StatusBadge";
 import { useTranslation } from "react-i18next";
 
 // The reader's earlier conversations on THIS lesson. Presentation only:
@@ -54,7 +54,7 @@ const ConversationRow = ({ item, current, onOpen, onDelete, deleting }) => {
         <Typography variant="caption" color="text.secondary">
           {formatDate(item.updated_at)} · {t("history.questions", { count: item.questions })}
         </Typography>
-        {current && <Chip size="small" color="primary" variant="outlined" label={t("history.current")} />}
+        {current && <StatusBadge size="small" tone="indigo">{t("history.current")}</StatusBadge>}
       </Box>
     </ButtonBase>
     {/* Beside the row, not inside it: a button within a button is neither

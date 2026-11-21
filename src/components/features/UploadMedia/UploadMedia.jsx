@@ -30,13 +30,13 @@ const UploadMedia = ({ open }) => {
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Box
             sx={{
-              border: "2px dashed", borderColor: "grey.400", borderRadius: 2,
+              border: "2px dashed", borderColor: "surface.lineStrong", borderRadius: 2,
               p: 3, textAlign: "center", cursor: "pointer",
               "&:hover": { borderColor: "primary.main", bgcolor: "action.hover" },
             }}
             onClick={() => document.getElementById("media-file-input").click()}
           >
-            <CloudUploadIcon sx={{ fontSize: 40, color: "grey.500", mb: 1 }} />
+            <CloudUploadIcon sx={{ fontSize: 40, color: "text.secondary", mb: 1 }} />
             <Typography color="text.secondary">
               {file ? file.name : t("chooseFile")}
             </Typography>

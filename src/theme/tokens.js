@@ -71,6 +71,30 @@ const dark = {
 
 export const COLORS = { light, dark };
 
+// White that stays white in both modes: text over a photo or a gradient, the
+// sheet of a PDF page. (`paper` turns dark in the dark mode, which these must not.)
+export const WHITE = "#FFFFFF";
+
+// The live room's chrome. A video room is dark in either mode — the picture of
+// a camera reads on a dark stage — so it takes the dark palette whole rather
+// than the mode's own (the bars, the chat, the controls).
+export const ROOM = {
+  stage: dark.bg,
+  bar: dark.paper,
+  line: dark.line,
+  fill: dark.fill,
+  fillHover: dark.fillHover,
+  ink: dark.ink,
+  ink2: dark.ink2,
+  mute: dark.mute,
+  placeholder: dark.placeholder,
+  danger: dark.danger,
+  dangerSoft: "rgba(251,113,133,.15)",
+  dangerSoftHover: "rgba(251,113,133,.25)",
+  // The name tag over a tile.
+  label: "rgba(0,0,0,.5)",
+};
+
 // The tones a StatusBadge is drawn in (component 9).
 export const badgeTones = (c) => ({
   indigo: { bg: c.accentSoft, fg: c === dark ? "#a5b4fc" : c.accent },
@@ -107,6 +131,17 @@ export const SHADOW = {
   chatInput: "0 10px 40px -12px rgba(0,0,0,.25)",
   dialog: "0 30px 80px -20px rgba(0,0,0,.3)",
   play: "0 6px 16px rgba(79,70,229,.4)",
+};
+
+// The card shell (component 12) — paper, a 1px line, radius 24, the card
+// shadow — spread into every `sx` that draws a card of its own. SectionCard,
+// NoteCard, the player card and the admin cards all start from it.
+export const CARD_SHELL_SX = {
+  bgcolor: "background.paper",
+  border: 1,
+  borderColor: "divider",
+  borderRadius: `${RADIUS.card}px`,
+  boxShadow: SHADOW.card,
 };
 
 // Motion (part B, "תנועה").

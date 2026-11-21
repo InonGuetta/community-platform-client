@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { RADIUS, SHADOW } from "../../../theme/tokens";
+import { CARD_SHELL_SX } from "../../../theme/tokens";
 
 // A section card (component 12): white, a 1px line, radius 24, padding 24/32,
 // the card shadow, and an optional display title (24/28) with actions at its
@@ -11,11 +11,7 @@ const SectionCard = ({ title, titleComponent = "h2", actions = null, component =
     component={component}
     sx={[
       {
-        bgcolor: "background.paper",
-        border: 1,
-        borderColor: "divider",
-        borderRadius: `${RADIUS.card}px`,
-        boxShadow: SHADOW.card,
+        ...CARD_SHELL_SX,
         p: { xs: 3, md: 4 },
       },
       ...(Array.isArray(sx) ? sx : [sx]),

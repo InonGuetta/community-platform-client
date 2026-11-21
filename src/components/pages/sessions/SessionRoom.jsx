@@ -40,7 +40,7 @@ const SessionRoom = () => {
 
   if (entry.status === "refused") {
     return (
-      <Box sx={{ p: 3, maxWidth: 520, mx: "auto" }}>
+      <Box sx={{ maxWidth: 520, mx: "auto" }}>
         <Alert
           severity="info"
           action={<Button color="inherit" size="small" onClick={backToSessions}>{t("backToSessions")}</Button>}

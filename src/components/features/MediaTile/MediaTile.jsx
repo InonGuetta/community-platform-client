@@ -16,7 +16,7 @@ import { mediaApi } from "../../../api/mediaApi";
 import { mediaTypeLabels } from "../../../utilities/constant";
 import { lengthLabel } from "../../../utilities/durationOptions";
 import { creatorDisplayName, hasCreatorPage } from "../../../utilities/creatorPage";
-import { RADIUS, SHADOW, MOTION, TILE } from "../../../theme/tokens";
+import { RADIUS, SHADOW, MOTION, TILE, WHITE } from "../../../theme/tokens";
 
 // An item in a grid (design/REDESIGN_V4.md, component 5 — "the most important
 // component"). The square cover with its buttons, and under it the type and
@@ -48,7 +48,7 @@ const fabSx = {
   backdropFilter: "blur(8px)",
   boxShadow: TILE.fabShadow,
   transition: "transform .15s, background-color .2s",
-  "&:hover": { bgcolor: "#fff" },
+  "&:hover": { bgcolor: WHITE },
   "&:active": { transform: "scale(.92)" },
 };
 
@@ -188,7 +188,7 @@ const MediaTile = ({
               onClick={handleLike}
               aria-label={t("card.likeOf", { title: item.title })}
               aria-pressed={liked}
-              sx={{ ...fabSx, bottom: 10, insetInlineStart: 10, ...(liked && { bgcolor: "#fff", color: TILE.heart }) }}
+              sx={{ ...fabSx, bottom: 10, insetInlineStart: 10, ...(liked && { bgcolor: WHITE, color: TILE.heart }) }}
             >
               {liked ? (
                 <FavoriteRoundedIcon

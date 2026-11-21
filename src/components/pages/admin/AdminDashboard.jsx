@@ -11,12 +11,12 @@ import TagProposals from "./componentsAdmin/TagProposals";
 import AiUsagePanel from "./componentsAdmin/AiUsagePanel";
 import SmsUsagePanel from "./componentsAdmin/SmsUsagePanel";
 import { useAdminDashboardController } from "./useAdminDashboardController";
-import { RADIUS } from "../../../theme/tokens";
+import { CARD_SHELL_SX } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 
 // A section is a card; the rows inside "מצב תורים" and "תקינות המערכת" are
 // boxes on fill-2 (component 17, as the mockup draws it).
-const CARD_SX = { bgcolor: "background.paper", borderRadius: `${RADIUS.card}px`, boxShadow: 1, border: 1, borderColor: "divider", p: 3, minWidth: 0 };
+const CARD_SX = { ...CARD_SHELL_SX, p: 3, minWidth: 0 };
 const FULL = { gridColumn: { md: "1 / -1" } };
 
 // Layout only: what the dashboard loads, when, and the reconcile sweep are

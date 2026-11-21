@@ -18,14 +18,15 @@ import ChatPanel from "./ChatPanel";
 import { useVideoRoom } from "./useVideoRoom";
 import { RecordButton, RecordingIndicator, ConsentDialog } from "./RecordingControls";
 import { useTranslation } from "react-i18next";
+import { ROOM } from "../../../theme/tokens";
 
 // Presentation only — every piece of signalling lives in useVideoRoom, and the
 // peer bookkeeping under it in peerMesh, where it can be tested without a
 // browser or a camera.
 const controlSx = (active) => ({
-  color: active ? "grey.100" : "error.light",
-  bgcolor: active ? "grey.800" : "rgba(211,47,47,0.15)",
-  "&:hover": { bgcolor: active ? "grey.700" : "rgba(211,47,47,0.25)" },
+  color: active ? ROOM.ink : ROOM.danger,
+  bgcolor: active ? ROOM.fill : ROOM.dangerSoft,
+  "&:hover": { bgcolor: active ? ROOM.fillHover : ROOM.dangerSoftHover },
 });
 
 const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
@@ -62,13 +63,13 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
   const participantCount = streams.filter((s) => s.id !== "local").length + 1;
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: "grey.950" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 1, bgcolor: "grey.900" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: ROOM.stage }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 1, bgcolor: ROOM.bar }}>
         {/* The room token is no longer shown. It is a credential the server hands
             out to enter this room, not a name for it — printing it put it on
             every screenshot of a session. */}
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap", minWidth: 0 }}>
-          <Typography variant="body2" color="grey.400">
+          <Typography variant="body2" sx={{ color: ROOM.mute }}>
             {connected ? t("room.participants", { count: participantCount }) : t("room.connecting")}
           </Typography>
           <RecordingIndicator recording={recording} mySocketId={mySocketId} onAnswer={answerRecording} />
@@ -129,7 +130,7 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
           <ParticipantGrid streams={streams} />
         </Box>
         {chatOpen && (
-          <Box sx={{ width: { xs: "100%", sm: 320 }, flexShrink: 0, borderInlineStart: "1px solid", borderColor: "grey.800" }}>
+          <Box sx={{ width: { xs: "100%", sm: 320 }, flexShrink: 0, borderInlineStart: "1px solid", borderColor: ROOM.line }}>
             <ChatPanel messages={messages} onSend={sendMessage} myUserId={user?.id} />
           </Box>
         )}
@@ -138,7 +139,7 @@ const VideoRoom = ({ roomToken, isHost, onEnd, sessionId = null }) => {
       {/* Controls at the bottom, where every other video tool in the world puts
           them. Disabled rather than hidden when there is no local media: the
           buttons explain why the room is quiet, which their absence would not. */}
-      <Box sx={{ display: "flex", justifyContent: "center", gap: 1, p: 1, bgcolor: "grey.900" }}>
+      <Box sx={{ display: "flex", justifyContent: "center", gap: 1, p: 1, bgcolor: ROOM.bar }}>
         {/* Disabled on the DEVICE, not merely on the connection.
             A user who joined without a microphone — refused, missing, or busy;
             all supported paths, see mediaErrors.js — was shown a live-looking,

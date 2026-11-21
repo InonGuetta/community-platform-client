@@ -10,7 +10,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import { alpha } from "@mui/material/styles";
 import RichNoteEditor from "./RichNoteEditor";
 import { SOURCE_CHIP_SX } from "./noteStyles";
-import { RADIUS, SHADOW } from "../../../theme/tokens";
+import { RADIUS, CARD_SHELL_SX } from "../../../theme/tokens";
 import { HEADER_HEIGHT } from "../../layout/shellGeometry";
 import { hasDragType } from "../../../utilities/useDragReorder";
 import { formatTime } from "../../../utilities/formatTime";
@@ -39,11 +39,7 @@ import { useTranslation } from "react-i18next";
 // Redesign v4 (screen 05): a note is a section card — paper, a 1px line,
 // radius 24, padding 24/32, the card shadow.
 const CARD_SX = {
-  bgcolor: "background.paper",
-  border: 1,
-  borderColor: "divider",
-  borderRadius: `${RADIUS.card}px`,
-  boxShadow: SHADOW.card,
+  ...CARD_SHELL_SX,
   p: { xs: 3, md: 4 },
   display: "flex", flexDirection: "column", gap: 2.5,
   // Where a card lands when the list scrolls to it: below the sticky header

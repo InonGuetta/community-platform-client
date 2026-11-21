@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import { useDirection, menuOrigins } from "../../../i18n/useDirection";
 import { useLanguage } from "../../../i18n/useLanguage";
 import { LanguageMenu } from "../LanguageSwitcher";
+import { HEADER_HEIGHT } from "../shellGeometry";
 import NavLinkLabel from "./NavLinkLabel";
 import SwitchMark from "./SwitchMark";
 
@@ -39,7 +40,7 @@ const AvatarMenu = ({ shell }) => {
         open={Boolean(menuAnchor)}
         onClose={closeMenu}
         {...menuOrigins(end)}
-        slotProps={{ paper: { sx: { width: 272, maxWidth: "calc(100vw - 24px)", maxHeight: "calc(100vh - 64px)", overflowY: "auto", mt: 0.5 } } }}
+        slotProps={{ paper: { sx: { width: 272, maxWidth: "calc(100vw - 24px)", maxHeight: `calc(100vh - ${HEADER_HEIGHT + 16}px)`, overflowY: "auto", mt: 0.5 } } }}
       >
         {/* Who is signed in — and the way to their account page. */}
         <MenuItem

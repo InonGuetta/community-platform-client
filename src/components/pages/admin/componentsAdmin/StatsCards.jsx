@@ -5,7 +5,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import Box from "@mui/material/Box";
-import { RADIUS } from "../../../../theme/tokens";
+import { RADIUS, CARD_SHELL_SX } from "../../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 
 // A KPI card (component 17): the figure in display type, its label above it,
@@ -23,11 +23,7 @@ const StatCard = ({ icon, label, value, to }) => {
         p: 3,
         height: "100%",
         textAlign: "start",
-        bgcolor: "background.paper",
-        borderRadius: `${RADIUS.card}px`,
-        boxShadow: 1,
-        border: 1,
-        borderColor: "divider",
+        ...CARD_SHELL_SX,
         transition: "box-shadow 0.25s ease",
         "&:hover": { boxShadow: 2 },
       }}

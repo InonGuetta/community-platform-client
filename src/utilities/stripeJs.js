@@ -1,3 +1,4 @@
+import { COLORS } from "../theme/tokens";
 import i18n from "../i18n/i18n";
 // Stripe.js, loaded on the donate page only (PRD PAY-1).
 //
@@ -47,7 +48,7 @@ export const elementsOptions = (clientSecret, theme) => ({
   appearance: {
     theme: theme?.palette?.mode === "dark" ? "night" : "stripe",
     variables: {
-      colorPrimary: theme?.palette?.primary?.main ?? "#1a4a66",
+      colorPrimary: theme?.palette?.primary?.main ?? COLORS.light.accent,
       borderRadius: "8px",
       fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
     },

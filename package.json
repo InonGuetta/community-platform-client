@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "verify": "npm run lint && npm test && npm run build && npm run check:chunks",
     "check:chunks": "node scripts/check-locale-chunks.mjs",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "screens": "playwright test -c playwright.screens.config.js"
   },
   "dependencies": {
     "@emotion/react": "^11.0.0",

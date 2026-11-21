@@ -47,3 +47,6 @@ playwright-report/
 
 # Redesign v4 mockups: 20MB of reference PNG/HTML, kept out of history (design/redesign-v4.zip source is outside the repo)
 design/redesign-v4/
+
+# Redesign v4 stage 8a screenshots (npm run screens)
+design/qa-shots/

@@ -7,6 +7,7 @@ import Tooltip from "@mui/material/Tooltip";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import LinkIcon from "@mui/icons-material/Link";
 import KeyIcon from "@mui/icons-material/VpnKeyOutlined";
+import { RADIUS } from "../../../../theme/tokens";
 import ConfirmingDeletionDialog from "../../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useJoinCodePanel from "./useJoinCodePanel";
 import { formatDate } from "../../../../utilities/formatDate";
@@ -24,10 +25,10 @@ const RequestRow = ({ request, busy, onApprove, onReject }) => {
         {request.display_name ? `${request.email} · ` : ""}{t("joinCode.requestedOn", { date: formatDate(request.created_at) })}
       </Typography>
     </Box>
-    <Button size="small" variant="contained" color="success" disabled={busy} onClick={() => onApprove(request.id)}>
+    <Button size="small" variant="tinted-success" disabled={busy} onClick={() => onApprove(request.id)}>
       {t("joinCode.approve")}
     </Button>
-    <Button size="small" variant="outlined" color="error" disabled={busy} onClick={() => onReject(request.id)}>
+    <Button size="small" variant="soft" disabled={busy} sx={{ color: "surface.danger" }} onClick={() => onReject(request.id)}>
       {t("joinCode.reject")}
     </Button>
   </Box>
@@ -39,7 +40,7 @@ const JoinCodePanel = ({ course }) => {
   const p = useJoinCodePanel(course);
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+    <Paper variant="outlined" sx={{ p: 2.5, mb: 2, borderRadius: `${RADIUS.menu}px`, boxShadow: "none" }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
         <KeyIcon color="primary" fontSize="small" />
         <Typography fontWeight={700}>{t("joinCode.title")}</Typography>
@@ -52,17 +53,17 @@ const JoinCodePanel = ({ course }) => {
               component="span"
               dir="ltr"
               data-testid="join-code"
-              sx={{ fontFamily: "monospace", fontSize: "1.6rem", fontWeight: 700, letterSpacing: "0.2em", px: 1.5, py: 0.25, borderRadius: 1, bgcolor: "action.hover" }}
+              sx={{ fontFamily: "monospace", fontSize: "1.6rem", fontWeight: 700, letterSpacing: "0.3em", px: 2.5, py: 0.75, borderRadius: `${RADIUS.menu}px`, bgcolor: "text.primary", color: "background.default" }}
             >
               {p.code}
             </Typography>
             <Tooltip title={t("joinCode.copy")}>
               <IconButton onClick={p.copyCode} aria-label={t("joinCode.copy")}><ContentCopyIcon fontSize="small" /></IconButton>
             </Tooltip>
-            <Button size="small" variant="outlined" endIcon={<LinkIcon />} onClick={p.copyLink}>{t("joinCode.copyLink")}</Button>
+            <Button size="small" variant="soft" endIcon={<LinkIcon />} onClick={p.copyLink}>{t("joinCode.copyLink")}</Button>
             <Box sx={{ flex: 1 }} />
             <Button size="small" disabled={p.busy} onClick={p.askReplace}>{t("joinCode.newCode")}</Button>
-            <Button size="small" color="error" disabled={p.busy} onClick={p.removeCode}>{t("joinCode.remove")}</Button>
+            <Button size="small" disabled={p.busy} onClick={p.removeCode} sx={{ color: "surface.danger" }}>{t("joinCode.remove")}</Button>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             {t("joinCode.howItWorks")}

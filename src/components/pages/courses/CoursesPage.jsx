@@ -4,12 +4,10 @@ import Button from "@mui/material/Button";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
-import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tooltip from "@mui/material/Tooltip";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -20,7 +18,11 @@ import MyStudents from "./componentsCourses/MyStudents";
 import JoinCodePanel from "./componentsCourses/JoinCodePanel";
 import { Link as RouterLink } from "react-router-dom";
 import { trackPath } from "../../../utilities/courseTrack";
-import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
+import PageHeader from "../../features/PageHeader/PageHeader";
+import EmptyState from "../../features/EmptyState/EmptyState";
+import StatusBadge from "../../features/StatusBadge/StatusBadge";
+import SegmentedControl from "../../features/SegmentedControl/SegmentedControl";
+import { DOCK, RADIUS } from "../../../theme/tokens";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import useCoursesPageController from "./useCoursesPageController";
 import { statuses } from "../../../utilities/constant";
@@ -49,13 +51,15 @@ const CoursesPage = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h4" fontWeight={800} color="primary">{t("title")}</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
-          {t("newCourse")}
-        </Button>
-      </Box>
+    <Box>
+      <PageHeader
+        title={t("title")}
+        actions={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
+            {t("newCourse")}
+          </Button>
+        }
+      />
 
       {/* "My students" sits ABOVE the course list, because it is the answer to
           the question a lecturer opens this tab with — how many people am I
@@ -70,31 +74,31 @@ const CoursesPage = () => {
           away — a lecturer planning a course wants to see what already exists —
           but not mixed into the list they manage. */}
       {isLecturer && totalCourses > 0 && (
-        <ToggleButtonGroup
+        <SegmentedControl
           value={scope}
-          exclusive
-          size="small"
-          onChange={(_, next) => next && setScope(next)}
-          sx={{ mb: 2 }}
-        >
-          <ToggleButton value="mine">{t("tabs.mine")}</ToggleButton>
-          <ToggleButton value="all">{t("tabs.all")}</ToggleButton>
-        </ToggleButtonGroup>
+          onChange={setScope}
+          label={t("title")}
+          options={[
+            { value: "mine", label: t("tabs.mine") },
+            { value: "all", label: t("tabs.all") },
+          ]}
+          sx={{ mb: 3 }}
+        />
       )}
 
       {totalCourses === 0 ? (
-        <NoDataDialog
-          message={t("noneDefined")}
-          actionLabel={t("newCourse")}
-          onAction={() => setCreateOpen(true)}
+        <EmptyState
+          icon={SchoolOutlinedIcon}
+          title={t("noneDefined")}
+          action={{ label: t("newCourse"), onClick: () => setCreateOpen(true) }}
         />
       ) : courses.length === 0 ? (
         // Courses exist, none of them this lecturer's. Saying "no courses"
         // here would contradict the switch right above it.
-        <NoDataDialog
-          message={t("noneOwn")}
-          actionLabel={t("newCourse")}
-          onAction={() => setCreateOpen(true)}
+        <EmptyState
+          icon={SchoolOutlinedIcon}
+          title={t("noneOwn")}
+          action={{ label: t("newCourse"), onClick: () => setCreateOpen(true) }}
         />
       ) : (
         courses.map((course) => (
@@ -102,23 +106,35 @@ const CoursesPage = () => {
             key={course.id}
             expanded={rosterCourseId === course.id}
             onChange={(_, open) => setRosterCourseId(open ? course.id : null)}
-            sx={{ mb: 1 }}
+            disableGutters
+            sx={{
+              mb: 2,
+              borderRadius: `${RADIUS.card}px !important`,
+              "&::before": { display: "none" },
+              overflow: "hidden",
+            }}
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexGrow: 1, flexWrap: "wrap" }}>
-                <Typography fontWeight={700} color="primary" dir="auto">{course.title}</Typography>
-                {!course.is_active && <Chip label={t("inactive")} size="small" color="default" />}
-                <Chip label={course.lecturer_name || t("noLecturer")} size="small" variant="outlined" />
-                <Chip label={t("students", { count: Number(course.student_count) || 0 })} size="small" color="info" variant="outlined" />
-                <Chip label={t("lessons", { count: Number(course.media_count) || 0 })} size="small" color="success" variant="outlined" />
-                {!canManage(course) && <Chip label={t("viewOnly")} size="small" />}
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 3, py: 1 }}>
+              <Box
+                aria-hidden
+                sx={{
+                  width: 48, height: 48, flexShrink: 0, display: "grid", placeItems: "center",
+                  borderRadius: `${RADIUS.menu}px`, background: DOCK.gradient.myCourses, color: "common.white",
+                  marginInlineEnd: 2,
+                }}
+              >
+                <SchoolOutlinedIcon />
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexGrow: 1, flexWrap: "wrap" }}>
+                <Typography fontWeight={800} fontSize={18} dir="auto" sx={{ marginInlineEnd: 1 }}>{course.title}</Typography>
+                {!course.is_active && <StatusBadge tone="neutral">{t("inactive")}</StatusBadge>}
+                <StatusBadge tone="neutral">{course.lecturer_name || t("noLecturer")}</StatusBadge>
+                <StatusBadge tone="indigo">{t("students", { count: Number(course.student_count) || 0 })}</StatusBadge>
+                <StatusBadge tone="success">{t("lessons", { count: Number(course.media_count) || 0 })}</StatusBadge>
+                {!canManage(course) && <StatusBadge tone="neutral">{t("viewOnly")}</StatusBadge>}
                 {/* PRD ROST-9 — only the course's manager is sent the count. */}
                 {course.pending_join_count > 0 && (
-                  <Chip
-                    label={t("joinRequests", { count: course.pending_join_count })}
-                    size="small"
-                    color="warning"
-                  />
+                  <StatusBadge tone="warning">{t("joinRequests", { count: course.pending_join_count })}</StatusBadge>
                 )}
               </Box>
 
@@ -132,7 +148,7 @@ const CoursesPage = () => {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title={t("delete")}>
-                    <IconButton size="small" color="error" onClick={() => setDeleteTarget(course)}>
+                    <IconButton size="small" sx={{ color: "surface.danger" }} onClick={() => setDeleteTarget(course)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
@@ -140,23 +156,25 @@ const CoursesPage = () => {
               )}
             </AccordionSummary>
 
-            <AccordionDetails>
-              {course.description && (
-                <Typography variant="body2" color="text.secondary" dir="auto" sx={{ mb: 2 }}>
-                  {course.description}
-                </Typography>
-              )}
+            <AccordionDetails sx={{ px: 3, pb: 3 }}>
               {/* The course as students follow it, where its lecturer also sets
-                  the order of its lessons (PRD CRS-1). */}
-              <Button
-                component={RouterLink}
-                to={trackPath(course.id)}
-                size="small"
-                variant="outlined"
-                sx={{ mb: 2 }}
+                  the order of its lessons (PRD CRS-1). A banner on the soft
+                  accent, as the mockup draws it. */}
+              <Box
+                sx={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, flexWrap: "wrap",
+                  p: 2, mb: 2, borderRadius: `${RADIUS.menu}px`, bgcolor: "surface.accentSoft",
+                }}
               >
-                {canManage(course) ? t("pageManage") : t("page")}
-              </Button>
+                {course.description ? (
+                  <Typography variant="body2" color="text.secondary" dir="auto" sx={{ flex: 1, minWidth: 200 }}>
+                    {course.description}
+                  </Typography>
+                ) : <Box sx={{ flex: 1 }} />}
+                <Button component={RouterLink} to={trackPath(course.id)} size="small" variant="contained">
+                  {canManage(course) ? t("pageManage") : t("page")}
+                </Button>
+              </Box>
               {/* Mounted only for the open course: it reads that course's queue
                   of names and addresses, which no other course needs. */}
               {canManage(course) && rosterCourseId === course.id && <JoinCodePanel course={course} />}

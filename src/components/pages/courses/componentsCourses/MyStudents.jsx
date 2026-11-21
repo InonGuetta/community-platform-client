@@ -1,7 +1,8 @@
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
+import StatusBadge from "../../../features/StatusBadge/StatusBadge";
+import { RADIUS } from "../../../../theme/tokens";
 import Divider from "@mui/material/Divider";
 import { useTranslation } from "react-i18next";
 
@@ -20,12 +21,12 @@ import { useTranslation } from "react-i18next";
 const MyStudents = ({ students = [] }) => {
   const { t } = useTranslation("courses");
   return (
-  <Paper variant="outlined" sx={{ p: 2 }}>
+  <Paper sx={{ p: 3, borderRadius: `${RADIUS.card}px` }}>
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-      <Typography variant="subtitle1" fontWeight={700}>
+      <Typography variant="subtitle1" component="h2" fontWeight={800} fontSize={18}>
         {t("myStudents.title")}
       </Typography>
-      {students.length > 0 && <Chip label={students.length} size="small" color="info" />}
+      {students.length > 0 && <StatusBadge tone="indigo">{students.length}</StatusBadge>}
     </Box>
 
     {students.length === 0 ? (
@@ -62,11 +63,11 @@ const MyStudents = ({ students = [] }) => {
                   "why is this person on my list", which a bare name is not. */}
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                 {(student.courses || []).map((course) => (
-                  <Chip key={course.id} label={course.title} size="small" variant="outlined" />
+                  <StatusBadge key={course.id} tone="neutral" size="small">{course.title}</StatusBadge>
                 ))}
               </Box>
 
-              {!student.is_active && <Chip label={t("inactive")} size="small" />}
+              {!student.is_active && <StatusBadge tone="neutral" size="small">{t("inactive")}</StatusBadge>}
             </Box>
           </Box>
         ))}

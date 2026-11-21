@@ -4,11 +4,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { sessionsApi } from "../../../api/sessionsApi";
-import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardActions from "@mui/material/CardActions";
-import Chip from "@mui/material/Chip";
+import Paper from "@mui/material/Paper";
 import Dialog from "@mui/material/Dialog";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
@@ -19,7 +15,11 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import DialogTitle from "../../features/Dialogs/DialogTitle";
 import DialogContent from "../../features/Dialogs/DialogContent";
 import DialogActions from "../../features/Dialogs/DialogActions";
-import NoDataDialog from "../../features/NoDataDialog/NoDataDialog";
+import PageHeader from "../../features/PageHeader/PageHeader";
+import EmptyState from "../../features/EmptyState/EmptyState";
+import StatusBadge from "../../features/StatusBadge/StatusBadge";
+import MicNoneOutlinedIcon from "@mui/icons-material/MicNoneOutlined";
+import { RADIUS } from "../../../theme/tokens";
 import useSessionsPageController from "./useSessionsPageController";
 import { sessionTypes, sessionTypeLabels } from "../../../utilities/constant";
 import { formatDateTime } from "../../../utilities/formatDate";
@@ -35,6 +35,17 @@ const defaultScheduledAt = () => {
   // the offset. Subtracting it back is the standard workaround.
   return new Date(when.getTime() - when.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
+
+// A session's card: its title, its badges, and what can be done with it.
+const SessionCard = ({ title, badges, actions }) => (
+  <Paper sx={{ p: 3, borderRadius: `${RADIUS.card}px`, display: "flex", flexDirection: "column", gap: 2 }}>
+    <Typography variant="subtitle1" fontWeight={800} dir="auto">{title}</Typography>
+    <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>{badges}</Box>
+    <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap", mt: "auto" }}>{actions}</Box>
+  </Paper>
+);
+
+const cardsGrid = { display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" } };
 
 const SessionsPage = () => {
   const { t } = useTranslation(["sessions", "common"]);
@@ -53,76 +64,76 @@ const SessionsPage = () => {
   });
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h5" fontWeight={700}>{t("title")}</Typography>
-        {canCreate && (
+    <Box>
+      <PageHeader
+        title={t("title")}
+        actions={canCreate && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateDialogOpen(true)}>
             {t("new")}
           </Button>
         )}
-      </Box>
+      />
 
       {rooms.length === 0 ? (
-        <NoDataDialog
-          message={t("noneActive")}
-          actionLabel={canCreate ? t("new") : undefined}
-          onAction={() => setCreateDialogOpen(true)}
+        <EmptyState
+          icon={MicNoneOutlinedIcon}
+          title={t("noneActive")}
+          action={canCreate ? { label: t("new"), onClick: () => setCreateDialogOpen(true) } : null}
         />
       ) : (
-        <Grid container spacing={2}>
+        <Box sx={cardsGrid}>
           {rooms.map((room) => (
-            <Grid item xs={12} sm={6} md={4} key={room.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="subtitle1" fontWeight={600}>{room.title || t("untitled")}</Typography>
-                  <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
-                    <Chip label={sessionTypeLabels[room.session_type] || room.session_type} size="small" color="primary" />
-                    <Chip label={t("host", { name: room.host_name })} size="small" variant="outlined" />
-                      {room.course_title && <Chip label={room.course_title} size="small" color="primary" variant="outlined" />}
-                  </Box>
-                </CardContent>
-                <CardActions>
-                  {/* By id. The room token is no longer something the client
-                      holds — SessionRoom asks the server for one on arrival. */}
-                  <Button startIcon={<MeetingRoomIcon />} variant="contained" size="small" onClick={() => handleJoinRoom(room.id)} fullWidth>
-                    {t("join")}
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
+            <SessionCard
+              key={room.id}
+              title={room.title || t("untitled")}
+              badges={
+                <>
+                  <StatusBadge tone="indigo">{sessionTypeLabels[room.session_type] || room.session_type}</StatusBadge>
+                  <StatusBadge tone="neutral">{t("host", { name: room.host_name })}</StatusBadge>
+                  {room.course_title && <StatusBadge tone="neutral">{room.course_title}</StatusBadge>}
+                </>
+              }
+              actions={
+                /* By id. The room token is no longer something the client
+                   holds — SessionRoom asks the server for one on arrival. */
+                <Button startIcon={<MeetingRoomIcon />} variant="contained" size="small" onClick={() => handleJoinRoom(room.id)} fullWidth>
+                  {t("join")}
+                </Button>
+              }
+            />
           ))}
-        </Grid>
+        </Box>
       )}
 
       {/* Scheduled and not yet opened. Shown only when there is something in it:
           an empty "coming up" heading on a platform that has never scheduled
           anything is a permanent reminder of a feature nobody used. */}
       {upcoming.length > 0 && (
-        <Box sx={{ mt: 5 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>{t("upcoming")}</Typography>
-          <Grid container spacing={2}>
+        <Box sx={{ mt: 6 }}>
+          <Typography variant="display" component="h2" sx={{ fontSize: { xs: 24, md: 28 }, mb: 3 }}>{t("upcoming")}</Typography>
+          <Box sx={cardsGrid}>
             {upcoming.map((room) => (
-              <Grid item xs={12} sm={6} md={4} key={room.id}>
-                <Card sx={{ opacity: 0.92 }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight={600}>{room.title || t("untitled")}</Typography>
-                    <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
-                      <Chip icon={<EventIcon />} label={formatDateTime(room.scheduled_at)} size="small" color="secondary" />
-                      <Chip label={t("host", { name: room.host_name })} size="small" variant="outlined" />
-                      {room.course_title && <Chip label={room.course_title} size="small" color="primary" variant="outlined" />}
-                    </Box>
-                  </CardContent>
-                  <CardActions>
+              <SessionCard
+                key={room.id}
+                title={room.title || t("untitled")}
+                badges={
+                  <>
+                    <StatusBadge tone="warning" icon={<EventIcon sx={{ fontSize: 14 }} />}>{formatDateTime(room.scheduled_at)}</StatusBadge>
+                    <StatusBadge tone="neutral">{t("host", { name: room.host_name })}</StatusBadge>
+                    {room.course_title && <StatusBadge tone="neutral">{room.course_title}</StatusBadge>}
+                  </>
+                }
+                actions={
+                  <>
                     {/* Only the host can open it, and only the host is offered
                         the button — the server refuses anyone else, and showing
                         a control that always fails is a worse way to say so. */}
                     {isHost(room) ? (
-                      <Button startIcon={<PlayArrowIcon />} variant="contained" size="small" onClick={() => handleStartSession(room.id)} fullWidth>
+                      <Button startIcon={<PlayArrowIcon />} variant="contained" size="small" onClick={() => handleStartSession(room.id)} sx={{ flex: 1 }}>
                         {t("open")}
                       </Button>
                     ) : (
-                      <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
                         {t("hostOpens")}
                       </Typography>
                     )}
@@ -136,16 +147,17 @@ const SessionsPage = () => {
                         download
                         startIcon={<EventAvailableIcon />}
                         size="small"
+                        variant="soft"
                         sx={{ flexShrink: 0 }}
                       >
                         {t("addToCalendar")}
                       </Button>
                     )}
-                  </CardActions>
-                </Card>
-              </Grid>
+                  </>
+                }
+              />
             ))}
-          </Grid>
+          </Box>
         </Box>
       )}
 

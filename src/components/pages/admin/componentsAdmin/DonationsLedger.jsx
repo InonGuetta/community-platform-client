@@ -1,14 +1,14 @@
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
+import StatusBadge from "../../../features/StatusBadge/StatusBadge";
+import SegmentedControl from "../../../features/SegmentedControl/SegmentedControl";
+import { TABLE_SX } from "../../../features/DataTable/tableSx";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { useTranslation } from "react-i18next";
 import { formatShortDate } from "../../../../utilities/formatDate";
 
@@ -23,8 +23,8 @@ const CURRENCY_SYMBOLS = { ILS: "₪", USD: "$", EUR: "€" };
 const money = (cents, currency) =>
   `${CURRENCY_SYMBOLS[String(currency).toUpperCase()] ?? ""}${(cents / 100).toFixed(2)}`;
 
-const STATUS_COLORS = { completed: "success", pending: "warning", failed: "error" };
-const STATUSES = Object.keys(STATUS_COLORS);
+const STATUS_TONES = { completed: "success", pending: "warning", failed: "error" };
+const STATUSES = Object.keys(STATUS_TONES);
 
 const DonationsLedger = ({ donations, totals }) => {
   const { t } = useTranslation("admin");
@@ -36,12 +36,16 @@ const DonationsLedger = ({ donations, totals }) => {
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, gap: 2, flexWrap: "wrap" }}>
         <Typography variant="h6" fontWeight={700}>{t("donations.title")}</Typography>
-        <ToggleButtonGroup size="small" exclusive value={filter} onChange={(_, v) => setFilter(v ?? "")}>
-          <ToggleButton value="">{t("donations.all")}</ToggleButton>
-          {STATUSES.map((status) => (
-            <ToggleButton key={status} value={status}>{t(`donations.statuses.${status}`)}</ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+        <SegmentedControl
+          size="small"
+          label={t("donations.title")}
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { value: "", label: t("donations.all") },
+            ...STATUSES.map((status) => ({ value: status, label: t(`donations.statuses.${status}`) })),
+          ]}
+        />
       </Box>
 
       {/* The totals come from a GROUP BY over the whole table, not from summing
@@ -49,12 +53,9 @@ const DonationsLedger = ({ donations, totals }) => {
           there are more donations than the query's limit. */}
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
         {(totals ?? []).map((total) => (
-          <Chip
-            key={total.status}
-            color={STATUS_COLORS[total.status] ?? "default"}
-            variant="outlined"
-            label={`${t(`donations.statuses.${total.status}`, { defaultValue: total.status })}: ${money(total.total_cents, "ILS")} (${total.count})`}
-          />
+          <StatusBadge key={total.status} tone={STATUS_TONES[total.status] ?? "neutral"}>
+            {`${t(`donations.statuses.${total.status}`, { defaultValue: total.status })}: ${money(total.total_cents, "ILS")} (${total.count})`}
+          </StatusBadge>
         ))}
       </Box>
 
@@ -62,7 +63,7 @@ const DonationsLedger = ({ donations, totals }) => {
         <Typography variant="body2" color="text.secondary">{t("donations.none")}</Typography>
       ) : (
         <Box sx={{ overflowX: "auto" }}>
-          <Table size="small">
+          <Table size="small" sx={TABLE_SX}>
             <TableHead>
               <TableRow>
                 <TableCell>{t("donations.date")}</TableCell>
@@ -89,11 +90,9 @@ const DonationsLedger = ({ donations, totals }) => {
                   </TableCell>
                   <TableCell>{donation.type === "monthly" ? t("donations.monthly") : t("donations.oneTime")}</TableCell>
                   <TableCell>
-                    <Chip
-                      size="small"
-                      color={STATUS_COLORS[donation.status] ?? "default"}
-                      label={t(`donations.statuses.${donation.status}`, { defaultValue: donation.status })}
-                    />
+                    <StatusBadge tone={STATUS_TONES[donation.status] ?? "neutral"} size="small">
+                      {t(`donations.statuses.${donation.status}`, { defaultValue: donation.status })}
+                    </StatusBadge>
                   </TableCell>
                   <TableCell sx={{ fontFamily: "monospace", fontSize: "0.75rem", direction: "ltr", unicodeBidi: "isolate" }}>
                     {donation.stripe_payment_intent || "—"}

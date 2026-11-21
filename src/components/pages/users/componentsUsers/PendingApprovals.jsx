@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
+import StatusBadge from "../../../features/StatusBadge/StatusBadge";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import CheckIcon from "@mui/icons-material/Check";
@@ -41,12 +41,12 @@ const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) 
   };
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, mb: 3, borderColor: "warning.main" }}>
+    <Paper sx={{ p: 2, mb: 3 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
         <Typography variant="subtitle1" fontWeight={700}>
           {t("pending.title")}
         </Typography>
-        <Chip label={pending.length} size="small" color="warning" />
+        <StatusBadge tone="warning" size="small">{pending.length}</StatusBadge>
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -65,8 +65,8 @@ const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) 
                 alignItems: "center",
                 gap: 1,
                 p: 1.5,
-                borderRadius: 1,
-                bgcolor: "action.hover",
+                borderRadius: "14px",
+                bgcolor: "surface.fill2",
               }}
             >
               <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -78,12 +78,9 @@ const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) 
                 </Typography>
               </Box>
 
-              <Chip
-                label={t("pending.requested", { role: roleLabels[user.requested_role] || user.requested_role })}
-                size="small"
-                color="primary"
-                variant="outlined"
-              />
+              <StatusBadge tone="indigo" size="small">
+                {t("pending.requested", { role: roleLabels[user.requested_role] || user.requested_role })}
+              </StatusBadge>
 
               {rejecting === user.id ? (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
@@ -108,8 +105,7 @@ const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) 
                     <span>
                       <Button
                         size="small"
-                        variant="contained"
-                        color="success"
+                        variant="tinted-success"
                         startIcon={<CheckIcon />}
                         disabled={isSelf}
                         onClick={() => onApprove(user.id)}

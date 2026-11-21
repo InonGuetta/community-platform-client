@@ -286,3 +286,16 @@
 
 ### פתוח
 לא צולם בדפדפן; השוואה מול `new-10/11/13/14/15`, dark, LTR ומובייל – 8ב, יחד עם חדר המפגש.
+
+---
+
+## שלב 7 – 16, 17 (2026-11-21, sonnet)
+
+### מה השתנה
+- **רכיב חדש:** `features/DataTable/{tableSx.js,TableCard.jsx}` – הטבלה של רכיב 15 (D-132).
+- **משתמשים (16):** `PageHeader` עם חיפוש ו"הוספת משתמש" בצד, טבלה בכרטיס עם גלילה פנימית, `StatusBadge` לתפקיד/סטטוס, כפתורי פעולה עגולים 36px, שורה לא פעילה `opacity .5`; בקשות אישור על `fill2` (D-133).
+- **לוח בקרה (17):** `PageHeader`, 3 כרטיסי KPI עם display, תתי-כרטיסים `fill2`, סכום AI/SMS ב-display accent, טבלאות תקלות/עלות/תרומות בסגנון המשותף, `SegmentedControl` לתרומות, כפתורי רענון/הרצה מחדש `soft` (D-134). נמחקו עטיפות `p: 3`. אין מחרוזות חדשות.
+- **קבצים:** `pages/users/{UsersPage,componentsUsers/*}`, `pages/admin/{AdminDashboard,componentsAdmin/{StatsCards,QueueStatus,AiUsagePanel,SmsUsagePanel,PipelineTrouble,DonationsLedger,TagProposals}}`.
+
+### בדיקות / e2e / פתוח
+`npm run verify` ירוק (lint, 170 קבצים / 1891 בדיקות, build, `check:chunks`) – אף בדיקה לא נכתבה מחדש. `npm run e2e` ירוק 5/5 (אישור המרצה ב-`/users` עובד, האימייל פעם אחת). אין סקריפט חדש. לא צולם בדפדפן – השוואה מול `new-16/17`, dark, LTR ומובייל – 8ב. `SystemHealth` לא שונה.

@@ -1,5 +1,6 @@
 {
   "title": "Admin dashboard",
+  "subtitle": "System status, AI costs and processing faults",
   "stale": "{{error}} — the data shown may be out of date.",
   "loadFailed": "The admin data cannot be loaded",
   "queues": {

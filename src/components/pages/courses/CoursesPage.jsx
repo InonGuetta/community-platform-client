@@ -148,7 +148,7 @@ const CoursesPage = () => {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title={t("delete")}>
-                    <IconButton size="small" sx={{ color: "surface.danger" }} onClick={() => setDeleteTarget(course)}>
+                    <IconButton size="small" sx={{ "&:hover": { color: "surface.danger" } }} onClick={() => setDeleteTarget(course)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>

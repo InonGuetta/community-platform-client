@@ -96,7 +96,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>{t("pipeline.noFailedJobs")}</Typography>
       ) : (
         <Box sx={{ overflowX: "auto", mb: 3 }}>
-          <Table size="small" sx={TABLE_SX}>
+          <Table size="small" sx={[TABLE_SX, { minWidth: 640 }]}>
             <TableHead>
               <TableRow>
                 <TableCell>{t("pipeline.queue")}</TableCell>
@@ -110,8 +110,8 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
                 <TableRow key={`${job.queue}-${job.id}`}>
                   <TableCell><StatusBadge tone="neutral" size="small">{job.queue}</StatusBadge></TableCell>
                   <TableCell>{job.mediaId ?? "—"}</TableCell>
-                  <TableCell sx={{ maxWidth: 380, wordBreak: "break-word" }}>{job.reason || "—"}</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>{formatDateTime(job.failedAt, "—")}</TableCell>
+                  <TableCell dir="auto" sx={{ maxWidth: 380, wordBreak: "break-word" }}>{job.reason || "—"}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}><bdi dir="ltr">{formatDateTime(job.failedAt, "—")}</bdi></TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -126,7 +126,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
         <Typography variant="body2" color="text.secondary">{t("pipeline.noStranded")}</Typography>
       ) : (
         <Box sx={{ overflowX: "auto" }}>
-          <Table size="small" sx={TABLE_SX}>
+          <Table size="small" sx={[TABLE_SX, { minWidth: 640 }]}>
             <TableHead>
               <TableRow>
                 <TableCell>#</TableCell>

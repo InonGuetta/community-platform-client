@@ -1,3 +1,4 @@
+/* global document -- used inside page.evaluate, which runs in the browser */
 import { test } from "@playwright/test";
 import fs from "node:fs";
 import os from "node:os";
@@ -158,6 +159,9 @@ test("screenshots of every screen", async ({ browser }) => {
   const matrix = [
     { lang: "he", mode: "light", width: 1440, only: ALL },
     { lang: "he", mode: "light", width: 390, only: ALL },
+    // Just above and below the spec's 768 breakpoint (D-135).
+    { lang: "he", mode: "light", width: 800, only: ["02", "05", "13", "17", "20", "27"] },
+    { lang: "he", mode: "light", width: 760, only: ["02", "20"] },
     { lang: "en", mode: "light", width: 1440, only: ["01", "02", "05", "09", "16", "18", "20"] },
     { lang: "en", mode: "light", width: 390, only: ["19"] },
     { lang: "he", mode: "dark", width: 1440, only: ["02", "05", "12", "16", "17", "18", "20", "27"] },
@@ -192,9 +196,16 @@ test("screenshots of every screen", async ({ browser }) => {
           await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
           await page.waitForTimeout(800);
           if (steps) { await steps(page, w); await page.waitForTimeout(700); }
+          const overflow = await page.evaluate(() => {
+            const vw = document.documentElement.clientWidth;
+            const wide = document.documentElement.scrollWidth > vw + 1;
+            if (!wide) return "";
+            const bad = [...document.body.querySelectorAll("*")].filter((el) => { const r = el.getBoundingClientRect(); return r.width > 0 && (r.right > vw + 1 || r.left < -1); });
+            return `horizontal scroll: ${bad.slice(0, 3).map((el) => `${el.tagName.toLowerCase()}.${String(el.className).split(" ").pop()}`).join(", ")}`;
+          });
           await page.screenshot({ path: path.join(OUT, dir, file), fullPage: true });
           taken += 1;
-          note(dir, file, route, "ok");
+          note(dir, file, route, "ok", overflow);
         } catch (err) {
           note(dir, file, route, "failed", String(err.message).split("\n")[0]);
         }

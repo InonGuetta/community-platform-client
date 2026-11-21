@@ -1,22 +1,16 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
+import StatusBadge from "../../../features/StatusBadge/StatusBadge";
 import { useTranslation } from "react-i18next";
+import { RADIUS } from "../../../../theme/tokens";
 
 const HealthRow = ({ label, ok }) => {
   const { t } = useTranslation("admin");
   return (
-    <ListItem disablePadding>
-      <ListItemIcon sx={{ minWidth: 36 }}>
-        {ok ? <CheckCircleIcon color="success" /> : <ErrorIcon color="error" />}
-      </ListItemIcon>
-      <ListItemText primary={label} secondary={ok ? t("health.ok") : t("health.down")} />
-    </ListItem>
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mb: 1.5, p: 2.5, bgcolor: "surface.fill2", borderRadius: `${RADIUS.menu}px` }}>
+      <Typography component="span" fontWeight={700}>{label}</Typography>
+      <StatusBadge tone={ok ? "success" : "error"} size="small">{ok ? t("health.ok") : t("health.down")}</StatusBadge>
+    </Box>
   );
 };
 
@@ -24,11 +18,9 @@ const SystemHealth = ({ health }) => {
   const { t } = useTranslation("admin");
   return (
     <Box>
-      <Typography variant="h6" fontWeight={700} mb={1}>{t("health.title")}</Typography>
-      <List dense>
-        <HealthRow label={t("health.db")} ok={health?.db} />
-        <HealthRow label={t("health.redis")} ok={health?.redis} />
-      </List>
+      <Typography variant="h6" fontWeight={700} mb={2}>{t("health.title")}</Typography>
+      <HealthRow label={t("health.db")} ok={health?.db} />
+      <HealthRow label={t("health.redis")} ok={health?.redis} />
     </Box>
   );
 };

@@ -3,11 +3,12 @@ import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
 import StatusBadge from "../../../features/StatusBadge/StatusBadge";
 import { useTranslation } from "react-i18next";
+import { RADIUS } from "../../../../theme/tokens";
 
 const QueueRow = ({ name, stats }) => {
   const { t } = useTranslation("admin");
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ mb: 1.5, p: 2.5, bgcolor: "surface.fill2", borderRadius: `${RADIUS.menu}px` }}>
       <Typography variant="subtitle2" fontWeight={600} mb={1}>{name}</Typography>
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
         <StatusBadge tone="neutral">{t("queues.waiting", { n: stats?.waiting ?? 0 })}</StatusBadge>

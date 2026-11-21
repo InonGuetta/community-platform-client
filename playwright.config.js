@@ -18,6 +18,8 @@ import { defineConfig } from "@playwright/test";
 // community-platform-server/scripts/e2eFixtures.js.
 export default defineConfig({
   testDir: "e2e",
+  // The screenshot runner lives under e2e/ but is run by `npm run screens` only.
+  testIgnore: "**/screens/**",
   // One journey, in order, against one shared database.
   workers: 1,
   fullyParallel: false,

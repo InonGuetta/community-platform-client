@@ -13,7 +13,7 @@ import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import { roleLabels } from "../../../../utilities/constant";
 import { useTranslation } from "react-i18next";
 
-const ROLE_TONE = { admin: "error", lecturer: "warning", student: "neutral" };
+const ROLE_TONE = { admin: "indigo", lecturer: "warning", student: "neutral" };
 
 // Component 15: 36px round icon buttons in mute, a `fill` hover.
 const ACTION_SX = { width: 36, height: 36, color: "text.secondary", "&:hover": { bgcolor: "surface.fill" } };
@@ -54,7 +54,7 @@ const UsersTableContent = ({ users, onEdit, onDelete, onToggleActive, canToggleA
         <TableCell>
           <StatusBadge tone={user.is_active ? "success" : "neutral"} size="small">{user.is_active ? t("active") : t("inactive")}</StatusBadge>
         </TableCell>
-        <TableCell sx={{ whiteSpace: "nowrap" }}>
+        <TableCell sx={{ whiteSpace: "nowrap", paddingBlock: "10px" }}>
           {/* Named after the person: a row of bare icons reads "button, button,
               button" to a screen reader (PRD MOB-7 review). */}
           <IconButton size="small" sx={ACTION_SX} onClick={() => onEdit(user)} aria-label={t("edit", { name: user.display_name || user.email })}><EditIcon fontSize="small" /></IconButton>

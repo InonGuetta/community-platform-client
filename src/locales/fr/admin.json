@@ -1,5 +1,6 @@
 {
   "title": "Tableau de bord d'administration",
+  "subtitle": "État du système, coûts de l'IA et incidents de traitement",
   "stale": "{{error}} — les données affichées ne sont peut-être pas à jour.",
   "loadFailed": "Les données d'administration ne peuvent pas être chargées",
   "queues": {

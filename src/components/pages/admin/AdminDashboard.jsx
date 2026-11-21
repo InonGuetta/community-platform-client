@@ -14,10 +14,9 @@ import { useAdminDashboardController } from "./useAdminDashboardController";
 import { RADIUS } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 
-// A section is a card; "מצב תורים" and "תקינות המערכת" are sub-cards on fill-2
-// (component 17).
+// A section is a card; the rows inside "מצב תורים" and "תקינות המערכת" are
+// boxes on fill-2 (component 17, as the mockup draws it).
 const CARD_SX = { bgcolor: "background.paper", borderRadius: `${RADIUS.card}px`, boxShadow: 1, border: 1, borderColor: "divider", p: 3, minWidth: 0 };
-const SUB_CARD_SX = { ...CARD_SX, bgcolor: "surface.fill2", boxShadow: 0 };
 const FULL = { gridColumn: { md: "1 / -1" } };
 
 // Layout only: what the dashboard loads, when, and the reconcile sweep are
@@ -34,7 +33,7 @@ const AdminDashboard = () => {
 
   return (
     <Box>
-      <PageHeader title={t("title")} />
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -47,10 +46,10 @@ const AdminDashboard = () => {
       </Box>
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(12, minmax(0, 1fr))" }, gap: 3 }}>
-        <Box sx={{ ...SUB_CARD_SX, gridColumn: { md: "span 7" } }}>
+        <Box sx={{ ...CARD_SX, gridColumn: { md: "span 6" } }}>
           <QueueStatus queueStatus={queueStatus} />
         </Box>
-        <Box sx={{ ...SUB_CARD_SX, gridColumn: { md: "span 5" } }}>
+        <Box sx={{ ...CARD_SX, gridColumn: { md: "span 6" } }}>
           <SystemHealth health={health} />
         </Box>
 

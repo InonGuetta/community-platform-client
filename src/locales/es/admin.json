@@ -1,5 +1,6 @@
 {
   "title": "Panel de administración",
+  "subtitle": "Estado del sistema, costes de IA y fallos de procesamiento",
   "stale": "{{error}}: es posible que los datos mostrados no estén actualizados.",
   "loadFailed": "No se pueden cargar los datos de administración",
   "queues": {

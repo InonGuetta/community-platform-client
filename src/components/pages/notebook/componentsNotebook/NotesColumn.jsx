@@ -1,11 +1,11 @@
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import NoteCard from "../../../features/Notes/NoteCard";
 import { statuses } from "../../../../utilities/constant";
 import { useTranslation } from "react-i18next";
+import { RADIUS } from "../../../../theme/tokens";
 
 // The notes themselves, one NoteCard each in the index's order, and what the
 // column shows while there are none. Layout only — every value and handler is
@@ -32,24 +32,35 @@ const NotesColumn = ({
 }) => {
   const { t } = useTranslation("notebook");
   return (
-  <Box
-    sx={{
-      flexGrow: 1, minWidth: 0, minHeight: 0,
-      display: "flex", flexDirection: "column", gap: 2,
-      overflowY: { md: "auto" },
-      // Room for the scrollbar so it does not sit on the cards' edge.
-      paddingInlineEnd: { md: 1 },
-    }}
-  >
+  <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
     {status === statuses.loading && items.length === 0 ? (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}><CircularProgress /></Box>
     ) : filtered.length === 0 ? (
-      <Paper elevation={0} sx={{ flexGrow: 1, p: 3, borderRadius: 3, border: "1px solid", borderColor: "divider", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, color: "text.secondary", minHeight: 400 }}>
-        <NoteAltOutlinedIcon sx={{ fontSize: 64, opacity: 0.4 }} />
-        <Typography>
+      // The empty column in the design's empty-state language (component 14):
+      // the dashed frame and the accent icon tile. The words are a sentence,
+      // not a headline, so they are the text and there is no display title.
+      <Box
+        sx={{
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          gap: 2, minHeight: 360, px: 3, textAlign: "center",
+          borderRadius: `${RADIUS.hero}px`, border: "2px dashed", borderColor: "surface.lineStrong",
+          bgcolor: "surface.wash",
+        }}
+      >
+        <Box
+          aria-hidden="true"
+          sx={{
+            width: 64, height: 64, borderRadius: `${RADIUS.emptyIcon}px`,
+            bgcolor: "surface.accentSoft", color: "primary.main",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          <NoteAltOutlinedIcon sx={{ fontSize: 32 }} />
+        </Box>
+        <Typography sx={{ fontSize: 16, color: "text.secondary", maxWidth: 448 }}>
           {items.length === 0 ? t("noNotes") : t("noMatchingNotes")}
         </Typography>
-      </Paper>
+      </Box>
     ) : (
       filtered.map((note) => (
         <NoteCard

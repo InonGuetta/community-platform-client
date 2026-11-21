@@ -6,12 +6,11 @@ import { isTextBookmark, isPageBookmark } from "./bookmarks";
 
 // Which picture stands for a piece of media, in one place.
 //
-// The notebook already colours a lecture by its type (`mediaTypeAccents`) and
-// names it (`mediaTypeLabels`), but the ICON beside it was chosen by asking a
-// different question entirely — "is this a book?" — and everything that was not
-// a book got a play triangle. A shiur filmed and a shiur recorded looked
-// identical in a list whose whole job is telling them apart, next to a coloured
-// chip that had already said they were different.
+// The notebook names a lecture by its type (`mediaTypeLabels`), but the ICON
+// beside it was chosen by asking a different question entirely — "is this a
+// book?" — and everything that was not a book got a play triangle. A shiur
+// filmed and a shiur recorded looked identical in a list whose whole job is
+// telling them apart.
 //
 // Kept out of constant.js on purpose: these are React components, and that
 // module is plain data imported by nearly every page. Icons belong to the

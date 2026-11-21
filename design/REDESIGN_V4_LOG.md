@@ -241,3 +241,33 @@
 `npm run verify` ירוק (בלי שינוי בבדיקות הקיימות – תוויות, תפקידים ומתגים לא השתנו); `npm run e2e` 5/5, כולל `phone.spec.js`.
 ### פתוח
 לא צולם בדפדפן; השוואה מול `new-08/09/12/18`, dark, LTR ומובייל – 8ב. ל-"סכום מותאם" אין משבצת בגריד (D-116).
+
+---
+
+## שלב 5ג – המחברת שלי (05) (2026-11-21, opus)
+
+### מה השתנה
+- **`NotebookPage`:** בלי עטיפה משלו (`p: 3`, `minHeight`, גובה קבוע ו-`overflow` יצאו). `PageHeader` ← CSS grid של 12 מ-md, הערות 7 / צד 5; בטלפון עמודה אחת והרשימה ראשונה כמו קודם. הדף גולל; מ-md הסרגל דביק בראש עמודת ההערות ועמודת הצד דביקה עם גלילה פנימית (D-119, מחליף את D-37).
+- **`NotebookHeader`:** `PageHeader` עם "הערה חדשה" (primary, בלי הגרדיאנט התכלת) ו"ייצוא" (`soft`) – אותו תפריט (PDF, Word, פיצול) ואותו tooltip. הסרגל יצא ממנו.
+- **`NoteToolbar`:** כרטיס עם כפתורים עגולים של 36, פעיל = accent על `accentSoft` (D-120).
+- **`NoteCard` + `RichNoteEditor`:** כרטיס סקשן, כותרת display 30, גוף 16 / 1.9 `ink2` בלי מסגרת משלו, כף כמו במוקאפ (D-121); הפניות למקור ירוקות דרך `features/Notes/noteStyles.js` (D-122). לוגיקת העורך – הדבקה, גרירה, שינוי שם, מחיקת אובייקט, פקודות, טיוטות – לא נגעה; השינוי בעורך הוא ה-`sx` בלבד (+ `common.white` במקום `#fff`).
+- **`NotesIndex`:** `SectionCard` עם `SearchBar` + צ׳יפ "בחירה מרובה" (= סמן הכל, שלושה מצבים) ומחיקת הנבחרות לידו; שורות 16 רדיוס, פעילה `accentSoft` + טבעת (D-123, D-124).
+- **`BookmarksSidebar`:** כרטיס "הסימניות שלי" נפרד: kicker סוג ← שם שיעור ← צ׳יפים עם `placeShortLabel` (וההערה, כשנכתבה); לחיצה וגרירה כמו קודם, שלושת העוגנים (D-125).
+- **`NotesColumn`:** בלי גלילה משלו, `gap` 24; מצב ריק במסגרת המקווקוות עם אריח האייקון.
+- **כרטיס המחברת בעמוד השיעור** (`LessonNotebook`) לא שונה – מקבל את כל זה דרך `NoteCard`/`NoteToolbar` (D-126).
+- `mediaTypeAccents` נמחק מ-`utilities/constant.js` (המשתמשים האחרונים היו העורך והסימניות); `iconForBookmark` נשאר ב-`mediaIcons.js` בלי משתמש (נבדק). **אין מחרוזות חדשות ואין מפתחות שנמחקו** – כל התוויות כבר היו קיימות (`notebook:title`, `newNote`, `export.*`, `index.*`, `bookmarks.*`).
+- החלטות: D-119 עד D-126.
+
+### קבצים
+`src/components/pages/notebook/NotebookPage.jsx`, `componentsNotebook/{NotebookHeader,NotesIndex,NotesColumn,BookmarksSidebar}.jsx`, `src/components/features/Notes/{NoteCard,NoteToolbar,RichNoteEditor}.jsx`, `features/Notes/noteStyles.js` (חדש), `features/Notes/NoteCard.test.jsx`, `src/utilities/{constant,mediaIcons}.js`, `design/REDESIGN_V4_{DECISIONS,LOG}.md`.
+
+### בדיקות
+- **נכתבה מחדש (מבנה):** `NoteCard.test.jsx` "an unticked one is not" חיפש `2px` בצל – צל הכרטיס החדש (`0 1px 2px …`) מכיל אותו. שתי הבדיקות של הטבעת מחפשות עכשיו `0 0 0 2px` (אותה התנהגות: מסומנת = טבעת, לא מסומנת = בלי).
+- **תוקן בקוד, לא בבדיקה:** `NotebookLightList` ("nothing is saved for a note whose body has not arrived") לוחץ על המופע הראשון של שם ההערה – "שנבחרה מהרשימה". בטיוטה הראשונה עמודת ההערות היתה ראשונה ב-DOM, והלחיצה נפלה על כותרת הכרטיס. עמודת הצד חזרה להיות ראשונה ב-DOM (כמו קודם) ומצוירת שנייה מ-md ב-`order` – גם סדר ה-Tab נשמר.
+- כל שאר בדיקות המחברת, `features/Notes/*`, `LessonNotebook*`, `SourcePreviewDialog*` עברו בלי שינוי (תוויות, תפקידים, `getByText` של הערת סימנייה).
+- **`npm run verify` ירוק** – lint, 170 קבצים / 1891 בדיקות, build, `check:chunks`.
+- **`npm run e2e` ירוק – 5/5** בריצה אחת (journey he/en/yi, language, phone). אף spec לא עובר במחברת; ה-journey עובר בעמוד השיעור, שכרטיס המחברת שבו משתמש ב-`NoteCard`. API ו-Vite כבר רצו – לא הופעלו ולא נעצרו. **אין סקריפט חדש ב-`package.json`.**
+
+### פתוח
+- לא צולם בדפדפן (הדפדפן לא היה מחובר לחשבון); השוואה מול `new-05`, dark, LTR ומובייל – 8ב. לבדוק שם במיוחד: הסרגל הדביק מעל כרטיסים שגוללים מתחתיו, ועמודת הצד הדביקה כשהיא ארוכה מהחלון.
+- D-123 (צ׳יפ = "סמן הכל", תיבות הסימון נשארות) ו-D-125 (ההערה בתוך צ׳יפ הסימנייה) סוטות מהמוקאפ כדי לא לאבד פונקציה – לסקירה.

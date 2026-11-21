@@ -20,12 +20,6 @@ export const pdfStates = { loading: "loading", ready: "ready", error: "error" };
 // is always current. Display-only — nothing persists or filters by these.
 export const mediaTypeLabels = translatedLabels("format:mediaTypes", Object.values(mediaTypes));
 
-// The accent each media type is identified by across the app — the archive
-// card's corner brackets and type chip, and the notebook's bookmark headers.
-// Fixed hex rather than palette keys so the colour is identical in light and
-// dark mode, and shared from here so the two screens cannot drift apart.
-export const mediaTypeAccents = { video: "#ef6c00", audio: "#1976d2", text: "#2e7d32" };
-
 // The neutral "row" background used by the notebook's lists and the media
 // page's bookmark list.
 //

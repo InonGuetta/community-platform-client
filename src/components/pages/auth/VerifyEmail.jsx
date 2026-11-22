@@ -1,8 +1,9 @@
+import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import Link from "@mui/material/Link";
 import AuthLayout from "./AuthLayout";
-import { AuthFootnote, AuthLink } from "./authShared";
 import { useVerifyEmail } from "./useVerifyEmail";
 import { useTranslation } from "react-i18next";
 
@@ -33,9 +34,9 @@ const VerifyEmail = () => {
         ) : (
           <Alert severity="error">{state.message}</Alert>
         )}
-        <AuthFootnote sx={{ mt: 1 }}>
-          <AuthLink to="/archive" accent>{t("verify.toArchive")}</AuthLink>
-        </AuthFootnote>
+        <Link component={RouterLink} to="/archive" underline="hover">
+          {t("verify.toArchive")}
+        </Link>
       </Box>
     </AuthLayout>
   );

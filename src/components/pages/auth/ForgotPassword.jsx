@@ -1,12 +1,14 @@
+import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import Link from "@mui/material/Link";
 import AuthLayout from "./AuthLayout";
 import { useForgotPassword } from "./useForgotPassword";
-import { AuthFootnote, AuthLink } from "./authShared";
+import { floatingLabelSx, inputBaseSx, submitButtonSx } from "./authShared";
 import { useTranslation } from "react-i18next";
 
 // "Forgot password" — which until now did not exist, and its absence was the one
@@ -32,17 +34,21 @@ const ForgotPassword = () => {
           <Typography variant="body2" color="text.secondary">
             {t("forgot.sentHint")}
           </Typography>
-          <AuthFootnote sx={{ mt: 1 }}>
-            <AuthLink to="/sign-in" accent>{t("forgot.backToSignIn")}</AuthLink>
-          </AuthFootnote>
+          <Link component={RouterLink} to="/sign-in" underline="hover">
+            {t("forgot.backToSignIn")}
+          </Link>
         </Box>
       </AuthLayout>
     );
   }
 
   return (
-    <AuthLayout title={t("forgot.title")} intro={t("forgot.intro")}>
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <AuthLayout title={t("forgot.title")}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <Typography variant="body2" color="text.secondary">
+          {t("forgot.intro")}
+        </Typography>
+
         {failed && <Alert severity="error">{t("forgot.failed")}</Alert>}
 
         <TextField
@@ -52,16 +58,19 @@ const ForgotPassword = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoFocus
+          variant="standard"
           fullWidth
+          sx={floatingLabelSx}
+          InputProps={inputBaseSx}
         />
 
-        <Button type="submit" variant="contained" fullWidth disabled={busy || !email.trim()} sx={{ minHeight: 48, mt: 1 }}>
+        <Button type="submit" disabled={busy || !email.trim()} sx={submitButtonSx}>
           {busy ? <CircularProgress size={20} /> : t("forgot.send")}
         </Button>
 
-        <AuthFootnote sx={{ mt: 1.5 }}>
-          <AuthLink to="/sign-in" accent>{t("forgot.backToSignIn")}</AuthLink>
-        </AuthFootnote>
+        <Link component={RouterLink} to="/sign-in" underline="hover" sx={{ alignSelf: "center" }}>
+          {t("forgot.backToSignIn")}
+        </Link>
       </Box>
     </AuthLayout>
   );

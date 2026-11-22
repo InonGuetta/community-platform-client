@@ -135,15 +135,8 @@ describe("verifying an email", () => {
 });
 
 describe("signing in through a provider", () => {
-  // The name a button has, without the provider's mark (aria-hidden: a
-  // coloured square holding "G" or "in" — decoration, not part of the name).
-  const nameOf = (b) => {
-    const copy = b.cloneNode(true);
-    copy.querySelectorAll("[aria-hidden]").forEach((n) => n.remove());
-    return copy.textContent;
-  };
   const providerButtons = () =>
-    screen.getAllByRole("button").map(nameOf).filter((t) => / באמצעות /.test(t));
+    screen.getAllByRole("button").map((b) => b.textContent).filter((t) => / באמצעות /.test(t));
 
   // Most-used first: the order is the request, not an accident of the markup.
   test("sign-in offers Google, then Apple, then LinkedIn", () => {

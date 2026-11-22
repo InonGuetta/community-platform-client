@@ -209,20 +209,3 @@ export const HERO = {
   ghostHover: "rgba(255,255,255,.25)",
 };
 
-// The sign-in family of pages (design/REDESIGN_V4.md, screens 01, 30, 31): the
-// soft washes behind the card and the card's glass. The light values are the
-// mockup's own; dark has no mockup — the same two washes at low strength on
-// the dark page, and the card as the dark glass of the dock.
-export const AUTH = {
-  backdrop: {
-    light:
-      "radial-gradient(1200px 600px at 80% -10%, #e0e7ff 0, transparent 60%), radial-gradient(900px 500px at 0% 110%, #fde7f3 0, transparent 55%), #FBFBFD",
-    dark:
-      "radial-gradient(1200px 600px at 80% -10%, rgba(99,102,241,.25) 0, transparent 60%), radial-gradient(900px 500px at 0% 110%, rgba(236,72,153,.14) 0, transparent 55%), #0B0F19",
-  },
-  card: { light: "rgba(255,255,255,.8)", dark: "rgba(17,24,39,.8)" },
-  cardEdge: { light: "#FFFFFF", dark: "rgba(255,255,255,.08)" },
-  // The logo square above the title, and each provider's own colour.
-  logo: "#1d1d1f",
-  brands: { google: "#ea4335", apple: "#1d1d1f", linkedin: "#0a66c2" },
-};

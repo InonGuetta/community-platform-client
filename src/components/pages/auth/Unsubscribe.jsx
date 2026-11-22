@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import AuthLayout from "./AuthLayout";
-import { AuthFootnote, AuthLink } from "./authShared";
 import { notificationsApi } from "../../../api/notificationsApi";
 import { categoryLabel } from "../../../utilities/notificationCategories";
 import { useTranslation } from "react-i18next";
@@ -58,9 +58,7 @@ const Unsubscribe = () => {
           <Alert severity="error">
             {t("unsubscribe.bad")}
           </Alert>
-          <AuthFootnote sx={{ mt: 1 }}>
-            <AuthLink to="/profile" accent>{t("unsubscribe.toProfile")}</AuthLink>
-          </AuthFootnote>
+          <Link component={RouterLink} to="/profile" underline="hover">{t("unsubscribe.toProfile")}</Link>
         </Box>
       </AuthLayout>
     );
@@ -78,9 +76,7 @@ const Unsubscribe = () => {
           <Typography variant="body2" color="text.secondary">
             {t("unsubscribe.doneHint")}
           </Typography>
-          <AuthFootnote sx={{ mt: 1 }}>
-            <AuthLink to="/profile" accent>{t("unsubscribe.toProfile")}</AuthLink>
-          </AuthFootnote>
+          <Link component={RouterLink} to="/profile" underline="hover">{t("unsubscribe.toProfile")}</Link>
         </Box>
       </AuthLayout>
     );
@@ -93,10 +89,10 @@ const Unsubscribe = () => {
         <Typography>
           {named ? t("unsubscribe.askNamed", { category: named }) : t("unsubscribe.ask")}
         </Typography>
-        <Button variant="contained" fullWidth sx={{ minHeight: 48 }} onClick={() => handleUnsubscribe(false)} disabled={working}>
+        <Button variant="contained" onClick={() => handleUnsubscribe(false)} disabled={working}>
           {t("unsubscribe.stopThis")}
         </Button>
-        <Button variant="outlined" fullWidth sx={{ minHeight: 48 }} onClick={() => handleUnsubscribe(true)} disabled={working}>
+        <Button variant="text" onClick={() => handleUnsubscribe(true)} disabled={working}>
           {t("unsubscribe.stopAll")}
         </Button>
       </Box>

@@ -5,7 +5,7 @@ import { Link as RouterLink } from "react-router-dom";
 import BackLink from "../../../features/BackLink/BackLink";
 import StatusBadge from "../../../features/StatusBadge/StatusBadge";
 import { creatorPrefixes } from "../../../../utilities/constant";
-import { creatorPath, hasCreatorPage, creatorDisplayName } from "../../../../utilities/creatorPage";
+import { creatorPath, hasCreatorPage, creatorDisplayName, isLeakedCreator } from "../../../../utilities/creatorPage";
 import { lessonTitleForHeading } from "./lessonTitle";
 import { useTranslation } from "react-i18next";
 
@@ -70,7 +70,7 @@ const LessonHeader = ({ media, showStatusBadge = false }) => {
           Always present: creator_name is NOT NULL and reads "כללי" when nobody
           said, so this never collapses into a title that looks unattributed by
           accident rather than on purpose. */}
-      {media.creator_name && (
+      {media.creator_name && !isLeakedCreator(media.creator_name) && (
         <Typography sx={{ fontSize: 17, fontWeight: 500, color: "text.secondary" }}>
           {creatorPrefixes[type] || creatorPrefixes.video}:{" "}
           {/* Their other lessons are one click away (PRD ATTR-10). */}

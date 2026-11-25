@@ -51,7 +51,6 @@ const PlaylistPage = () => {
         <MediaGrid
           items={items}
           status={status}
-          onView={(id) => navigate(`/media/${id}`)}
           user={user}
           emptyMessage={t("list.empty")}
           emptyActionLabel={t("toArchive")}

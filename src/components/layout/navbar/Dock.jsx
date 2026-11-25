@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import { DOCK, MOTION } from "../../../theme/tokens";
 import { DOCK_ITEMS, isActive } from "../navConfig";
+import { useDockVisibility } from "./useDockVisibility";
 
 // The dock (design/REDESIGN_V4.md, component 4): a floating glass bar at the
 // bottom centre with the three places a reader goes most — the archive,
@@ -19,6 +20,7 @@ import { DOCK_ITEMS, isActive } from "../navConfig";
 const Dock = () => {
   const { t } = useTranslation("nav");
   const { pathname } = useLocation();
+  const visible = useDockVisibility(pathname);
   return (
     <Box
       component="nav"
@@ -44,6 +46,13 @@ const Dock = () => {
           WebkitBackdropFilter: "blur(28px) saturate(180%)",
           border: `1px solid ${DOCK.edge[mode]}`,
           boxShadow: DOCK.shadow,
+          // UI_UX_FIXES 2.2: slides down out of the way while scrolling down.
+          // It stays up while focus is inside it, so a keyboard user's Tab
+          // never lands on something that is off the screen.
+          transform: visible ? "none" : "translateY(calc(100% + 32px))",
+          transition: "transform .25s ease",
+          "&:focus-within": { transform: "none" },
+          "@media (prefers-reduced-motion: reduce)": { transition: "none" },
         };
       }}
     >

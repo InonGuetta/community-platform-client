@@ -10,6 +10,7 @@ import PageHeader from "../../features/PageHeader/PageHeader";
 import { useGuestLessonPageController } from "./useGuestLessonPageController";
 import { creatorPrefixes, defaultCreatorName } from "../../../utilities/constant";
 import { formatTime } from "../../../utilities/formatTime";
+import { isLeakedCreator } from "../../../utilities/creatorPage";
 import { useTranslation } from "react-i18next";
 
 // One lesson its lecturer made public, for whoever has the link (PRD COM-3b,
@@ -79,7 +80,7 @@ const GuestLessonPage = () => {
           <>
             <PageHeader title={<bdi dir="auto">{lesson.title}</bdi>} sx={{ mb: 2 }} />
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center", mb: 2 }}>
-              {lesson.creator_name && lesson.creator_name !== defaultCreatorName && (
+              {lesson.creator_name && lesson.creator_name !== defaultCreatorName && !isLeakedCreator(lesson.creator_name) && (
                 <Typography color="text.secondary">
                   {creatorPrefixes[lesson.media_type] || creatorPrefixes.video}: {lesson.creator_name}
                 </Typography>

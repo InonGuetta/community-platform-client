@@ -5,7 +5,7 @@ import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import { useTranslation } from "react-i18next";
 import { mediaTypeLabels } from "../../../../utilities/constant";
 import { lengthLabel } from "../../../../utilities/durationOptions";
-import { creatorDisplayName } from "../../../../utilities/creatorPage";
+import { creatorDisplayName, isLeakedCreator } from "../../../../utilities/creatorPage";
 import { RADIUS, HERO, WHITE } from "../../../../theme/tokens";
 
 // The archive's banner (decision 1, step 3): the newest published lesson
@@ -26,7 +26,7 @@ const ArchiveHero = ({ item, onOpen }) => {
   };
   const typeLabel = mediaTypeLabels[item.media_type] || item.media_type;
   const length = item.media_type === "text" ? null : lengthLabel(item.duration_seconds);
-  const meta = [item.creator_name && creatorDisplayName(item.creator_name), length].filter(Boolean).join(" · ");
+  const meta = [item.creator_name && !isLeakedCreator(item.creator_name) && creatorDisplayName(item.creator_name), length].filter(Boolean).join(" · ");
 
   return (
     <Box

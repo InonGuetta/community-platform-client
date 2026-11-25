@@ -38,9 +38,6 @@ const MediaInsightsTabs = ({
   // A lesson recorded in a live session: that session's chat (PRD REC-3).
   // No slot, no tab — every other lesson.
   sessionChatPanel = null,
-  // The tallest the panel area may grow before it scrolls — a responsive sx
-  // value such as { md: "70vh" }. None: it grows with its content.
-  contentMaxHeight,
 }) => {
   const { t } = useTranslation("lesson");
   const {
@@ -91,12 +88,12 @@ const MediaInsightsTabs = ({
         {tabs.map((t) => <Tab key={t.key} label={t.label} />)}
       </Tabs>
 
-      {/* D-22: the page caps this area (`contentMaxHeight`) so a long
-          transcript or chapter list scrolls inside the card, and the
-          follow-along transcript keeps the playing line in view without
-          moving the whole page. The notebook's floating preview passes no cap
-          and the panel grows with its content, as before. */}
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", maxHeight: contentMaxHeight }}>
+      {/* UI_UX_FIXES 2.1 (overrides D-22): the card no longer scrolls inside
+          itself — the page scrolls, like any other. The one exception is the
+          follow-along transcript, which may scroll in a box of its own (and
+          never inside another scrolling box), so the playing line can be kept
+          in view. */}
+      <Box>
         {activeKey === "summary" && (
           <AISummaryPanel
             transcript={transcript}
@@ -140,7 +137,9 @@ const MediaInsightsTabs = ({
           />
         )}
         {activeKey === "transcript" && captions && transcriptView === "follow" && (
-          <FollowAlongTranscript captions={captions} currentTime={currentTime} onSeek={onSeek} />
+          <Box sx={{ maxHeight: { md: "60vh" }, overflowY: { md: "auto" } }}>
+            <FollowAlongTranscript captions={captions} currentTime={currentTime} onSeek={onSeek} />
+          </Box>
         )}
         {activeKey === "transcript" && (!captions || transcriptView === "text") && (
           <TranscriptEditor

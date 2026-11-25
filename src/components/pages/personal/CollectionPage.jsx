@@ -44,7 +44,6 @@ const CollectionPage = ({ shelf }) => {
       <MediaGrid
         items={shown}
         status={status}
-        onView={(id) => navigate(`/media/${id}`)}
         onOpenCreator={(name) => navigate(creatorPath(name))}
         user={user}
         emptyMessage={emptyMessage}

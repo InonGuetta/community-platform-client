@@ -88,7 +88,6 @@ const ArchiveBrowser = ({ archive: a, user, canUpload, onOpenUpload, chooseCreat
       <MediaGrid
         items={a.filteredMedia}
         status={a.status}
-        onView={a.handleOpenMedia}
         user={user}
         onDelete={a.handleDeleteRequest}
         onTogglePublish={a.handleTogglePublish}

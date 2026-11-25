@@ -49,7 +49,7 @@ const MediaTileSkeleton = () => (
 // come from the archive, which loads 24 at a time. The likes page passes none
 // of them and gets the whole list it already had.
 const MediaGrid = ({
-  items, status, onView, user, onDelete, onTogglePublish, onEditTags, onEditDetails, onOpenCreator,
+  items, status, user, onDelete, onTogglePublish, onEditTags, onEditDetails, onOpenCreator,
   emptyActionLabel, onEmptyAction, filtered = false, emptyMessage,
   hasMore = false, loadingMore = false, onLoadMore,
 }) => {
@@ -92,7 +92,6 @@ const MediaGrid = ({
           <Box key={item.id} sx={{ minWidth: 0 }}>
             <MediaTile
               item={item}
-              onView={onView}
               user={user}
               showAdmin={showAdmin}
               liked={likes.isLiked(item.id)}

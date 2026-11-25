@@ -2,6 +2,8 @@ import { useState } from "react";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
+import { Link as RouterLink } from "react-router-dom";
 import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
@@ -15,7 +17,7 @@ import { showsStatusBadge } from "./tileActions";
 import { mediaApi } from "../../../api/mediaApi";
 import { mediaTypeLabels } from "../../../utilities/constant";
 import { lengthLabel } from "../../../utilities/durationOptions";
-import { creatorDisplayName, hasCreatorPage } from "../../../utilities/creatorPage";
+import { creatorDisplayName, hasCreatorPage, isLeakedCreator } from "../../../utilities/creatorPage";
 import { RADIUS, SHADOW, MOTION, TILE, WHITE } from "../../../theme/tokens";
 
 // An item in a grid (design/REDESIGN_V4.md, component 5 — "the most important
@@ -23,10 +25,12 @@ import { RADIUS, SHADOW, MOTION, TILE, WHITE } from "../../../theme/tokens";
 // length, the title, who said it, and one tag. The same tile on every page
 // that shows items: the archive, a lecturer's page, likes, saved, continue.
 //
-//   * The whole tile opens the lesson (onView). It is one focusable element
-//     named by the title, like the mockup's <article tabindex=0>, with the
-//     buttons on the cover inside it; Enter or Space on the tile itself opens
-//     it, on a button presses that button.
+//   * The whole tile opens the lesson, and it is a real link (UI_UX_FIXES 2.3):
+//     the title is a <Link to="/media/:id"> whose ::after stretches over the
+//     tile, so a click, a middle click, "open in a new tab" and "copy link"
+//     all work, and Tab lands on the title. The buttons on the cover and the
+//     lecturer's name sit above that layer (position: relative, z-index 1),
+//     so each stays clickable on its own. No <a> inside an <a>.
 //   * ▶ is a picture of what the tile does, not a second control (D-02: there
 //     is no playing from the grid).
 //   * ♥ is the like (D-18), from the grid's useTileLikes.
@@ -40,6 +44,7 @@ import { RADIUS, SHADOW, MOTION, TILE, WHITE } from "../../../theme/tokens";
 
 const fabSx = {
   position: "absolute",
+  zIndex: 1,
   width: 34,
   height: 34,
   borderRadius: "50%",
@@ -62,7 +67,7 @@ const popSx = {
 };
 
 const MediaTile = ({
-  item, onView, user, showAdmin = false, liked = false, onToggleLike,
+  item, user, showAdmin = false, liked = false, onToggleLike,
   onDelete, onTogglePublish, onEditTags, onEditDetails, onOpenCreator,
 }) => {
   const { t } = useTranslation("media");
@@ -75,8 +80,8 @@ const MediaTile = ({
   const length = item.media_type === "text" ? null : lengthLabel(item.duration_seconds);
   const typeLabel = mediaTypeLabels[item.media_type] || item.media_type;
   const kicker = length ? t("card.kicker", { type: typeLabel, length }) : typeLabel;
-  const creator = item.creator_name ? creatorDisplayName(item.creator_name) : "";
-  const creatorLinks = Boolean(onOpenCreator && item.creator_name && hasCreatorPage(item.creator_name));
+  const creator = item.creator_name && !isLeakedCreator(item.creator_name) ? creatorDisplayName(item.creator_name) : "";
+  const creatorLinks = Boolean(onOpenCreator && creator && hasCreatorPage(item.creator_name));
   const tag = (item.tags || [])[0];
 
   const badge = showsStatusBadge({ user, item, showAdmin })
@@ -87,34 +92,19 @@ const MediaTile = ({
         : null
     : null;
 
-  const open = () => onView?.(item.id);
-  const handleKeyDown = (e) => {
-    // Only the tile's own keys: Enter on the ⋯ button presses the button.
-    if (e.target !== e.currentTarget) return;
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      open();
-    }
-  };
-  const stop = (handler) => (e) => {
-    e.stopPropagation();
-    handler?.(e);
-  };
-  const handleLike = stop(() => {
+  const handleLike = () => {
     if (!liked) setPopping(true);
     onToggleLike();
-  });
+  };
 
   return (
     <Box sx={{ position: "relative", minWidth: 0 }} onMouseEnter={startPreview} onMouseLeave={stopPreview}>
       <Box
         component="article"
-        tabIndex={0}
         aria-label={item.title}
-        onClick={open}
-        onKeyDown={handleKeyDown}
         sx={{
           display: "block",
+          position: "relative",
           cursor: "pointer",
           borderRadius: `${RADIUS.tile}px`,
           // The hover wash reaches 12px past the cover on a desktop; on a
@@ -174,7 +164,7 @@ const MediaTile = ({
           )}
 
           <ButtonBase
-            onClick={stop(menu.openMenu)}
+            onClick={menu.openMenu}
             aria-label={t("card.actionsFor", { title: item.title })}
             aria-haspopup="menu"
             aria-expanded={menu.open}
@@ -229,15 +219,29 @@ const MediaTile = ({
               overflowWrap: "anywhere",
             }}
           >
-            {item.title}
+            <Link
+              component={RouterLink}
+              to={`/media/${item.id}`}
+              color="inherit"
+              underline="none"
+              sx={{
+                // The stretched link: this ::after covers the whole tile.
+                "&::after": { content: '""', position: "absolute", inset: 0, borderRadius: `${RADIUS.tile}px` },
+                "&:focus-visible": { outline: "none" },
+                "&:focus-visible::after": { outline: "2px solid", outlineColor: "primary.main", outlineOffset: "2px" },
+              }}
+            >
+              {item.title}
+            </Link>
           </Typography>
           {creator &&
             (creatorLinks ? (
               <ButtonBase
-                onClick={stop(() => onOpenCreator(item.creator_name))}
+                onClick={() => onOpenCreator(item.creator_name)}
                 aria-label={t("card.allByCreator", { name: item.creator_name })}
                 dir="auto"
                 sx={{
+                  position: "relative", zIndex: 1,
                   mt: 0.25, fontSize: { xs: 13, md: 14 }, color: "text.secondary", textAlign: "start",
                   borderRadius: 1, "&:hover": { color: "text.primary", textDecoration: "underline" },
                 }}

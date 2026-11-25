@@ -224,9 +224,6 @@ const MediaViewPage = () => {
             tags={media.tags}
             insights={controller}
             onSeek={seekPlayer}
-            // D-22: the panel stops growing here and scrolls inside the card.
-            // On a phone the card grows with what is in it.
-            contentMaxHeight={{ md: "70vh" }}
             // The transcript tab follows the lesson as it plays (PRD MOB-6).
             captions={captions}
             currentTime={currentTime}

@@ -7,16 +7,22 @@ vi.mock("../DownloadMenu/DownloadMenu", () => ({
   default: ({ open }) => (open ? <div role="menu" aria-label="download-menu" /> : null),
 }));
 
-import MediaTile from "./MediaTile";
+import { MemoryRouter } from "react-router-dom";
+import RawMediaTile from "./MediaTile";
+
+const MediaTile = (props) => (
+  <MemoryRouter>
+    <RawMediaTile {...props} />
+  </MemoryRouter>
+);
 
 const base = { id: 1, title: "שיעור", creator_name: "כללי", tags: [], is_published: true, uploader_id: 7, media_type: "audio" };
 const admin = { id: 1, role: "admin" };
 const student = { id: 9, role: "student" };
 
 const renderTile = (props = {}) => {
-  const onView = vi.fn();
-  render(<MediaTile item={base} onView={onView} {...props} />);
-  return { onView };
+  render(<MediaTile item={base} {...props} />);
+  return {};
 };
 
 describe("what the tile says", () => {
@@ -27,10 +33,10 @@ describe("what the tile says", () => {
   });
 
   test("an unmeasured recording, and any book, show only the type", () => {
-    const { unmount } = render(<MediaTile item={{ ...base, media_type: "video", duration_seconds: null }} onView={vi.fn()} />);
+    const { unmount } = render(<MediaTile item={{ ...base, media_type: "video", duration_seconds: null }} />);
     expect(screen.getByText("וידאו")).toBeInTheDocument();
     unmount();
-    render(<MediaTile item={{ ...base, media_type: "text", duration_seconds: 500 }} onView={vi.fn()} />);
+    render(<MediaTile item={{ ...base, media_type: "text", duration_seconds: 500 }} />);
     expect(screen.getByText("קריאה")).toBeInTheDocument();
   });
 
@@ -48,39 +54,52 @@ describe("what the tile says", () => {
   });
 
   test("an uploaded picture replaces the generated cover", () => {
-    const { unmount } = render(<MediaTile item={base} onView={vi.fn()} />);
+    const { unmount } = render(<MediaTile item={base} />);
     expect(screen.getByTestId("cover-art")).toBeInTheDocument();
     unmount();
-    const { container } = render(<MediaTile item={{ ...base, thumbnail_url: "/t.jpg" }} onView={vi.fn()} />);
+    const { container } = render(<MediaTile item={{ ...base, thumbnail_url: "/t.jpg" }} />);
     expect(screen.queryByTestId("cover-art")).toBeNull();
     expect(container.querySelector("img")).toHaveAttribute("src", "/t.jpg");
   });
 });
 
 describe("opening", () => {
-  test("a click or Enter on the tile opens the lesson", () => {
-    const { onView } = renderTile();
+  // UI_UX_FIXES 2.3: a real link, so a new tab, a middle click and "copy
+  // link" all work; the only <a> in the tile, and the only tab stop but the
+  // buttons.
+  test("the title is a link to the lesson, and the only link in the tile", () => {
+    renderTile();
     const tile = screen.getByRole("article", { name: "שיעור" });
-    fireEvent.click(tile);
-    fireEvent.keyDown(tile, { key: "Enter" });
-    expect(onView).toHaveBeenCalledTimes(2);
-    expect(onView).toHaveBeenCalledWith(1);
+    expect(tile).not.toHaveAttribute("tabindex");
+    const links = within(tile).getAllByRole("link");
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAttribute("href", "/media/1");
+    expect(links[0]).toHaveTextContent("שיעור");
+    expect(tile.querySelector("a a")).toBeNull();
+  });
+
+  test("a leaked pipeline name (AI, ToolLLM) shows no lecturer line", () => {
+    const { unmount } = render(<MediaTile item={{ ...base, creator_name: "ToolLLM" }} onOpenCreator={vi.fn()} />);
+    expect(screen.queryByText("ToolLLM")).toBeNull();
+    expect(screen.queryByRole("button", { name: /לכל השיעורים של/ })).toBeNull();
+    unmount();
+    render(<MediaTile item={{ ...base, creator_name: "AI" }} />);
+    expect(screen.queryByText("AI")).toBeNull();
   });
 
   // PRD ATTR-10 — without also opening the lesson.
   test("the lecturer's name opens their page, and only that", () => {
     const onOpenCreator = vi.fn();
-    const { onView } = renderTile({ item: { ...base, creator_name: "הרב כהן" }, onOpenCreator });
+    renderTile({ item: { ...base, creator_name: "הרב כהן" }, onOpenCreator });
     fireEvent.click(screen.getByRole("button", { name: "לכל השיעורים של הרב כהן" }));
     expect(onOpenCreator).toHaveBeenCalledWith("הרב כהן");
-    expect(onView).not.toHaveBeenCalled();
   });
 
   test("an unattributed lesson's name leads nowhere, and neither does one on the lecturer's own page", () => {
-    const { unmount } = render(<MediaTile item={base} onView={vi.fn()} onOpenCreator={vi.fn()} />);
+    const { unmount } = render(<MediaTile item={base} onOpenCreator={vi.fn()} />);
     expect(screen.queryByRole("button", { name: /לכל השיעורים של/ })).toBeNull();
     unmount();
-    render(<MediaTile item={{ ...base, creator_name: "הרב כהן" }} onView={vi.fn()} />);
+    render(<MediaTile item={{ ...base, creator_name: "הרב כהן" }} />);
     expect(screen.queryByRole("button", { name: /לכל השיעורים של/ })).toBeNull();
     expect(screen.getByText("הרב כהן")).toBeInTheDocument();
   });
@@ -89,19 +108,18 @@ describe("opening", () => {
 describe("the like", () => {
   test("says whether it is pressed, and pressing it likes without opening the lesson", () => {
     const onToggleLike = vi.fn();
-    const { onView } = renderTile({ liked: false, onToggleLike });
+    renderTile({ liked: false, onToggleLike });
     const heart = screen.getByRole("button", { name: "אהבתי: שיעור" });
     expect(heart).toHaveAttribute("aria-pressed", "false");
     fireEvent.click(heart);
     expect(onToggleLike).toHaveBeenCalledTimes(1);
-    expect(onView).not.toHaveBeenCalled();
   });
 
   test("is drawn pressed for a liked lesson, and absent with no one to like it", () => {
-    const { unmount } = render(<MediaTile item={base} onView={vi.fn()} liked onToggleLike={vi.fn()} />);
+    const { unmount } = render(<MediaTile item={base} liked onToggleLike={vi.fn()} />);
     expect(screen.getByRole("button", { name: "אהבתי: שיעור" })).toHaveAttribute("aria-pressed", "true");
     unmount();
-    render(<MediaTile item={base} onView={vi.fn()} />);
+    render(<MediaTile item={base} />);
     expect(screen.queryByRole("button", { name: /^אהבתי/ })).toBeNull();
   });
 });
@@ -114,10 +132,9 @@ describe("the ⋯ menu", () => {
   const items = () => within(screen.getByRole("menu")).getAllByRole("menuitem").map((i) => i.textContent);
 
   test("a student gets download, and opening the menu does not open the lesson", () => {
-    const { onView } = renderTile({ user: student, showAdmin: true, ...handlers() });
+    renderTile({ user: student, showAdmin: true, ...handlers() });
     openMenu();
     expect(items()).toEqual(["הורדה"]);
-    expect(onView).not.toHaveBeenCalled();
   });
 
   test("a manager gets every action, in the spec's order, with delete last", () => {
@@ -148,9 +165,9 @@ describe("the ⋯ menu", () => {
     expect(h.onTogglePublish).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
   });
 
-  test("each action reaches the page's handler, and the lesson stays closed", () => {
+  test("each action reaches the page's handler,", () => {
     const h = handlers();
-    const { onView } = renderTile({ user: admin, showAdmin: true, ...h });
+    renderTile({ user: admin, showAdmin: true, ...h });
     openMenu();
     fireEvent.click(screen.getByRole("menuitem", { name: "עריכת פרטים" }));
     openMenu();
@@ -160,7 +177,6 @@ describe("the ⋯ menu", () => {
     expect(h.onEditDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
     expect(h.onEditTags).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
     expect(h.onDelete).toHaveBeenCalledWith(1);
-    expect(onView).not.toHaveBeenCalled();
   });
 
   test("download hands over to the download menu", () => {

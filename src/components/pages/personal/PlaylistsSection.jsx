@@ -26,7 +26,7 @@ const PLACEHOLDER_ROWS = 3;
 // The cards are the archive's MediaGrid: a lecture a user filed should look and
 // behave exactly as it does where they found it — same menu, same badges, same
 // click.
-const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
+const PlaylistShelf = ({ playlist, user, onOpenList }) => {
   const { t } = useTranslation("personal");
   const panelId = useId();
   const [open, setOpen] = useState(false);
@@ -92,7 +92,7 @@ const PlaylistShelf = ({ playlist, user, onView, onOpenList }) => {
               {t("emptyList")}
             </Typography>
           ) : (
-            <MediaGrid items={items} status={statuses.succeeded} onView={onView} user={user} />
+            <MediaGrid items={items} status={statuses.succeeded} user={user} />
           )}
         </Box>
       </Collapse>
@@ -130,7 +130,6 @@ const PlaylistsSection = () => {
             key={playlist.id}
             playlist={playlist}
             user={user}
-            onView={(id) => navigate(`/media/${id}`)}
             onOpenList={() => navigate(savedListPath(playlist.id))}
           />
         ))

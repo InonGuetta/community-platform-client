@@ -74,6 +74,7 @@
   "dock": {
     "label": "ניווט מהיר",
     "ask": "שאל",
-    "myCourses": "קורסים"
+    "myCourses": "קורסים",
+    "notebook": "מחברת"
   }
 }

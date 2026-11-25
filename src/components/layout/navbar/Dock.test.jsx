@@ -22,11 +22,11 @@ const renderAt = (path) =>
 const dock = () => screen.getByRole("navigation", { name: "ניווט מהיר" });
 const current = () => within(dock()).getAllByRole("link").filter((a) => a.getAttribute("aria-current") === "page");
 
-test("holds the archive, ask and my courses, in that order, by their full names", () => {
+test("holds the archive, ask, my courses and the notebook, in that order, by their full names", () => {
   renderAt("/archive");
   const links = within(dock()).getAllByRole("link");
-  expect(links.map((a) => a.getAttribute("href"))).toEqual(["/archive", "/ask", "/my-courses"]);
-  expect(links.map((a) => a.getAttribute("aria-label"))).toEqual(["ארכיון", "שאל את הארכיון", "הקורסים שלי"]);
+  expect(links.map((a) => a.getAttribute("href"))).toEqual(["/archive", "/ask", "/my-courses", "/notebook"]);
+  expect(links.map((a) => a.getAttribute("aria-label"))).toEqual(["ארכיון", "שאל את הארכיון", "הקורסים שלי", "המחברת שלי"]);
 });
 
 test("marks the page you are on", () => {
@@ -47,4 +47,9 @@ test("course management marks nothing", () => {
 test("a lesson marks nothing", () => {
   renderAt("/media/5");
   expect(current()).toHaveLength(0);
+});
+
+test("the notebook is lit on /notebook", () => {
+  renderAt("/notebook");
+  expect(current().map((a) => a.getAttribute("href"))).toEqual(["/notebook"]);
 });

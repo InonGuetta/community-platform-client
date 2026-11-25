@@ -25,9 +25,9 @@ import { useTranslation } from "react-i18next";
 // place it is described. A change here lands on both, which is the point — two
 // copies of a pill row drift the first time one of them is adjusted.
 //
-// Redesign v4 (screen 20): a row of `soft` pills under a hairline, the icon
-// leading the label, starting from the reader's side and wrapping when the card
-// is narrow. "אהבתי" turns `tinted-success` once pressed (D-25).
+// Redesign v4 (screen 20): a row of `soft` pills under a hairline. Four equal
+// cells across the whole width (UI_UX_FIXES 1.5): the icon leading the label on
+// a desktop, above a small label on a phone, so the row never wraps. "אהבתי" turns `tinted-success` once pressed (D-25).
 
 // Saving is a split control: the wide half toggles the general save, the narrow
 // half opens the lists. One soft pill drawn on the CONTAINER rather than on each
@@ -35,7 +35,7 @@ import { useTranslation } from "react-i18next";
 // touch. The bookmark is the saved shelf's purple (palette.personal, D-25) — the
 // mark that means "saved" on this site — and is drawn filled once saved.
 const savePillSx = {
-  display: "inline-flex",
+  display: "flex",
   alignItems: "stretch",
   overflow: "hidden",
   borderRadius: `${RADIUS.pill}px`,
@@ -45,6 +45,21 @@ const savePillSx = {
 
 // Both halves light up on their own under the pointer, so it is visible that
 // the caret is a target of its own and a click there will not toggle the save.
+// What every cell of the row shares: it fills its grid cell, and on a phone the
+// icon sits above a small label.
+const cellSx = (theme) => ({
+  width: "100%",
+  minWidth: 0,
+  [theme.breakpoints.down("md")]: {
+    flexDirection: "column",
+    gap: theme.spacing(0.25),
+    paddingInline: theme.spacing(0.5),
+    fontSize: 12,
+    lineHeight: 1.3,
+    "& .MuiButton-startIcon": { margin: 0 },
+  },
+});
+
 const saveHalfSx = {
   borderRadius: 0,
   color: "inherit",
@@ -82,9 +97,9 @@ const MediaActionsBar = ({
       <Divider sx={{ mt: 3, flexShrink: 0 }} />
       <Box
         sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 1,
+          display: "grid",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gap: { xs: 1, md: 1.5 },
           pt: 2.5,
           flexShrink: 0,
         }}
@@ -94,7 +109,8 @@ const MediaActionsBar = ({
           variant={isLiked ? "tinted-success" : "soft"}
           aria-pressed={isLiked}
           startIcon={isLiked ? <likeIcons.on /> : <likeIcons.off />}
-          sx={{ px: 2.5 }}
+          fullWidth
+          sx={cellSx}
         >
           {isLiked ? t("actions.liked") : t("actions.like")}
         </Button>
@@ -110,12 +126,13 @@ const MediaActionsBar = ({
             onClick={onToggleSave}
             aria-pressed={isSaved}
             startIcon={isSaved ? <saveIcons.on /> : <saveIcons.off />}
-            sx={{
+            sx={(theme) => ({
               ...saveHalfSx,
-              paddingInlineStart: 2.5,
-              paddingInlineEnd: 1.5,
-              "& .MuiButton-startIcon": { color: SAVE_COLOUR },
-            }}
+              ...cellSx(theme),
+              flex: 1,
+              [theme.breakpoints.up("md")]: { paddingInlineStart: theme.spacing(2.5), paddingInlineEnd: theme.spacing(1.5) },
+              "& .MuiButton-startIcon svg": { color: SAVE_COLOUR },
+            })}
           >
             {isSaved ? t("actions.saved") : t("actions.save")}
           </Button>
@@ -137,6 +154,8 @@ const MediaActionsBar = ({
           aria-haspopup="menu"
           variant="soft"
           startIcon={<FileDownloadOutlinedIcon />}
+          fullWidth
+          sx={cellSx}
         >
           {t("actions.download")}
         </Button>
@@ -144,6 +163,8 @@ const MediaActionsBar = ({
           onClick={() => setShareOpen(true)}
           variant="soft"
           startIcon={<ShareOutlinedIcon />}
+          fullWidth
+          sx={cellSx}
         >
           {t("actions.share")}
         </Button>

@@ -6,7 +6,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
+import NumberField from "../NumberField/NumberField";
 import Typography from "@mui/material/Typography";
 import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
@@ -302,9 +302,12 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
             before applying (see RichNoteEditor). Everything else here cancels
             its own mousedown precisely to avoid needing that. */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 1.5, pb: 1 }}>
-          <TextField
+          <NumberField
             value={typedSize}
-            onChange={(e) => setTypedSize(e.target.value)}
+            onChange={(n) => setTypedSize(String(n))}
+            defaultValue={DEFAULT_FONT_SIZE_PX}
+            min={MIN_FONT_SIZE_PX}
+            max={MAX_FONT_SIZE_PX}
             // Both jobs in the CAPTURE phase, and they cannot be split.
             //
             // A menu moves focus to whichever ITEM matches what you type; inside
@@ -318,11 +321,10 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
               e.stopPropagation();
               if (e.key === "Enter") { e.preventDefault(); applyTypedSize(); }
             }}
-            type="number"
             size="small"
             autoFocus
             label={t("toolbar.pixels")}
-            inputProps={{ min: MIN_FONT_SIZE_PX, max: MAX_FONT_SIZE_PX, "aria-label": t("toolbar.pixels") }}
+            inputProps={{ "aria-label": t("toolbar.pixels") }}
             sx={{ width: 130 }}
           />
           <Button onClick={applyTypedSize} variant="contained" size="small">

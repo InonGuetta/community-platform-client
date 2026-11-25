@@ -22,7 +22,8 @@
     "when": "When (empty = start now)",
     "schedule": "Schedule for a future time",
     "scheduleSubmit": "Schedule session",
-    "createStart": "Create and start"
+    "createStart": "Create and start",
+    "pastTime": "The time has already passed"
   },
   "notices": {
     "cannotJoin": "The session cannot be joined",

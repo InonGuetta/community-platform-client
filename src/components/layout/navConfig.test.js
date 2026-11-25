@@ -14,7 +14,7 @@ test("the five primary links, in the header's order", () => {
 });
 
 test("the dock is three of them", () => {
-  expect(DOCK_ITEMS.map((l) => l.to)).toEqual(["/archive", "/ask", "/my-courses"]);
+  expect(DOCK_ITEMS.map((l) => l.to)).toEqual(["/archive", "/ask", "/my-courses", "/notebook"]);
   for (const item of DOCK_ITEMS) expect(item.gradient).toMatch(/^linear-gradient/);
 });
 

@@ -35,5 +35,10 @@
     "body": "Se produjo un error inesperado al cargar la página. Recargarla suele solucionarlo.",
     "reload": "Recargar la página",
     "toArchive": "Volver al archivo"
+  },
+  "numberField": {
+    "between": "El valor debe estar entre {{min}} y {{max}}",
+    "atLeast": "El mínimo es {{min}}",
+    "atMost": "El máximo es {{max}}"
   }
 }

@@ -9,10 +9,10 @@
     "monthlySoon": "Monthly donations will be available soon",
     "amount": "Amount (₪)",
     "custom": "Custom amount",
-    "minimum": "The minimum amount is ₪{{min}}",
     "preparing": "Preparing the payment...",
     "continue": "Continue to pay ₪{{amount}}",
-    "secure": "Secure payment through Stripe. Your card details are typed directly into Stripe and never pass through us."
+    "secure": "Secure payment through Stripe. Your card details are typed directly into Stripe and never pass through us.",
+    "enterAmount": "Enter an amount"
   },
   "payment": {
     "of": "A donation of {{amount}}",

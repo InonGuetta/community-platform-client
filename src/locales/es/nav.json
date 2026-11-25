@@ -71,6 +71,7 @@
   "dock": {
     "label": "Navegación rápida",
     "ask": "Preguntar",
-    "myCourses": "Cursos"
+    "myCourses": "Cursos",
+    "notebook": "Cuaderno"
   }
 }

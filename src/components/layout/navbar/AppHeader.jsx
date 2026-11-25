@@ -6,7 +6,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { CONTENT_WIDTH, RADIUS, SHELL } from "../../../theme/tokens";
+import { RADIUS, SHELL } from "../../../theme/tokens";
 import { HEADER_HEIGHT } from "../shellGeometry";
 import { isActive } from "../navConfig";
 import LanguageSwitcher from "../LanguageSwitcher";
@@ -45,10 +45,12 @@ const Frame = ({ children }) => (
   >
     <Box
       sx={{
-        maxWidth: CONTENT_WIDTH.wide,
+        // Not capped at the content's width: the avatar and bell sit at the
+        // screen's edge on a wide monitor, the brand at the other (UI_UX_FIXES 1.2).
+        // The pages below keep their own 1180.
+        maxWidth: "none",
         height: "100%",
-        marginInline: "auto",
-        paddingInline: { xs: 2, md: 3 },
+        paddingInline: { xs: 1.5, md: 2 },
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",

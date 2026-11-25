@@ -22,7 +22,8 @@
     "when": "Cuándo (vacío = empezar ahora)",
     "schedule": "Programar para más adelante",
     "scheduleSubmit": "Programar la sesión",
-    "createStart": "Crear y empezar"
+    "createStart": "Crear y empezar",
+    "pastTime": "Esa hora ya pasó"
   },
   "notices": {
     "cannotJoin": "No es posible unirse a la sesión",

@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import TextField from "@mui/material/TextField";
+import NumberField from "../../features/NumberField/NumberField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import SegmentedControl from "../../features/SegmentedControl/SegmentedControl";
@@ -14,6 +14,8 @@ const PRESET_AMOUNTS = [50, 100, 250, 500];
 // The server's floor is ₪1; the form asks for at least ₪10, the smallest gift
 // worth Stripe's fixed fee.
 const MIN_AMOUNT = 10;
+// A ceiling so a slipped key cannot become a five-figure charge.
+const MAX_AMOUNT = 100000;
 
 // The first step of a donation (PRD PAY-1): how much. The card comes next, in
 // Stripe's own fields — see PaymentStep. `onContinue({ amountCents, type })`.
@@ -71,14 +73,14 @@ const DonateForm = ({ onContinue, starting = false, error = null }) => {
             );
           })}
         </Box>
-        <TextField
+        <NumberField
           label={t("form.custom")}
-          type="number"
           value={customAmount}
-          onChange={(e) => { setCustomAmount(e.target.value); setAmount(0); }}
-          inputProps={{ min: MIN_AMOUNT }}
-          helperText={customAmount && !valid ? t("form.minimum", { min: MIN_AMOUNT }) : " "}
-          error={Boolean(customAmount) && !valid}
+          onChange={(n) => { setCustomAmount(n === "" ? "" : String(n)); setAmount(0); }}
+          min={MIN_AMOUNT}
+          max={MAX_AMOUNT}
+          allowEmpty
+          helperText=" "
           fullWidth
         />
       </Box>
@@ -91,7 +93,7 @@ const DonateForm = ({ onContinue, starting = false, error = null }) => {
         onClick={() => onContinue({ amountCents: Math.round(finalAmount * 100), type })}
         disabled={starting || !valid}
       >
-        {starting ? t("form.preparing") : t("form.continue", { amount: valid ? finalAmount : "" })}
+        {starting ? t("form.preparing") : valid ? t("form.continue", { amount: finalAmount }) : t("form.enterAmount")}
       </Button>
 
       <Typography variant="caption" color="text.secondary" sx={{ textAlign: "center" }}>

@@ -22,7 +22,8 @@
     "when": "מועד (ריק = להתחיל עכשיו)",
     "schedule": "לקבוע למועד עתידי",
     "scheduleSubmit": "קביעת מפגש",
-    "createStart": "יצירה והתחלה"
+    "createStart": "יצירה והתחלה",
+    "pastTime": "אי אפשר לקבוע מועד שכבר עבר"
   },
   "notices": {
     "cannotJoin": "לא ניתן להצטרף למפגש",

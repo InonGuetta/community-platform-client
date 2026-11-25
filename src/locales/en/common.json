@@ -35,5 +35,10 @@
     "body": "An unexpected error occurred while loading the page. Reloading the page usually fixes it.",
     "reload": "Reload the page",
     "toArchive": "Back to the archive"
+  },
+  "numberField": {
+    "between": "The value must be between {{min}} and {{max}}",
+    "atLeast": "The minimum is {{min}}",
+    "atMost": "The maximum is {{max}}"
   }
 }

@@ -31,6 +31,15 @@ export const CoursesDockIcon = (props) => (
   </SvgIcon>
 );
 
+export const NotebookDockIcon = (props) => (
+  <SvgIcon {...props} viewBox="0 0 24 24">
+    <g {...stroked}>
+      <path d="M12 6.5C10.5 5 8 4.5 4 4.5V18c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2V4.5c-4 0-6.5.5-8 2z" />
+      <path d="M12 6.5V20" />
+    </g>
+  </SvgIcon>
+);
+
 // The brand mark: a sound wave in a dark square (component 1).
 export const BrandWaveIcon = (props) => (
   <SvgIcon {...props} viewBox="0 0 24 24">

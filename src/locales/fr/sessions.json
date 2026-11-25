@@ -22,7 +22,8 @@
     "when": "Quand (vide = commencer maintenant)",
     "schedule": "Programmer pour plus tard",
     "scheduleSubmit": "Programmer la séance",
-    "createStart": "Créer et commencer"
+    "createStart": "Créer et commencer",
+    "pastTime": "Cette date est déjà passée"
   },
   "notices": {
     "cannotJoin": "Impossible de rejoindre la séance",

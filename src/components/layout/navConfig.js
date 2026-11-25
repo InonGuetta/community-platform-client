@@ -1,8 +1,8 @@
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { roles } from "../../utilities/constant";
 import { DOCK } from "../../theme/tokens";
-import { PERSONAL_SHELVES } from "./personalShelves";
-import { ArchiveDockIcon, AskDockIcon, CoursesDockIcon } from "./navbar/dockIcons";
+import { PERSONAL_SHELVES, NOTEBOOK_SHELF } from "./personalShelves";
+import { ArchiveDockIcon, AskDockIcon, CoursesDockIcon, NotebookDockIcon } from "./navbar/dockIcons";
 
 // The navigation, described once (design/REDESIGN_V4.md, decision 3; D-06).
 // The header's links, the avatar menu, the side drawer and the dock all read
@@ -35,12 +35,15 @@ export const PRIMARY_LINKS = [
 
 const primaryById = Object.fromEntries(PRIMARY_LINKS.map((link) => [link.id, link]));
 
-// The dock (component 4): three of the primary links, each with its glyph, its
+// The dock (component 4): three of the primary links plus the notebook, each with its glyph, its
 // gradient and the short word shown under it on a phone.
 export const DOCK_ITEMS = [
   { ...primaryById.archive, shortKey: "links.archive", Icon: ArchiveDockIcon, gradient: DOCK.gradient.archive },
   { ...primaryById.ask, shortKey: "dock.ask", Icon: AskDockIcon, gradient: DOCK.gradient.ask },
   { ...primaryById.myCourses, shortKey: "dock.myCourses", Icon: CoursesDockIcon, gradient: DOCK.gradient.myCourses },
+  // The notebook is a personal shelf, not a primary link (UI_UX_FIXES 1.1). Last,
+  // so in RTL it is the leftmost; lit on /notebook exactly.
+  { id: "notebook", labelKey: NOTEBOOK_SHELF.labelKey, to: NOTEBOOK_SHELF.path, shortKey: "dock.notebook", Icon: NotebookDockIcon, gradient: DOCK.gradient.notebook },
 ];
 
 // The user's own material, then their account (components 2 and 3).

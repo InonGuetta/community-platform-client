@@ -174,6 +174,7 @@ export const DOCK = {
     archive: "linear-gradient(160deg, #818cf8, #4338ca)",
     ask: "linear-gradient(160deg, #38bdf8, #2563eb)",
     myCourses: "linear-gradient(160deg, #fb923c, #e11d48)",
+    notebook: "linear-gradient(160deg, #34d399, #047857)",
   },
 };
 

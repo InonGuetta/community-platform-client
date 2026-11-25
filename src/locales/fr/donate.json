@@ -9,10 +9,10 @@
     "monthlySoon": "Les dons mensuels seront bientôt disponibles",
     "amount": "Montant (₪)",
     "custom": "Montant personnalisé",
-    "minimum": "Le montant minimum est de {{min}} ₪",
     "preparing": "Préparation du paiement...",
     "continue": "Continuer vers le paiement de {{amount}} ₪",
-    "secure": "Paiement sécurisé via Stripe. Vos données de carte sont saisies directement chez Stripe et ne transitent jamais par nous."
+    "secure": "Paiement sécurisé via Stripe. Vos données de carte sont saisies directement chez Stripe et ne transitent jamais par nous.",
+    "enterAmount": "Saisissez un montant"
   },
   "payment": {
     "of": "Un don de {{amount}}",

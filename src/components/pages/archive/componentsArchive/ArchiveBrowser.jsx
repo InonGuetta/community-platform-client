@@ -46,25 +46,28 @@ const ArchiveBrowser = ({ archive: a, user, canUpload, onOpenUpload, chooseCreat
         filtersOpen={filtersOpen}
         onToggleFilters={() => setFiltersOpen((prev) => !prev)}
         filterCount={filterCount}
-      />
-      <FilterBar
-        open={filtersOpen}
-        durationRange={a.durationRange}
-        onDurationFilter={a.handleDurationFilter}
-        lengthOffered={a.lengthOffered}
-        creatorFilter={creatorFilter}
-        knownCreators={chooseCreator ? a.knownCreators : []}
-        onCreatorFilter={a.handleCreatorFilter}
-        tagIds={a.tagIds}
-        excludedTagIds={a.excludedTagIds}
-        tagTree={a.tagTree}
-        onCycleTag={a.handleCycleTag}
-        onRemoveTag={a.handleRemoveTag}
-        onClearTags={a.handleClearTags}
-        uploadedAfter={a.dates.uploadedAfter}
-        uploadedBefore={a.dates.uploadedBefore}
-        onDateFilter={a.handleDateFilter}
-        onClearAll={a.handleClearFilters}
+        onDismissFilters={() => setFiltersOpen(false)}
+        panel={
+          <FilterBar
+            open={filtersOpen}
+            durationRange={a.durationRange}
+            onDurationFilter={a.handleDurationFilter}
+            lengthOffered={a.lengthOffered}
+            creatorFilter={creatorFilter}
+            knownCreators={chooseCreator ? a.knownCreators : []}
+            onCreatorFilter={a.handleCreatorFilter}
+            tagIds={a.tagIds}
+            excludedTagIds={a.excludedTagIds}
+            tagTree={a.tagTree}
+            onCycleTag={a.handleCycleTag}
+            onRemoveTag={a.handleRemoveTag}
+            onClearTags={a.handleClearTags}
+            uploadedAfter={a.dates.uploadedAfter}
+            uploadedBefore={a.dates.uploadedBefore}
+            onDateFilter={a.handleDateFilter}
+            onClearAll={a.handleClearFilters}
+          />
+        }
       />
 
       {/* "כל הפריטים", and how many the filter matches in all — the grid

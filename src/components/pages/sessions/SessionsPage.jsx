@@ -7,6 +7,7 @@ import { sessionsApi } from "../../../api/sessionsApi";
 import Paper from "@mui/material/Paper";
 import Dialog from "@mui/material/Dialog";
 import TextField from "@mui/material/TextField";
+import NumberField from "../../features/NumberField/NumberField";
 import MenuItem from "@mui/material/MenuItem";
 import AddIcon from "@mui/icons-material/Add";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
@@ -27,14 +28,21 @@ import { useTranslation } from "react-i18next";
 
 // Enough of a lead that the default is a plan rather than "now", which is what
 // the unscheduled button next to it is already for.
-const defaultScheduledAt = () => {
-  const when = new Date(Date.now() + 60 * 60 * 1000);
+// A moment as a datetime-local value: LOCAL time to the minute, no zone.
+const toLocalInput = (when) => {
   when.setSeconds(0, 0);
   // datetime-local wants the value in LOCAL time with no zone suffix, so
   // toISOString — which converts to UTC — would silently shift the default by
   // the offset. Subtracting it back is the standard workaround.
   return new Date(when.getTime() - when.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
+
+const defaultScheduledAt = () => toLocalInput(new Date(Date.now() + 60 * 60 * 1000));
+
+// A session holds between 2 and 500 people; a one-on-one is exactly two.
+const MIN_PARTICIPANTS = 2;
+const MAX_PARTICIPANTS = 500;
+const DEFAULT_PARTICIPANTS = 10;
 
 // A session's card: its title, its badges, and what can be done with it.
 const SessionCard = ({ title, badges, actions }) => (
@@ -56,12 +64,17 @@ const SessionsPage = () => {
   const [form, setForm] = useState({
     title: "",
     sessionType: "group",
-    maxParticipants: 10,
+    maxParticipants: DEFAULT_PARTICIPANTS,
     // Empty means "start it now", which is what this dialog has always done.
     scheduledAt: "",
     // Empty is a general session (PRD D8).
     courseId: "",
   });
+
+  // The earliest moment the date field offers (UI_UX_FIXES 1.3). The server
+  // does not refuse a past time yet (stage 5), so the dialog does.
+  const nowInput = toLocalInput(new Date());
+  const scheduledInPast = Boolean(form.scheduledAt) && form.scheduledAt < nowInput;
 
   return (
     <Box>
@@ -166,10 +179,19 @@ const SessionsPage = () => {
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <TextField label={t("create.name")} value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} fullWidth />
-            <TextField label={t("create.type")} value={form.sessionType} onChange={(e) => setForm((p) => ({ ...p, sessionType: e.target.value }))} select fullWidth>
+            <TextField label={t("create.type")} value={form.sessionType} onChange={(e) => setForm((p) => ({ ...p, sessionType: e.target.value, maxParticipants: e.target.value === sessionTypes.oneOnOne ? MIN_PARTICIPANTS : p.sessionType === sessionTypes.oneOnOne ? DEFAULT_PARTICIPANTS : p.maxParticipants }))} select fullWidth>
               {Object.values(sessionTypes).map((t) => <MenuItem key={t} value={t}>{sessionTypeLabels[t] || t}</MenuItem>)}
             </TextField>
-            <TextField label={t("create.maxParticipants")} type="number" value={form.maxParticipants} onChange={(e) => setForm((p) => ({ ...p, maxParticipants: Number(e.target.value) }))} fullWidth />
+            <NumberField
+              label={t("create.maxParticipants")}
+              value={form.maxParticipants}
+              onChange={(n) => setForm((p) => ({ ...p, maxParticipants: n }))}
+              min={MIN_PARTICIPANTS}
+              max={MAX_PARTICIPANTS}
+              defaultValue={DEFAULT_PARTICIPANTS}
+              disabled={form.sessionType === sessionTypes.oneOnOne}
+              fullWidth
+            />
 
             {/* Who is TOLD about the session (PRD D8) — not who may join, which
                 stays everyone. Hidden for somebody who teaches no course. */}
@@ -200,6 +222,9 @@ const SessionsPage = () => {
               value={form.scheduledAt}
               onChange={(e) => setForm((p) => ({ ...p, scheduledAt: e.target.value }))}
               InputLabelProps={{ shrink: true }}
+              inputProps={{ min: nowInput }}
+              error={scheduledInPast}
+              helperText={scheduledInPast ? t("create.pastTime") : undefined}
               fullWidth
             />
             {!form.scheduledAt && (
@@ -211,7 +236,7 @@ const SessionsPage = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateDialogOpen(false)} variant="outlined">{t("common:actions.cancel")}</Button>
-          <Button onClick={() => handleCreateSession(form)} variant="contained">
+          <Button onClick={() => handleCreateSession(form)} variant="contained" disabled={scheduledInPast}>
             {form.scheduledAt ? t("create.scheduleSubmit") : t("create.createStart")}
           </Button>
         </DialogActions>

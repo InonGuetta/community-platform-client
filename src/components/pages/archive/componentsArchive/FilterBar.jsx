@@ -10,6 +10,7 @@ import SectionCard from "../../../features/SectionCard/SectionCard";
 import { DURATION_OPTIONS } from "../../../../utilities/durationOptions";
 import { creatorDisplayName } from "../../../../utilities/creatorPage";
 import { activeFilterCount } from "./filterCount";
+import { HEADER_HEIGHT } from "../../../layout/shellGeometry";
 import { useTranslation } from "react-i18next";
 
 // The archive's filter panel (mockup 29): a card under the toolbar, opened by
@@ -29,6 +30,13 @@ const fieldsSx = {
   gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
   gap: 2,
   alignItems: "end",
+};
+
+// Today as a date input writes it: local, YYYY-MM-DD (not toISOString, which is UTC).
+const todayInput = () => {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 };
 
 const FilterBar = ({
@@ -55,8 +63,15 @@ const FilterBar = ({
     creatorFilter, tagIds, excludedTagIds, uploadedAfter, uploadedBefore, lengthOffered, durationRange,
   });
 
+  // The range cannot be turned inside out (UI_UX_FIXES 1.3): "from" ends at
+  // "to" (or today), "to" starts at "from" and ends today.
+  const today = todayInput();
+
   return (
     <Collapse in={open} unmountOnExit={false}>
+      {/* The panel sits in the sticky band, so it scrolls inside the room the
+          screen leaves under the header and the toolbar. */}
+      <Box sx={{ maxHeight: { xs: `calc(100vh - ${HEADER_HEIGHT + 190}px)`, md: `calc(100vh - ${HEADER_HEIGHT + 140}px)` }, overflowY: "auto" }}>
       <SectionCard component="div" sx={{ mt: { xs: 2, md: 3 } }}>
         <Box id="archive-filter-panel" sx={fieldsSx}>
           {/* Hidden when there is nothing to choose between — one creator makes
@@ -104,6 +119,7 @@ const FilterBar = ({
             size="small"
             label={t("filter.from")}
             value={uploadedAfter}
+            inputProps={{ max: uploadedBefore || today }}
             onChange={(e) => onDateFilter("uploadedAfter", e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
           />
@@ -112,6 +128,7 @@ const FilterBar = ({
             size="small"
             label={t("filter.to")}
             value={uploadedBefore}
+            inputProps={{ min: uploadedAfter || undefined, max: today }}
             onChange={(e) => onDateFilter("uploadedBefore", e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
           />
@@ -159,6 +176,7 @@ const FilterBar = ({
           </>
         )}
       </SectionCard>
+      </Box>
     </Collapse>
   );
 };

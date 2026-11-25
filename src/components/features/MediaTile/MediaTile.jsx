@@ -17,7 +17,7 @@ import { showsStatusBadge } from "./tileActions";
 import { mediaApi } from "../../../api/mediaApi";
 import { mediaTypeLabels } from "../../../utilities/constant";
 import { lengthLabel } from "../../../utilities/durationOptions";
-import { creatorDisplayName, hasCreatorPage, isLeakedCreator } from "../../../utilities/creatorPage";
+import { creatorDisplayName, hasCreatorPage } from "../../../utilities/creatorPage";
 import { RADIUS, SHADOW, MOTION, TILE, WHITE } from "../../../theme/tokens";
 
 // An item in a grid (design/REDESIGN_V4.md, component 5 — "the most important
@@ -80,7 +80,7 @@ const MediaTile = ({
   const length = item.media_type === "text" ? null : lengthLabel(item.duration_seconds);
   const typeLabel = mediaTypeLabels[item.media_type] || item.media_type;
   const kicker = length ? t("card.kicker", { type: typeLabel, length }) : typeLabel;
-  const creator = item.creator_name && !isLeakedCreator(item.creator_name) ? creatorDisplayName(item.creator_name) : "";
+  const creator = item.creator_name ? creatorDisplayName(item.creator_name) : "";
   const creatorLinks = Boolean(onOpenCreator && creator && hasCreatorPage(item.creator_name));
   const tag = (item.tags || [])[0];
 

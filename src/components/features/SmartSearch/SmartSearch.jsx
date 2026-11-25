@@ -12,7 +12,7 @@ import { formatTime } from "../../../utilities/formatTime";
 import { creatorPrefixes } from "../../../utilities/constant";
 import { useSmartSearch } from "./useSmartSearch";
 import { useTranslation } from "react-i18next";
-import { creatorDisplayName, isLeakedCreator } from "../../../utilities/creatorPage";
+import { creatorDisplayName } from "../../../utilities/creatorPage";
 import EmptyState from "../EmptyState/EmptyState";
 import { RADIUS } from "../../../theme/tokens";
 
@@ -144,7 +144,7 @@ const SmartSearch = ({ onOpenResult }) => {
                   </Typography>
                   {/* Who said it, labelled the way the archive card labels it — two
                       shiurim with the same title are otherwise one line twice. */}
-                  {r.creator_name && !isLeakedCreator(r.creator_name) && (
+                  {r.creator_name && (
                     <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
                       {`${creatorPrefixes[r.media_type] || creatorPrefixes.video}: ${creatorDisplayName(r.creator_name)}`}
                     </Typography>

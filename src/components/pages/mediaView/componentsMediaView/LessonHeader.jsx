@@ -5,7 +5,7 @@ import { Link as RouterLink } from "react-router-dom";
 import BackLink from "../../../features/BackLink/BackLink";
 import StatusBadge from "../../../features/StatusBadge/StatusBadge";
 import { creatorPrefixes } from "../../../../utilities/constant";
-import { creatorPath, hasCreatorPage, creatorDisplayName, isLeakedCreator } from "../../../../utilities/creatorPage";
+import { creatorPath, hasCreatorPage, creatorDisplayName } from "../../../../utilities/creatorPage";
 import { lessonTitleForHeading } from "./lessonTitle";
 import { useTranslation } from "react-i18next";
 
@@ -39,7 +39,7 @@ const LessonHeader = ({ media, showStatusBadge = false, dateText = null }) => {
         ? { tone: "indigo", label: t("media:card.public") }
         : null;
 
-  const showCreator = Boolean(media.creator_name) && !isLeakedCreator(media.creator_name);
+  const showCreator = Boolean(media.creator_name);
 
   return (
     <Box sx={{ mb: 4 }}>

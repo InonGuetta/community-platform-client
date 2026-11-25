@@ -78,15 +78,6 @@ describe("opening", () => {
     expect(tile.querySelector("a a")).toBeNull();
   });
 
-  test("a leaked pipeline name (AI, ToolLLM) shows no lecturer line", () => {
-    const { unmount } = render(<MediaTile item={{ ...base, creator_name: "ToolLLM" }} onOpenCreator={vi.fn()} />);
-    expect(screen.queryByText("ToolLLM")).toBeNull();
-    expect(screen.queryByRole("button", { name: /לכל השיעורים של/ })).toBeNull();
-    unmount();
-    render(<MediaTile item={{ ...base, creator_name: "AI" }} />);
-    expect(screen.queryByText("AI")).toBeNull();
-  });
-
   // PRD ATTR-10 — without also opening the lesson.
   test("the lecturer's name opens their page, and only that", () => {
     const onOpenCreator = vi.fn();

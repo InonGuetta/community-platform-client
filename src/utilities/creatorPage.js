@@ -22,12 +22,3 @@ export const hasCreatorPage = (name) =>
 // the system's own word, so it is translated.
 export const creatorDisplayName = (name) =>
   !name || name.trim() === defaultCreatorName ? i18n.t("format:creatorNone") : name;
-
-// The pipeline's own default sometimes lands in creator_name as "AI" or
-// "ToolLLM" — a value that leaks from the tooling, not a person. A screen shows
-// no creator line for it.
-// TODO(UI_UX_FIXES 5.2): remove once the server stops writing these and the
-// existing rows are cleaned.
-const LEAKED_CREATORS = ["ai", "toolllm"];
-export const isLeakedCreator = (name) =>
-  typeof name === "string" && LEAKED_CREATORS.includes(name.trim().toLowerCase());

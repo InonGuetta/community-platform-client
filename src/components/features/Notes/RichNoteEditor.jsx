@@ -287,7 +287,7 @@ const RichNoteEditor = forwardRef(({
 
   // A chip that IS a bookmark (data-bookmark-id) is renamed by renaming the
   // bookmark: the name lives there, and every chip pointing at it — in this
-  // note, in others, and the row under "הערות אישיות" — follows. The chip on
+  // note, in others, and the row under "סימניות" — follows. The chip on
   // screen is updated at once so the dialog's answer shows immediately, but the
   // note is NOT marked as changed: nothing about the note itself was edited,
   // and a "not saved" warning for a name that is already saved would be false.

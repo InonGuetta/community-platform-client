@@ -11,7 +11,7 @@
     "summary": "Résumé",
     "chapters": "Chapitres",
     "transcript": "Transcription",
-    "notes": "Notes personnelles",
+    "notes": "Signets",
     "sessionChat": "Chat de la séance",
     "discuss": "Discussion avec l'IA",
     "transcriptView": "Affichage de la transcription",
@@ -220,7 +220,7 @@
     "share": "Partager"
   },
   "notebook": {
-    "title": "Mon carnet pour ce cours",
+    "title": "Mon carnet",
     "all": "Vers tout le carnet",
     "newNote": "Nouvelle note pour le cours",
     "empty": "Il n'y a pas encore de note pour ce cours. Cliquez sur « Nouvelle note pour le cours » pour commencer à écrire.",

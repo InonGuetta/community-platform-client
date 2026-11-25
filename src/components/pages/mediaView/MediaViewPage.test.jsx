@@ -121,19 +121,19 @@ test("shows a spinner rather than a broken page while the media is still loading
 // The tab set is built as a list precisely so a document can drop two of them.
 // Hard-coded indices used to point at the wrong panel the moment the set changed.
 describe("which tabs a media type offers", () => {
-  // "דיון עם AI" is last in the list — to the LEFT of "הערות אישיות" in this
+  // "דיון עם AI" is last in the list — to the LEFT of "סימניות" in this
   // right-to-left row, which is where it was asked to be.
   test("audio and video get all five, the discussion last", () => {
     renderPage({ media: audio, isText: false });
     expect(screen.getAllByRole("tab").map((t) => t.textContent))
-      .toEqual(["סיכום", "פרקים", "תמלול", "הערות אישיות", "דיון עם AI"]);
+      .toEqual(["סיכום", "פרקים", "תמלול", "סימניות", "דיון עם AI"]);
   });
 
   // A book has no timeline to place a chapter on and no transcript to edit.
   test("a document drops chapters and transcript, and keeps the discussion", () => {
     renderPage({ media: book, isText: true });
     expect(screen.getAllByRole("tab").map((t) => t.textContent))
-      .toEqual(["סיכום", "הערות אישיות", "דיון עם AI"]);
+      .toEqual(["סיכום", "סימניות", "דיון עם AI"]);
   });
 
   test("a recording's discussion seeks the player, and has no reader to open", async () => {

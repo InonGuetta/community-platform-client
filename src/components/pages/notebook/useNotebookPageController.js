@@ -72,7 +72,7 @@ export const useNotebookPageController = () => {
 
   // Every chip that is a bookmark shows that bookmark's current name — this page
   // holds all of the user's bookmarks, so all of them. A rename in the sidebar,
-  // under a lesson's "הערות אישיות", or with a chip's pencil is one value seen
+  // under a lesson's "סימניות", or with a chip's pencil is one value seen
   // everywhere. See syncChipNames.
   const names = useMemo(() => bookmarkNames(bookmarks), [bookmarks]);
 

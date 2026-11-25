@@ -239,7 +239,7 @@ const useLessonNotebook = ({
     onDelete: () => setDeleteTarget(note),
     onOpenSource: openSource,
     // The pencil on a chip that is a bookmark renames the bookmark — one value,
-    // shown in the note and under "הערות אישיות" alike.
+    // shown in the note and under "סימניות" alike.
     onRenameSource: (bookmarkId, name) => dispatch(updateBookmark({ id: bookmarkId, note: name })),
     onDropSource: (bookmark, point) => {
       editorApis.current.get(note.id)?.insertSource(bookmark, point);

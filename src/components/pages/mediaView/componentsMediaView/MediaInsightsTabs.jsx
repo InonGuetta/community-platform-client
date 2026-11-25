@@ -71,7 +71,7 @@ const MediaInsightsTabs = ({
     ...(notesPanel ? [{ key: "notes", label: t("tabs.notes") }] : []),
     ...(sessionChatPanel ? [{ key: "sessionChat", label: t("tabs.sessionChat") }] : []),
     // Last in the list, which in this right-to-left row is to the LEFT of
-    // "הערות אישיות". Offered for books too: a book's text is in the same
+    // "סימניות". Offered for books too: a book's text is in the same
     // chunks a recording's transcript is.
     ...(discussionPanel ? [{ key: "discuss", label: t("tabs.discuss") }] : []),
   ];

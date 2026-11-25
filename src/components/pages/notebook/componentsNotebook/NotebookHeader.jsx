@@ -8,7 +8,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import AddIcon from "@mui/icons-material/Add";
-import IosShareIcon from "@mui/icons-material/IosShare";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
@@ -47,7 +47,7 @@ const NotebookHeader = ({
             <span>
               <Button
                 variant="soft"
-                startIcon={exporting ? <CircularProgress size={18} /> : <IosShareIcon />}
+                startIcon={exporting ? <CircularProgress size={18} /> : <FileDownloadOutlinedIcon />}
                 onClick={(e) => setExportAnchor(e.currentTarget)}
                 disabled={exporting || notesToExport.length === 0}
                 aria-haspopup="menu"

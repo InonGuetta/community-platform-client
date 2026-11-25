@@ -98,8 +98,8 @@ describe("forgetting a password", () => {
     authApi.forgotPassword.mockResolvedValue({});
     renderAt("/forgot", <ForgotPassword />);
     fireEvent.change(screen.getByLabelText(/אימייל/), { target: { value: "  a@b.co " } });
-    fireEvent.click(screen.getByRole("button", { name: "שלח קישור" }));
-    expect(await screen.findByText("בדוק את תיבת הדואר")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "שליחת קישור" }));
+    expect(await screen.findByText("כדאי לבדוק את תיבת הדואר")).toBeInTheDocument();
     expect(authApi.forgotPassword).toHaveBeenCalledWith("a@b.co");
   });
 
@@ -107,8 +107,8 @@ describe("forgetting a password", () => {
     authApi.forgotPassword.mockRejectedValue(new Error("Network Error"));
     renderAt("/forgot", <ForgotPassword />);
     fireEvent.change(screen.getByLabelText(/אימייל/), { target: { value: "a@b.co" } });
-    fireEvent.click(screen.getByRole("button", { name: "שלח קישור" }));
-    expect(await screen.findByText("לא ניתן לשלוח כרגע. נסה שוב בעוד רגע.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "שליחת קישור" }));
+    expect(await screen.findByText("לא ניתן לשלוח כרגע. אפשר לנסות שוב בעוד רגע.")).toBeInTheDocument();
   });
 });
 
@@ -141,12 +141,12 @@ describe("signing in through a provider", () => {
   // Most-used first: the order is the request, not an accident of the markup.
   test("sign-in offers Google, then Apple, then LinkedIn", () => {
     renderAt("/sign-in-page", <SignIn />);
-    expect(providerButtons()).toEqual(["התחבר באמצעות Google", "התחבר באמצעות Apple", "התחבר באמצעות LinkedIn"]);
+    expect(providerButtons()).toEqual(["התחברות באמצעות Google", "התחברות באמצעות Apple", "התחברות באמצעות LinkedIn"]);
   });
 
   test("sign-up offers the same three, in the same order", () => {
     renderAt("/sign-up-page", <SignUp />);
-    expect(providerButtons()).toEqual(["הירשם באמצעות Google", "הירשם באמצעות Apple", "הירשם באמצעות LinkedIn"]);
+    expect(providerButtons()).toEqual(["הרשמה באמצעות Google", "הרשמה באמצעות Apple", "הרשמה באמצעות LinkedIn"]);
   });
 
   test("a provider not set up yet is said in Hebrew, naming it", () => {

@@ -27,7 +27,8 @@
     "trail": "Position dans l'arbre des étiquettes",
     "noMatch": "Aucune étiquette de ce nom",
     "noChildren": "Il n'y a aucune étiquette sous « {{name}} ». La nouvelle sera la première ici.",
-    "below": "{{count}} étiquettes en dessous"
+    "below_one": "1 étiquette en dessous",
+    "below_other": "{{count}} étiquettes en dessous"
   },
   "proposals": {
     "add": "Ajouter une étiquette",

@@ -104,5 +104,12 @@
       "resendIn": "New code in {{seconds}}s",
       "verifyFailed": "The code can't be verified right now. Try again."
     }
+  },
+  "nav": {
+    "label": "Jump to a section",
+    "details": "Details",
+    "phone": "Phone",
+    "notifications": "Notifications",
+    "password": "Password"
   }
 }

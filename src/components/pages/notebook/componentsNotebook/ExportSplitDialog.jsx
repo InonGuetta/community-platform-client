@@ -384,7 +384,7 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
           disabled={exporting || plan.length === 0}
           startIcon={exporting ? <CircularProgress size={18} /> : null}
         >
-          {exporting ? t("export.exporting") : t("export.splitDialog.run", { n: plan.length })}
+          {exporting ? t("export.exporting") : t("export.splitDialog.run", { count: plan.length })}
         </Button>
       </DialogActions>
     </Dialog>

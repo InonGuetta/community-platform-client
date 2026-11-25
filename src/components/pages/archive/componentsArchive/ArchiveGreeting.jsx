@@ -3,7 +3,8 @@ import { useGreeting } from "./useGreeting";
 
 // "בוקר טוב, דנה" / "Good evening, Dana" — the part of the day on the reader's
 // clock, in the interface language, with the display name as they wrote it
-// (<bdi>: a Hebrew name in an English sentence keeps its own direction).
+// (<bdi>: a Hebrew name in an English sentence keeps its own direction; the
+// kicker is drawn in capitals, but a name is shown as it was written — UI_UX_FIXES 4.8).
 //
 // The archive's kicker (decision 1, step 1: "kicker ברכה"): plain text that
 // PageHeader sets small, in the accent, above the title. It was a large
@@ -14,7 +15,7 @@ const ArchiveGreeting = ({ name }) => {
   const greeting = t(`greeting.${part}`);
 
   return name ? (
-    <Trans t={t} i18nKey="greeting.named" values={{ greeting, name }} components={{ name: <bdi /> }} />
+    <Trans t={t} i18nKey="greeting.named" values={{ greeting, name }} components={{ name: <bdi style={{ textTransform: "none" }} /> }} />
   ) : (
     greeting
   );

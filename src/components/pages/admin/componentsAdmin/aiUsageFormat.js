@@ -21,7 +21,7 @@ export const formatUsd = (value) => {
 // for everything else — in thousands, because a single lecture is tens of
 // thousands of them.
 export const formatUsage = ({ audio_seconds: seconds = 0, input_tokens: input = 0, output_tokens: output = 0 }) => {
-  if (seconds > 0) return i18n.t("admin:ai.audioMinutes", { n: formatNumber(Math.round(seconds / 60)) });
+  if (seconds > 0) return i18n.t("admin:ai.audioMinutes", { count: Math.round(seconds / 60), n: formatNumber(Math.round(seconds / 60)) });
   const thousands = (input + output) / 1000;
   return i18n.t("admin:ai.kiloTokens", { n: thousands < 10 ? thousands.toFixed(1) : formatNumber(Math.round(thousands)) });
 };

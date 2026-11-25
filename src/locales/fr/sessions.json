@@ -19,12 +19,13 @@
     "courseNotified": "Les élèves du cours seront notifiés",
     "allNotified": "Les élèves de tous vos cours seront notifiés",
     "noCourse": "Sans cours",
-    "when": "Quand (vide = commencer maintenant)",
-    "schedule": "Programmer pour plus tard",
+    "when": "Quand",
     "scheduleSubmit": "Programmer la séance",
     "createStart": "Créer et commencer",
     "pastTime": "Cette date est déjà passée",
-    "namePlaceholder": "Facultatif. Sans titre, la séance s’affiche comme « {{name}} »"
+    "namePlaceholder": "Facultatif. Sans titre, la séance s’affiche comme « {{name}} »",
+    "now": "Maintenant",
+    "later": "Plus tard"
   },
   "notices": {
     "cannotJoin": "Impossible de rejoindre la séance",
@@ -97,5 +98,6 @@
     "savedLessonMissing_one": "L'enregistrement a été sauvegardé et est devenu un cours (brouillon), mais sa dernière partie n'est pas parvenue au serveur. Vous pouvez lancer sa transcription depuis la page du cours.",
     "savedLessonMissing_other": "L'enregistrement a été sauvegardé et est devenu un cours (brouillon), mais ses {{count}} dernières parties ne sont pas parvenues au serveur. Vous pouvez lancer sa transcription depuis la page du cours.",
     "finishFailed": "La sauvegarde de l'enregistrement n'a pas abouti. Ce qui est déjà parvenu au serveur sera conservé à la fin de la séance."
-  }
+  },
+  "noneActiveText": "Une séance en direct est un cours ou une conversation en temps réel, avec voix et vidéo. L'hôte l'ouvre et chacun la rejoint d'ici."
 }

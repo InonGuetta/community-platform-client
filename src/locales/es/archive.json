@@ -45,9 +45,10 @@
     "removedLabel": "Sin:",
     "chosenSpoken": "Filtrado por",
     "removedSpoken": "Sacado del filtro",
-    "tagCount": "{{count}} etiquetas",
     "remove": "Quitar {{name}} del filtro",
-    "clear": "Borrar las etiquetas"
+    "clear": "Borrar las etiquetas",
+    "tagCount_one": "1 etiqueta",
+    "tagCount_other": "{{count}} etiquetas"
   },
   "tree": {
     "back": "Atrás",
@@ -61,7 +62,6 @@
     "tooMany": "Se muestran {{shown}} de {{total}} etiquetas: conviene acotar la búsqueda",
     "wholeBranch": "El número incluye toda la rama, también lo que se sacó de ella",
     "partial": "Elegido en parte: se sacaron algunas categorías de esta rama",
-    "partialSpoken": "Elegido en parte, {{count}} etiquetas",
     "inside": "Dentro de {{path}}",
     "mark": {
       "included": "Elegido · haz clic de nuevo para quitarlo",
@@ -77,7 +77,9 @@
       "inheritedExcluded": "Fuera del filtro a través de una categoría principal · haz clic para restablecerlo",
       "contains": "Hay algo elegido dentro · haz clic para elegirlo todo",
       "none": "No elegido · haz clic para elegirlo"
-    }
+    },
+    "partialSpoken_one": "Elegido en parte, 1 etiqueta",
+    "partialSpoken_other": "Elegido en parte, {{count}} etiquetas"
   },
   "edit": {
     "detailsTitle": "Editar datos — {{title}}",
@@ -100,7 +102,14 @@
   "smartSearch": {
     "placeholder": "Búsqueda profunda inteligente",
     "run": "Buscar",
-    "none": "No se encontraron resultados."
+    "none": "No se encontraron resultados.",
+    "introTitle": "Busca por significado, no solo por palabras",
+    "introText": "Describe con tus palabras lo que buscas y obtén los pasajes relevantes de las clases y los libros, aunque esas palabras exactas no aparezcan.",
+    "examples": [
+      "Qué se dice sobre la intención en la oración",
+      "Fuentes sobre las leyes de muktzé",
+      "La discusión entre Beit Shamai y Beit Hilel"
+    ]
   },
   "greeting": {
     "morning": "Buenos días",

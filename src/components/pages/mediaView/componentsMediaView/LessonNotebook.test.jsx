@@ -212,13 +212,13 @@ describe("saving a card with no title", () => {
   test("a name given in the dialog is what the card is saved under", async () => {
     await pressSave();
     fireEvent.change(await screen.findByLabelText("שם הכרטיסייה"), { target: { value: "מצוות ציצית" } });
-    fireEvent.click(screen.getByRole("button", { name: "שמור" }));
+    fireEvent.click(screen.getByRole("button", { name: "שמירה" }));
     await waitFor(() => expect(updateNote).toHaveBeenCalledWith(30, expect.objectContaining({ title: "מצוות ציצית" })));
   });
 
-  test("'שמור בכל זאת' saves it untitled", async () => {
+  test("'שמירה בכל זאת' saves it untitled", async () => {
     await pressSave();
-    fireEvent.click(await screen.findByRole("button", { name: "שמור בכל זאת" }));
+    fireEvent.click(await screen.findByRole("button", { name: "שמירה בכל זאת" }));
     await waitFor(() => expect(updateNote).toHaveBeenCalledWith(30, expect.objectContaining({ title: "" })));
   });
 

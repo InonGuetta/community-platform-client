@@ -1,6 +1,6 @@
 {
   "title": "Téléverser un média",
-  "chooseFile": "Cliquez pour choisir un fichier",
+  "chooseFile": "Glissez un fichier ici ou cliquez pour choisir",
   "uploading": "Téléversement... {{progress}} %",
   "processing": "Traitement sur le serveur...",
   "uploadingShort": "Téléversement...",
@@ -13,8 +13,10 @@
     "tagsHelper": "Jusqu'à {{max}} étiquettes. Vous pouvez aussi passer — nous proposerons des étiquettes après le téléversement.",
     "course": "Cours",
     "courseHelper": "Sans cours — le contenu est montré à tous les élèves",
-    "noCourse": "Sans cours (bibliothèque générale)"
+    "noCourse": "Sans cours (bibliothèque générale)",
+    "typeAuto": "Détecté automatiquement d'après le fichier. Vous pouvez le modifier."
   },
   "tagsSaved": "Étiquettes enregistrées",
-  "tagsFailed": "L'enregistrement des étiquettes a échoué"
+  "tagsFailed": "L'enregistrement des étiquettes a échoué",
+  "notAllowed": "Seuls les fichiers vidéo, audio, PDF, TXT ou Word peuvent être envoyés"
 }

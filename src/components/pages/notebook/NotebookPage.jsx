@@ -57,6 +57,9 @@ const NotebookPage = () => {
     selectedCount,
     selectedIds,
     selectedNotes,
+    selecting,
+    startSelecting,
+    cancelSelecting,
     setActiveNoteId,
     setDeleteTargets,
     setDrafts,
@@ -80,6 +83,12 @@ const NotebookPage = () => {
     toggleAllVisible,
     toggleSelected,
   } = useNotebookPageController();
+
+  // The strip is live whenever there is a note to format (UI_UX_FIXES 4.4):
+  // before the caret has been anywhere it aims at the first note, and the
+  // press moves the focus into that editor (exec restores or creates the
+  // selection) and applies there.
+  const targetNoteId = activeNoteId ?? filtered[0]?.id ?? null;
 
   return (
     // Redesign v4 (screen 05). PageContainer already gives the page its width
@@ -144,6 +153,9 @@ const NotebookPage = () => {
             selectedCount={selectedCount}
             selectedIds={selectedIds}
             selectedNotes={selectedNotes}
+            selecting={selecting}
+            startSelecting={startSelecting}
+            cancelSelecting={cancelSelecting}
             setDeleteTargets={setDeleteTargets}
             setSearch={setSearch}
             someVisibleSelected={someVisibleSelected}
@@ -176,16 +188,14 @@ const NotebookPage = () => {
             }}
           >
             <NoteToolbar
-              onCommand={(command, value) => editorApis.current.get(activeNoteId)?.exec(command, value)}
+              onCommand={(command, value) => editorApis.current.get(targetNoteId)?.exec(command, value)}
               // A pixel size is not an execCommand — see
               // RichNoteEditor.setFontSize — so it has its own way in rather
               // than a fake command name.
-              onFontSize={(px) => editorApis.current.get(activeNoteId)?.setFontSize(px)}
+              onFontSize={(px) => editorApis.current.get(targetNoteId)?.setFontSize(px)}
               formats={formats}
-              // Nothing to format until the caret is in one of the cards. The
-              // strip stays in place and fades, so the column does not change
-              // shape as the user moves between notes.
-              disabled={!activeNoteId}
+              // Faded only when there is no note at all to format.
+              disabled={!targetNoteId}
             />
           </Box>
 
@@ -265,8 +275,8 @@ const NotebookPage = () => {
         current={sourceStyle}
         exporting={exporting}
         summary={pendingExport?.books
-          ? t("export.summaryFiles", { files: pendingExport.books.length, format: pendingExport.format === "pdf" ? "PDF" : "Word" })
-          : t("export.summaryNotes", { notes: notesToExport.length, format: pendingExport?.format === "pdf" ? "PDF" : "Word" })}
+          ? t("export.summaryFiles", { count: pendingExport.books.length, format: pendingExport.format === "pdf" ? "PDF" : "Word" })
+          : t("export.summaryNotes", { count: notesToExport.length, format: pendingExport?.format === "pdf" ? "PDF" : "Word" })}
         onChoose={runExport}
         onClose={() => setPendingExport(null)}
       />

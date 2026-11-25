@@ -64,7 +64,7 @@ const LessonNotebook = ({ media, isText, currentTime, readerPage, bookmarks, onS
             onCommand={notebook.execCommand}
             onFontSize={notebook.setFontSize}
             formats={notebook.formats}
-            disabled={!notebook.activeNoteId}
+            disabled={!notebook.targetNoteId}
           />
         </Box>
       )}

@@ -32,9 +32,8 @@
       "suggested_questions": "שאלות מוצעות בצ'אט"
     },
     "lessThanCent": "פחות מסנט",
-    "audioMinutes": "{{n}} דקות שמע",
     "kiloTokens": "{{n}} אלף טוקנים",
-    "retry": "נסה שוב",
+    "retry": "ניסיון חוזר",
     "loadFailed": "לא ניתן לטעון את נתוני העלות.",
     "title": "עלות AI החודש",
     "refresh": "רענון",
@@ -48,7 +47,10 @@
     "kind": "סוג",
     "usage": "שימוש",
     "calls": "קריאות",
-    "cost": "עלות"
+    "cost": "עלות",
+    "audioMinutes_one": "דקת שמע אחת",
+    "audioMinutes_two": "שתי דקות שמע",
+    "audioMinutes_other": "{{n}} דקות שמע"
   },
   "donations": {
     "title": "תרומות",
@@ -114,9 +116,9 @@
     "approved": "התגית «{{name}}» אושרה ונכנסה למערכת.",
     "approvedTagged_one": "התגית «{{name}}» אושרה ונכנסה למערכת ונוספה לשיעור אחד.",
     "approvedTagged_other": "התגית «{{name}}» אושרה ונכנסה למערכת ונוספה ל-{{count}} שיעורים.",
-    "approveFailed": "האישור נכשל. נסה שוב.",
+    "approveFailed": "האישור נכשל. אפשר לנסות שוב.",
     "rejected": "ההצעה «{{name}}» נדחתה.",
-    "rejectFailed": "הדחייה נכשלה. נסה שוב."
+    "rejectFailed": "הדחייה נכשלה. אפשר לנסות שוב."
   },
   "stats": {
     "activeUsers": "משתמשים פעילים",

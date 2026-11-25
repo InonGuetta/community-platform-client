@@ -124,7 +124,8 @@
     "count_other": "{{count}} courses",
     "awaiting": "Awaiting the lecturer's approval",
     "cancelRequest": "Cancel the request",
-    "none": "You haven't been added to any course yet. Received a code from the lecturer? You can join with it.",
-    "join": "Join a course"
+    "none": "No courses yet",
+    "join": "Join a course",
+    "noneText": "Received a code from the lecturer? You can join with it."
   }
 }

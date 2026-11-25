@@ -27,7 +27,8 @@
     "trail": "Position in the tag tree",
     "noMatch": "No tag with this name",
     "noChildren": "There are no tags under \"{{name}}\". The new tag will be the first here.",
-    "below": "{{count}} tags below"
+    "below_one": "1 tag below",
+    "below_other": "{{count}} tags below"
   },
   "proposals": {
     "add": "Add tag",

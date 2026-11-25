@@ -31,7 +31,7 @@ import { creatorDisplayName } from "../../../utilities/creatorPage";
 // changing it afterwards would send a recording down the book pipeline. The tags
 // have their own dialog, which carries what this form cannot: proposing a new
 // tag for approval.
-const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [], knownTags = [], editing = false }) => {
+const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [], knownTags = [], editing = false, typeAuto = false }) => {
   const { t } = useTranslation(["upload", "format"]);
   return (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -60,6 +60,8 @@ const ContentFieldsUpload = ({ values, onChange, courses = [], knownCreators = [
         select
         fullWidth
         required
+        // Said once, while the type is still what the file's own type gave.
+        helperText={typeAuto ? t("fields.typeAuto") : undefined}
       >
         {Object.values(mediaTypes).map((type) => (
           <MenuItem key={type} value={type}>{mediaTypeLabels[type] || type}</MenuItem>

@@ -104,5 +104,12 @@
       "resendIn": "Nouveau code dans {{seconds}} s",
       "verifyFailed": "Impossible de vérifier le code pour le moment. Réessayez."
     }
+  },
+  "nav": {
+    "label": "Aller à une section",
+    "details": "Informations",
+    "phone": "Téléphone",
+    "notifications": "Notifications",
+    "password": "Mot de passe"
   }
 }

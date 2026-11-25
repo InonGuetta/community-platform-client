@@ -90,10 +90,10 @@ describe("dividing a selection into notebooks", () => {
     const onExport = setup();
 
     // The second notebook exists from the start and holds nothing.
-    expect(exportButton()).toHaveTextContent("ייצוא 1 קבצים");
+    expect(exportButton()).toHaveTextContent("ייצוא קובץ אחד");
 
     choose(combos()[1], "2");
-    expect(exportButton()).toHaveTextContent("ייצוא 2 קבצים");
+    expect(exportButton()).toHaveTextContent("ייצוא שני קבצים");
 
     fireEvent.click(exportButton());
     expect(onExport.mock.calls[0][0].map((book) => book.name)).toEqual(["מחברת 1", "מחברת 2"]);

@@ -97,6 +97,10 @@ const useLessonNotebook = ({
     draftFor, isDirty, activeNoteId, setActiveNoteId, editorApis, cardNodes, setDrafts, setFormats,
   } = editing;
 
+  // The strip aims at the caret's note, or the first one before there is a
+  // caret (UI_UX_FIXES 4.4): it is live whenever there is a note.
+  const targetNoteId = activeNoteId ?? notes[0]?.id ?? null;
+
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [preview, setPreview] = useState(null);
 
@@ -249,9 +253,10 @@ const useLessonNotebook = ({
     cardProps,
     handleCreate,
     activeNoteId,
+    targetNoteId,
     formats: editing.formats,
-    execCommand: (command, value) => editorApis.current.get(activeNoteId)?.exec(command, value),
-    setFontSize: (px) => editorApis.current.get(activeNoteId)?.setFontSize(px),
+    execCommand: (command, value) => editorApis.current.get(targetNoteId)?.exec(command, value),
+    setFontSize: (px) => editorApis.current.get(targetNoteId)?.setFontSize(px),
     deleteTarget,
     cancelDelete: () => setDeleteTarget(null),
     handleDeleteConfirm,

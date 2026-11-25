@@ -66,5 +66,5 @@ test("a PDF that cannot be built is said", async () => {
   downloadHebrewPdf.mockRejectedValue(new Error("font"));
   const { store } = renderMenu();
   fireEvent.click(screen.getByText("הורדת תמלול (PDF)"));
-  await waitFor(() => expect(notices(store)).toContain("יצירת ה-PDF נכשלה. נסה שוב."));
+  await waitFor(() => expect(notices(store)).toContain("יצירת ה-PDF נכשלה. אפשר לנסות שוב."));
 });

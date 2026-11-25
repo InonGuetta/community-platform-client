@@ -271,7 +271,7 @@ describe("the save button", () => {
 // three-hour Whisper transcription, which is not what the button should mean —
 // so it is offered for documents only, and only to someone allowed to write.
 describe("who is offered the summary action", () => {
-  const generateButton = () => screen.queryByRole("button", { name: /הפק סיכום/ });
+  const generateButton = () => screen.queryByRole("button", { name: /הפקת סיכום/ });
 
   test("a document, for someone who may edit it", () => {
     renderPage({ media: book, isText: true, canEditTranscript: true, transcript: null });

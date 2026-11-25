@@ -47,7 +47,7 @@ const onPage = {
 describe("where a bookmark is made", () => {
   test("a recording offers the form, because it has a playhead to read", () => {
     withStore(<NotesPanel bookmarks={[]} onCreateBookmark={vi.fn()} />);
-    expect(screen.getByLabelText("הוסף הערה בזמן הנוכחי")).toBeInTheDocument();
+    expect(screen.getByLabelText("הוספת הערה בזמן הנוכחי")).toBeInTheDocument();
   });
 
   // A book is marked in the book — the words are selected on the page and
@@ -57,8 +57,8 @@ describe("where a bookmark is made", () => {
   // worse than an instruction, because it invites the press.
   test("a book is told where the gesture is, and offered no form", () => {
     withStore(<NotesPanel bookmarks={[]} isText />);
-    expect(screen.queryByLabelText("הוסף הערה בזמן הנוכחי")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "שמור" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("הוספת הערה בזמן הנוכחי")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "שמירה" })).not.toBeInTheDocument();
     // Nothing to pick up, and nothing to press.
     expect(screen.queryByLabelText("סימנייה חדשה")).not.toBeInTheDocument();
     expect(screen.getByText(/סמנו את השורה בספר/)).toBeInTheDocument();
@@ -72,8 +72,8 @@ describe("where a bookmark is made", () => {
   test("the recording's form still saves the current second with its note", () => {
     const onCreateBookmark = vi.fn();
     withStore(<NotesPanel bookmarks={[]} currentTime={91.7} onCreateBookmark={onCreateBookmark} />);
-    fireEvent.change(screen.getByLabelText("הוסף הערה בזמן הנוכחי"), { target: { value: "כאן" } });
-    fireEvent.click(screen.getByRole("button", { name: "שמור" }));
+    fireEvent.change(screen.getByLabelText("הוספת הערה בזמן הנוכחי"), { target: { value: "כאן" } });
+    fireEvent.click(screen.getByRole("button", { name: "שמירה" }));
     expect(onCreateBookmark).toHaveBeenCalledWith(91, "כאן");
   });
 });

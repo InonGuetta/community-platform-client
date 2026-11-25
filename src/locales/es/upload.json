@@ -1,6 +1,6 @@
 {
   "title": "Subir contenido",
-  "chooseFile": "Haz clic para elegir un archivo",
+  "chooseFile": "Arrastra un archivo aquí o haz clic para elegir",
   "uploading": "Subiendo... {{progress}} %",
   "processing": "Procesando en el servidor...",
   "uploadingShort": "Subiendo...",
@@ -13,8 +13,10 @@
     "tagsHelper": "Hasta {{max}} etiquetas. También puedes saltarte esto: sugeriremos etiquetas después de la subida.",
     "course": "Curso",
     "courseHelper": "Sin curso: el contenido se muestra a todos los alumnos",
-    "noCourse": "Sin curso (biblioteca general)"
+    "noCourse": "Sin curso (biblioteca general)",
+    "typeAuto": "Detectado automáticamente según el archivo. Puedes cambiarlo."
   },
   "tagsSaved": "Etiquetas guardadas",
-  "tagsFailed": "No se pudieron guardar las etiquetas"
+  "tagsFailed": "No se pudieron guardar las etiquetas",
+  "notAllowed": "Solo se pueden subir archivos de video, audio, PDF, TXT o Word"
 }

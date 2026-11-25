@@ -32,7 +32,6 @@
       "suggested_questions": "Preguntas sugeridas del chat"
     },
     "lessThanCent": "Menos de un céntimo",
-    "audioMinutes": "{{n}} minutos de audio",
     "kiloTokens": "{{n}} mil tokens",
     "retry": "Intentarlo de nuevo",
     "loadFailed": "No se pueden cargar los datos de coste.",
@@ -48,7 +47,9 @@
     "kind": "Tipo",
     "usage": "Uso",
     "calls": "Llamadas",
-    "cost": "Coste"
+    "cost": "Coste",
+    "audioMinutes_one": "1 minuto de audio",
+    "audioMinutes_other": "{{n}} minutos de audio"
   },
   "donations": {
     "title": "Donaciones",

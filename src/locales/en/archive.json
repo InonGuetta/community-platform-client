@@ -45,9 +45,10 @@
     "removedLabel": "Without:",
     "chosenSpoken": "Filtered by",
     "removedSpoken": "Taken out of the filter",
-    "tagCount": "{{count}} tags",
     "remove": "Remove {{name}} from the filter",
-    "clear": "Clear the tags"
+    "clear": "Clear the tags",
+    "tagCount_one": "1 tag",
+    "tagCount_other": "{{count}} tags"
   },
   "tree": {
     "back": "Back",
@@ -61,7 +62,6 @@
     "tooMany": "Showing {{shown}} of {{total}} tags — try narrowing the search",
     "wholeBranch": "The number covers the whole branch, including what was taken out of it",
     "partial": "Partly chosen — some categories in this branch were taken out",
-    "partialSpoken": "Partly chosen, {{count}} tags",
     "inside": "Inside {{path}}",
     "mark": {
       "included": "Chosen · click again to unchoose",
@@ -77,7 +77,9 @@
       "inheritedExcluded": "Outside the filter through a parent category · click to restore",
       "contains": "Something inside is chosen · click to choose all of it",
       "none": "Not chosen · click to choose"
-    }
+    },
+    "partialSpoken_one": "Partly chosen, 1 tag",
+    "partialSpoken_other": "Partly chosen, {{count}} tags"
   },
   "edit": {
     "detailsTitle": "Edit details — {{title}}",
@@ -100,7 +102,14 @@
   "smartSearch": {
     "placeholder": "Smart deep search",
     "run": "Search",
-    "none": "No matching results found."
+    "none": "No matching results found.",
+    "introTitle": "Search by meaning, not only by words",
+    "introText": "Describe what you are looking for in your own words and get the relevant passages from the lessons and books, even when those exact words are not there.",
+    "examples": [
+      "What is said about intention in prayer",
+      "Sources on the laws of muktzeh",
+      "The dispute between Beit Shammai and Beit Hillel"
+    ]
   },
   "greeting": {
     "morning": "Good morning",

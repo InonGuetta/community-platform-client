@@ -12,6 +12,7 @@ import { roleLabels } from "../../../utilities/constant";
 import RoleRequestCard from "./RoleRequestCard";
 import NotificationPreferencesCard from "./NotificationPreferencesCard";
 import PhoneCard from "./PhoneCard";
+import ProfileSectionNav, { SECTION_SCROLL_MARGIN } from "./ProfileSectionNav";
 import LanguageSwitcher from "../../layout/LanguageSwitcher";
 import AvatarEditor from "../../features/Avatar/AvatarEditor";
 import { useProfilePageController, MIN_PASSWORD_LENGTH } from "./useProfilePageController";
@@ -52,7 +53,10 @@ const ProfilePage = () => {
   return (
     <Box>
       <PageHeader title={t("title")} />
-      <Box sx={{ display: "grid", gap: 3 }}>
+      <ProfileSectionNav />
+      <Box sx={{ display: "grid", gap: 3, "& > [id]": { scrollMarginTop: `${SECTION_SCROLL_MARGIN}px` } }}>
+        {/* The picture and the name are one section for the strip above. */}
+        <Box id="profile-details" sx={{ display: "grid", gap: 3 }}>
         <SectionCard>
           {/* The picture, the means to upload, change or remove it, and — beside
               it — who the account is. The email is shown and NOT editable:
@@ -106,14 +110,16 @@ const ProfilePage = () => {
             <LanguageSwitcher variant="field" />
           </Box>
         </SectionCard>
+        </Box>
         {/* Between the profile and the password, because it is about WHO the
             account is rather than how it is secured. Renders nothing for an
             admin, who has nothing left to ask for. */}
         <RoleRequestCard />
         {/* A mobile number for SMS (AUTH-13), just above the choices it enables. */}
-        <PhoneCard />
+        <Box id="profile-phone"><PhoneCard /></Box>
         {/* NOTIF-6 — the place every notification mail's footer points back to. */}
-        <NotificationPreferencesCard />
+        <Box id="profile-notifications"><NotificationPreferencesCard /></Box>
+        <Box id="profile-password">
         <SectionCard title={t("password.title")}>
           <Box component="form" onSubmit={handleChangePassword} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {passwordError && <Alert severity="error">{passwordError}</Alert>}
@@ -164,6 +170,7 @@ const ProfilePage = () => {
             </Button>
           </Box>
         </SectionCard>
+        </Box>
       </Box>
     </Box>
   );

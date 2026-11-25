@@ -18,6 +18,7 @@ import DialogContent from "../../features/Dialogs/DialogContent";
 import DialogActions from "../../features/Dialogs/DialogActions";
 import PageHeader from "../../features/PageHeader/PageHeader";
 import EmptyState from "../../features/EmptyState/EmptyState";
+import SegmentedControl from "../../features/SegmentedControl/SegmentedControl";
 import StatusBadge from "../../features/StatusBadge/StatusBadge";
 import MicNoneOutlinedIcon from "@mui/icons-material/MicNoneOutlined";
 import { RADIUS } from "../../../theme/tokens";
@@ -45,6 +46,9 @@ const MAX_PARTICIPANTS = 500;
 const DEFAULT_PARTICIPANTS = 10;
 
 // A session's card: its title, its badges, and what can be done with it.
+// What goes to the server: the choice "now / later" is the dialog's own.
+const createPayload = ({ when, ...rest }) => rest;
+
 const SessionCard = ({ title, badges, actions }) => (
   <Paper sx={{ p: 3, borderRadius: `${RADIUS.card}px`, display: "flex", flexDirection: "column", gap: 2 }}>
     <Typography variant="subtitle1" fontWeight={800} dir="auto">{title}</Typography>
@@ -65,7 +69,9 @@ const SessionsPage = () => {
     title: "",
     sessionType: "group",
     maxParticipants: DEFAULT_PARTICIPANTS,
-    // Empty means "start it now", which is what this dialog has always done.
+    // "now" starts it at once (no time is sent); "later" shows the date field
+    // and sends what is in it (UI_UX_FIXES 4.1).
+    when: "now",
     scheduledAt: "",
     // Empty is a general session (PRD D8).
     courseId: "",
@@ -91,6 +97,7 @@ const SessionsPage = () => {
         <EmptyState
           icon={MicNoneOutlinedIcon}
           title={t("noneActive")}
+          text={t("noneActiveText")}
           action={canCreate ? { label: t("new"), onClick: () => setCreateDialogOpen(true) } : null}
         />
       ) : (
@@ -213,31 +220,40 @@ const SessionsPage = () => {
               </TextField>
             )}
 
-            {/* Empty is the default and means "open it now" — the behaviour this
-                dialog has always had. Filling it in makes the session exist
-                before it begins, which is the whole point of scheduling. */}
-            <TextField
+            {/* "Now" is the default: the behaviour this dialog has always had.
+                "Later" makes the session exist before it begins, which is the
+                whole point of scheduling. */}
+            <SegmentedControl
               label={t("create.when")}
-              type="datetime-local"
-              value={form.scheduledAt}
-              onChange={(e) => setForm((p) => ({ ...p, scheduledAt: e.target.value }))}
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ min: nowInput }}
-              error={scheduledInPast}
-              helperText={scheduledInPast ? t("create.pastTime") : undefined}
               fullWidth
+              value={form.when}
+              onChange={(when) =>
+                setForm((p) => ({ ...p, when, scheduledAt: when === "later" ? p.scheduledAt || defaultScheduledAt() : "" }))
+              }
+              options={[
+                { value: "now", label: t("create.now") },
+                { value: "later", label: t("create.later") },
+              ]}
             />
-            {!form.scheduledAt && (
-              <Button size="small" onClick={() => setForm((p) => ({ ...p, scheduledAt: defaultScheduledAt() }))}>
-                {t("create.schedule")}
-              </Button>
+            {form.when === "later" && (
+              <TextField
+                label={t("create.when")}
+                type="datetime-local"
+                value={form.scheduledAt}
+                onChange={(e) => setForm((p) => ({ ...p, scheduledAt: e.target.value }))}
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ min: nowInput }}
+                error={scheduledInPast}
+                helperText={scheduledInPast ? t("create.pastTime") : undefined}
+                fullWidth
+              />
             )}
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateDialogOpen(false)} variant="outlined">{t("common:actions.cancel")}</Button>
-          <Button onClick={() => handleCreateSession(form)} variant="contained" disabled={scheduledInPast}>
-            {form.scheduledAt ? t("create.scheduleSubmit") : t("create.createStart")}
+          <Button onClick={() => handleCreateSession(createPayload(form))} variant="contained" disabled={scheduledInPast || (form.when === "later" && !form.scheduledAt)}>
+            {form.when === "later" ? t("create.scheduleSubmit") : t("create.createStart")}
           </Button>
         </DialogActions>
       </Dialog>

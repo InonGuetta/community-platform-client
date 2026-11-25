@@ -67,11 +67,11 @@ describe("messageForError", () => {
   // as a value, and not as a fallback.
   test("the server's English message is never what comes out", () => {
     const rejection = { message: "Invalid credentials", code: ERROR_CODES.INVALID_CREDENTIALS };
-    expect(messageForError(rejection, "ההתחברות נכשלה. נסה שוב.")).not.toContain("Invalid");
+    expect(messageForError(rejection, "ההתחברות נכשלה. אפשר לנסות שוב.")).not.toContain("Invalid");
 
     // Even with no code at all, the fallback wins — the message is not consulted.
-    expect(messageForError({ message: "Something went wrong" }, "ההתחברות נכשלה. נסה שוב."))
-      .toBe("ההתחברות נכשלה. נסה שוב.");
+    expect(messageForError({ message: "Something went wrong" }, "ההתחברות נכשלה. אפשר לנסות שוב."))
+      .toBe("ההתחברות נכשלה. אפשר לנסות שוב.");
   });
 
   test("anything unrecognisable degrades to the fallback instead of throwing", () => {

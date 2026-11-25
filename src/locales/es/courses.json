@@ -124,7 +124,8 @@
     "count_other": "{{count}} cursos",
     "awaiting": "Pendientes de aprobación del profesor",
     "cancelRequest": "Cancelar la solicitud",
-    "none": "Todavía no estás en ningún curso. ¿Recibiste un código del profesor? Puedes unirte con él.",
-    "join": "Unirse a un curso"
+    "none": "Todavía no hay cursos",
+    "join": "Unirse a un curso",
+    "noneText": "¿Recibiste un código del profesor? Puedes unirte con él."
   }
 }

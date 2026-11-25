@@ -86,6 +86,7 @@ const MyCoursesPage = () => {
         <EmptyState
           icon={SchoolOutlinedIcon}
           title={t("mine.none")}
+          text={t("mine.noneText")}
           action={{ label: t("mine.join"), onClick: openJoin }}
         />
       ) : (

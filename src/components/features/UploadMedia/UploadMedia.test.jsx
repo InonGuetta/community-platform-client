@@ -149,3 +149,24 @@ describe("the tag question after it", () => {
     expect(screen.queryByTestId("suggest")).not.toBeInTheDocument();
   });
 });
+
+// UI_UX_FIXES 4.12: a file dropped on the area is picked like a chosen one,
+// its type is read off it and can still be changed; other kinds are refused.
+describe("dropping a file", () => {
+  const drop = (file) =>
+    fireEvent.drop(screen.getByRole("button", { name: /גררו קובץ לכאן/ }), { dataTransfer: { files: [file] } });
+
+  test("is picked, and its type is read off it", () => {
+    renderUpload();
+    drop(new File(["x"], "shiur.mp3", { type: "audio/mpeg" }));
+    expect(screen.getByText("shiur.mp3")).toBeInTheDocument();
+    expect(screen.getByText("זוהה אוטומטית לפי הקובץ. אפשר לשנות.")).toBeInTheDocument();
+  });
+
+  test("of a kind that cannot be uploaded is refused with a notice", () => {
+    const store = renderUpload();
+    drop(new File(["x"], "pic.png", { type: "image/png" }));
+    expect(screen.queryByText("pic.png")).not.toBeInTheDocument();
+    expect(notices(store)).toContain("אפשר להעלות רק וידאו");
+  });
+});

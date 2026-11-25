@@ -19,12 +19,13 @@
     "courseNotified": "Los alumnos del curso recibirán una notificación",
     "allNotified": "Los alumnos de todos tus cursos recibirán una notificación",
     "noCourse": "Sin curso",
-    "when": "Cuándo (vacío = empezar ahora)",
-    "schedule": "Programar para más adelante",
+    "when": "Cuándo",
     "scheduleSubmit": "Programar la sesión",
     "createStart": "Crear y empezar",
     "pastTime": "Esa hora ya pasó",
-    "namePlaceholder": "Opcional. Sin título, la sesión aparecerá como «{{name}}»"
+    "namePlaceholder": "Opcional. Sin título, la sesión aparecerá como «{{name}}»",
+    "now": "Ahora",
+    "later": "Más adelante"
   },
   "notices": {
     "cannotJoin": "No es posible unirse a la sesión",
@@ -97,5 +98,6 @@
     "savedLessonMissing_one": "La grabación se guardó y se convirtió en una clase (borrador), pero su última parte no llegó al servidor. Puedes iniciar su transcripción desde la página de la clase.",
     "savedLessonMissing_other": "La grabación se guardó y se convirtió en una clase (borrador), pero sus últimas {{count}} partes no llegaron al servidor. Puedes iniciar su transcripción desde la página de la clase.",
     "finishFailed": "No se terminó de guardar la grabación. Lo que ya llegó al servidor se conservará al terminar la sesión."
-  }
+  },
+  "noneActiveText": "Una sesión en vivo es una clase o conversación en tiempo real, con voz y video. El anfitrión la abre y todos se unen desde aquí."
 }

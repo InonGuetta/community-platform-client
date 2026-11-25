@@ -147,7 +147,7 @@ describe("the split path, where two dialogs stack", () => {
   test("arranging the notebooks and exporting asks the same question", async () => {
     await openSplit();
 
-    fireEvent.click(screen.getByRole("button", { name: /ייצוא 1 קבצים/ }));
+    fireEvent.click(screen.getByRole("button", { name: /ייצוא קובץ אחד/ }));
 
     expect(await screen.findByText("איך לכלול את המקורות?")).toBeInTheDocument();
     expect(writeNotebooks).not.toHaveBeenCalled();
@@ -155,7 +155,7 @@ describe("the split path, where two dialogs stack", () => {
 
   test("answering it writes the notebooks", async () => {
     await openSplit();
-    fireEvent.click(screen.getByRole("button", { name: /ייצוא 1 קבצים/ }));
+    fireEvent.click(screen.getByRole("button", { name: /ייצוא קובץ אחד/ }));
     fireEvent.click(await screen.findByRole("button", { name: /מקורות בתחתית העמוד/ }));
 
     await waitFor(() => expect(writeNotebooks).toHaveBeenCalled());
@@ -168,7 +168,7 @@ describe("the split path, where two dialogs stack", () => {
   // back to it rather than throw it away.
   test("cancelling the question returns to the arrangement", async () => {
     await openSplit();
-    fireEvent.click(screen.getByRole("button", { name: /ייצוא 1 קבצים/ }));
+    fireEvent.click(screen.getByRole("button", { name: /ייצוא קובץ אחד/ }));
     fireEvent.click(await screen.findByRole("button", { name: "ביטול" }));
 
     await waitFor(() => expect(screen.queryByText("איך לכלול את המקורות?")).not.toBeInTheDocument());

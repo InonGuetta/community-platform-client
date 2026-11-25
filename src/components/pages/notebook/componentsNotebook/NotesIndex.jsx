@@ -41,6 +41,9 @@ const NotesIndex = ({
   selectedCount,
   selectedIds,
   selectedNotes,
+  selecting,
+  startSelecting,
+  cancelSelecting,
   setDeleteTargets,
   setSearch,
   someVisibleSelected,
@@ -63,19 +66,34 @@ const NotesIndex = ({
         label={t("index.searchLabel")}
         sx={{ flex: 1, minWidth: { xs: 0, sm: 160 } }}
       />
-      {items.length > 0 && (
-        <FilterChip
-          label={selectedCount > 0 ? t("index.selected", { count: selectedCount }) : t("index.multiSelect")}
-          selected={allVisibleSelected}
-          aria-pressed={allVisibleSelected ? true : (someVisibleSelected ? "mixed" : false)}
-          aria-label={t("index.selectAll")}
-          onClick={toggleAllVisible}
-        />
+      {/* The tick boxes are drawn only while "בחירה מרובה" is on (UI_UX_FIXES
+          4.5, over D-123). In the mode the same chip becomes "ביטול בחירה",
+          and beside it come tick-all (the three states it always had), how
+          many are ticked, and delete. */}
+      {items.length > 0 && !selecting && (
+        <FilterChip label={t("index.multiSelect")} onClick={startSelecting} />
+      )}
+      {items.length > 0 && selecting && (
+        <>
+          <FilterChip label={t("index.cancelSelect")} onClick={cancelSelecting} />
+          <FilterChip
+            label={t("index.selectAllShort")}
+            selected={allVisibleSelected}
+            aria-pressed={allVisibleSelected ? true : (someVisibleSelected ? "mixed" : false)}
+            aria-label={t("index.selectAll")}
+            onClick={toggleAllVisible}
+          />
+          {selectedCount > 0 && (
+            <Typography sx={{ fontSize: 14, fontWeight: 600, color: "text.secondary" }}>
+              {t("index.selected", { count: selectedCount })}
+            </Typography>
+          )}
+        </>
       )}
       {/* Only delete lives here. Export is in the page header beside "new
           note" — offering it in two places would be two things to keep in
           step for one action. */}
-      {selectedCount > 0 && (
+      {selecting && selectedCount > 0 && (
         <Tooltip title={t("index.deleteSelected")}>
           <IconButton
             color="error"
@@ -134,14 +152,16 @@ const NotesIndex = ({
               {/* Ticking a note is not opening it, so the box swallows the
                   click that would otherwise scroll the column away from
                   whatever the user was reading. */}
-              <Checkbox
-                size="small"
-                checked={selectedIds.has(n.id)}
-                onClick={(e) => e.stopPropagation()}
-                onChange={() => toggleSelected(n.id)}
-                inputProps={{ "aria-label": t("index.selectNote", { title: n.title?.trim() || t("notes:untitledBare") }) }}
-                sx={{ p: 0.5, mt: -0.5 }}
-              />
+              {selecting && (
+                <Checkbox
+                  size="small"
+                  checked={selectedIds.has(n.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={() => toggleSelected(n.id)}
+                  inputProps={{ "aria-label": t("index.selectNote", { title: n.title?.trim() || t("notes:untitledBare") }) }}
+                  sx={{ p: 0.5, mt: -0.5 }}
+                />
+              )}
 
               <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, minWidth: 0, flexGrow: 1 }}>
                 <Typography noWrap sx={{ width: "100%", fontSize: 15, fontWeight: 700, lineHeight: 1.35 }}>

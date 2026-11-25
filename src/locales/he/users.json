@@ -23,7 +23,7 @@
     "title": "ממתינים לאישור",
     "requested": "ביקש: {{role}}",
     "reasonPlaceholder": "סיבה (לא חובה) — תישלח במייל",
-    "sendReject": "שלח דחייה",
+    "sendReject": "שליחת דחייה",
     "cannotApproveSelf": "לא ניתן לאשר את הבקשה של עצמך",
     "approve": "אישור",
     "reject": "דחייה"

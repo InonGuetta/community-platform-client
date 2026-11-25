@@ -33,7 +33,6 @@
       "suggested_questions": "פֿאָרגעשלאָגענע שאלות אינעם שמועס"
     },
     "lessThanCent": "ווייניקער ווי אַ סענט",
-    "audioMinutes": "{{n}} מינוט קול",
     "kiloTokens": "{{n}} טויזנט טאָקענס",
     "retry": "פּרוּוו ווידער",
     "loadFailed": "מע קען נישט לאָדן די קאָסטן־דאַטן.",
@@ -49,7 +48,9 @@
     "kind": "סאָרט",
     "usage": "באַניץ",
     "calls": "רופֿן",
-    "cost": "קאָסטן"
+    "cost": "קאָסטן",
+    "audioMinutes_one": "איין מינוט קול",
+    "audioMinutes_other": "{{n}} מינוט קול"
   },
   "donations": {
     "title": "נדבֿות",

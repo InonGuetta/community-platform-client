@@ -22,6 +22,20 @@ import { useTranslation } from "react-i18next";
 // default look like something the uploader chose.
 const EMPTY_FIELDS = { title: "", description: "", mediaType: "video", courseId: "", creatorName: "", tags: [] };
 
+// The type a file is filed as, read off its MIME type. A browser that reports no
+// type for an audio or video file (some do for less common containers) falls
+// back to the extension; anything else — a PDF, a Word file, plain text — is a
+// text item. The person can change the answer in the form (UI_UX_FIXES 4.12).
+const AUDIO_EXTENSION = /\.(mp3|m4a|wav|ogg|oga|aac|flac|opus)$/i;
+const VIDEO_EXTENSION = /\.(mp4|m4v|mov|webm|mkv|avi)$/i;
+const detectMediaType = (file) => {
+  if (file.type.startsWith("video/")) return "video";
+  if (file.type.startsWith("audio/")) return "audio";
+  if (!file.type && AUDIO_EXTENSION.test(file.name)) return "audio";
+  if (!file.type && VIDEO_EXTENSION.test(file.name)) return "video";
+  return "text";
+};
+
 /**
  * @param {{ open: boolean }} props
  */
@@ -86,19 +100,52 @@ export const useUploadMedia = ({ open }) => {
     handleClose();
   };
 
-  const handleFieldChange = (key, val) => setFields((prev) => ({ ...prev, [key]: val }));
+  // True while the type is what was read off the file; the person changing it
+  // by hand turns the note off (UI_UX_FIXES 4.12).
+  const [typeAuto, setTypeAuto] = useState(false);
+  // A file is being dragged over the drop area.
+  const [dragging, setDragging] = useState(false);
 
-  const detectMediaType = (file) => {
-    if (file.type.startsWith("video/")) return "video";
-    if (file.type.startsWith("audio/")) return "audio";
-    return "text";
+  const handleFieldChange = (key, val) => {
+    if (key === "mediaType") setTypeAuto(false);
+    setFields((prev) => ({ ...prev, [key]: val }));
+  };
+
+  // The same kinds the file input offers (its `accept`): a drop is not
+  // filtered by the browser, so it is checked here.
+  const isAcceptable = (picked) =>
+    /^(video|audio)\//.test(picked.type) || /\.(pdf|txt|doc|docx)$/i.test(picked.name);
+
+  const pickFile = (selected) => {
+    setFile(selected);
+    setFields((prev) => ({ ...prev, mediaType: detectMediaType(selected) }));
+    setTypeAuto(true);
   };
 
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
     if (!selected) return;
-    setFile(selected);
-    setFields((prev) => ({ ...prev, mediaType: detectMediaType(selected) }));
+    pickFile(selected);
+  };
+
+  const dropProps = {
+    onDragOver: (e) => {
+      e.preventDefault();
+      setDragging(true);
+    },
+    onDragLeave: () => setDragging(false),
+    onDrop: (e) => {
+      e.preventDefault();
+      setDragging(false);
+      if (uploading) return;
+      const dropped = e.dataTransfer?.files?.[0];
+      if (!dropped) return;
+      if (!isAcceptable(dropped)) {
+        dispatch(notify({ message: t("notAllowed"), severity: "warning" }));
+        return;
+      }
+      pickFile(dropped);
+    },
   };
 
   const handleSubmit = async () => {
@@ -173,7 +220,7 @@ export const useUploadMedia = ({ open }) => {
 
   return {
     progress, courses, knownCreators, knownTags, file, fields, uploading,
-    justUploaded, suggestions, savingTags,
+    justUploaded, suggestions, savingTags, typeAuto, dragging, dropProps,
     handleClose, handleDialogClose, handleFieldChange, handleFileChange, handleSubmit,
     handleSkipTags, handleSaveTags,
   };

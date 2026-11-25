@@ -201,3 +201,56 @@
 
 ## 3.10 – החלטה (2026-11-25): נשאר כמו היום
 אינון השאיר את ההחלטה לשיקול דעתי. שלוש הכניסות לחיפוש נשארות כמו שהן: כל אחת עונה על צורך אחר (מציאת פריט / מציאת פסקה בתוכן / שאלה עם תשובה מנומקת), ושתי ההצעות מחליפות בעיה אחת בבעיה אחרת – שדה אחד עם מתג מערבב תוצאות משני סוגים תחת סרגל סינון שמתאים רק לאחד, והעברה ל־`/ask` מנתקת את חיפוש הציטוט מהפילטרים. כדאי לחזור לזה כשיהיו נתוני שימוש: אם הטאב "חיפוש עומק חכם" כמעט לא בשימוש, ההצעה השנייה הופכת לפשוטה.
+
+## שלב 5 – שרת (2026-11-25)
+בוצע בריפו `community-platform-server` (ענף `ui-ux-fixes`) ובצד הלקוח של שליחת מייל האימות. כל בדיקת קלט היא guard ב־`lib/validate.js` עם הודעת 400 שלו. לא נוסף קוד שגיאה חדש, ולכן אין שינוי ב־`apiError.js`.
+
+### 5.1 ולידציה זהה ללקוח
+- **משתתפים:** guard חדש `sessionCapacity` – מספר שלם בין 2 ל־500 (היה 1–100), ו"אחד על אחד" בדיוק 2. ערך חסר ב"אחד על אחד" נשמר כ־2, ובשאר הסוגים נשאר "ללא הגבלה" כמו היום. `controllers/controllersSessions.js`.
+- **מועד מפגש:** השרת כבר דחה זמן שעבר. `optionalSessionStart` דורש לפחות דקה קדימה ולכל היותר שנה, ולא שיניתי אותו. בלקוח ה־`min` של שדה המועד הוא עכשיו הדקה השלמה הראשונה שרחוקה לפחות דקה מעכשיו, כך שהשדה לא מציע זמן שהשרת ידחה. תוקנה גם ההערה ב־`SessionsPage.jsx` שטענה שהשרת לא דוחה.
+- **תרומה:** guard חדש `donationAmountCents` – בין 1000 ל־10,000,000 אגורות (₪10–₪100,000; היה ₪1–₪10,000). מלבד הגבולות אין שינוי בזרימת Stripe. בלקוח הכפתור נחסם גם מעל ₪100,000 (`DonateForm.jsx`).
+- **טווח תאריכים בארכיון:** guard חדש `uploadDateRangeFilter` – אם `uploadedAfter` מאוחר מ־`uploadedBefore` מוחזר 400. אותו יום בשני הקצוות מותר. שמות הפרמטרים לא שונו (זוג 5).
+- בדיקות: `test/inputChecks.test.js`, `test/inputGuards.test.js` (סכומים בשני הקצוות, טווח הפוך דרך ה־route), `test/validate.test.js`.
+
+### 5.2 "AI" / "ToolLLM" כשם מרצה
+- **ממצא:** שום קוד בשרת לא כותב "AI" או "ToolLLM". הערך הגיע כ־`creatorName` מהלקוח בהעלאה, כנראה מכלי אוטומטי שמילא את השדה בשם שלו. במסד יש שורה אחת כזו: #117 "שמירת הברית" (audio, הועלה ע"י משתמש #1 ב־2026-11-17), עם "AI". אין במסד שורה עם "ToolLLM".
+- **עצירה:** `cleanCreatorName` ב־`services/servicesMedia.js` שומר "כללי" (`DEFAULT_CREATOR`) במקום "AI"/"ToolLLM", בלי תלות באותיות גדולות ורווחים, גם בהעלאה וגם בעריכה. שם שרק מכיל את האותיות (למשל "AIDAN") נשאר כמו שהוא. **החלטה:** "כללי" ולא NULL, כי העמודה `creator_name` היא NOT NULL בכוונה (מיגרציה 020), ו"כללי" הוא כבר הערך שמסמן "לא צוין מרצה", והלקוח מציג אותו כ"ללא מרצה".
+- **ניקוי:** `scripts/fix-leaked-creators.js` (`npm run fix:leaked-creators`, עם `-- --dry`), דרך `findPlaceholderCreators` / `clearPlaceholderCreators` בשירות. שתי הפונקציות משתמשות באותו תנאי, כך שהרצה יבשה מציגה בדיוק את מה שהרצה אמיתית תשנה.
+- בדיקות: `test/creatorName.test.js`.
+- **נשאר:** אחרי ההרצה האמיתית אפשר למחוק את `isLeakedCreator` מהלקוח (`TODO(UI_UX_FIXES 5.2)`). הוא נשאר בינתיים, כי השורה במסד עוד לא נוקתה. הערה: ייתכן ש־#117 הוא שיעור שנוצר ב־AI ו"AI" נכתב בו בכוונה. כדאי לוודא את זה לפני ההרצה האמיתית.
+
+### 5.3 שם משובש (משתמש 9)
+- **ממצא:** החשבון לא נוצר מקוד בריפו. הוא נוצר בבדיקה ידנית של סשן קודם, ב־`curl` מ־Git Bash ב־Windows, עם `displayName` בעברית בתוך ארגומנט `-d`. ה־code page של המסוף אינו UTF-8, ולכן כל אות הגיעה כבתים לא תקינים ונשמרה כ־U+FFFD. החשבון השני (10) נוצר באותו סשן דרך `fetch` של Node ותקין.
+- **תיקון נתיב היצירה:** אין קוד שאפשר לתקן, אז השרת מונע את התקלה מכל מקור. `cleanDisplayName` (`services/servicesAuth.js`) דוחה שם שמכיל U+FFFD עם 400 "Display name was not sent as UTF-8 text". הבדיקה חלה על הרשמה, עריכת פרופיל, ויצירה ועריכה ע"י מנהל.
+- **תיקון הרשומה:** `scripts/fix-garbled-names.js` (`npm run fix:garbled-names`, עם `-- --dry`). האותיות המקוריות אבדו, ולכן הסקריפט משחזר רק שם שידוע: חשבונות `notif-test-<n>@example.test` נרשמו בשם "משתמש בדיקה להתראות" (כך מופיע בפקודה שיצרה אותם). כל שם משובש אחר רק מוצג ולא משתנה. העדכון בודק שוב את הסימן, כדי לא לדרוס שם שתוקן בינתיים ביד. השירות: `findGarbledDisplayNames` / `repairGarbledDisplayName` ב־`services/servicesUsers.js`.
+- בדיקות: `test/garbledNames.test.js`.
+
+### שליחת מייל אימות מחדש (מ־3.12)
+- **שרת:** `POST /api/auth/resend-verification` – `verifyToken`, ומגבלת קצב של 5 לשעה לכל משתמש (`userRateLimit`; אותה מכסה כמו נתיבי השחזור, אבל לפי חשבון ולא לפי IP). משתמש באותו טוקן של ההרשמה (`issueVerificationToken`, purpose verify, 24 שעות) ובאותו `sendVerificationEmail`. לא נוצרה שיטת טוקן חדשה. הנתיב לא מקבל שום דבר מגוף הבקשה. התשובה היא `{ sent, alreadyVerified }`. **החלטה לגבי enumeration:** הכתובת היא של המשתמש המחובר עצמו, ולכן אין מה לחשוף, והתשובה אומרת בדיוק מה קרה: נשלח, לא נשלח (שרת המייל לא זמין או לא מוגדר; הקישור עדיין תקף), או שהכתובת כבר מאומתת (ואז לא נוצר טוקן). שורה ב־`test/roleMatrix.test.js` (signed-in). בדיקות: `test/resendVerification.test.js` (שירות, 401, תשובות, 429 בבקשה השישית).
+- **לקוח:** `authApi.resendVerification` (`src/api/authApi.js`). הלוגיקה ב־`useProfilePageController.js` (`handleResendVerification`, `resendingVerification`), שקורא ישירות ל־`src/api`. אם הכתובת כבר מאומתת, הוא קורא שוב את החשבון (`fetchMe`) כדי שהתגית תתעדכן. הכפתור "שליחת מייל אימות" נמצא ליד התגית "כתובת לא אומתה" ב־`ProfilePage.jsx`. ההודעות (`profile:verification.*`) כתובות בחמש השפות: נשלח, כבר מאומתת, ונכשל. בדיקות ב־`ProfilePage.test.jsx`.
+- הערה: בפיתוח בלי SMTP המייל רק נכתב ללוג, והתשובה היא `sent: false`, כלומר הודעת "לא ניתן לשלוח". זה מדויק, כי שום מייל לא יצא.
+
+### קבצים
+- **שרת:** `lib/validate.js`, `controllers/controllersSessions.js`, `controllers/controllersDonations.js`, `controllers/controllersMedia.js`, `controllers/controllersAuth.js`, `routes/routersAuth.js`, `services/servicesMedia.js`, `services/servicesAuth.js`, `services/servicesUsers.js`, `scripts/fix-leaked-creators.js`, `scripts/fix-garbled-names.js`, `package.json`. בדיקות: `test/inputChecks.test.js`, `test/inputGuards.test.js`, `test/validate.test.js`, `test/creatorName.test.js`, `test/roleMatrix.test.js`, `test/garbledNames.test.js`, `test/resendVerification.test.js`.
+- **לקוח:** `src/api/authApi.js`, `src/components/pages/profile/{ProfilePage.jsx,useProfilePageController.js,ProfilePage.test.jsx}`, `src/locales/*/profile.json`, `src/components/pages/sessions/SessionsPage.jsx`, `src/components/pages/donate/DonateForm.jsx`.
+- **ריפו השורש** (לא בקומיט של שני הריפואים): `CLAUDE.md` (שורת "Other server scripts") ו־`.claude/skills/run-migrations/SKILL.md` (רשימת הסקריפטים החד־פעמיים). שני הסקריפטים החדשים נוספו לשניהם.
+
+### הרצה יבשה מול המסד (2026-11-25)
+```
+npm run fix:leaked-creators -- --dry
+1 lesson(s) attributed to a tool's label rather than a person:
+  #117  "AI"  audio  uploader #1  2026-11-17T10:34:20.355Z  שמירת הברית
+--dry: nothing was changed. A real run sets each to "כללי".
+
+npm run fix:garbled-names -- --dry
+1 account(s) with a garbled display name:
+  #9  notif-test-…@example.test  inactive  → "משתמש בדיקה להתראות"
+--dry: nothing was changed. A real run repairs 1 of 1.
+```
+לא בוצעה שום כתיבה למסד. ההרצות האמיתיות (מתוך `community-platform-server/`): `npm run fix:leaked-creators` ו־`npm run fix:garbled-names`.
+
+### נשאר
+- ההרצות האמיתיות של שני הסקריפטים, ואחריהן מחיקת `isLeakedCreator` בלקוח.
+- `npm run smoke` לא הורץ. לפי הכותרת של `scripts/smoke.js` הוא כותב באמת למסד (סימנייה שנוצרת ונמחקת), וזה מנוגד לכלל "בלי כתיבה למסד" של השלב הזה. ה־SELECT-ים החדשים כן רצו מול המסד האמיתי בהרצות היבשות.
+- 500 משתתפים ב־full mesh של WebRTC לא באמת יעבוד. הגבול נקבע כך כדי להתאים לדיאלוג, לפי ההחלטה בשלב 1.
+- מהסיכום של שלב 4: `count` בפרמטרים של `PHONE_CODE_INVALID` / `PHONE_SEND_LIMIT` לא טופל בשלב הזה.

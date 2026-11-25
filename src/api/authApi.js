@@ -40,6 +40,12 @@ export const authApi = {
   verifyEmail: async (token) =>
     (await axiosInstance.post("/auth/verify-email", { token })).data,
 
+  // The verification link again, to the signed-in user's own address — takes
+  // nothing, the server reads the session. Answers { sent, alreadyVerified }:
+  // `sent` false means the mail could not go out now (the link is still valid).
+  resendVerification: async () =>
+    (await axiosInstance.post("/auth/resend-verification")).data,
+
   // ── The signed-in user's own account ──────────────────────────────────────
   updateProfile: async ({ displayName, avatarUrl }) =>
     (await axiosInstance.patch("/auth/me", { displayName, avatarUrl })).data,

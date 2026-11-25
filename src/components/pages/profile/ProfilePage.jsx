@@ -8,6 +8,7 @@ import PageHeader from "../../features/PageHeader/PageHeader";
 import SectionCard from "../../features/SectionCard/SectionCard";
 import StatusBadge from "../../features/StatusBadge/StatusBadge";
 import VerifiedIcon from "@mui/icons-material/Verified";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import { roleLabels } from "../../../utilities/constant";
 import RoleRequestCard from "./RoleRequestCard";
 import NotificationPreferencesCard from "./NotificationPreferencesCard";
@@ -34,12 +35,14 @@ const ProfilePage = () => {
     currentPassword,
     displayName,
     handleChangePassword,
+    handleResendVerification,
     handleSaveProfile,
     nameChanged,
     newPassword,
     passwordError,
     passwordMismatch,
     passwordTooShort,
+    resendingVerification,
     savingPassword,
     savingProfile,
     setConfirm,
@@ -74,12 +77,25 @@ const ProfilePage = () => {
                   </Typography>
                 )}
                 <Typography sx={{ fontSize: user.display_name ? 15 : 18, fontWeight: user.display_name ? 500 : 700, color: user.display_name ? "text.secondary" : "text.primary", wordBreak: "break-all" }}>{user.email}</Typography>
-                <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
+                <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap", alignItems: "center" }}>
                   <StatusBadge tone="indigo">{roleLabels[user.role] ?? user.role}</StatusBadge>
                   {user.email_verified ? (
                     <StatusBadge tone="success" icon={<VerifiedIcon />}>{t("verified")}</StatusBadge>
                   ) : (
                     <StatusBadge tone="warning">{t("unverified")}</StatusBadge>
+                  )}
+                  {/* Beside the badge it answers (UI_UX_FIXES 3.12). */}
+                  {!user.email_verified && (
+                    <Button
+                      size="small"
+                      variant="text"
+                      startIcon={resendingVerification ? <CircularProgress size={16} /> : <MailOutlineIcon />}
+                      onClick={handleResendVerification}
+                      disabled={resendingVerification}
+                      sx={{ paddingInline: 1, minHeight: 32, py: 0 }}
+                    >
+                      {t("verification.resend")}
+                    </Button>
                   )}
                 </Box>
               </Box>

@@ -4,6 +4,12 @@
   "verified": "Verified address",
   "displayName": "Display name",
   "save": "Save",
+  "verification": {
+    "resend": "Send verification email",
+    "sent": "Verification email sent. Its link is valid for 24 hours.",
+    "alreadyVerified": "Your address is already verified",
+    "failed": "The email could not be sent right now. Please try again later."
+  },
   "password": {
     "title": "Change password",
     "current": "Current password",

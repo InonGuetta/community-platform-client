@@ -40,7 +40,12 @@ const toLocalInput = (when) => {
 
 const defaultScheduledAt = () => toLocalInput(new Date(Date.now() + 60 * 60 * 1000));
 
-// A session holds between 2 and 500 people; a one-on-one is exactly two.
+// The first whole minute at least a minute from now (see nowInput below).
+const MINUTE_MS = 60 * 1000;
+const earliestScheduledAt = () => toLocalInput(new Date(Math.ceil((Date.now() + MINUTE_MS) / MINUTE_MS) * MINUTE_MS));
+
+// A session holds between 2 and 500 people; a one-on-one is exactly two. The
+// server holds the same bounds (sessionCapacity in lib/validate.js).
 const MIN_PARTICIPANTS = 2;
 const MAX_PARTICIPANTS = 500;
 const DEFAULT_PARTICIPANTS = 10;
@@ -77,9 +82,11 @@ const SessionsPage = () => {
     courseId: "",
   });
 
-  // The earliest moment the date field offers (UI_UX_FIXES 1.3). The server
-  // does not refuse a past time yet (stage 5), so the dialog does.
-  const nowInput = toLocalInput(new Date());
+  // The earliest moment the date field offers (UI_UX_FIXES 1.3): the first
+  // whole minute at least a minute away — the server refuses anything sooner
+  // (MIN_SESSION_LEAD_MS in lib/validate.js, optionalSessionStart), so the
+  // field never offers a time it would refuse.
+  const nowInput = earliestScheduledAt();
   const scheduledInPast = Boolean(form.scheduledAt) && form.scheduledAt < nowInput;
 
   return (

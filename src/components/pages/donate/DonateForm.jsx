@@ -11,10 +11,10 @@ import { RADIUS } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 
 const PRESET_AMOUNTS = [50, 100, 250, 500];
-// The server's floor is ₪1; the form asks for at least ₪10, the smallest gift
-// worth Stripe's fixed fee.
+// At least ₪10, the smallest gift worth Stripe's fixed fee, and a ceiling so a
+// slipped key cannot become a charge nobody meant. The server refuses outside
+// the same bounds (donationAmountCents in lib/validate.js, in cents).
 const MIN_AMOUNT = 10;
-// A ceiling so a slipped key cannot become a five-figure charge.
 const MAX_AMOUNT = 100000;
 
 // The first step of a donation (PRD PAY-1): how much. The card comes next, in
@@ -26,7 +26,7 @@ const DonateForm = ({ onContinue, starting = false, error = null }) => {
   const [type, setType] = useState("one_time");
 
   const finalAmount = customAmount ? Number(customAmount) : amount;
-  const valid = Number.isFinite(finalAmount) && finalAmount >= MIN_AMOUNT;
+  const valid = Number.isFinite(finalAmount) && finalAmount >= MIN_AMOUNT && finalAmount <= MAX_AMOUNT;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

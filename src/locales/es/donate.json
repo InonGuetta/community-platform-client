@@ -1,5 +1,6 @@
 {
   "title": "Apoya a nuestra comunidad",
+  "kicker": "Donar",
   "intro": "Tu donación nos ayuda a crear más contenido y a mantener la plataforma gratuita para los alumnos.",
   "form": {
     "type": "Tipo de donación",
@@ -8,10 +9,10 @@
     "monthlySoon": "Las donaciones mensuales estarán disponibles pronto",
     "amount": "Importe (₪)",
     "custom": "Importe personalizado",
-    "minimum": "El importe mínimo es de ₪{{min}}",
     "preparing": "Preparando el pago...",
     "continue": "Continuar al pago de ₪{{amount}}",
-    "secure": "Pago seguro mediante Stripe. Los datos de tu tarjeta se introducen directamente en Stripe y nunca pasan por nosotros."
+    "secure": "Pago seguro mediante Stripe. Los datos de tu tarjeta se introducen directamente en Stripe y nunca pasan por nosotros.",
+    "enterAmount": "Introduce un importe"
   },
   "payment": {
     "of": "Una donación de {{amount}}",

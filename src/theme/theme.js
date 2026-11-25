@@ -39,6 +39,7 @@ const paletteFor = (mode) => {
       accentSoft: c.accentSoft,
       danger: c.danger,
       draft: c.draft,
+      cue: c.cue,
       wash: c.wash,
       glass: c.glass,
     },
@@ -150,6 +151,9 @@ export const buildTheme = (mode, direction = "rtl") => {
   return createTheme({
     direction,
     palette,
+    // The spec's main breakpoint is 768 (REDESIGN_V4.md part B, "Layout"), so
+    // `md` is 768, not MUI's 900 (D-135; D-68 had kept 900 until 8ב looked).
+    breakpoints: { values: { xs: 0, sm: 600, md: 768, lg: 1200, xl: 1536 } },
     shadows: shadowScale(),
     // shape.borderRadius stays MUI's 4: an `sx={{ borderRadius: 2 }}` written
     // anywhere in the app is that multiple of it, and changing the base would
@@ -175,6 +179,9 @@ export const buildTheme = (mode, direction = "rtl") => {
       MuiCssBaseline: {
         styleOverrides: {
           ...scrollbarStyles(isDark),
+          // The scrollbar never appears or goes: a page that grows or shrinks
+          // (the archive's tabs) does not shift sideways (UI_UX_FIXES 3.3).
+          html: { scrollbarGutter: "stable" },
           body: { backgroundColor: c.bg, color: c.ink },
           // Anything focusable that is not a MUI control (a plain link, a
           // div with tabIndex) gets the same ring as the controls.

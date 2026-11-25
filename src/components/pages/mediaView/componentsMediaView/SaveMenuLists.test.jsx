@@ -68,7 +68,7 @@ describe("loading the lists", () => {
   test("a failure says so, and offers no new list", async () => {
     savesApi.listPlaylists.mockRejectedValue(new Error("500"));
     renderMenu();
-    expect(await screen.findByText("טעינת הרשימות נכשלה. נסה לפתוח שוב.")).toBeInTheDocument();
+    expect(await screen.findByText("טעינת הרשימות נכשלה. אפשר לנסות לפתוח שוב.")).toBeInTheDocument();
     expect(screen.queryByText("רשימה חדשה")).not.toBeInTheDocument();
   });
 

@@ -12,12 +12,15 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudOffOutlinedIcon from "@mui/icons-material/CloudOffOutlined";
+import PageHeader from "../../features/PageHeader/PageHeader";
+import EmptyState from "../../features/EmptyState/EmptyState";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import OfflinePlayer from "./OfflinePlayer";
 import { useDownloadsPageController } from "./useDownloadsPageController";
 import { lessonByline, lessonDetails, progressLabel, storageLine } from "./downloadsText";
 import { DOWNLOADS_SHELF } from "../../layout/personalShelves";
 import { useTranslation } from "react-i18next";
+import { RADIUS } from "../../../theme/tokens";
 import { percentOf } from "../../../utilities/offlineStore";
 
 // "הורדות להאזנה" (PRD MOB-2): the lessons this device keeps for listening with
@@ -46,7 +49,7 @@ const DownloadingRow = ({ entry, onCancel }) => {
   const { t } = useTranslation("downloads");
   const percent = percentOf(entry.received, entry.total);
   return (
-    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+    <Paper variant="outlined" sx={{ p: 2, borderRadius: `${RADIUS.menu}px` }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography fontWeight={600} noWrap dir="auto" title={entry.title}>{entry.title}</Typography>
@@ -75,11 +78,11 @@ const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
       variant="outlined"
       sx={{
         p: 1.5,
-        borderRadius: 2,
+        borderRadius: `${RADIUS.menu}px`,
         display: "flex",
         alignItems: "center",
         gap: 1.5,
-        borderColor: isPlaying ? "secondary.main" : "divider",
+        borderColor: isPlaying ? "primary.main" : "divider",
       }}
     >
       <Tooltip title={isPlaying ? t("playing") : t("listen")}>
@@ -88,7 +91,7 @@ const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
             onClick={() => onPlay(item.id)}
             disabled={isPlaying}
             aria-label={t("listenTo", { title: item.title })}
-            sx={{ bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" }, "&.Mui-disabled": { bgcolor: "secondary.main", color: "secondary.contrastText" } }}
+            sx={{ bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" }, "&.Mui-disabled": { bgcolor: "surface.accentSoft", color: "primary.main" } }}
           >
             {isPlaying ? <GraphicEqRoundedIcon /> : <PlayArrowRoundedIcon />}
           </IconButton>
@@ -122,61 +125,51 @@ const DownloadsPage = () => {
   const empty = c.loaded && c.items.length === 0 && c.downloading.length === 0;
 
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
-      <Box sx={{ maxWidth: 820, mx: "auto", p: { xs: 2, sm: 3 } }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
-          <Icon color="primary" sx={{ fontSize: 34 }} />
-          <Typography variant="h4" fontWeight={800} color="primary" sx={{ flex: 1 }}>
-            {t(`nav:${labelKey}`)}
-          </Typography>
-          {c.items.length > 0 && (
-            <Button color="error" onClick={c.askClear} endIcon={<DeleteOutlineIcon />}>{t("removeAllButton")}</Button>
-          )}
-        </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          {c.items.length > 0
+    <Box>
+      <PageHeader
+        title={t(`nav:${labelKey}`)}
+        subtitle={
+          c.items.length > 0
             ? t("summary", { count: c.items.length, storage: storageLine(c.totalSize, c.estimate) })
-            : t("intro")}
-        </Typography>
-
-        {c.offline && <OfflineNotice onRetry={c.retry} />}
-
-        {!c.supported && (
-          <Alert severity="warning" sx={{ mb: 3 }}>
-            {t("unsupported")}
-          </Alert>
-        )}
-
-        {c.playing && <OfflinePlayer key={c.playing.id} item={c.playing} onClose={c.closePlayer} />}
-
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-          {c.downloading.map((entry) => (
-            <DownloadingRow key={`downloading-${entry.id}`} entry={entry} onCancel={c.cancel} />
-          ))}
-          {c.items.map((item) => (
-            <LessonRow
-              key={item.id}
-              item={item}
-              isPlaying={c.playing?.id === item.id}
-              offline={c.offline}
-              onPlay={c.play}
-              onOpen={c.openLesson}
-              onRemove={c.remove}
-            />
-          ))}
-        </Box>
-
-        {empty && (
-          <Paper variant="outlined" sx={{ p: 4, textAlign: "center", borderRadius: 3, borderStyle: "dashed" }}>
-            <Typography fontWeight={700} sx={{ mb: 1 }}>{t("emptyTitle")}</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: c.offline ? 0 : 2 }}>
-              {t("emptyHow")}
-            </Typography>
-            {!c.offline && <Button variant="contained" onClick={c.goToArchive}>{t("toArchive")}</Button>}
-          </Paper>
-        )}
+            : t("intro")
+        }
+        actions={
+          c.items.length > 0 ? (
+            <Button variant="soft" sx={{ color: "error.main" }} onClick={c.askClear} endIcon={<DeleteOutlineIcon />}>{t("removeAllButton")}</Button>
+          ) : null
+        }
+      />
+      {c.offline && <OfflineNotice onRetry={c.retry} />}
+      {!c.supported && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          {t("unsupported")}
+        </Alert>
+      )}
+      {c.playing && <OfflinePlayer key={c.playing.id} item={c.playing} onClose={c.closePlayer} />}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+        {c.downloading.map((entry) => (
+          <DownloadingRow key={`downloading-${entry.id}`} entry={entry} onCancel={c.cancel} />
+        ))}
+        {c.items.map((item) => (
+          <LessonRow
+            key={item.id}
+            item={item}
+            isPlaying={c.playing?.id === item.id}
+            offline={c.offline}
+            onPlay={c.play}
+            onOpen={c.openLesson}
+            onRemove={c.remove}
+          />
+        ))}
       </Box>
-
+      {empty && (
+        <EmptyState
+          icon={Icon}
+          title={t("emptyTitle")}
+          text={t("emptyHow")}
+          action={c.offline ? null : { label: t("toArchive"), onClick: c.goToArchive }}
+        />
+      )}
       <ConfirmingDeletionDialog
         open={c.confirmClear}
         onClose={c.cancelClear}

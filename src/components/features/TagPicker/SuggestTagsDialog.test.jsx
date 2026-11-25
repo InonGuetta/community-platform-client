@@ -133,7 +133,7 @@ describe("skipping", () => {
   // The item is already stored; this is a question, not a step that can fail.
   it("is a real answer and saves nothing", async () => {
     const { onSave, onSkip, user } = draw();
-    await user.click(screen.getByRole("button", { name: "דלג" }));
+    await user.click(screen.getByRole("button", { name: "דילוג" }));
     expect(onSkip).toHaveBeenCalled();
     expect(onSave).not.toHaveBeenCalled();
   });

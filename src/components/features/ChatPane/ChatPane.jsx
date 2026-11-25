@@ -5,7 +5,8 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
-import TextField from "@mui/material/TextField";
+import ButtonBase from "@mui/material/ButtonBase";
+import InputBase from "@mui/material/InputBase";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import SendIcon from "@mui/icons-material/Send";
@@ -20,6 +21,8 @@ import { messageForError } from "../../../utilities/apiError";
 import { placeOf, canOpenPlace, openPlace } from "../../../utilities/discussionPlace";
 import { canSaveAnswer, SAVE_STATES } from "../../../utilities/discussionNote";
 import { useTranslation } from "react-i18next";
+import { useDirection } from "../../../i18n/useDirection";
+import { RADIUS, SHADOW } from "../../../theme/tokens";
 import i18n from "../../../i18n/i18n";
 
 // The conversation with the AI — about one lesson, in the lesson page's
@@ -68,16 +71,16 @@ const AnswerText = ({ content, citations, onOpen }) => {
             mx: 0.25,
             px: 0.5,
             border: 0,
-            borderRadius: 1,
+            borderRadius: "6px",
             font: "inherit",
             fontSize: "0.75em",
             fontWeight: 700,
             verticalAlign: "super",
             lineHeight: 1.2,
             color: "primary.main",
-            bgcolor: "action.selected",
+            bgcolor: "surface.accentSoft",
             cursor: openable ? "pointer" : "default",
-            "&:hover": openable ? { bgcolor: "primary.light", color: "primary.contrastText" } : undefined,
+            "&:hover": openable ? { bgcolor: "primary.main", color: "primary.contrastText" } : undefined,
           }}
         >
           {n}
@@ -96,7 +99,7 @@ const waitingLabel = (t, stage, subject) => {
 };
 
 const Sources = ({ citations, onOpen }) => (
-  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }} data-testid="answer-sources">
+  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mt: 1.5 }} data-testid="answer-sources">
     {citations.map((c) => {
       const place = placeOf(c);
       const openable = onOpen.can(place);
@@ -109,6 +112,7 @@ const Sources = ({ citations, onOpen }) => (
           icon={place.kind === "time" ? <PlayArrowIcon /> : place.kind === "page" ? <MenuBookIcon /> : undefined}
           label={`[${c.n}] ${place.label}`}
           onClick={openable ? () => onOpen.go(place) : undefined}
+          sx={openable ? { bgcolor: "surface.accentSoft", borderColor: "transparent", color: "primary.main" } : undefined}
         />
       );
     })}
@@ -166,19 +170,23 @@ export const MessageBubble = ({ message, onOpen, save = null }) => {
       data-testid={mine ? "message-user" : "message-assistant"}
       aria-busy={message.streaming ? true : undefined}
       sx={{
-        // The reader's own questions on the far side, the answers where the
-        // eye starts — the start edge, which in this page is the right.
-        alignSelf: mine ? "flex-end" : "flex-start",
-        maxWidth: mine ? "85%" : "100%",
-        px: 1.5,
-        py: 1,
-        borderRadius: 2,
-        bgcolor: mine ? "primary.main" : "action.hover",
+        // Redesign v4 (screen 24, and /ask): the reader's question in accent
+        // with white text at the START side, the answer white with a hairline
+        // at the END side. In a flex column `flex-start` is the start edge in
+        // either direction.
+        alignSelf: mine ? "flex-start" : "flex-end",
+        maxWidth: mine ? "85%" : "92%",
+        px: 2,
+        py: 1.5,
+        borderRadius: `${RADIUS.menu}px`,
+        bgcolor: mine ? "primary.main" : "background.paper",
         color: mine ? "primary.contrastText" : "text.primary",
+        border: "1px solid",
+        borderColor: mine ? "primary.main" : "divider",
         opacity: message.pending ? 0.7 : 1,
       }}
     >
-      <Typography variant="body2" component="div" dir="auto" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
+      <Typography variant="body2" component="div" dir="auto" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8, fontSize: 15 }}>
         {mine ? message.content : <AnswerText content={message.content} citations={message.citations} onOpen={onOpen} />}
       </Typography>
       {!mine && message.citations?.length > 0 && <Sources citations={message.citations} onOpen={onOpen} />}
@@ -214,8 +222,12 @@ const ChatPane = ({
   // The archive page opens a citation in its own lesson, and is about the
   // archive: subject "archive". Otherwise the subject follows isText.
   opener = null, subject: givenSubject = null,
+  // The archive page draws "שיחה חדשה" / "העתק שיחה" in its own header and
+  // floats the question box `inputBottom` above the screen's edge.
+  hideActions = false, inputBottom = 0,
 }) => {
   const { t } = useTranslation("chat");
+  const { rtl } = useDirection();
   const subject = givenSubject ?? (isText ? "book" : "lesson");
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);
@@ -272,7 +284,7 @@ const ChatPane = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 1 }}>
-      {!empty && (
+      {!empty && !hideActions && (
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
           <CopyConversationButton
             onCopy={chat.copy && (() => chat.copy(chat.messages))}
@@ -298,12 +310,32 @@ const ChatPane = ({
       >
         {empty && (
           <Box data-testid="chat-empty">
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            <Typography sx={{ fontSize: 16, lineHeight: 1.7, mb: 2 }}>
               {t("intro", { context: subject })}
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {/* Full-width rows (screen 24): fill-2, radius 16, bold. */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {suggestionsFor(suggestedQuestions).map((s) => (
-                <Chip key={s} label={s} variant="outlined" onClick={() => send(s)} disabled={chat.asking} />
+                <ButtonBase
+                  key={s}
+                  onClick={() => send(s)}
+                  disabled={chat.asking}
+                  sx={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    textAlign: "start",
+                    px: 2.5,
+                    py: 1.75,
+                    borderRadius: `${RADIUS.menu}px`,
+                    bgcolor: "surface.fill2",
+                    fontSize: 15,
+                    fontWeight: 600,
+                    "&:hover": { bgcolor: "surface.fillHover" },
+                    "&.Mui-disabled": { opacity: 0.6 },
+                  }}
+                >
+                  {s}
+                </ButtonBase>
               ))}
             </Box>
           </Box>
@@ -336,31 +368,46 @@ const ChatPane = ({
           // On a phone the panel is not height-capped and the whole page
           // scrolls; sticky keeps the box reachable under a long thread.
           position: "sticky",
-          bottom: 0,
+          bottom: inputBottom,
+          zIndex: 1,
           bgcolor: "background.paper",
-          pt: 0.5,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: `${RADIUS.hero}px`,
+          boxShadow: SHADOW.card,
+          p: 0.75,
+          paddingInlineStart: 2,
+          "&:focus-within": { borderColor: "primary.main" },
         }}
       >
-        <TextField
+        <InputBase
           fullWidth
           multiline
           maxRows={4}
-          size="small"
           value={draft}
           onChange={(e) => setDraft(e.target.value.slice(0, MAX_QUESTION_CHARS))}
           onKeyDown={onKeyDown}
           placeholder={t("placeholder", { context: subject })}
           inputProps={{ "aria-label": t("question"), maxLength: MAX_QUESTION_CHARS }}
+          sx={{ flex: 1, px: 1, py: 0.75, fontSize: 15 }}
         />
         <IconButton
           type="submit"
-          color="primary"
           disabled={!draft.trim() || chat.asking}
           aria-label={t("send")}
-          // The icon points right; in a right-to-left page "send" points left.
-          sx={{ "& svg": { transform: "scaleX(-1)" } }}
+          sx={{
+            width: 40,
+            height: 40,
+            flexShrink: 0,
+            bgcolor: "primary.main",
+            color: "primary.contrastText",
+            "&:hover": { bgcolor: "primary.dark" },
+            "&.Mui-disabled": { bgcolor: "surface.fill", color: "text.disabled" },
+            // The icon points right; in a right-to-left page "send" points left.
+            "& svg": { transform: rtl ? "scaleX(-1)" : "none" },
+          }}
         >
-          <SendIcon />
+          <SendIcon fontSize="small" />
         </IconButton>
       </Box>
 

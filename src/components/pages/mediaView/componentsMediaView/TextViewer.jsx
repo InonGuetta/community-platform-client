@@ -127,13 +127,15 @@ const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) =
     //
     // And AFTER the document, not before it: see the PDF branch below.
     <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1, flexWrap: "wrap" }}>
+      {/* Redesign v4 (screen 27): a 13px accent link with its icon, not a
+          button's chrome. */}
       <Button
         size="small"
-        startIcon={<OpenInNewIcon />}
+        startIcon={<OpenInNewIcon sx={{ fontSize: "16px !important" }} />}
         href={mediaApi.streamUrl(mediaId)}
         target="_blank"
         rel="noopener noreferrer"
-        sx={{ textTransform: "none" }}
+        sx={{ textTransform: "none", fontSize: 13, fontWeight: 600, color: "primary.main" }}
       >
         {t("textViewer.newTab")}
       </Button>
@@ -216,7 +218,7 @@ const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) =
         height={650}
         sx={{
           border: "none",
-          borderRadius: 2,
+          borderRadius: "12px",
           display: loaded ? "block" : "none",
           bgcolor: "background.paper",
         }}

@@ -104,8 +104,7 @@ const TagProposals = () => {
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
               <Button
                 size="small"
-                variant="contained"
-                color="success"
+                variant="tinted-success"
                 startIcon={<CheckIcon />}
                 disabled={busyId !== null}
                 onClick={() => run(proposal, () => approve(proposal, {}))}

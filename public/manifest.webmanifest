@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "פלטפורמת הקהילה",
-  "short_name": "הקהילה",
+  "name": "קול תבונה",
+  "short_name": "קול תבונה",
   "description": "שיעורים, ספרים ומפגשים חיים של הקהילה — שמיעה, קריאה, הערות ודיון.",
   "lang": "he",
   "dir": "rtl",
@@ -9,8 +9,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#ffffff",
-  "theme_color": "#1a4a66",
+  "background_color": "#FBFBFD",
+  "theme_color": "#FBFBFD",
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

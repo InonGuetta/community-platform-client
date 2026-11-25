@@ -9,6 +9,7 @@ import DialogContent from "../Dialogs/DialogContent";
 import DialogActions from "../Dialogs/DialogActions";
 import { useTranslation } from "react-i18next";
 import { useCamera } from "./useCamera";
+import { ROOM } from "../../../theme/tokens";
 
 // Taking the profile picture now: the camera live, mirrored as a mirror is,
 // and one press to take the frame — which then goes to the crop editor like a
@@ -41,7 +42,7 @@ const CameraDialog = ({ open, onCancel, onCaptured, onChooseFile }) => {
               aspectRatio: "1 / 1",
               borderRadius: 2,
               overflow: "hidden",
-              bgcolor: "grey.900",
+              bgcolor: ROOM.bar,
               display: "grid",
               placeItems: "center",
             }}
@@ -55,7 +56,7 @@ const CameraDialog = ({ open, onCancel, onCaptured, onChooseFile }) => {
               sx={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }}
             />
             {status !== "live" && (
-              <Box sx={{ position: "absolute", display: "flex", flexDirection: "column", alignItems: "center", gap: 1, color: "grey.300" }}>
+              <Box sx={{ position: "absolute", display: "flex", flexDirection: "column", alignItems: "center", gap: 1, color: ROOM.ink2 }}>
                 <CircularProgress color="inherit" size={28} />
                 {t("avatar.camera.starting")}
               </Box>

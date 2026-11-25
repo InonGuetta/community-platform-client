@@ -71,7 +71,7 @@ describe("the student's side", () => {
     const user = userEvent.setup();
 
     await user.click((await screen.findAllByRole("button", { name: "הצטרפות לקורס" }))[0]);
-    await user.type(screen.getByLabelText("קוד הצטרפות"), "abc234");
+    await user.type(screen.getByLabelText(/^קוד הצטרפות/), "abc234");
     coursesApi.getMyJoinRequests.mockResolvedValue([{ id: 31, course_title: "גמרא", lecturer_name: "הרב כהן" }]);
     await user.click(screen.getByRole("button", { name: "שליחת בקשה" }));
 
@@ -87,7 +87,7 @@ describe("the student's side", () => {
     renderMyCourses();
     const user = userEvent.setup();
     await user.click((await screen.findAllByRole("button", { name: "הצטרפות לקורס" }))[0]);
-    await user.type(screen.getByLabelText("קוד הצטרפות"), "ZZZZZZ");
+    await user.type(screen.getByLabelText(/^קוד הצטרפות/), "ZZZZZZ");
     await user.click(screen.getByRole("button", { name: "שליחת בקשה" }));
     expect(await screen.findByText(/אין קורס פתוח עם הקוד הזה/)).toBeInTheDocument();
   });
@@ -95,7 +95,7 @@ describe("the student's side", () => {
   // The lecturer's shared link.
   it("opens with the code from the link already typed, and takes it off the address", async () => {
     renderMyCourses("/my-courses?join=abc234");
-    expect(await screen.findByLabelText("קוד הצטרפות")).toHaveValue("ABC234");
+    expect(await screen.findByLabelText(/^קוד הצטרפות/)).toHaveValue("ABC234");
     await waitFor(() => expect(screen.getByTestId("address")).toHaveTextContent(/^$/));
   });
 

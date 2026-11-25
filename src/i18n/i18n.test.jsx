@@ -10,7 +10,7 @@ beforeEach(() => localStorage.clear());
 test("Hebrew is loaded from the start, and common is one of its namespaces", () => {
   expect(i18n.language).toBe("he");
   expect(NAMESPACES).toContain("common");
-  expect(i18n.t("appName")).toBe("פלטפורמת הקהילה");
+  expect(i18n.t("appName")).toBe("קול תבונה");
 });
 
 test("switching language sets <html lang dir> and remembers the choice", async () => {
@@ -24,18 +24,18 @@ test("switching language sets <html lang dir> and remembers the choice", async (
 });
 
 test("the tab's title follows the language", async () => {
-  i18n.addResourceBundle("en", "common", { appName: "Community Platform" }, true, true);
+  i18n.addResourceBundle("en", "common", { appName: "Kol Tevuna" }, true, true);
   await changeLanguage("en");
-  expect(document.title).toBe("Community Platform");
+  expect(document.title).toBe("Kol Tevuna");
   await changeLanguage("he");
-  expect(document.title).toBe("פלטפורמת הקהילה");
+  expect(document.title).toBe("קול תבונה");
   i18n.removeResourceBundle("en", "common");
 });
 
 test("a key a language does not have yet falls back to Hebrew", async () => {
   i18n.addResourceBundle("he", "common", { onlyInHebrew: "רק בעברית" }, true, true);
   await changeLanguage("fr");
-  expect(i18n.t("appName")).toBe("Plateforme communautaire");
+  expect(i18n.t("language.change")).toBe("Changer de langue");
   expect(i18n.t("onlyInHebrew")).toBe("רק בעברית");
 });
 
@@ -91,7 +91,7 @@ test("a component re-renders in the new language and direction", async () => {
     return <p>{`${language} ${direction} ${t("appName")}`}</p>;
   };
   render(<Probe />);
-  expect(screen.getByText("he rtl פלטפורמת הקהילה")).toBeInTheDocument();
+  expect(screen.getByText("he rtl קול תבונה")).toBeInTheDocument();
   await act(() => changeLanguage("es"));
-  expect(screen.getByText("es ltr Plataforma comunitaria")).toBeInTheDocument();
+  expect(screen.getByText("es ltr Kol Tevuna")).toBeInTheDocument();
 });

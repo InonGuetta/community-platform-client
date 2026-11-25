@@ -50,6 +50,8 @@ export const useNotebookPageController = () => {
   // The notes ticked for a bulk action, and the notes queued for deletion (one
   // from a card's own button, or the whole tick-list).
   const [selectedIds, setSelectedIds] = useState(() => new Set());
+  // The tick boxes are drawn only in multi-select mode (UI_UX_FIXES 4.5).
+  const [selecting, setSelecting] = useState(false);
   const [deleteTargets, setDeleteTargets] = useState(null);
 
 
@@ -70,7 +72,7 @@ export const useNotebookPageController = () => {
 
   // Every chip that is a bookmark shows that bookmark's current name — this page
   // holds all of the user's bookmarks, so all of them. A rename in the sidebar,
-  // under a lesson's "הערות אישיות", or with a chip's pencil is one value seen
+  // under a lesson's "סימניות", or with a chip's pencil is one value seen
   // everywhere. See syncChipNames.
   const names = useMemo(() => bookmarkNames(bookmarks), [bookmarks]);
 
@@ -243,6 +245,14 @@ export const useNotebookPageController = () => {
     disabled: Boolean(reorderHint),
   });
 
+  const startSelecting = () => setSelecting(true);
+  // Leaving the mode drops the ticks with it: a hidden selection would still
+  // steer the export and the bulk delete.
+  const cancelSelecting = () => {
+    setSelecting(false);
+    setSelectedIds(new Set());
+  };
+
   const toggleSelected = (id) => setSelectedIds((prev) => {
     const next = new Set(prev);
     if (next.has(id)) next.delete(id); else next.add(id);
@@ -312,6 +322,9 @@ export const useNotebookPageController = () => {
     selectedCount,
     selectedIds,
     selectedNotes,
+    selecting,
+    startSelecting,
+    cancelSelecting,
     setActiveNoteId,
     setDeleteTargets,
     setDrafts,

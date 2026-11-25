@@ -6,9 +6,6 @@
   "items_one": "Un élément",
   "items_other": "{{count}} éléments",
   "fullList": "Voir la liste complète",
-  "more": "Plus de cours",
-  "noMore": "Plus aucun cours",
-  "showMore": "Afficher plus de cours de {{title}}",
   "emptyList": "Elle ne contient aucun cours à afficher.",
   "lists": {
     "title": "Listes enregistrées",

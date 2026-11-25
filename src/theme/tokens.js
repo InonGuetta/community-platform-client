@@ -33,6 +33,8 @@ const light = {
   error: { bg: "#fff1f2", fg: "#be123c" },
   // The draft badge on a cover: amber-800 on white, legible over any palette.
   draft: "#92400e",
+  // The sentence playing in the transcript: the mockup's cyan-200 at 80%.
+  cue: "rgba(165,243,252,.8)",
   // The empty state's wash and the glass of the header and dock.
   wash: "rgba(255,255,255,.6)",
   glass: "rgba(251,251,253,.78)",
@@ -61,11 +63,37 @@ const dark = {
   warning: { bg: "rgba(245,158,11,.15)", fg: "#fcd34d" },
   error: { bg: "rgba(244,63,94,.15)", fg: "#fda4af" },
   draft: "#92400e",
+  // Cyan-400 at 28%: a wash the light text still reads on.
+  cue: "rgba(34,211,238,.28)",
   wash: "rgba(17,24,39,.6)",
   glass: "rgba(11,15,25,.78)",
 };
 
 export const COLORS = { light, dark };
+
+// White that stays white in both modes: text over a photo or a gradient, the
+// sheet of a PDF page. (`paper` turns dark in the dark mode, which these must not.)
+export const WHITE = "#FFFFFF";
+
+// The live room's chrome. A video room is dark in either mode — the picture of
+// a camera reads on a dark stage — so it takes the dark palette whole rather
+// than the mode's own (the bars, the chat, the controls).
+export const ROOM = {
+  stage: dark.bg,
+  bar: dark.paper,
+  line: dark.line,
+  fill: dark.fill,
+  fillHover: dark.fillHover,
+  ink: dark.ink,
+  ink2: dark.ink2,
+  mute: dark.mute,
+  placeholder: dark.placeholder,
+  danger: dark.danger,
+  dangerSoft: "rgba(251,113,133,.15)",
+  dangerSoftHover: "rgba(251,113,133,.25)",
+  // The name tag over a tile.
+  label: "rgba(0,0,0,.5)",
+};
 
 // The tones a StatusBadge is drawn in (component 9).
 export const badgeTones = (c) => ({
@@ -105,6 +133,17 @@ export const SHADOW = {
   play: "0 6px 16px rgba(79,70,229,.4)",
 };
 
+// The card shell (component 12) — paper, a 1px line, radius 24, the card
+// shadow — spread into every `sx` that draws a card of its own. SectionCard,
+// NoteCard, the player card and the admin cards all start from it.
+export const CARD_SHELL_SX = {
+  bgcolor: "background.paper",
+  border: 1,
+  borderColor: "divider",
+  borderRadius: `${RADIUS.card}px`,
+  boxShadow: SHADOW.card,
+};
+
 // Motion (part B, "תנועה").
 export const MOTION = {
   cover: ".35s cubic-bezier(.2,.8,.2,1)",
@@ -122,3 +161,52 @@ export const FONT_DISPLAY = '"Heebo", "Assistant", "Segoe UI", Arial, sans-serif
 
 // The mockups' width limits (part B, "Layout"; decision 7).
 export const CONTENT_WIDTH = { wide: 1180, narrow: 1080 };
+
+// The dock (component 4): its glass, and the gradient of each of its icons.
+export const DOCK = {
+  glass: { light: "rgba(255,255,255,.55)", dark: "rgba(17,24,39,.6)" },
+  edge: { light: "rgba(255,255,255,.7)", dark: "rgba(255,255,255,.08)" },
+  dot: { light: "rgba(0,0,0,.55)", dark: "rgba(255,255,255,.6)" },
+  shadow: "0 0 0 .5px rgba(0,0,0,.12), 0 18px 40px -8px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.8)",
+  iconShadow: "0 4px 10px -2px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35)",
+  tip: "rgba(30,30,32,.82)",
+  gradient: {
+    archive: "linear-gradient(160deg, #818cf8, #4338ca)",
+    ask: "linear-gradient(160deg, #38bdf8, #2563eb)",
+    myCourses: "linear-gradient(160deg, #fb923c, #e11d48)",
+    notebook: "linear-gradient(160deg, #34d399, #047857)",
+  },
+};
+
+// The header's hairline (component 1), and the drawer's avatar and backdrop
+// (component 3).
+export const SHELL = {
+  headerEdge: { light: "rgba(0,0,0,.08)", dark: "rgba(255,255,255,.08)" },
+  drawerAvatar: "linear-gradient(135deg, #6366f1, #312e81)",
+  drawerShadow: "0 0 80px rgba(0,0,0,.3)",
+  backdrop: "rgba(0,0,0,.25)",
+};
+
+// The item tile (component 5): the round buttons and the badge that sit ON a
+// cover. White in both modes — they are read against the cover's own colours,
+// not against the page — and the heart is the light mode's rose for the same
+// reason. The hero (decision 1) is the archive's indigo banner.
+export const TILE = {
+  fab: "rgba(255,255,255,.9)",
+  fabInk: "#1d1d1f",
+  fabShadow: "0 1px 3px rgba(0,0,0,.15)",
+  heart: "#e11d48",
+  badge: "rgba(255,255,255,.92)",
+  gap: { column: { xs: 2, md: 4 }, row: { xs: 4, md: 6 } },
+};
+
+export const HERO = {
+  base: "#14123a",
+  gradient: ["#4f46e5", "#2b2a7a", "#14123a"],
+  ring: "rgba(255,255,255,.10)",
+  kicker: "#c7d2fe",
+  text: "rgba(224,231,255,.8)",
+  ghost: "rgba(255,255,255,.15)",
+  ghostHover: "rgba(255,255,255,.25)",
+};
+

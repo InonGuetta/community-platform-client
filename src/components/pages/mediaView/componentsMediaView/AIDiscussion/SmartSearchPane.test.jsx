@@ -34,7 +34,7 @@ describe("searching", () => {
     render(<SmartSearchPane search={s} />);
     await userEvent.type(screen.getByRole("textbox"), "   {Enter}");
     expect(s.run).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "חפש" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "חיפוש" })).toBeDisabled();
   });
 
   // Every search is paid for. A second Enter while one is running would only
@@ -44,7 +44,7 @@ describe("searching", () => {
     render(<SmartSearchPane search={s} />);
     await userEvent.type(screen.getByRole("textbox"), "{Enter}");
     expect(s.run).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "חפש" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "חיפוש" })).toBeDisabled();
   });
 
   test("coming back to the tab shows the query that produced the results", () => {
@@ -55,7 +55,7 @@ describe("searching", () => {
   test("clearing empties the box and the results", async () => {
     const s = search({ query: "תשובה", status: "succeeded", results: [recordingHit] });
     render(<SmartSearchPane search={s} />);
-    await userEvent.click(screen.getByRole("button", { name: "נקה חיפוש" }));
+    await userEvent.click(screen.getByRole("button", { name: "ניקוי החיפוש" }));
     expect(screen.getByRole("textbox")).toHaveValue("");
     expect(s.reset).toHaveBeenCalled();
   });

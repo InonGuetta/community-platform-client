@@ -1,5 +1,4 @@
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import ConfirmingDeletionDialog from "../../features/ConfirmingDeletionDialog/ConfirmingDeletionDialog";
 import SourcePreviewDialog from "../mediaView/componentsMediaView/SourcePreviewDialog";
 import ExportSplitDialog from "./componentsNotebook/ExportSplitDialog";
@@ -11,13 +10,16 @@ import NotesIndex from "./componentsNotebook/NotesIndex";
 import BookmarksSidebar from "./componentsNotebook/BookmarksSidebar";
 import NotesColumn from "./componentsNotebook/NotesColumn";
 import { useTranslation } from "react-i18next";
+import NoteToolbar from "../../features/Notes/NoteToolbar";
+import { HEADER_HEIGHT, DOCK_OFFSET } from "../../layout/shellGeometry";
 
-// The sticky navbar's height, which this page's own height is measured against.
-const NAVBAR_HEIGHT = 64;
+// The side column's distance below the site header while it sticks.
+const SIDE_GAP = 12;
 
 // Layout only. What the page does lives in useNotebookPageController; its four
 // sections are in componentsNotebook/ (NotebookHeader, NotesIndex,
-// BookmarksSidebar, NotesColumn), and the dialogs they open are mounted here.
+// BookmarksSidebar, NotesColumn), the formatting strip is features/Notes'
+// NoteToolbar, and the dialogs they open are mounted here.
 const NotebookPage = () => {
   const { t } = useTranslation(["notebook", "notes"]);
   const {
@@ -52,10 +54,12 @@ const NotebookPage = () => {
     reportEditorWarning,
     requestSave,
     runExport,
-    search,
     selectedCount,
     selectedIds,
     selectedNotes,
+    selecting,
+    startSelecting,
+    cancelSelecting,
     setActiveNoteId,
     setDeleteTargets,
     setDrafts,
@@ -80,33 +84,28 @@ const NotebookPage = () => {
     toggleSelected,
   } = useNotebookPageController();
 
+  // The strip is live whenever there is a note to format (UI_UX_FIXES 4.4):
+  // before the caret has been anywhere it aims at the first note, and the
+  // press moves the focus into that editor (exec restores or creates the
+  // selection) and applies there.
+  const targetNoteId = activeNoteId ?? filtered[0]?.id ?? null;
+
   return (
-    <Box
-      sx={{
-        display: "flex", flexDirection: "column", gap: 2, p: 3,
-        bgcolor: "background.default",
-        minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
-        // From md up the PAGE does not scroll — the column of notes does. That
-        // is what keeps the formatting strip and the notes list in place while
-        // the user moves down a long notebook, without either of them having to
-        // be positioned by hand against a header of a height nobody can predict
-        // once it starts wrapping. Below md the two stack and the page scrolls
-        // normally, where a pinned strip would eat most of a phone's screen.
-        height: { md: `calc(100vh - ${NAVBAR_HEIGHT}px)` },
-        overflow: { md: "hidden" },
-      }}
-    >
-      {/* Header — title, the formatting strip, and the one action that makes a
-          new note. The toolbar sits BETWEEN them, filling the space the header
-          had going spare, and wraps under the title on a narrow screen rather
-          than squeezing the two ends together. */}
+    // Redesign v4 (screen 05). PageContainer already gives the page its width
+    // and padding, so there is no wrapper of its own: the header, then two
+    // columns — the notes (7) and, beside them, the index and the bookmarks
+    // (5) — stacked on a phone with the index first, as before.
+    //
+    // The PAGE scrolls now (D-119, superseding D-37's inner scrolling): from
+    // md the formatting strip sticks under the site header at the top of the
+    // notes, and the side column sticks beside them and scrolls inside itself
+    // when it is taller than the window — so both stay in reach down a long
+    // notebook without the page having to guess a height for itself.
+    <>
       <NotebookHeader
-        activeNoteId={activeNoteId}
         askSources={askSources}
-        editorApis={editorApis}
         exportAnchor={exportAnchor}
         exporting={exporting}
-        formats={formats}
         handleCreate={handleCreate}
         notesToExport={notesToExport}
         selectedCount={selectedCount}
@@ -114,11 +113,34 @@ const NotebookPage = () => {
         setSplitOpen={setSplitOpen}
       />
 
-      <Box sx={{ display: "flex", gap: 3, flexGrow: 1, minHeight: 0, flexDirection: { xs: "column", md: "row" } }}>
-        {/* List column — an index of the notebook rather than a chooser: every
-            note is already open in the column beside it, so a row here scrolls
-            to its card. It is also where notes are ticked for a bulk action. */}
-        <Paper elevation={0} sx={{ width: { xs: "100%", md: 340 }, flexShrink: 0, height: { md: "100%" }, minHeight: 0, p: 2, borderRadius: 3, border: "1px solid", borderColor: "divider", display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(12, minmax(0, 1fr))" },
+          gap: 3,
+          alignItems: "start",
+        }}
+      >
+        {/* The index — every note is already open in the column beside it, so
+            a row scrolls to its card; it is also where notes are ticked for a
+            bulk action — and every bookmark the user has left across the
+            platform, so the notebook is one place for both kinds of personal
+            marking. */}
+        <Box
+          sx={{
+            gridColumn: { md: "span 5" },
+            // First in the document — read and tabbed to first, and on top on
+            // a phone, as the list always was — but drawn after the notes
+            // from md, where the notes take the start side.
+            order: { md: 1 },
+            minWidth: 0,
+            display: "flex", flexDirection: "column", gap: 3,
+            position: { md: "sticky" },
+            top: { md: HEADER_HEIGHT + SIDE_GAP },
+            maxHeight: { md: `calc(100vh - ${HEADER_HEIGHT + SIDE_GAP}px - ${DOCK_OFFSET.md}px)` },
+            overflowY: { md: "auto" },
+          }}
+        >
           <NotesIndex
             activeNoteId={activeNoteId}
             allVisibleSelected={allVisibleSelected}
@@ -128,10 +150,12 @@ const NotebookPage = () => {
             isDirty={isDirty}
             items={items}
             reorderHint={reorderHint}
-            search={search}
             selectedCount={selectedCount}
             selectedIds={selectedIds}
             selectedNotes={selectedNotes}
+            selecting={selecting}
+            startSelecting={startSelecting}
+            cancelSelecting={cancelSelecting}
             setDeleteTargets={setDeleteTargets}
             setSearch={setSearch}
             someVisibleSelected={someVisibleSelected}
@@ -140,39 +164,63 @@ const NotebookPage = () => {
             toggleSelected={toggleSelected}
           />
 
-          {/* Every bookmark the user has left across the platform, so the
-              notebook is one place for both kinds of personal marking. */}
           <BookmarksSidebar
             bookmarkGroups={bookmarkGroups}
             bookmarks={bookmarks}
             bookmarksStatus={bookmarksStatus}
             openSource={openSource}
           />
-        </Paper>
+        </Box>
+        {/* The notes themselves — every one of them, in the list's order —
+            under the strip that formats whichever one the caret is in. */}
+        <Box sx={{ gridColumn: { md: "span 7" }, minWidth: 0 }}>
+          <Box
+            sx={{
+              position: { md: "sticky" },
+              top: { md: HEADER_HEIGHT },
+              zIndex: 2,
+              // The page's own colour behind the strip, so the cards scrolling
+              // up under it do not show through the gap above and below it.
+              bgcolor: "background.default",
+              py: { md: 1.5 },
+              mt: { md: -1.5 },
+              mb: { xs: 2, md: 1.5 },
+            }}
+          >
+            <NoteToolbar
+              onCommand={(command, value) => editorApis.current.get(targetNoteId)?.exec(command, value)}
+              // A pixel size is not an execCommand — see
+              // RichNoteEditor.setFontSize — so it has its own way in rather
+              // than a fake command name.
+              onFontSize={(px) => editorApis.current.get(targetNoteId)?.setFontSize(px)}
+              formats={formats}
+              // Faded only when there is no note at all to format.
+              disabled={!targetNoteId}
+            />
+          </Box>
 
-        {/* The notes themselves — every one of them, in the list's order, as a
-            scrolling column. This is the pane that moves; everything else on the
-            page stays where it is. */}
-        <NotesColumn
-          activeNoteId={activeNoteId}
-          cardNodes={cardNodes}
-          draftFor={draftFor}
-          onNeedBody={onNeedBody}
-          editorApis={editorApis}
-          filtered={filtered}
-          isDirty={isDirty}
-          items={items}
-          openSource={openSource}
-          renameSource={renameSource}
-          reportEditorWarning={reportEditorWarning}
-          requestSave={requestSave}
-          selectedIds={selectedIds}
-          setActiveNoteId={setActiveNoteId}
-          setDeleteTargets={setDeleteTargets}
-          setDrafts={setDrafts}
-          setFormats={setFormats}
-          status={status}
-        />
+          <NotesColumn
+            activeNoteId={activeNoteId}
+            cardNodes={cardNodes}
+            draftFor={draftFor}
+            onNeedBody={onNeedBody}
+            editorApis={editorApis}
+            filtered={filtered}
+            isDirty={isDirty}
+            items={items}
+            openSource={openSource}
+            renameSource={renameSource}
+            reportEditorWarning={reportEditorWarning}
+            requestSave={requestSave}
+            selectedIds={selectedIds}
+            setActiveNoteId={setActiveNoteId}
+            setDeleteTargets={setDeleteTargets}
+            setDrafts={setDrafts}
+            setFormats={setFormats}
+            status={status}
+          />
+        </Box>
+
       </Box>
 
       {/* Mounted only while a source is open, rather than sitting there closed.
@@ -227,8 +275,8 @@ const NotebookPage = () => {
         current={sourceStyle}
         exporting={exporting}
         summary={pendingExport?.books
-          ? t("export.summaryFiles", { files: pendingExport.books.length, format: pendingExport.format === "pdf" ? "PDF" : "Word" })
-          : t("export.summaryNotes", { notes: notesToExport.length, format: pendingExport?.format === "pdf" ? "PDF" : "Word" })}
+          ? t("export.summaryFiles", { count: pendingExport.books.length, format: pendingExport.format === "pdf" ? "PDF" : "Word" })
+          : t("export.summaryNotes", { count: notesToExport.length, format: pendingExport?.format === "pdf" ? "PDF" : "Word" })}
         onChoose={runExport}
         onClose={() => setPendingExport(null)}
       />
@@ -249,7 +297,7 @@ const NotebookPage = () => {
             : t("delete.many", { count: deleteTargets?.length ?? 0 })
         }
       />
-    </Box>
+    </>
   );
 };
 

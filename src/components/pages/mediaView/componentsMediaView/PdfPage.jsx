@@ -5,6 +5,7 @@ import * as pdfjs from "pdfjs-dist";
 import { logger } from "../../../../utilities/logger";
 import { outputScaleFor } from "../../../../utilities/canvasScale";
 import { PAGE_GAP } from "./pdfLayout";
+import { SHADOW, WHITE } from "../../../../theme/tokens";
 
 // A highlighter over a scan, not a sticker on top of one.
 //
@@ -146,8 +147,10 @@ const PdfPage = ({ pdf, pageNumber, scale, width, height, observe, marks, flashe
         position: "relative",
         width, height,
         mx: "auto", mb: `${PAGE_GAP}px`,
-        bgcolor: "#fff",
-        boxShadow: 2,
+        bgcolor: WHITE,
+        boxShadow: SHADOW.cover,
+        borderRadius: "12px",
+        overflow: "hidden",
         // See textLayerSx: pdf.js writes every span's font size in terms of this.
         "--total-scale-factor": scale,
       }}

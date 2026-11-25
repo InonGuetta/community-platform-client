@@ -104,7 +104,7 @@ export const useNotesExport = ({ filtered, selectedIds, names }) => {
         const written = await downloadNotebooks(ready, (bookNotes, options) =>
           write(bookNotes, { ...options, sources }));
         setSplitOpen(false);
-        dispatch(notify({ message: t("export.filesCreated", { n: written }), severity: "success" }));
+        dispatch(notify({ message: t("export.filesCreated", { count: written }), severity: "success" }));
       } else {
         await write(await withBodies(notesToExport), { sources });
       }

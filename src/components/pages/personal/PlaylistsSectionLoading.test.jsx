@@ -49,5 +49,5 @@ test("asks for the lists with what is inside them, and shows placeholders until 
 test("a failure is said, not drawn as an empty page", async () => {
   savesApi.listPlaylists.mockRejectedValue(new Error("500"));
   renderSection();
-  expect(await screen.findByText("טעינת הרשימות נכשלה. נסה לרענן את העמוד.")).toBeInTheDocument();
+  expect(await screen.findByText("טעינת הרשימות נכשלה. אפשר לנסות לרענן את העמוד.")).toBeInTheDocument();
 });

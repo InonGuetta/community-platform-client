@@ -29,7 +29,7 @@ beforeEach(() => {
 });
 
 const propose = async (user, name) => {
-  await user.click(screen.getByRole("button", { name: "הוסף תגית" }));
+  await user.click(screen.getByRole("button", { name: "הוספת תגית" }));
   await user.type(screen.getByLabelText("שם התגית"), name);
   await user.click(screen.getByRole("button", { name: /^מעגל השנה/ }));
   await user.click(screen.getByRole("button", { name: /מעגל השנה לפי שבתות/ }));

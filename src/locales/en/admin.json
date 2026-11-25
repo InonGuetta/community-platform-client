@@ -1,5 +1,6 @@
 {
   "title": "Admin dashboard",
+  "subtitle": "System status, AI costs and processing faults",
   "stale": "{{error}} — the data shown may be out of date.",
   "loadFailed": "The admin data cannot be loaded",
   "queues": {
@@ -31,7 +32,6 @@
       "suggested_questions": "Suggested chat questions"
     },
     "lessThanCent": "Less than a cent",
-    "audioMinutes": "{{n}} audio minutes",
     "kiloTokens": "{{n}}k tokens",
     "retry": "Try again",
     "loadFailed": "The cost data cannot be loaded.",
@@ -47,7 +47,9 @@
     "kind": "Kind",
     "usage": "Usage",
     "calls": "Calls",
-    "cost": "Cost"
+    "cost": "Cost",
+    "audioMinutes_one": "1 audio minute",
+    "audioMinutes_other": "{{n}} audio minutes"
   },
   "donations": {
     "title": "Donations",

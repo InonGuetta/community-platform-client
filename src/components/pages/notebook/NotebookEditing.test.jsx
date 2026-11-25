@@ -89,7 +89,7 @@ describe("a draft", () => {
     expect(await screen.findByText("לא צוין שם לכרטיסייה")).toBeInTheDocument();
     expect(updateNote).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText("שם הכרטיסייה"), { target: { value: "צדקה" } });
-    fireEvent.click(screen.getByRole("button", { name: "שמור" }));
+    fireEvent.click(screen.getByRole("button", { name: "שמירה" }));
     await waitFor(() => expect(updateNote).toHaveBeenCalledWith(2, expect.objectContaining({ title: "צדקה" })));
   });
 });
@@ -100,7 +100,7 @@ describe("Ctrl+S", () => {
     let notPrevented;
     await act(async () => { notPrevented = ctrlS(); });
     expect(notPrevented).toBe(false);
-    expect(notices(store)).toContain("לא נבחרה הערה. לחץ בתוך הערה ואז שמור.");
+    expect(notices(store)).toContain("לא נבחרה הערה. לוחצים בתוך הערה ואז שומרים.");
     expect(updateNote).not.toHaveBeenCalled();
   });
 
@@ -152,15 +152,18 @@ describe("deleting", () => {
   test("the ticked notes: the ones deleted go, with their ticks; the one refused stays, ticked", async () => {
     removeNote.mockImplementation(async (id) => { if (id === 2) throw new Error("refused"); });
     await renderNotebook();
+    // The tick boxes appear only in multi-select mode.
+    expect(screen.queryByRole("checkbox", { name: "בחירת ההערה תפילה" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "בחירה מרובה" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "בחירת ההערה תפילה" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "בחירת ההערה ללא כותרת" }));
-    expect(screen.getByText("2 נבחרו")).toBeInTheDocument();
+    expect(screen.getByText("נבחרו שתי הערות")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "מחיקת הנבחרות" }));
     fireEvent.click(await screen.findByRole("button", { name: "מחיקה" }));
     await waitFor(() => expect(removeNote).toHaveBeenCalledTimes(2));
     await dialogClosed();
     await waitFor(() => expect(editors()).toHaveLength(1));
-    expect(screen.getByText("1 נבחרו")).toBeInTheDocument();
+    expect(screen.getByText("נבחרה הערה אחת")).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "בחירת ההערה ללא כותרת" })).toBeChecked();
   });
 });

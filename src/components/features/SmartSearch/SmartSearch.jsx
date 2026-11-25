@@ -13,6 +13,10 @@ import { creatorPrefixes } from "../../../utilities/constant";
 import { useSmartSearch } from "./useSmartSearch";
 import { useTranslation } from "react-i18next";
 import { creatorDisplayName } from "../../../utilities/creatorPage";
+import EmptyState from "../EmptyState/EmptyState";
+import { RADIUS } from "../../../theme/tokens";
+
+const SMART_SEARCH_SHADOW = "0 10px 40px -14px rgba(79,70,229,.3)";
 
 // ts_headline returns the snippet with <b>…</b> around matches; render as plain
 // text to avoid injecting transcript-derived HTML into the DOM.
@@ -32,8 +36,8 @@ const tierOf = (sim) => {
   if (s >= MEDIUM_THRESHOLD) return "medium";
   return "normal";
 };
-const TITLE_COLOR = { strong: "success.main", medium: "#b8860b", normal: "text.primary" };
-const BORDER_COLOR = { strong: "success.main", medium: "#b8860b", normal: "transparent" };
+const TITLE_COLOR = { strong: "success.main", medium: "warning.main", normal: "text.primary" };
+const BORDER_COLOR = { strong: "success.main", medium: "warning.main", normal: "transparent" };
 
 // "Smart deep search" over transcripts: hybrid (meaning + keyword). Fires on
 // Enter / the search button — NOT per keystroke, since each query embeds the
@@ -41,7 +45,7 @@ const BORDER_COLOR = { strong: "success.main", medium: "#b8860b", normal: "trans
 // matching segment's start_time (onOpenResult is wired by the page).
 const SmartSearch = ({ onOpenResult }) => {
   const { t } = useTranslation("archive");
-  const { results, value, setValue, loading, searched, runSearch, handleKeyDown } = useSmartSearch();
+  const { results, value, setValue, loading, searched, runSearch, searchFor, handleKeyDown } = useSmartSearch();
 
   return (
     <Box>
@@ -53,22 +57,54 @@ const SmartSearch = ({ onOpenResult }) => {
         fullWidth
         // A placeholder is not a name, and is gone once something is typed.
         inputProps={{ "aria-label": t("smartSearch.placeholder") }}
+        // One magnifier, at the start (UI_UX_FIXES 4.3): it is also the button.
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <SearchIcon fontSize="small" />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={runSearch} edge="end" aria-label={t("smartSearch.run")} disabled={loading}>
+              <IconButton onClick={runSearch} edge="start" aria-label={t("smartSearch.run")} disabled={loading}>
                 {loading ? <CircularProgress size={20} /> : <SearchIcon />}
               </IconButton>
             </InputAdornment>
           ),
         }}
-        sx={{ mb: 2 }}
+        // Mockup 03 (D-33): one large field, centred — a white pill 64 high
+        // with a line and an indigo glow, 18px text.
+        sx={(theme) => ({
+          display: "flex",
+          maxWidth: 768,
+          mx: "auto",
+          mb: { xs: 4, md: 5 },
+          "& .MuiOutlinedInput-root": {
+            minHeight: 64,
+            fontSize: 18,
+            borderRadius: `${RADIUS.pill}px`,
+            bgcolor: "background.paper",
+            border: `1px solid ${theme.palette.divider}`,
+            boxShadow: SMART_SEARCH_SHADOW,
+            paddingInline: "12px",
+            "&.Mui-focused": { borderColor: theme.palette.primary.main },
+          },
+          "& .MuiInputAdornment-root": { color: "text.secondary" },
+        })}
       />
+
+      {/* Before the first search: what this is, and three ways to try it. */}
+      {!loading && !searched && results.length === 0 && (
+        <EmptyState
+          icon={SearchIcon}
+          title={t("smartSearch.introTitle")}
+          text={t("smartSearch.introText")}
+          titleComponent="h3"
+          sx={{ py: { xs: 5, md: 6 }, mb: 3 }}
+          action={
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
+              {t("smartSearch.examples", { returnObjects: true }).map((example) => (
+                <Chip key={example} label={example} variant="outlined" onClick={() => searchFor(example)} />
+              ))}
+            </Box>
+          }
+        />
+      )}
 
       {loading && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>

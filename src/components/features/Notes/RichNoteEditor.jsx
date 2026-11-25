@@ -12,7 +12,8 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { sanitizeNoteHtml, isNoteHtmlEmpty } from "../../../utilities/noteHtml";
-import { mediaTypeAccents } from "../../../utilities/constant";
+import { RADIUS } from "../../../theme/tokens";
+import { SOURCE_CHIP_SX } from "./noteStyles";
 import {
   sourceChipHtml, sourceFromChip, renameSourceChip, SOURCE_CHIP_SELECTOR, MAX_CHIP_NOTE,
   appendToReferences, hasWrittenText, REFERENCES_SELECTOR,
@@ -286,7 +287,7 @@ const RichNoteEditor = forwardRef(({
 
   // A chip that IS a bookmark (data-bookmark-id) is renamed by renaming the
   // bookmark: the name lives there, and every chip pointing at it — in this
-  // note, in others, and the row under "הערות אישיות" — follows. The chip on
+  // note, in others, and the row under "סימניות" — follows. The chip on
   // screen is updated at once so the dialog's answer shows immediately, but the
   // note is NOT marked as changed: nothing about the note itself was edited,
   // and a "not saved" warning for a name that is already saved would be false.
@@ -520,21 +521,21 @@ const RichNoteEditor = forwardRef(({
         // Focus does two things: it reports the formats under the caret, and it
         // tells the page which of its stacked editors the toolbar now drives.
         onFocus={() => { onFocus?.(); reportFormats(); }}
+        // Redesign v4 (screen 05): the body is the card's own text — 16 / 1.9
+        // in ink-2 on the card, no box of its own. The card's accent outline
+        // (NoteCard, isActive) is what says the caret is here.
         sx={{
           flexGrow: 1, width: "100%", minHeight,
-          p: 2, borderRadius: 1, overflowY: "auto",
-          border: "1px solid", borderColor: "divider",
-          outline: "none", lineHeight: 1.7,
+          p: 0, overflowY: "auto",
+          // No outline of its own: the focus shows on the note's card, whose
+          // border turns accent while the caret is inside (NoteCard, isActive).
+          outline: "none",
+          fontSize: 16, lineHeight: 1.9, color: "surface.ink2",
           // The note is content, and each of its paragraphs reads in the
           // direction of its own words: a Hebrew line after one that opens with
           // "Rashi" is still right to left. dir="auto" on the box would decide
           // the whole note from its first letter instead.
           "&, & > *": { unicodeBidi: "plaintext", textAlign: "start" },
-          "&:hover": { borderColor: "text.primary" },
-          // The brand ring the rest of the app uses on a focused control, as a
-          // literal rather than currentColor — which is the TEXT colour here and
-          // would draw a black halo round the box.
-          "&:focus": { borderColor: "primary.main", boxShadow: "0 0 0 3px rgba(21,151,187,0.15)" },
           // A list indents on the side the text starts from. Without this the
           // bullets sit on the left of a right-to-left line, detached from it.
           "& ul, & ol": { paddingInlineStart: "1.5rem", margin: "0.5rem 0" },
@@ -547,24 +548,25 @@ const RichNoteEditor = forwardRef(({
           // A pasted screenshot is whatever size it was taken at, which is
           // routinely wider than this box. Scaled down to fit rather than
           // allowed to force the whole page sideways.
-          "& img": { maxWidth: "100%", height: "auto", borderRadius: 4, display: "block", my: 1 },
+          "& img": { maxWidth: "100%", height: "auto", borderRadius: `${RADIUS.cover}px`, display: "block", my: 1 },
           // A source chip — a bookmark dragged in from the sidebar. Styled from
           // here rather than with inline CSS on the element itself so it follows
           // the theme into dark mode, and so the sanitizer has one less kind of
           // style attribute to have an opinion about.
+          //
+          // Redesign v4 (screen 05): every source is a green chip (part B,
+          // success), whatever kind of lecture it came from — the per-type
+          // orange/blue/green it used to wear is gone with the archive's type
+          // accents. The chip may wrap onto a second line (its note), so it is
+          // rounded rather than a pill.
           "& span[data-media-id]": {
+            ...SOURCE_CHIP_SX,
             display: "inline-block",
-            px: 0.75,
-            py: 0.25,
+            px: 1.25,
+            py: 0.5,
             mx: 0.25,
-            borderRadius: 1.5,
-            // The neutral case: a chip carrying no media type, which is every
-            // chip written before the type was recorded. The three real colours
-            // are below.
-            bgcolor: "primary.main",
-            color: "#fff",
-            fontSize: "0.8em",
-            fontWeight: 700,
+            borderRadius: `${RADIUS.field}px`,
+            fontSize: "0.8125em",
             lineHeight: 1.45,
             verticalAlign: "middle",
             cursor: "pointer",
@@ -577,20 +579,7 @@ const RichNoteEditor = forwardRef(({
             // the outline drawn round it on hover is still a rectangle.
             maxWidth: "100%",
             overflowWrap: "anywhere",
-            // Darkened rather than switched to a named "dark" shade: the three
-            // accents are fixed hex values with no dark variant of their own.
-            "&:hover": { filter: "brightness(0.88)" },
           },
-
-          // A source keeps the colour of the KIND of lecture it came from —
-          // orange for video, blue for audio, green for text — which is the
-          // same accent the archive's cards and the sidebar's own bookmark
-          // headers use. Dragging a bookmark out of an orange group and having
-          // it land as a blue chip made the two into different things; they are
-          // the same thing in two places.
-          '& span[data-media-id][data-media-type="video"]': { bgcolor: mediaTypeAccents.video },
-          '& span[data-media-id][data-media-type="audio"]': { bgcolor: mediaTypeAccents.audio },
-          '& span[data-media-id][data-media-type="text"]': { bgcolor: mediaTypeAccents.text },
 
           // The chip's second line: what the user wrote at that second. Lighter
           // and slightly smaller than the lecture's name above it, because the
@@ -648,7 +637,7 @@ const RichNoteEditor = forwardRef(({
                 left: framed.left + framed.width,
                 transform: "translate(-50%, -50%)",
                 bgcolor: "error.main",
-                color: "#fff",
+                color: "common.white",
                 boxShadow: 2,
                 // A chip is barely taller than its own text, so a button sized
                 // for a screenshot would bury it. Both sizes still clear the
@@ -678,7 +667,7 @@ const RichNoteEditor = forwardRef(({
                   left: framed.left + framed.width - RENAME_OFFSET_PX,
                   transform: "translate(-50%, -50%)",
                   bgcolor: "primary.main",
-                  color: "#fff",
+                  color: "common.white",
                   boxShadow: 2,
                   p: 0,
                   "&:hover": { bgcolor: "primary.dark" },
@@ -724,7 +713,7 @@ const RichNoteEditor = forwardRef(({
         <Typography
           aria-hidden
           sx={{
-            position: "absolute", top: 16, insetInlineStart: 16,
+            position: "absolute", top: 0, insetInlineStart: 0, fontSize: 16, lineHeight: 1.9,
             color: "text.disabled", pointerEvents: "none",
           }}
         >

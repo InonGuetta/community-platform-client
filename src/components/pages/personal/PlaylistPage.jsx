@@ -1,8 +1,6 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
-import DirectionalIcon from "../../../components/features/DirectionalIcon/DirectionalIcon";
+import BackLink from "../../features/BackLink/BackLink";
+import PageHeader from "../../features/PageHeader/PageHeader";
 import MediaGrid from "../../features/MediaGrid/MediaGrid";
 import { SAVED_SHELF } from "../../layout/personalShelves";
 import { useTranslation } from "react-i18next";
@@ -32,49 +30,34 @@ const PlaylistPage = () => {
   const { t } = useTranslation(["personal", "nav"]);
 
   return (
-    <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
-      <Box sx={{ flexGrow: 1, p: 3 }}>
-        {/* "Back" by meaning: DirectionalIcon points it right in Hebrew and
-            left in English. */}
-        <Button
-          onClick={() => navigate(SAVED_SHELF.path)}
-          startIcon={<DirectionalIcon toward="back" />}
-          sx={{ mb: 2, "& .MuiButton-startIcon": { marginInlineEnd: -0.25, marginInlineStart: 0.75 } }}
-        >
-          {t(`nav:${SAVED_SHELF.labelKey}`)}
-        </Button>
+    <>
+      <BackLink to={SAVED_SHELF.path} sx={{ mb: 3 }}>
+        {t(`nav:${SAVED_SHELF.labelKey}`)}
+      </BackLink>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-          {/* The heading holds its place while the list loads, so the page does
-              not jump once the title arrives. */}
-          <Typography variant="h4" fontWeight={800} color="primary">
-            {playlist?.title || t("list.fallbackTitle")}
-          </Typography>
-          {items.length > 0 && (
-            <Typography variant="body2" color="text.secondary">
-              {t("lessons", { count: items.length })}
-            </Typography>
-          )}
-        </Box>
+      {/* The heading holds its place while the list loads, so the page does
+          not jump once the title arrives. */}
+      <PageHeader
+        kicker={items.length > 0 ? t("lessons", { count: items.length }) : undefined}
+        title={playlist?.title || t("list.fallbackTitle")}
+      />
 
-        {/* A failed load is told apart from an empty list on purpose: "הרשימה
-            ריקה" under a request that never arrived sends the user looking for
-            lectures they did not lose. */}
-        {failed ? (
-          <Alert severity="error">{t("list.loadFailed")}</Alert>
-        ) : (
-          <MediaGrid
-            items={items}
-            status={status}
-            onView={(id) => navigate(`/media/${id}`)}
-            user={user}
-            emptyMessage={t("list.empty")}
-            emptyActionLabel={t("toArchive")}
-            onEmptyAction={() => navigate("/archive")}
-          />
-        )}
-      </Box>
-    </Box>
+      {/* A failed load is told apart from an empty list on purpose: "הרשימה
+          ריקה" under a request that never arrived sends the user looking for
+          lectures they did not lose. */}
+      {failed ? (
+        <Alert severity="error">{t("list.loadFailed")}</Alert>
+      ) : (
+        <MediaGrid
+          items={items}
+          status={status}
+          user={user}
+          emptyMessage={t("list.empty")}
+          emptyActionLabel={t("toArchive")}
+          onEmptyAction={() => navigate("/archive")}
+        />
+      )}
+    </>
   );
 };
 

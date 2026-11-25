@@ -65,11 +65,14 @@ const PdfToolbar = ({ page, pages, onPage, zoom, onZoom, onFit }) => {
   };
 
   return (
+    // Redesign v4 (screen 27): no card of its own. It sits on the viewer's
+    // line-coloured container, centred, and always left-to-right: the page
+    // number, the percentage and the arrows read the same in every language.
     <Box
+      dir="ltr"
       sx={{
-        display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap",
-        px: 1, py: 0.5, mb: 1,
-        bgcolor: "background.paper", borderRadius: 2, boxShadow: 1,
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, flexWrap: "wrap",
+        minHeight: 44, mb: 1,
       }}
     >
       <Tooltip describeChild title={t("pdf.prev")}>

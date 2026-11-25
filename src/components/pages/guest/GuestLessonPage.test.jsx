@@ -84,7 +84,7 @@ describe("sharing a lesson", () => {
     renderShare({ isPublic: true, isPublished: true, canManage: false, url: "http://app.test/api/public/share/7" });
     expect(await whatsAppHref()).toContain("http://app.test/api/public/share/7");
     // A guest starts at the start: no "from this moment".
-    expect(screen.queryByText(/שתף מהזמן הנוכחי/)).toBeNull();
+    expect(screen.queryByText(/שיתוף מהזמן הנוכחי/)).toBeNull();
   });
 
   it("sends the lesson's own page while it is not public", async () => {

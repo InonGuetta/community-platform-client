@@ -15,7 +15,7 @@ import i18n from "../i18n/i18n";
 // gone, rather than offering a play button that cannot play.
 //
 // The lessons belong to ONE person: whoever was signed in when they were
-// saved. Signing out deletes them (Navbar), and a different user signing in on
+// saved. Signing out deletes them (useAccount), and a different user signing in on
 // the same device deletes them too (`claimOffline`), so one reader never finds
 // another's lessons on a shared computer.
 

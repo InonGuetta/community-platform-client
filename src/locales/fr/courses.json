@@ -1,5 +1,5 @@
 {
-  "title": "Cours",
+  "title": "Gérer les cours",
   "newCourse": "Nouveau cours",
   "editCourse": "Modifier le cours",
   "tabs": {
@@ -124,7 +124,8 @@
     "count_other": "{{count}} cours",
     "awaiting": "En attente de l'accord de l'enseignant",
     "cancelRequest": "Annuler la demande",
-    "none": "Vous n'avez encore été ajouté à aucun cours. Vous avez reçu un code de l'enseignant ? Vous pouvez vous inscrire avec.",
-    "join": "Rejoindre un cours"
+    "none": "Pas encore de cours",
+    "join": "Rejoindre un cours",
+    "noneText": "Vous avez reçu un code de l'enseignant ? Vous pouvez vous inscrire avec."
   }
 }

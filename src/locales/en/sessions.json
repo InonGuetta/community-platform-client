@@ -19,10 +19,13 @@
     "courseNotified": "The course's students will be notified",
     "allNotified": "The students of all your courses will be notified",
     "noCourse": "No course",
-    "when": "When (empty = start now)",
-    "schedule": "Schedule for a future time",
+    "when": "When",
     "scheduleSubmit": "Schedule session",
-    "createStart": "Create and start"
+    "createStart": "Create and start",
+    "pastTime": "The time has already passed",
+    "namePlaceholder": "Optional. Without one the session shows as “{{name}}”",
+    "now": "Now",
+    "later": "Later"
   },
   "notices": {
     "cannotJoin": "The session cannot be joined",
@@ -95,5 +98,6 @@
     "savedLessonMissing_one": "The recording was saved and became a lesson (draft), but its last part did not reach the server. You can start its transcription from the lesson's page.",
     "savedLessonMissing_other": "The recording was saved and became a lesson (draft), but its last {{count}} parts did not reach the server. You can start its transcription from the lesson's page.",
     "finishFailed": "Saving the recording did not finish. Whatever already reached the server will be kept when the session ends."
-  }
+  },
+  "noneActiveText": "A live session is a lesson or conversation in real time, with voice and video. The host opens it, and everyone joins from here."
 }

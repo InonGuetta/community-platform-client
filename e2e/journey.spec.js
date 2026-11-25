@@ -57,7 +57,22 @@ const signUp = async (page, w, who, roleLabel) => {
   await page.getByLabel(w("auth:fields.displayName")).fill(who.name);
   await page.getByLabel(w("auth:fields.email")).fill(who.email);
   await page.getByLabel(new RegExp(`^${literally(w("auth:fields.password"))}`)).fill(who.password);
-  await page.getByRole("button", { name: w("auth:signUp.submit"), exact: true }).click();
+  const submit = page.getByRole("button", { name: w("auth:signUp.submit"), exact: true });
+  await submit.click();
+  // The API restarts under `node --watch` now and then, and a sign-up is a POST
+  // the app never replays. When Vite's proxy answers "API unavailable" the
+  // request never reached Express (the code says so), so pressing the button
+  // again is safe — and is what a person would do. See DECISIONS D-143.
+  const unreachable = page.getByText(w("errors:codes.API_UNAVAILABLE")).first();
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const outcome = await Promise.race([
+      page.waitForURL(/\/archive/, { timeout: 20_000 }).then(() => "in"),
+      unreachable.waitFor({ timeout: 20_000 }).then(() => "unreachable"),
+    ]).catch(() => "timeout");
+    if (outcome !== "unreachable") break;
+    await page.waitForTimeout(5_000);
+    await submit.click();
+  }
   await expect(page).toHaveURL(/\/archive/);
   // A new account is offered a profile picture once; this journey says later.
   const welcome = page.getByRole("dialog");
@@ -159,9 +174,10 @@ test(`[${lng}] a lecturer is approved, opens a course, enrols a student, and the
     // Untagged, so the app offers tags; this journey is not about tags.
     await asLecturer.getByRole("button", { name: w("tags:suggest.skip") }).click();
 
-    const publish = w("media:card.publish");
-    const card = rowWith(asLecturer, lessonTitle, asLecturer.getByRole("button", { name: publish }));
-    await card.getByRole("button", { name: publish }).click();
+    // Publishing is in the tile's ⋯ menu (Redesign v4, component 5), named for
+    // the lesson it acts on.
+    await asLecturer.getByRole("button", { name: w("media:card.actionsFor", { title: lessonTitle }) }).click();
+    await asLecturer.getByRole("menuitem", { name: w("media:card.publish") }).click();
     await expect(asLecturer.getByText(w("archive:notices.published"))).toBeVisible();
   });
 

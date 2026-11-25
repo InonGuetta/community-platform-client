@@ -408,7 +408,7 @@ export const appendToReferences = (editor, chipHtml) => {
 //
 // A chip made from a bookmark carries that bookmark's id, and its name is the
 // bookmark's note — one value, not a copy of it taken at the moment the chip
-// was written. Rename the bookmark under "הערות אישיות" and every chip pointing
+// was written. Rename the bookmark under "סימניות" and every chip pointing
 // at it says the new name; rename the chip with its pencil and it is the
 // bookmark that is renamed (RichNoteEditor's onRenameSource).
 //

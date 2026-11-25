@@ -1,9 +1,7 @@
-import TableContainer from "@mui/material/TableContainer";
-import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
-import Paper from "@mui/material/Paper";
+import TableCard from "../../../features/DataTable/TableCard";
 import UsersTableContent from "./UsersTableContent";
 import { useTranslation } from "react-i18next";
 
@@ -13,14 +11,13 @@ const HEADERS = ["id", "name", "email", "role", "status", "actions"];
 const UsersTable = ({ users, onEdit, onDelete, onToggleActive, canToggleActive = false, currentUserId, loading = false }) => {
   const { t } = useTranslation("users");
   return (
-  <TableContainer component={Paper} sx={{ boxShadow: 1 }}>
-    {/* minWidth keeps the columns readable and lets TableContainer scroll the
-        table horizontally on narrow screens instead of squashing the cells. */}
-    <Table size="small" sx={{ minWidth: 640 }}>
+    // minWidth keeps the columns readable; the card scrolls the table
+    // sideways on a phone, so the page itself never does.
+    <TableCard minWidth={720}>
       <TableHead>
-        <TableRow sx={{ bgcolor: "grey.100" }}>
+        <TableRow>
           {HEADERS.map((h) => (
-            <TableCell key={h} sx={{ fontWeight: 700 }}>{t(`headers.${h}`)}</TableCell>
+            <TableCell key={h}>{t(`headers.${h}`)}</TableCell>
           ))}
         </TableRow>
       </TableHead>
@@ -33,8 +30,7 @@ const UsersTable = ({ users, onEdit, onDelete, onToggleActive, canToggleActive =
         currentUserId={currentUserId}
         loading={loading}
       />
-    </Table>
-  </TableContainer>
+    </TableCard>
   );
 };
 

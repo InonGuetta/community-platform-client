@@ -110,3 +110,15 @@ describe("a summary inside an English interface", () => {
     expect(screen.getByText("נקודה ראשונה").closest("[dir]")).toHaveAttribute("dir", "auto");
   });
 });
+
+// Redesign v4, screen 20: the key points are a list, not chips.
+describe("key points", () => {
+  test("render as list items", async () => {
+    await act(() => i18n.changeLanguage("he"));
+    const done = { status: "done", ai_summary: "סיכום", ai_key_points: ["א", "ב"] };
+    render(<AISummaryPanel transcript={done} />);
+    const list = screen.getByTestId("key-points");
+    expect(list.tagName).toBe("UL");
+    expect(list.querySelectorAll("li")).toHaveLength(2);
+  });
+});

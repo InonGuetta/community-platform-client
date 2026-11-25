@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import SegmentedControl from "../../../features/SegmentedControl/SegmentedControl";
 import AISummaryPanel from "./AISummaryPanel";
 import ChaptersPanel from "./ChaptersPanel";
 import TranscriptEditor from "../../../features/TranscriptEditor/TranscriptEditor";
@@ -72,7 +71,7 @@ const MediaInsightsTabs = ({
     ...(notesPanel ? [{ key: "notes", label: t("tabs.notes") }] : []),
     ...(sessionChatPanel ? [{ key: "sessionChat", label: t("tabs.sessionChat") }] : []),
     // Last in the list, which in this right-to-left row is to the LEFT of
-    // "הערות אישיות". Offered for books too: a book's text is in the same
+    // "סימניות". Offered for books too: a book's text is in the same
     // chunks a recording's transcript is.
     ...(discussionPanel ? [{ key: "discuss", label: t("tabs.discuss") }] : []),
   ];
@@ -81,13 +80,20 @@ const MediaInsightsTabs = ({
 
   return (
     <>
-      <Tabs value={activeTab} onChange={(_, v) => setTab(v)} variant="fullWidth" sx={{ mb: 2, flexShrink: 0 }}>
-        {/* minWidth 0 and tighter padding: five tabs share a third of the
-            page, and MUI's default 90px minimum would push the last one off. */}
-        {tabs.map((t) => <Tab key={t.key} label={t.label} sx={{ minWidth: 0, px: 1 }} />)}
+      {/* Redesign v4 (component 10): the theme draws the row — a hairline
+          under it, 15px bold labels, a 2px accent indicator — and scrolls it
+          sideways when the five do not fit, rather than squeezing them into
+          equal slivers as the old full-width row did. */}
+      <Tabs value={activeTab} onChange={(_, v) => setTab(v)} sx={{ mb: 3, flexShrink: 0 }}>
+        {tabs.map((t) => <Tab key={t.key} label={t.label} />)}
       </Tabs>
 
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+      {/* UI_UX_FIXES 2.1 (overrides D-22): the card no longer scrolls inside
+          itself — the page scrolls, like any other. The one exception is the
+          follow-along transcript, which may scroll in a box of its own (and
+          never inside another scrolling box), so the playing line can be kept
+          in view. */}
+      <Box>
         {activeKey === "summary" && (
           <AISummaryPanel
             transcript={transcript}
@@ -119,20 +125,21 @@ const MediaInsightsTabs = ({
         {activeKey === "sessionChat" && sessionChatPanel}
         {activeKey === "discuss" && discussionPanel}
         {activeKey === "transcript" && captions && (
-          <ToggleButtonGroup
-            exclusive
-            size="small"
+          <SegmentedControl
             value={transcriptView}
-            onChange={(_, next) => next && setTranscriptView(next)}
-            aria-label={t("tabs.transcriptView")}
-            sx={{ mb: 1.5, display: "flex", "& .MuiToggleButton-root": { flex: 1, py: 0.25 } }}
-          >
-            <ToggleButton value="follow">{t("tabs.follow")}</ToggleButton>
-            <ToggleButton value="text">{canEditTranscript ? t("tabs.fullTextEdit") : t("tabs.fullText")}</ToggleButton>
-          </ToggleButtonGroup>
+            onChange={setTranscriptView}
+            label={t("tabs.transcriptView")}
+            options={[
+              { value: "follow", label: t("tabs.follow") },
+              { value: "text", label: canEditTranscript ? t("tabs.fullTextEdit") : t("tabs.fullText") },
+            ]}
+            sx={{ mb: 2.5 }}
+          />
         )}
         {activeKey === "transcript" && captions && transcriptView === "follow" && (
-          <FollowAlongTranscript captions={captions} currentTime={currentTime} onSeek={onSeek} />
+          <Box sx={{ maxHeight: { md: "60vh" }, overflowY: { md: "auto" } }}>
+            <FollowAlongTranscript captions={captions} currentTime={currentTime} onSeek={onSeek} />
+          </Box>
         )}
         {activeKey === "transcript" && (!captions || transcriptView === "text") && (
           <TranscriptEditor

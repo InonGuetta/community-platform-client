@@ -10,7 +10,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { useNotesPanel } from "./useNotesPanel";
 import { formatTime } from "../../../../utilities/formatTime";
 import { listRowSx } from "../../../../utilities/constant";
@@ -62,7 +61,7 @@ const NotesPanel = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="subtitle1" fontWeight={600}>{t("notes.title")}</Typography>
+      <Typography variant="display" component="h3" sx={{ fontSize: 24 }}>{t("notes.title")}</Typography>
 
       {/* ── Where a bookmark is made ──────────────────────────────────────────
           A recording has a playhead, so "here" is a value this panel can read
@@ -88,7 +87,7 @@ const NotesPanel = ({
           </Typography>
         </Paper>
       ) : (
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
           <TextField
             label={t("notes.addAtTime")}
             value={note}
@@ -97,7 +96,7 @@ const NotesPanel = ({
             fullWidth
             placeholder={t("notes.atTime", { time: formatTime(Math.floor(currentTime)) })}
           />
-          <Button variant="contained" onClick={handleCreate} startIcon={<BookmarkIcon />} sx={{ flexShrink: 0 }}>
+          <Button variant="contained" onClick={handleCreate} sx={{ flexShrink: 0 }}>
             {t("notes.save")}
           </Button>
         </Box>

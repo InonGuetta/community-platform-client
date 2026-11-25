@@ -1,10 +1,9 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
-import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
-import DirectionalIcon from "../../../components/features/DirectionalIcon/DirectionalIcon";
+import BackLink from "../../features/BackLink/BackLink";
+import { SHELL } from "../../../theme/tokens";
 import ArchiveBrowser from "../archive/componentsArchive/ArchiveBrowser";
 import { useCreatorPageController } from "./useCreatorPageController";
 import { creatorSummary } from "./creatorSummary";
@@ -22,27 +21,42 @@ const CreatorPage = () => {
   const p = c.profile;
 
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 64px)", p: 3 }}>
-      <Button size="small" startIcon={<DirectionalIcon toward="back" />} onClick={c.goToArchive} sx={{ mb: 2 }}>
+    <>
+      <BackLink onClick={c.goToArchive} sx={{ mb: 3 }}>
         {t("toArchive")}
-      </Button>
+      </BackLink>
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3, flexWrap: "wrap" }}>
-        <Avatar sx={{ width: 64, height: 64, bgcolor: "primary.main", fontSize: 28, fontWeight: 800 }} aria-hidden>
-          {c.name.trim().replace(/^הרב\s+/, "").slice(0, 1)}
-        </Avatar>
+      <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 2.5, md: 3 }, mb: 5 }}>
+        <Box
+          aria-hidden
+          sx={{
+            width: { xs: 96, md: 112 },
+            height: { xs: 96, md: 112 },
+            flexShrink: 0,
+            borderRadius: "50%",
+            background: SHELL.drawerAvatar,
+            color: "common.white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Typography variant="display" component="span" sx={{ fontSize: 44 }}>
+            {c.name.trim().replace(/^הרב\s+/, "").slice(0, 1)}
+          </Typography>
+        </Box>
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography variant="h4" fontWeight={800} color="primary" dir="auto" sx={{ wordBreak: "break-word" }}>
+          <Typography variant="display" component="h1" dir="auto" sx={{ fontSize: { xs: 40, md: 64 }, overflowWrap: "anywhere" }}>
             {c.name}
           </Typography>
           {c.profileStatus === "loading" && <Skeleton width={280} />}
           {p && (
-            <Typography variant="body1" color="text.secondary" data-testid="creator-summary">
+            <Typography data-testid="creator-summary" sx={{ mt: 0.5, fontSize: 15, fontWeight: 500, color: "text.secondary" }}>
               {creatorSummary(p)}
             </Typography>
           )}
           {c.profileStatus === "failed" && (
-            <Typography variant="body1" color="text.secondary">
+            <Typography sx={{ mt: 0.5, fontSize: 15, fontWeight: 500, color: "text.secondary" }}>
               {t("none")}
             </Typography>
           )}
@@ -57,7 +71,7 @@ const CreatorPage = () => {
       </Box>
 
       <ArchiveBrowser archive={c.archive} user={c.user} canUpload={c.canUpload} chooseCreator={false} />
-    </Box>
+    </>
   );
 };
 

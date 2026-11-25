@@ -1,83 +1,66 @@
 import { useState } from "react";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import UploadIcon from "@mui/icons-material/Upload";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import PageHeader from "../../features/PageHeader/PageHeader";
 import ArchiveBrowser from "./componentsArchive/ArchiveBrowser";
 import ArchiveGreeting from "./componentsArchive/ArchiveGreeting";
+import ArchiveHero from "./componentsArchive/ArchiveHero";
 import UploadMedia from "../../features/UploadMedia/UploadMedia";
 import SmartSearch from "../../features/SmartSearch/SmartSearch";
 import useArchivePageController from "./useArchivePageController";
 import { useArchiveUpload } from "./useArchiveUpload";
+import { featuredItem } from "./featuredItem";
 import { useTranslation } from "react-i18next";
 
-// The filters, the cards and their dialogs are ArchiveBrowser, shared with a
-// lecturer's page (PRD ATTR-10). What is only the archive's is here: the
-// upload button, the smart-search tab and the picture beside them.
+// The archive (mockup 02), in the order decision 1 fixes:
+//   1. the page header — the greeting as its kicker, the title, the subtitle,
+//      and "העלאת מדיה" (admin-only; useArchiveUpload);
+//   2. the tabs ארכיון / חיפוש עומק חכם (03);
+//   3. on the archive tab, the banner of the newest published lesson — only
+//      while nothing narrows or reorders the list (featuredItem.js);
+//   4–7. the toolbar, the filter panel (29), "כל הפריטים" with its count, and
+//      the grid — ArchiveBrowser, shared with a lecturer's page (PRD ATTR-10).
+//
+// The page sits in App's PageContainer, which gives it its width and padding.
 const ArchivePage = () => {
   const { t } = useTranslation("archive");
   const archive = useArchivePageController();
   const { user, isUploadOpen, canUpload } = useArchiveUpload();
   const [tab, setTab] = useState(0);
+  const featured =
+    tab === 0 ? featuredItem(archive.filteredMedia, { hasActiveFilter: archive.hasActiveFilter, sortOrder: archive.sortOrder }) : null;
 
   return (
-    <Box sx={{ display: "flex", bgcolor: "background.default", minHeight: "calc(100vh - 64px)" }}>
-      {/* Main content */}
-      <Box sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
-        {/* Wraps: the title and the button are as long as the language makes
-            them, and side by side they were wider than a phone in French. */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2, mb: 3 }}>
-          <Typography variant="h4" fontWeight={800} color="primary">{t("title")}</Typography>
-          {/* Between the title and the button: good morning, by name. */}
-          <ArchiveGreeting name={user?.display_name?.trim()} />
-          {canUpload && (
-            <Button variant="contained" startIcon={<UploadIcon />} onClick={archive.handleOpenUpload}
-              sx={{
-                background: "linear-gradient(135deg, #29b6d8 0%, #1597bb 100%)",
-                "&:hover": { background: "linear-gradient(135deg, #1ea7ca 0%, #128aab 100%)" },
-                borderRadius: 2, fontWeight: 700, px: 3, boxShadow: "0 3px 10px rgba(21,151,187,0.35)",
-              }}
-            >
+    <Box>
+      <PageHeader
+        size="archive"
+        kicker={<ArchiveGreeting name={user?.display_name?.trim()} />}
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={
+          canUpload && (
+            <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={archive.handleOpenUpload}>
               {t("upload")}
             </Button>
-          )}
-        </Box>
-
-        {/* Scrollable: a tab's label is as long as its language makes it
-            ("Recherche approfondie intelligente"), and fixed tabs wider than a
-            phone widen the whole page with them. */}
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons={false} sx={{ mb: 3 }}>
-          <Tab label={t("tabs.archive")} />
-          <Tab label={t("tabs.smartSearch")} />
-        </Tabs>
-
-        {tab === 0 && (
-          <ArchiveBrowser archive={archive} user={user} canUpload={canUpload} onOpenUpload={archive.handleOpenUpload} />
-        )}
-
-        {tab === 1 && <SmartSearch onOpenResult={archive.handleOpenResult} />}
-      </Box>
-
-      {/* Left side image (rendered last so it sits on the left under RTL) */}
-      <Box
-        component="img"
-        src="/images/central_image.png"
-        alt=""
-        sx={{
-          flexShrink: 0,
-          width: { xs: 0, md: "24%" },
-          display: { xs: "none", md: "block" },
-          objectFit: "cover",
-          position: "sticky",
-          top: 64,
-          alignSelf: "flex-start",
-          height: "calc(100vh - 64px)",
-          borderInlineEnd: "1px solid rgba(0,0,0,0.06)",
-          opacity: 0.5,
-        }}
+          )
+        }
       />
+
+      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: { xs: 3, md: 4 } }}>
+        <Tab label={t("tabs.archive")} />
+        <Tab label={t("tabs.smartSearch")} />
+      </Tabs>
+
+      {featured && <ArchiveHero item={featured} onOpen={archive.handleOpenMedia} />}
+
+      {tab === 0 && (
+        <ArchiveBrowser archive={archive} user={user} canUpload={canUpload} onOpenUpload={archive.handleOpenUpload} />
+      )}
+
+      {tab === 1 && <SmartSearch onOpenResult={archive.handleOpenResult} />}
 
       <UploadMedia open={isUploadOpen} />
     </Box>

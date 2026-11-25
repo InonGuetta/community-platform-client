@@ -7,11 +7,11 @@
     "donate": "Donate",
     "manageCourses": "Manage courses",
     "users": "Users",
-    "admin": "Admin"
+    "admin": "Dashboard",
+    "upload": "Upload media"
   },
   "pendingRequests_one": "{{label}}, one request waiting",
   "pendingRequests_other": "{{label}}, {{count}} requests waiting",
-  "personal": "My content",
   "shelves": {
     "notebook": "My notebook",
     "likes": "Content I liked",
@@ -25,10 +25,13 @@
     "savedAllInLists": "Everything you saved is organised in the lists below",
     "continue": "You haven't started watching a lesson yet"
   },
+  "shelfSubtitle": {
+    "continue": "Pick up where you left off",
+    "likes": "Everything you liked",
+    "saved": "Everything you saved, in one place"
+  },
   "colorMode": {
-    "toLight": "Light mode",
-    "toDark": "Dark mode",
-    "toggle": "Switch display mode"
+    "toDark": "Dark mode"
   },
   "myAccount": "My account",
   "drawer": {
@@ -54,5 +57,21 @@
     "step1": "1. In Safari, tap the share button <icon/> at the bottom of the screen.",
     "step2": "2. Choose \"Add to Home Screen\".",
     "step3": "3. Tap \"Add\". The app will appear on your home screen and open without the address bar."
+  },
+  "mainNav": "Main navigation",
+  "adminView": "Admin view",
+  "groups": {
+    "admin": "Admin"
+  },
+  "accountMenu": {
+    "open": "Account menu",
+    "openPending_one": "Account menu, one request waiting",
+    "openPending_other": "Account menu, {{count}} requests waiting"
+  },
+  "dock": {
+    "label": "Quick navigation",
+    "ask": "Ask",
+    "myCourses": "Courses",
+    "notebook": "Notebook"
   }
 }

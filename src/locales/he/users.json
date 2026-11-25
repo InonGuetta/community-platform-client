@@ -23,19 +23,20 @@
     "title": "ממתינים לאישור",
     "requested": "ביקש: {{role}}",
     "reasonPlaceholder": "סיבה (לא חובה) — תישלח במייל",
-    "sendReject": "שלח דחייה",
+    "sendReject": "שליחת דחייה",
     "cannotApproveSelf": "לא ניתן לאשר את הבקשה של עצמך",
     "approve": "אישור",
     "reject": "דחייה"
   },
   "add": "הוספת משתמש",
   "headers": {
-    "id": "ID / מזהה",
+    "id": "מס׳",
     "name": "שם",
     "email": "אימייל",
     "role": "תפקיד",
     "status": "סטטוס",
     "actions": "פעולות"
   },
-  "phoneMasked": "טלפון מאומת: {{phone}}"
+  "phoneMasked": "טלפון מאומת: {{phone}}",
+  "more": "פעולות נוספות עבור {{name}}"
 }

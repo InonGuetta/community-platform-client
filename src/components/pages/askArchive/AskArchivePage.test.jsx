@@ -59,7 +59,7 @@ describe("asking the archive", () => {
     renderPage();
     expect(await screen.findByText(archiveSuggestions()[0])).toBeInTheDocument();
     expect(discussionApi.getConversation).toHaveBeenCalledWith("archive");
-    expect(screen.getByPlaceholderText("שאל שאלה על הארכיון…")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("אפשר לשאול שאלה על הארכיון…")).toBeInTheDocument();
     expect(screen.getByText(/נשארו לך היום 48 שאלות/)).toBeInTheDocument();
   });
 
@@ -74,7 +74,7 @@ describe("asking the archive", () => {
     renderPage();
     const user = userEvent.setup();
     await user.type(await screen.findByRole("textbox", { name: "שאלה" }), "מה נאמר על תשובה?");
-    await user.click(screen.getByRole("button", { name: "שלח" }));
+    await user.click(screen.getByRole("button", { name: "שליחה" }));
     expect(discussionApi.askStream.mock.calls[0][0]).toBe("archive");
     expect(discussionApi.askStream.mock.calls[0][1]).toBe("מה נאמר על תשובה?");
 

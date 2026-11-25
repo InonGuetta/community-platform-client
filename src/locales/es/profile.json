@@ -4,6 +4,12 @@
   "verified": "Dirección verificada",
   "displayName": "Nombre visible",
   "save": "Guardar",
+  "verification": {
+    "resend": "Enviar correo de verificación",
+    "sent": "Correo de verificación enviado. Su enlace es válido durante 24 horas.",
+    "alreadyVerified": "Tu dirección ya está verificada",
+    "failed": "No se pudo enviar el correo en este momento. Inténtalo de nuevo más tarde."
+  },
   "password": {
     "title": "Cambiar la contraseña",
     "current": "Contraseña actual",
@@ -104,5 +110,12 @@
       "resendIn": "Código nuevo en {{seconds}} s",
       "verifyFailed": "No se puede verificar el código ahora mismo. Inténtalo de nuevo."
     }
+  },
+  "nav": {
+    "label": "Ir a una sección",
+    "details": "Datos",
+    "phone": "Teléfono",
+    "notifications": "Notificaciones",
+    "password": "Contraseña"
   }
 }

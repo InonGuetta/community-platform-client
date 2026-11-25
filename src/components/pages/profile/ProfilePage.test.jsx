@@ -47,6 +47,14 @@ vi.mock("../../../store/slicesAndThunks/authSlice/authPost", async (importOrigin
   };
 });
 
+// The resend button calls src/api directly (the hook's local state, not a
+// slice); everything else in authApi stays real.
+const resendCall = vi.hoisted(() => vi.fn());
+vi.mock("../../../api/authApi", async (importOriginal) => {
+  const actual = await importOriginal();
+  return { authApi: { ...actual.authApi, resendVerification: () => resendCall() } };
+});
+
 import ProfilePage from "./ProfilePage";
 
 const answers = (mock, action) => mock.mockReturnValue(() => Promise.resolve(action));
@@ -77,6 +85,7 @@ const renderProfile = (over = {}) => {
 beforeEach(() => {
   profileCall.mockReset();
   passwordCall.mockReset();
+  resendCall.mockReset();
 });
 
 describe("what the account shows", () => {
@@ -96,6 +105,46 @@ describe("what the account shows", () => {
   test("a verified one says so too", () => {
     renderProfile({ email_verified: true });
     expect(screen.getByText("כתובת מאומתת")).toBeTruthy();
+  });
+});
+
+describe("sending the verification mail again", () => {
+  const RESEND = "שליחת מייל אימות";
+
+  test("offered beside an unverified address", () => {
+    renderProfile({ email_verified: false });
+    expect(screen.getByRole("button", { name: RESEND })).toBeTruthy();
+  });
+
+  test("not offered when the address is verified", () => {
+    renderProfile({ email_verified: true });
+    expect(screen.queryByRole("button", { name: RESEND })).toBe(null);
+  });
+
+  test("a sent mail says so", async () => {
+    const user = userEvent.setup();
+    resendCall.mockResolvedValue({ sent: true, alreadyVerified: false });
+    const store = renderProfile({ email_verified: false });
+    await user.click(screen.getByRole("button", { name: RESEND }));
+    await waitFor(() => expect(store.getState().notification.message).toBe("נשלח מייל אימות. הקישור בו תקף ל־24 שעות."));
+    expect(store.getState().notification.severity).toBe("success");
+    expect(resendCall).toHaveBeenCalledTimes(1);
+  });
+
+  test("a mail that could not go out, or a failed request, is an error toast", async () => {
+    const user = userEvent.setup();
+    resendCall.mockResolvedValueOnce({ sent: false, alreadyVerified: false });
+    const store = renderProfile({ email_verified: false });
+    await user.click(screen.getByRole("button", { name: RESEND }));
+    await waitFor(() => expect(store.getState().notification.severity).toBe("error"));
+    expect(store.getState().notification.message).toBe("לא ניתן לשלוח את המייל כרגע. אפשר לנסות שוב מאוחר יותר.");
+
+    resendCall.mockRejectedValueOnce({ status: 429 });
+    await user.click(screen.getByRole("button", { name: RESEND }));
+    await waitFor(() => expect(resendCall).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByRole("button", { name: RESEND }).disabled).toBe(false));
+    expect(store.getState().notification.severity).toBe("error");
+    expect(store.getState().notification.message).toBe("לא ניתן לשלוח את המייל כרגע. אפשר לנסות שוב מאוחר יותר.");
   });
 });
 

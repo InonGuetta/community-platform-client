@@ -11,6 +11,7 @@ import StopIcon from "@mui/icons-material/Stop";
 import { myRecordingStatus } from "./sessionRecorder";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n/i18n";
+import { ROOM } from "../../../theme/tokens";
 
 // Recording a session (PRD REC-1), as each person in the room sees it.
 //
@@ -39,7 +40,7 @@ export const RecordButton = ({ recorderStatus, pendingParts, onStart, onStop, di
   const { t } = useTranslation("sessions");
   if (recorderStatus === "saving") {
     return (
-      <Button size="small" variant="outlined" color="inherit" disabled sx={{ color: "grey.300" }}>
+      <Button size="small" variant="outlined" color="inherit" disabled sx={{ color: ROOM.ink2 }}>
         {pendingParts > 0 ? t("recording.savingParts", { n: pendingParts }) : t("recording.saving")}
       </Button>
     );
@@ -81,12 +82,12 @@ export const RecordingIndicator = ({ recording, mySocketId, onAnswer }) => {
         sx={{ "& .MuiChip-icon": { animation: "rec-pulse 1.6s ease-in-out infinite" }, "@keyframes rec-pulse": { "50%": { opacity: 0.3 } } }}
       />
       {status === "recorded" && (
-        <Button size="small" color="inherit" sx={{ color: "grey.300" }} onClick={() => onAnswer(false)}>
+        <Button size="small" color="inherit" sx={{ color: ROOM.ink2 }} onClick={() => onAnswer(false)}>
           {t("recording.stopMe")}
         </Button>
       )}
       {status === "declined" && (
-        <Button size="small" color="inherit" sx={{ color: "grey.300" }} onClick={() => onAnswer(true)}>
+        <Button size="small" color="inherit" sx={{ color: ROOM.ink2 }} onClick={() => onAnswer(true)}>
           {t("recording.consent")}
         </Button>
       )}

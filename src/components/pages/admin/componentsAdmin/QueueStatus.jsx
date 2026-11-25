@@ -1,19 +1,20 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
-import Chip from "@mui/material/Chip";
+import StatusBadge from "../../../features/StatusBadge/StatusBadge";
 import { useTranslation } from "react-i18next";
+import { RADIUS } from "../../../../theme/tokens";
 
 const QueueRow = ({ name, stats }) => {
   const { t } = useTranslation("admin");
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ mb: 1.5, p: 2.5, bgcolor: "surface.fill2", borderRadius: `${RADIUS.menu}px` }}>
       <Typography variant="subtitle2" fontWeight={600} mb={1}>{name}</Typography>
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-        <Chip label={t("queues.waiting", { n: stats?.waiting ?? 0 })} size="small" color="default" />
-        <Chip label={t("queues.active", { n: stats?.active ?? 0 })} size="small" color="warning" />
-        <Chip label={t("queues.completed", { n: stats?.completed ?? 0 })} size="small" color="success" />
-        <Chip label={t("queues.failed", { n: stats?.failed ?? 0 })} size="small" color="error" />
+        <StatusBadge tone="neutral">{t("queues.waiting", { n: stats?.waiting ?? 0 })}</StatusBadge>
+        <StatusBadge tone="warning">{t("queues.active", { n: stats?.active ?? 0 })}</StatusBadge>
+        <StatusBadge tone="success">{t("queues.completed", { n: stats?.completed ?? 0 })}</StatusBadge>
+        <StatusBadge tone="error">{t("queues.failed", { n: stats?.failed ?? 0 })}</StatusBadge>
       </Box>
       {stats?.active > 0 && <LinearProgress sx={{ mt: 1 }} />}
     </Box>

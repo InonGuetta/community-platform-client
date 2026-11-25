@@ -1,11 +1,17 @@
 {
   "published": "Publicado el: ",
   "draftUploaded": "Borrador · subido el: ",
+  "backToArchive": "El archivo",
+  "kicker": {
+    "audio": "Clase de audio",
+    "video": "Clase en vídeo",
+    "text": "Libro"
+  },
   "tabs": {
     "summary": "Resumen",
     "chapters": "Capítulos",
     "transcript": "Transcripción",
-    "notes": "Notas personales",
+    "notes": "Marcadores",
     "sessionChat": "Chat de la sesión",
     "discuss": "Conversación con IA",
     "transcriptView": "Vista de la transcripción",
@@ -214,7 +220,7 @@
     "share": "Compartir"
   },
   "notebook": {
-    "title": "Mi cuaderno para esta clase",
+    "title": "Mi cuaderno",
     "all": "A todo el cuaderno",
     "newNote": "Nota nueva para la clase",
     "empty": "Todavía no hay notas para esta clase. Haz clic en «Nota nueva para la clase» para empezar a escribir.",

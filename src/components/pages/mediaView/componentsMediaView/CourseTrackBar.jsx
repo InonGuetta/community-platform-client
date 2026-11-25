@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
@@ -10,17 +11,20 @@ import { useTranslation } from "react-i18next";
 // Under the player, for a lesson that is part of a course (PRD CRS-1, CRS-3):
 // where it stands in the track, a way to the lesson after it, and the countdown
 // to that lesson when this one ends. See useCourseTrackForLesson.
+//
+// Redesign v4 has no mockup for it (D-23): a card in the new style, under the
+// audio player card or under the video, like the player card beside it.
 const CourseTrackBar = ({ track }) => {
   const { t } = useTranslation(["lesson", "common"]);
   if (!track?.inTrack) return null;
   const { place, next, countdown } = track;
 
   return (
-    <Box sx={{ mt: 1.5 }}>
+    <Paper data-testid="course-track" sx={{ mt: 2.5, p: 2.5 }}>
       {countdown !== null && next && (
         <Alert
           severity="info"
-          sx={{ mb: 1 }}
+          sx={{ mb: 1.5 }}
           action={
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button color="inherit" size="small" onClick={track.goNext}>{t("track.now")}</Button>
@@ -39,12 +43,12 @@ const CourseTrackBar = ({ track }) => {
           </Link>
         </Typography>
         {next && (
-          <Button size="small" variant="outlined" endIcon={<DirectionalIcon toward="forward" />} onClick={track.goNext}>
+          <Button size="small" variant="soft" endIcon={<DirectionalIcon toward="forward" />} onClick={track.goNext}>
             {t("track.next", { title: next.title })}
           </Button>
         )}
       </Box>
-    </Box>
+    </Paper>
   );
 };
 

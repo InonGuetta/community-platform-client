@@ -27,7 +27,8 @@
     "trail": "Posición en el árbol de etiquetas",
     "noMatch": "No hay ninguna etiqueta con ese nombre",
     "noChildren": "No hay etiquetas bajo «{{name}}». La nueva será la primera aquí.",
-    "below": "{{count}} etiquetas debajo"
+    "below_one": "1 etiqueta debajo",
+    "below_other": "{{count}} etiquetas debajo"
   },
   "proposals": {
     "add": "Añadir etiqueta",

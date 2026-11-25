@@ -1,5 +1,6 @@
 {
   "title": "Tableau de bord d'administration",
+  "subtitle": "État du système, coûts de l'IA et incidents de traitement",
   "stale": "{{error}} — les données affichées ne sont peut-être pas à jour.",
   "loadFailed": "Les données d'administration ne peuvent pas être chargées",
   "queues": {
@@ -31,7 +32,6 @@
       "suggested_questions": "Questions suggérées du chat"
     },
     "lessThanCent": "Moins d'un centime",
-    "audioMinutes": "{{n}} minutes d'audio",
     "kiloTokens": "{{n}} k jetons",
     "retry": "Réessayer",
     "loadFailed": "Les données de coût ne peuvent pas être chargées.",
@@ -47,7 +47,9 @@
     "kind": "Type",
     "usage": "Utilisation",
     "calls": "Appels",
-    "cost": "Coût"
+    "cost": "Coût",
+    "audioMinutes_one": "1 minute d'audio",
+    "audioMinutes_other": "{{n}} minutes d'audio"
   },
   "donations": {
     "title": "Dons",

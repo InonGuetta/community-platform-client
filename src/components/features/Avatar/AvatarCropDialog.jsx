@@ -12,6 +12,7 @@ import DialogContent from "../Dialogs/DialogContent";
 import DialogActions from "../Dialogs/DialogActions";
 import { useTranslation } from "react-i18next";
 import { useAvatarCrop } from "./useAvatarCrop";
+import { ROOM } from "../../../theme/tokens";
 
 // Choosing which part of the picture is the profile picture: the picture under
 // a circle, moved by dragging, zoomed by the slider, the wheel or a pinch. What
@@ -47,7 +48,7 @@ const AvatarCropDialog = ({ picture, busy, onCancel, onSave }) => {
             maxWidth: "100%",
             overflow: "hidden",
             borderRadius: 2,
-            bgcolor: "grey.900",
+            bgcolor: ROOM.bar,
             cursor: "grab",
             touchAction: "none",
             userSelect: "none",

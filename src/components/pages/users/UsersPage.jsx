@@ -57,7 +57,7 @@ const UsersPage = () => {
   } = useUsersPageController();
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <UsersHeader onSearch={setSearch} onCreateClick={() => setIsCreateOpen(true)} />
       {/* Above the table, and absent entirely when the queue is empty — a
           request is a task, and a task rendered as one more chip in a long

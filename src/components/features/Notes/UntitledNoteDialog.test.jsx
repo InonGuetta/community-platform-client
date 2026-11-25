@@ -16,22 +16,22 @@ const setup = () => {
 test("says the card has no name, and offers to save it anyway", () => {
   const { onSave } = setup();
   expect(screen.getByText("לא צוין שם לכרטיסייה")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "שמור בכל זאת" }));
+  fireEvent.click(screen.getByRole("button", { name: "שמירה בכל זאת" }));
   expect(onSave).toHaveBeenCalledWith("");
 });
 
 test("the button becomes 'שמור' as soon as a name is typed, and saves under it", () => {
   const { onSave, field } = setup();
   fireEvent.change(field, { target: { value: "  מצוות ציצית " } });
-  expect(screen.queryByRole("button", { name: "שמור בכל זאת" })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "שמור" }));
+  expect(screen.queryByRole("button", { name: "שמירה בכל זאת" })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "שמירה" }));
   expect(onSave).toHaveBeenCalledWith("מצוות ציצית");
 });
 
 test("spaces alone are not a name", () => {
   const { field } = setup();
   fireEvent.change(field, { target: { value: "   " } });
-  expect(screen.getByRole("button", { name: "שמור בכל זאת" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "שמירה בכל זאת" })).toBeInTheDocument();
 });
 
 test("Enter saves, and cancelling saves nothing", () => {

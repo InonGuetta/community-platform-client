@@ -9,6 +9,7 @@ import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
+import { TABLE_SX } from "../../../features/DataTable/tableSx";
 import useSmsUsage from "./useSmsUsage";
 import { formatUsd, capProgress } from "./aiUsageFormat";
 import { categoryLabel } from "../../../../utilities/notificationCategories";
@@ -37,14 +38,14 @@ const SmsUsagePanel = () => {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 2, flexWrap: "wrap" }}>
         <Typography variant="h6" fontWeight={700}>{t("sms.title")}</Typography>
-        <Button size="small" onClick={reload} disabled={status === "loading"}>{t("ai.refresh")}</Button>
+        <Button size="small" variant="soft" onClick={reload} disabled={status === "loading"}>{t("ai.refresh")}</Button>
       </Box>
 
       {status === "failed" && <Alert severity="warning">{t("sms.loadFailed")}</Alert>}
       {!report.configured && <Alert severity="info">{t("sms.notConfigured")}</Alert>}
 
       <Box>
-        <Typography variant="h4" fontWeight={800} component="p">{formatUsd(report.spentUsd)}</Typography>
+        <Typography variant="display" component="p" sx={{ fontSize: 48, lineHeight: 1.1, color: "primary.main" }}>{formatUsd(report.spentUsd)}</Typography>
         <Typography variant="caption" color="text.secondary">{t("sms.estimate")}</Typography>
       </Box>
 
@@ -70,7 +71,7 @@ const SmsUsagePanel = () => {
         <Typography variant="body2" color="text.secondary">{t("sms.unused")}</Typography>
       ) : (
         <Box sx={{ overflowX: "auto" }}>
-          <Table size="small" aria-label={t("sms.tableLabel")}>
+          <Table size="small" sx={TABLE_SX} aria-label={t("sms.tableLabel")}>
             <TableHead>
               <TableRow>
                 <TableCell>{t("ai.kind")}</TableCell>

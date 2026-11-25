@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import DeleteIcon from "@mui/icons-material/Delete";
-import SaveIcon from "@mui/icons-material/Save";
+import DeleteIcon from "@mui/icons-material/DeleteOutline";
+import { alpha } from "@mui/material/styles";
 import RichNoteEditor from "./RichNoteEditor";
+import { SOURCE_CHIP_SX } from "./noteStyles";
+import { RADIUS, CARD_SHELL_SX } from "../../../theme/tokens";
+import { HEADER_HEIGHT } from "../../layout/shellGeometry";
 import { hasDragType } from "../../../utilities/useDragReorder";
 import { formatTime } from "../../../utilities/formatTime";
 import { noteHtmlToPlainText } from "../../../utilities/noteHtml";
@@ -33,6 +35,20 @@ import { useTranslation } from "react-i18next";
 // A card used to accept a dragged NOTE as well, for reordering, through a grip
 // beside its title — see useDragReorder for why that needed a handle and where
 // the feature lives now.
+
+// Redesign v4 (screen 05): a note is a section card — paper, a 1px line,
+// radius 24, padding 24/32, the card shadow.
+const CARD_SX = {
+  ...CARD_SHELL_SX,
+  p: { xs: 3, md: 4 },
+  display: "flex", flexDirection: "column", gap: 2.5,
+  // Where a card lands when the list scrolls to it: below the sticky header
+  // and, from md, below the notebook's sticky formatting strip as well.
+  scrollMarginTop: { xs: HEADER_HEIGHT + 16, md: HEADER_HEIGHT + 88 },
+};
+
+// The title, in the display face at 30.
+const TITLE_SX = (theme) => ({ ...theme.typography.display, fontSize: 30, lineHeight: 1.15 });
 
 // A note whose body has not arrived yet (PRD NOTE-17: the notebook's list is
 // light, and a body is fetched as its card comes near the screen). Its title
@@ -67,19 +83,18 @@ const NotePlaceholder = ({ note, cardRef, onNeedBody }) => {
   }, [note.id, onNeedBody]);
 
   return (
-    <Paper
+    <Box
       ref={(element) => {
         node.current = element;
         if (typeof cardRef === "function") cardRef(element);
       }}
-      elevation={0}
       aria-busy="true"
-      sx={{ p: 3, borderRadius: 3, display: "flex", flexDirection: "column", gap: 2, border: "1px solid", borderColor: "divider", scrollMarginTop: { xs: 80, md: 8 } }}
+      sx={CARD_SX}
     >
-      <Typography sx={{ fontSize: "1.5rem", fontWeight: 700 }}>{note.title?.trim() || t("untitled")}</Typography>
-      <Typography color="text.secondary" sx={{ overflowWrap: "anywhere" }}>{note.preview || ""}</Typography>
-      <Skeleton variant="rounded" height={120} />
-    </Paper>
+      <Typography sx={TITLE_SX}>{note.title?.trim() || t("untitled")}</Typography>
+      <Typography sx={{ fontSize: 16, lineHeight: 1.9, color: "surface.ink2", overflowWrap: "anywhere" }}>{note.preview || ""}</Typography>
+      <Skeleton variant="rounded" height={120} sx={{ borderRadius: `${RADIUS.field}px` }} />
+    </Box>
   );
 };
 
@@ -128,9 +143,8 @@ const NoteCard = ({
   };
 
   return (
-    <Paper
+    <Box
       ref={cardRef}
-      elevation={0}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       // relatedTarget is null when the pointer leaves for a child of this card,
@@ -141,8 +155,7 @@ const NoteCard = ({
         if (!event.currentTarget.contains(event.relatedTarget)) setSourceHovering(false);
       }}
       sx={{
-        p: 3, borderRadius: 3, display: "flex", flexDirection: "column", gap: 2,
-        border: "1px solid",
+        ...CARD_SX,
         // The card the caret is in is outlined, because with a column of them the
         // toolbar at the top would otherwise be acting on something the user
         // cannot identify. A card a bookmark is hovering over says so more
@@ -154,14 +167,9 @@ const NoteCard = ({
         // than by widening the border, so ticking a note does not shift its
         // contents by a pixel. A bookmark hovering over the card still wins.
         ...(sourceHovering
-          ? { boxShadow: "0 0 0 3px rgba(46,125,50,0.18)" }
+          ? { boxShadow: (theme) => `0 0 0 3px ${alpha(theme.palette.success.main, 0.18)}` }
           : isSelected && { boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}` }),
         transition: "border-color 0.2s, box-shadow 0.2s",
-        // Where a card lands when the list scrolls to it. In the desktop layout
-        // the column is its own scroll container and a small inset is enough; on
-        // a phone the PAGE scrolls, and the sticky navbar would otherwise cover
-        // the card's first line.
-        scrollMarginTop: { xs: 80, md: 8 },
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -174,7 +182,7 @@ const NoteCard = ({
           fullWidth
           // The placeholder is gone once a title is typed; this name stays.
           inputProps={{ "aria-label": t("titlePlaceholder"), dir: "auto" }}
-          InputProps={{ disableUnderline: true, sx: { fontSize: "1.5rem", fontWeight: 700 } }}
+          InputProps={{ disableUnderline: true, sx: TITLE_SX }}
         />
       </Box>
 
@@ -200,7 +208,8 @@ const NoteCard = ({
           })}
           startIcon={<SourceIcon />}
           size="small"
-          sx={{ alignSelf: "flex-start", textTransform: "none" }}
+          // A green chip, like every source reference in the notebook.
+          sx={{ ...SOURCE_CHIP_SX, alignSelf: "flex-start", height: 32, px: 1.75, fontSize: 13 }}
         >
           {`${t("from", { title: note.media_title || t("lessonFallback") })}${note.timestamp_seconds != null ? ` · ${formatTime(note.timestamp_seconds)}` : ""}`}
         </Button>
@@ -224,29 +233,40 @@ const NoteCard = ({
         placeholder={t("bodyPlaceholder")}
       />
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="caption" color={sourceHovering ? "success.main" : "text.secondary"}>
-          {sourceHovering
-            ? t("dropHere")
-            : (isDirty ? t("unsaved") : t("updated", { date: formatDate(note.updated_at) }))}
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton color="error" onClick={onDelete} aria-label={t("deleteNamed", { title: note.title?.trim() || t("untitledBare") })}>
-            <DeleteIcon />
-          </IconButton>
+      {/* The foot of the card, as in the mockup: save and delete at the start,
+          when it was last saved at the end, over a line. */}
+      <Box
+        sx={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          gap: 2, flexWrap: "wrap", pt: 2.5, borderTop: 1, borderColor: "divider",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           {/* Ctrl+S does the same thing for the card the caret is in — see the
               keyboard handler in NotebookPage. */}
           <Tooltip title={t("saveShortcut")}>
             <span>
-              <Button variant="contained" startIcon={<SaveIcon />} onClick={onSave} disabled={!isDirty}
-                sx={{ borderRadius: 2, fontWeight: 700 }}>
+              <Button variant="contained" onClick={onSave} disabled={!isDirty}>
                 {t("save")}
               </Button>
             </span>
           </Tooltip>
+          <IconButton
+            color="error"
+            onClick={onDelete}
+            aria-label={t("deleteNamed", { title: note.title?.trim() || t("untitledBare") })}
+            sx={{ width: 44, height: 44, "&:hover": { bgcolor: "badge.error.bg" } }}
+          >
+            <DeleteIcon />
+          </IconButton>
         </Box>
+        <Typography sx={{ fontSize: 13, color: sourceHovering ? "success.main" : "text.secondary" }}>
+          {sourceHovering
+            ? t("dropHere")
+            : (isDirty ? t("unsaved") : t("updated", { date: formatDate(note.updated_at) }))}
+        </Typography>
       </Box>
-    </Paper>
+    </Box>
   );
 };
 

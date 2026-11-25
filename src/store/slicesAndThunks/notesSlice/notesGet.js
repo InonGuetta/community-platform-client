@@ -21,7 +21,7 @@ export const fetchNoteBodies = createAsyncThunk("notes/fetchBodies", async (ids,
   }
 });
 
-// One lesson's notes, whole — the lesson page's "הערות אישיות". Replaces the
+// One lesson's notes, whole — the lesson page's "סימניות". Replaces the
 // list: that page shows these and nothing else, and the notebook page fetches
 // its own list on arrival.
 export const fetchNotesAboutMedia = createApiThunk("notes/fetchAboutMedia", "Failed to fetch notes", async (mediaId) => {

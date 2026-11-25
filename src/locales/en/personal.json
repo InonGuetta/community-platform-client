@@ -6,9 +6,6 @@
   "items_one": "One item",
   "items_other": "{{count}} items",
   "fullList": "See the full list",
-  "more": "More lessons",
-  "noMore": "No more lessons",
-  "showMore": "Show more lessons from {{title}}",
   "emptyList": "It has no lessons to show.",
   "lists": {
     "title": "Saved lists",

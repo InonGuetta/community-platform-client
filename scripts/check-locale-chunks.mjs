@@ -6,14 +6,18 @@
 // nothing would fail — the app just gets heavier. So, reading dist/:
 //   • the entry chunk holds Hebrew and none of the others;
 //   • each other language is in some chunk, and no chunk holds two of them.
-// Each language is recognised by its own name for the app (common:appName).
+// Each language is recognised by its own words for "change language"
+// (common:language.change) — a phrase every language words differently. It
+// used to be the app's name, until the brand became one name in several
+// languages ("קול תבונה" in Hebrew and Yiddish, "Kol Tevuna" in the three
+// others), which cannot tell them apart (D-26).
 
 import { readdirSync, readFileSync } from "node:fs";
 
 const DIST = new URL("../dist/", import.meta.url);
 const LOCALES = new URL("../src/locales/", import.meta.url);
 
-const appName = (lng) => JSON.parse(readFileSync(new URL(`${lng}/common.json`, LOCALES), "utf8")).appName;
+const marker = (lng) => JSON.parse(readFileSync(new URL(`${lng}/common.json`, LOCALES), "utf8")).language.change;
 // Vite writes non-ASCII as-is inside JSON chunks, but a minifier may escape it.
 const escaped = (text) => [...text].map((c) => (c.charCodeAt(0) > 127 ? `\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}` : c)).join("");
 const holds = (source, text) => source.includes(text) || source.toLowerCase().includes(escaped(text).toLowerCase());
@@ -27,7 +31,9 @@ const problems = [];
 if (!entry) problems.push("could not find the entry chunk named in dist/index.html");
 
 const OTHERS = ["yi", "en", "fr", "es"];
-const names = Object.fromEntries(["he", ...OTHERS].map((lng) => [lng, appName(lng)]));
+const names = Object.fromEntries(["he", ...OTHERS].map((lng) => [lng, marker(lng)]));
+const distinct = new Set(Object.values(names));
+if (distinct.size !== Object.keys(names).length) problems.push(`the marker phrase is the same in two languages: ${JSON.stringify(names)}`);
 
 if (entry) {
   const main = read(entry);

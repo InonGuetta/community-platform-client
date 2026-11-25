@@ -1,13 +1,12 @@
 import { useState } from "react";
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
+import NumberField from "../NumberField/NumberField";
 import Typography from "@mui/material/Typography";
 import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
@@ -21,6 +20,7 @@ import FormatClearIcon from "@mui/icons-material/FormatClear";
 import FormatSizeIcon from "@mui/icons-material/FormatSize";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
+import { RADIUS, SHADOW } from "../../../theme/tokens";
 
 // The notebook's formatting strip. Sits at the top of the page, above the notes
 // — and stays there while they scroll, which is what makes it usable on a column
@@ -96,7 +96,7 @@ const ColorMenu = ({ anchorEl, onClose, colors, onPick, title }) => {
             aria-label={t(`toolbar.colors.${color.name}`)}
             onMouseDown={(e) => { e.preventDefault(); onPick(color.value); }}
             sx={{
-              width: 34, height: 34, borderRadius: 1, cursor: "pointer",
+              width: 34, height: 34, borderRadius: "50%", cursor: "pointer",
               border: "1px solid", borderColor: "divider",
               bgcolor: color.swatch ?? color.value,
               // The "none" swatches are empty boxes, so they get the diagonal
@@ -113,6 +113,14 @@ const ColorMenu = ({ anchorEl, onClose, colors, onPick, title }) => {
   );
 };
 
+// Redesign v4 (screen 05): every control in the strip is a 36px circle that
+// fills on hover, and a format that is on is the accent on its soft tint.
+const ROUND_BUTTON_SX = {
+  width: 36, height: 36, p: 0, borderRadius: "50%",
+  "& svg": { fontSize: 20 },
+  "&:hover": { bgcolor: "surface.fill" },
+};
+
 // One button in the strip. At module level rather than inside NoteToolbar: a
 // component declared during render is a NEW component type on every render, so
 // React unmounts and remounts it — losing the tooltip's open state mid-hover.
@@ -127,9 +135,10 @@ const ToolButton = ({ title, active, disabled, onPress, children }) => (
         aria-pressed={Boolean(active)}
         onMouseDown={onPress}
         sx={{
-          borderRadius: 1.5,
-          color: active ? "primary.main" : "text.secondary",
-          bgcolor: active ? "action.selected" : "transparent",
+          ...ROUND_BUTTON_SX,
+          color: active ? "primary.main" : "surface.ink2",
+          bgcolor: active ? "surface.accentSoft" : "transparent",
+          ...(active && { "&:hover": { bgcolor: "surface.accentSoft" } }),
         }}
       >
         {children}
@@ -181,16 +190,16 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
   };
 
   return (
-    <Paper
-      elevation={0}
+    <Box
       // role=toolbar so the strip is announced as one control group rather than
       // as a dozen loose buttons between a heading and a link.
       role="toolbar"
       aria-label={t("toolbar.label")}
       sx={{
         display: "flex", alignItems: "center", flexWrap: "wrap", gap: 0.5,
-        px: 1.5, py: 1, borderRadius: 2.5,
-        border: "1px solid", borderColor: "divider",
+        px: 1, py: 1, borderRadius: `${RADIUS.card}px`,
+        bgcolor: "background.paper",
+        border: 1, borderColor: "divider", boxShadow: SHADOW.card,
         // Faded rather than hidden when there is nothing to format: the header
         // would otherwise change shape as the user moves between notes.
         opacity: disabled ? 0.5 : 1,
@@ -212,9 +221,11 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
             // actually run the command.
             onClick={openSizeMenu}
             onMouseDown={(e) => e.preventDefault()}
+            size="small"
             sx={{
-              borderRadius: 1.5, color: "text.secondary", textTransform: "none",
-              fontWeight: 700, minWidth: 118, justifyContent: "space-between",
+              height: 36, px: 1.5, borderRadius: `${RADIUS.pill}px`, color: "surface.ink2",
+              fontWeight: 700, minWidth: 112, justifyContent: "space-between",
+              "&:hover": { bgcolor: "surface.fill" },
             }}
           >
             {`${currentSize}px`}
@@ -222,14 +233,14 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
         </span>
       </Tooltip>
 
-      <Divider orientation="vertical" flexItem sx={{ mx: 0.75, my: 0.5 }} />
+      <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 1 }} />
 
       <ToolButton {...button(t("toolbar.bold"), "bold", formats.bold)}><FormatBoldIcon /></ToolButton>
       <ToolButton {...button(t("toolbar.italic"), "italic", formats.italic)}><FormatItalicIcon /></ToolButton>
       <ToolButton {...button(t("toolbar.underline"), "underline", formats.underline)}><FormatUnderlinedIcon /></ToolButton>
       <ToolButton {...button(t("toolbar.strike"), "strikeThrough", formats.strikeThrough)}><StrikethroughSIcon /></ToolButton>
 
-      <Divider orientation="vertical" flexItem sx={{ mx: 0.75, my: 0.5 }} />
+      <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 1 }} />
 
       <Tooltip title={t("toolbar.textColor")}>
         <span>
@@ -239,7 +250,7 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
             aria-haspopup="menu"
             onClick={(e) => setTextColorAnchor(e.currentTarget)}
             onMouseDown={(e) => e.preventDefault()}
-            sx={{ borderRadius: 1.5, color: "text.secondary" }}
+            sx={{ ...ROUND_BUTTON_SX, color: "surface.ink2" }}
           >
             <FormatColorTextIcon />
           </IconButton>
@@ -254,14 +265,18 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
             aria-haspopup="menu"
             onClick={(e) => setHighlightAnchor(e.currentTarget)}
             onMouseDown={(e) => e.preventDefault()}
-            sx={{ borderRadius: 1.5, color: formats.highlighted ? "primary.main" : "text.secondary" }}
+            sx={{
+              ...ROUND_BUTTON_SX,
+              color: formats.highlighted ? "primary.main" : "surface.ink2",
+              bgcolor: formats.highlighted ? "surface.accentSoft" : "transparent",
+            }}
           >
             <BorderColorIcon />
           </IconButton>
         </span>
       </Tooltip>
 
-      <Divider orientation="vertical" flexItem sx={{ mx: 0.75, my: 0.5 }} />
+      <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 1 }} />
 
       <ToolButton {...button(t("toolbar.bullets"), "insertUnorderedList", formats.unorderedList)}>
         <FormatListBulletedIcon />
@@ -270,7 +285,7 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
         <FormatListNumberedIcon />
       </ToolButton>
 
-      <Divider orientation="vertical" flexItem sx={{ mx: 0.75, my: 0.5 }} />
+      <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 1 }} />
 
       <ToolButton {...button(t("toolbar.clear"), "removeFormat")}><FormatClearIcon /></ToolButton>
 
@@ -287,9 +302,12 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
             before applying (see RichNoteEditor). Everything else here cancels
             its own mousedown precisely to avoid needing that. */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 1.5, pb: 1 }}>
-          <TextField
+          <NumberField
             value={typedSize}
-            onChange={(e) => setTypedSize(e.target.value)}
+            onChange={(n) => setTypedSize(String(n))}
+            defaultValue={DEFAULT_FONT_SIZE_PX}
+            min={MIN_FONT_SIZE_PX}
+            max={MAX_FONT_SIZE_PX}
             // Both jobs in the CAPTURE phase, and they cannot be split.
             //
             // A menu moves focus to whichever ITEM matches what you type; inside
@@ -303,14 +321,13 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
               e.stopPropagation();
               if (e.key === "Enter") { e.preventDefault(); applyTypedSize(); }
             }}
-            type="number"
             size="small"
             autoFocus
             label={t("toolbar.pixels")}
-            inputProps={{ min: MIN_FONT_SIZE_PX, max: MAX_FONT_SIZE_PX, "aria-label": t("toolbar.pixels") }}
+            inputProps={{ "aria-label": t("toolbar.pixels") }}
             sx={{ width: 130 }}
           />
-          <Button onClick={applyTypedSize} variant="contained" size="small" sx={{ borderRadius: 1.5 }}>
+          <Button onClick={applyTypedSize} variant="contained" size="small">
             {t("toolbar.apply")}
           </Button>
         </Box>
@@ -347,7 +364,7 @@ const NoteToolbar = ({ onCommand, onFontSize, formats = {}, disabled = false }) 
         title={t("toolbar.highlightTitle")}
         onPick={(value) => { setHighlightAnchor(null); onCommand("hiliteColor", value); }}
       />
-    </Paper>
+    </Box>
   );
 };
 

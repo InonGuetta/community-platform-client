@@ -43,6 +43,7 @@ const JoinCourseDialog = ({ open, code, onCodeChange, submitting, error, joined,
           <TextField
             autoFocus
             fullWidth
+            required
             label={t("join.code")}
             value={code}
             onChange={(e) => onCodeChange(e.target.value.toUpperCase())}

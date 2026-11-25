@@ -212,13 +212,13 @@ describe("saving a card with no title", () => {
   test("a name given in the dialog is what the card is saved under", async () => {
     await pressSave();
     fireEvent.change(await screen.findByLabelText("שם הכרטיסייה"), { target: { value: "מצוות ציצית" } });
-    fireEvent.click(screen.getByRole("button", { name: "שמור" }));
+    fireEvent.click(screen.getByRole("button", { name: "שמירה" }));
     await waitFor(() => expect(updateNote).toHaveBeenCalledWith(30, expect.objectContaining({ title: "מצוות ציצית" })));
   });
 
-  test("'שמור בכל זאת' saves it untitled", async () => {
+  test("'שמירה בכל זאת' saves it untitled", async () => {
     await pressSave();
-    fireEvent.click(await screen.findByRole("button", { name: "שמור בכל זאת" }));
+    fireEvent.click(await screen.findByRole("button", { name: "שמירה בכל זאת" }));
     await waitFor(() => expect(updateNote).toHaveBeenCalledWith(30, expect.objectContaining({ title: "" })));
   });
 
@@ -232,7 +232,7 @@ describe("saving a card with no title", () => {
   });
 });
 
-// The same place, listed under "הערות אישיות" beside the player as well.
+// The same place, listed under "סימניות" beside the player as well.
 describe("the bookmark a new note brings with it", () => {
   const press = () => fireEvent.click(screen.getByRole("button", { name: /הערה חדשה לשיעור/ }));
 
@@ -309,7 +309,7 @@ describe("the reference and its bookmark are one", () => {
     expect(chipOf(createNote.mock.calls[0][0].body).hasAttribute("data-bookmark-id")).toBe(false);
   });
 
-  // Renamed under "הערות אישיות": the note says the new name, whatever it was
+  // Renamed under "סימניות": the note says the new name, whatever it was
   // saved with.
   test("a note shows its bookmark's current name, not the one it was saved with", async () => {
     const chip = sourceChipHtml({

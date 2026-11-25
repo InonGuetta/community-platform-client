@@ -3,6 +3,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { selectNotification } from "../../../store/selectors/notificationSelectors";
 import { closeNotification } from "../../../store/slicesAndThunks/snackbarSlice";
+import { DOCK_OFFSET } from "../../layout/shellGeometry";
 
 // The single app-wide toast host. Rendered once in App (outside <Routes>) so a
 // message survives navigation and any page can trigger it via the notify()
@@ -25,6 +26,8 @@ const GlobalSnackbar = () => {
       autoHideDuration={4000}
       onClose={handleClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      // Above the dock, which floats at the bottom centre too (D-47).
+      sx={{ bottom: DOCK_OFFSET }}
     >
       <Alert onClose={handleClose} severity={severity} variant="filled" sx={{ width: "100%" }}>
         {message}

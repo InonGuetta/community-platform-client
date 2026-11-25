@@ -1,5 +1,5 @@
 {
-  "appName": "Plateforme communautaire",
+  "appName": "Kol Tevuna",
   "language": {
     "label": "Langue du site",
     "change": "Changer de langue"
@@ -35,5 +35,10 @@
     "body": "Une erreur inattendue s'est produite au chargement de la page. Recharger la page règle généralement le problème.",
     "reload": "Recharger la page",
     "toArchive": "Retour aux archives"
+  },
+  "numberField": {
+    "between": "La valeur doit être comprise entre {{min}} et {{max}}",
+    "atLeast": "Le minimum est {{min}}",
+    "atMost": "Le maximum est {{max}}"
   }
 }

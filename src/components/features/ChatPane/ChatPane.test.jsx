@@ -70,7 +70,7 @@ describe("asking", () => {
     render(<ChatPane chat={c} />);
     await userEvent.type(screen.getByRole("textbox"), "עוד שאלה{Enter}");
     expect(c.ask).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "שלח" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "שליחה" })).toBeDisabled();
     expect(screen.getByTestId("chat-thinking")).toHaveTextContent("מעיין בשיעור");
   });
 
@@ -84,7 +84,7 @@ describe("asking", () => {
   test("a failure is said in Hebrew and can be dismissed", async () => {
     const c = chat({ askError: { code: "AI_ANSWER_FAILED", message: "The AI could not answer" } });
     render(<ChatPane chat={c} />);
-    expect(screen.getByRole("alert")).toHaveTextContent("נסה לשאול שוב");
+    expect(screen.getByRole("alert")).toHaveTextContent("אפשר לנסות לשאול שוב");
     expect(screen.queryByText(/could not answer/)).not.toBeInTheDocument();
     await userEvent.click(within(screen.getByRole("alert")).getByRole("button"));
     expect(c.dismissAskError).toHaveBeenCalled();
@@ -111,7 +111,7 @@ describe("the thread", () => {
   test("a conversation that failed to load says so and can be retried", async () => {
     const c = chat({ loadStatus: "failed", loadError: { code: "DB_UNAVAILABLE" } });
     render(<ChatPane chat={c} />);
-    await userEvent.click(screen.getByRole("button", { name: "נסה שוב" }));
+    await userEvent.click(screen.getByRole("button", { name: "ניסיון חוזר" }));
     expect(c.retryLoad).toHaveBeenCalled();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
@@ -214,7 +214,7 @@ test("the daily quota says when the chat comes back, and points at the search", 
   expect(alert).toHaveTextContent("הגעת למכסת השאלות היומית");
   expect(alert).toHaveTextContent("אפשר להמשיך מחר");
   expect(alert).toHaveTextContent("החיפוש החכם");
-  expect(alert).not.toHaveTextContent("נסה לשאול שוב");
+  expect(alert).not.toHaveTextContent("אפשר לנסות לשאול שוב");
 });
 
 describe("saving an answer to the notebook", () => {
@@ -224,7 +224,7 @@ describe("saving an answer to the notebook", () => {
     const n = notebook();
     const messages = [question, answer];
     render(<ChatPane chat={chat({ messages })} notebook={n} />);
-    await userEvent.click(screen.getByRole("button", { name: "שמור למחברת" }));
+    await userEvent.click(screen.getByRole("button", { name: "שמירה למחברת" }));
     expect(n.save).toHaveBeenCalledWith(messages, 2);
   });
 
@@ -235,7 +235,7 @@ describe("saving an answer to the notebook", () => {
       { id: "draft-r", role: "assistant", content: "כותב [1]", citations: [], streaming: true },
     ];
     render(<ChatPane chat={chat({ messages, asking: true })} notebook={notebook()} />);
-    expect(screen.queryByRole("button", { name: "שמור למחברת" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "שמירה למחברת" })).not.toBeInTheDocument();
   });
 
   test("once saved it says so, and cannot be pressed again by accident", () => {
@@ -246,7 +246,7 @@ describe("saving an answer to the notebook", () => {
   test("a failed save says so and can be tried again", async () => {
     const n = notebook({ 2: "failed" });
     render(<ChatPane chat={chat({ messages: [question, answer] })} notebook={n} />);
-    await userEvent.click(screen.getByRole("button", { name: "השמירה נכשלה — נסה שוב" }));
+    await userEvent.click(screen.getByRole("button", { name: "השמירה נכשלה — אפשר לנסות שוב" }));
     expect(n.save).toHaveBeenCalled();
   });
 });
@@ -275,7 +275,7 @@ describe("copying the conversation", () => {
     const copy = vi.fn();
     const messages = [question, answer, { ...question, id: 4 }, { ...bookAnswer, id: 5 }];
     render(<ChatPane chat={chat({ messages, copy })} />);
-    const buttons = screen.getAllByRole("button", { name: "העתק שיחה" });
+    const buttons = screen.getAllByRole("button", { name: "העתקת השיחה" });
     expect(buttons).toHaveLength(1);
     await userEvent.click(buttons[0]);
     expect(copy).toHaveBeenCalledWith(messages);
@@ -283,9 +283,9 @@ describe("copying the conversation", () => {
 
   test("not offered on an empty conversation, nor pressed mid-answer", () => {
     const { rerender } = render(<ChatPane chat={chat({ copy: vi.fn() })} />);
-    expect(screen.queryByRole("button", { name: "העתק שיחה" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "העתקת השיחה" })).not.toBeInTheDocument();
     rerender(<ChatPane chat={chat({ messages: [question, answer], asking: true, copy: vi.fn() })} />);
-    expect(screen.getByRole("button", { name: "העתק שיחה" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "העתקת השיחה" })).toBeDisabled();
   });
 });
 

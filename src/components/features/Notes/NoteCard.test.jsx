@@ -128,11 +128,11 @@ describe("a ticked note", () => {
 
   test("is framed", () => {
     const { card } = setup({ isSelected: true });
-    expect(ring(card)).toMatch(/2px/);
+    expect(ring(card)).toMatch(/0 0 0 2px/);
   });
 
   test("an unticked one is not", () => {
     const { card } = setup({ isSelected: false });
-    expect(ring(card)).not.toMatch(/2px/);
+    expect(ring(card)).not.toMatch(/0 0 0 2px/);
   });
 });

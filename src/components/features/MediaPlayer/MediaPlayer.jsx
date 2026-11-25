@@ -4,8 +4,12 @@ import ReactPlayer from "react-player";
 import Box from "@mui/material/Box";
 import PlayerControls from "./PlayerControls";
 import { mediaTypes } from "../../../utilities/constant";
-import { STAGE_ASPECT } from "./stageGeometry";
+import { RADIUS, SHADOW, CARD_SHELL_SX, WHITE } from "../../../theme/tokens";
 import { captionAt } from "../../../utilities/transcriptTiming";
+
+// A video's stage: the picture's own shape. Audio has no stage any more — it
+// is a card under the lesson's cover (D-21).
+const STAGE_ASPECT = "16 / 9";
 
 // How long the control bar stays up over a playing video after the last pointer
 // movement. Long enough to reach it without chasing, short enough that it is out
@@ -173,8 +177,8 @@ const MediaPlayer = forwardRef((
   //
   // Drawn by the page rather than as a <track> on the media element: an audio
   // lesson plays in an <audio>, which shows no captions at all, and this way the
-  // same line appears over a picture and over the empty stage of a recording,
-  // in the same right-to-left type as the rest of the page.
+  // same line appears over a picture and inside a recording's player card, in
+  // the same right-to-left type as the rest of the page.
   const [captionsOn, setCaptionsOn] = useState(readCaptionsOn);
   const toggleCaptions = useCallback(() => {
     setCaptionsOn((on) => { saveCaptionsOn(!on); return !on; });
@@ -182,95 +186,169 @@ const MediaPlayer = forwardRef((
   const hasCaptions = Boolean(captions?.cues?.length);
   const caption = hasCaptions && captionsOn ? captionAt(captions.cues, played) : null;
 
+  // The media element stays rendered and playing in BOTH layouts — a <video>
+  // for a picture, an <audio> for a lecture without one (see forceAudio below;
+  // it was a <video> for both until background play needed otherwise).
+  const player = (
+    <ReactPlayer
+      ref={playerRef}
+      url={url}
+      width="100%"
+      height="100%"
+      controls={false}
+      playing={playing}
+      volume={volume}
+      muted={muted}
+      playbackRate={playbackRate}
+      onProgress={handleProgress}
+      onDuration={setLoadedDuration}
+      onReady={handleReady}
+      onPlay={() => setPlaying(true)}
+      onPause={() => setPlaying(false)}
+      // The page moves on to the course's next lesson (PRD CRS-3).
+      onEnded={() => { setPlaying(false); onEnded?.(); }}
+      // An audio lesson as an <audio> element (PRD MOB-3). The stream URL
+      // has no extension, so ReactPlayer would otherwise build a <video>
+      // for it too — and a phone pauses a VIDEO when the screen locks or
+      // the browser goes to the background, which made a shiur stop the
+      // moment the phone went into a pocket. Audio is allowed to play on.
+      config={{ file: { forceAudio: !isVideo } }}
+    />
+  );
+
+  const controls = (
+    <PlayerControls
+      playing={playing}
+      onTogglePlay={() => setPlaying((p) => !p)}
+      volume={volume}
+      muted={muted}
+      onVolumeChange={handleVolumeChange}
+      onToggleMute={handleToggleMute}
+      played={scrubbing ? scrubValue : played}
+      duration={effectiveDuration}
+      onSeek={(v) => { setScrubbing(true); setScrubValue(v); }}
+      onSeekCommit={(v) => { setScrubbing(false); seekTo(v); }}
+      playbackRate={playbackRate}
+      onRateChange={setPlaybackRate}
+      media={media}
+      transcript={transcript}
+      variant={isVideo ? "overlay" : "card"}
+      // Keeps the bar up while its own menus are open — see PlayerControls.
+      onBusyChange={setControlsBusy}
+      captionsAvailable={hasCaptions}
+      captionsOn={captionsOn}
+      onToggleCaptions={toggleCaptions}
+    />
+  );
+
+  // ── Audio: a card, not a stage (D-21) ──────────────────────────────────────
+  //
+  // The lecture used to stand its bar in the middle of an empty 16:9 frame —
+  // the frame the side panel was measured against. The redesign gives an audio
+  // lesson its cover art instead, and the player becomes the card under it:
+  // play, the line and its times, and a row of the secondary buttons. The tabs
+  // card no longer takes its height from here (D-22), so nothing is reserved.
+  if (!isVideo) {
+    return (
+      <Box
+        data-testid="player-card"
+        sx={{
+          position: "relative",
+          ...CARD_SHELL_SX,
+          p: 2.5,
+        }}
+      >
+        {/* Kept to an invisible 1×1 — still laid out, still playing, but with
+            no surface to paint. Not `display: none`, which would take its box
+            away entirely and is a heavier promise to make about a playing
+            element. "1px", not 1: in MUI's sx a bare number for width/height
+            between 0 and 1 is read as a PERCENTAGE. */}
+        <Box
+          data-testid="player-element"
+          sx={{
+            position: "absolute",
+            width: "1px",
+            height: "1px",
+            overflow: "hidden",
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+        >
+          {player}
+        </Box>
+
+        {/* Captions (PRD MOB-5): an <audio> shows none of its own, so the line
+            being said is drawn here, inside the card, above the controls. */}
+        {caption && (
+          <Box
+            data-testid="player-caption"
+            // The lesson's own words: their direction, not the interface's.
+            dir="auto"
+            sx={{
+              mb: 2,
+              px: 2,
+              py: 1.25,
+              borderRadius: `${RADIUS.field}px`,
+              bgcolor: "surface.fill2",
+              color: "text.primary",
+              textAlign: "center",
+              fontSize: 15,
+              lineHeight: 1.6,
+            }}
+          >
+            {caption}
+          </Box>
+        )}
+
+        {controls}
+      </Box>
+    );
+  }
+
+  // ── Video: the picture, with the bar floating over its foot ────────────────
   return (
-    // The BLACK belongs to a picture; the space does not. A lecture with no
-    // picture was being painted a black rectangle it had nothing to put in, so
-    // audio keeps the frame — the page is measured against it, and it is what
-    // stands the bar level with the middle of the panel beside it — but not the
-    // paint.
     <Box
       sx={{
         position: "relative",
         width: "100%",
-        ...(isVideo && { bgcolor: "black", borderRadius: 2, overflow: "hidden" }),
+        bgcolor: "black",
+        // Redesign v4: the video player's own radius and heavy shadow (part B).
+        borderRadius: `${RADIUS.hero}px`,
+        boxShadow: SHADOW.player,
+        overflow: "hidden",
       }}
     >
-      {/* The stage: a 16:9 frame for BOTH, and only its treatment differs.
-          Video fills it and the bar floats near the bottom, where a control bar
-          belongs when there is a picture to keep clear. Audio leaves it empty
-          and puts the bar in the middle of it.
-          The frame is kept for audio even though there is nothing to frame,
-          because it is what the rest of the page is measured against: the side
-          panel matches this block's height, and a block that shrank to the
-          height of its own control bar took the panel down with it. Reserving
-          the space here — rather than compensating for its absence over there —
-          is also what puts the bar level with the middle of the panel. */}
       <Box
-        onPointerMove={isVideo ? wakeControls : undefined}
+        onPointerMove={wakeControls}
         // Leaving the picture is as clear a "done with the controls" as running
         // out of time, and waiting the full delay afterwards only leaves the bar
         // sitting on a frame nobody is pointing at.
-        onPointerLeave={isVideo ? () => setPointerAwake(false) : undefined}
+        onPointerLeave={() => setPointerAwake(false)}
         sx={{
           position: "relative",
           width: "100%",
           aspectRatio: STAGE_ASPECT,
           display: "flex",
           justifyContent: "center",
-          alignItems: isVideo ? "flex-end" : "center",
+          alignItems: "flex-end",
           p: 2,
         }}
       >
-        {/* The media element stays rendered and playing in BOTH cases — a
-            <video> for a picture, an <audio> for a lecture without one (see
-            forceAudio below; it was a <video> for both until background play
-            needed otherwise). What changes is its box. For video it fills the frame behind the bar; for
-            audio it is kept to an invisible 1×1 — still laid out, still playing,
-            but with no surface left to paint the black rectangle this change is
-            here to remove. Not `display: none`, which would take its box away
-            entirely and is a heavier promise to make about a playing element. */}
         {/* The picture itself is the play/pause target, the way it is in every
             player people already use. It works because this element and the bar
             are SIBLINGS rather than nested: a click on the bar lands on the bar
             and stops there, so pressing a button in it cannot also toggle
             playback behind it. */}
         <Box
-          onClick={isVideo ? () => setPlaying((p) => !p) : undefined}
+          onClick={() => setPlaying((p) => !p)}
           sx={{
             position: "absolute",
-            // "1px", not 1: in MUI's sx a bare number for width/height between
-            // 0 and 1 is read as a PERCENTAGE, so `width: 1` would quietly mean
-            // 100% and leave the element covering the whole row.
-            ...(isVideo
-              ? { inset: 0, cursor: "pointer" }
-              : { width: "1px", height: "1px", overflow: "hidden", opacity: 0, pointerEvents: "none" }),
+            inset: 0,
+            cursor: "pointer",
             "& video": { width: "100%", height: "100%", objectFit: "contain", display: "block" },
           }}
         >
-          <ReactPlayer
-            ref={playerRef}
-            url={url}
-            width="100%"
-            height="100%"
-            controls={false}
-            playing={playing}
-            volume={volume}
-            muted={muted}
-            playbackRate={playbackRate}
-            onProgress={handleProgress}
-            onDuration={setLoadedDuration}
-            onReady={handleReady}
-            onPlay={() => setPlaying(true)}
-            onPause={() => setPlaying(false)}
-            // The page moves on to the course's next lesson (PRD CRS-3).
-            onEnded={() => { setPlaying(false); onEnded?.(); }}
-            // An audio lesson as an <audio> element (PRD MOB-3). The stream URL
-            // has no extension, so ReactPlayer would otherwise build a <video>
-            // for it too — and a phone pauses a VIDEO when the screen locks or
-            // the browser goes to the background, which made a shiur stop the
-            // moment the phone went into a pocket. Audio is allowed to play on.
-            config={{ file: { forceAudio: !isVideo } }}
-          />
+          {player}
         </Box>
 
         {caption && (
@@ -286,12 +364,9 @@ const MediaPlayer = forwardRef((
               justifyContent: "center",
               px: 2,
               pointerEvents: "none",
-              // Over a picture, just above the bar — lower when the bar has
-              // faded away. On a recording's empty stage, above the bar in the
-              // middle of it.
-              ...(isVideo
-                ? { bottom: controlsVisible ? 76 : 20, transition: "bottom 220ms ease" }
-                : { bottom: "calc(50% + 34px)" }),
+              // Just above the bar — lower when the bar has faded away.
+              bottom: controlsVisible ? 76 : 20,
+              transition: "bottom 220ms ease",
             }}
           >
             <Box
@@ -302,7 +377,7 @@ const MediaPlayer = forwardRef((
                 py: 0.5,
                 borderRadius: 1,
                 bgcolor: "rgba(0,0,0,0.72)",
-                color: "#fff",
+                color: WHITE,
                 textAlign: "center",
                 lineHeight: 1.5,
                 fontSize: { xs: "0.95rem", sm: "1.15rem" },
@@ -317,6 +392,7 @@ const MediaPlayer = forwardRef((
             swallow the click meant for the picture underneath it. The transition
             lists visibility too, or it would snap away before the fade. */}
         <Box
+          data-testid="player-bar"
           sx={{
             position: "relative",
             zIndex: 1,
@@ -328,39 +404,9 @@ const MediaPlayer = forwardRef((
             transition: "opacity 220ms ease, visibility 220ms ease",
           }}
         >
-          <PlayerControls
-            playing={playing}
-            onTogglePlay={() => setPlaying((p) => !p)}
-            volume={volume}
-            muted={muted}
-            onVolumeChange={handleVolumeChange}
-            onToggleMute={handleToggleMute}
-            played={scrubbing ? scrubValue : played}
-            duration={effectiveDuration}
-            onSeek={(v) => { setScrubbing(true); setScrubValue(v); }}
-            onSeekCommit={(v) => { setScrubbing(false); seekTo(v); }}
-            playbackRate={playbackRate}
-            onRateChange={setPlaybackRate}
-            media={media}
-            transcript={transcript}
-            // Whether the bar has black behind it. Its glass colouring assumes
-            // it does; standing on the page instead, it needs to be opaque
-            // enough to stay legible in either theme.
-            overPicture={isVideo}
-            // Keeps the bar up while its own menus are open — see PlayerControls.
-            onBusyChange={setControlsBusy}
-            captionsAvailable={hasCaptions}
-            captionsOn={captionsOn}
-            onToggleCaptions={toggleCaptions}
-          />
+          {controls}
         </Box>
       </Box>
-      {/* No strip of bookmark pins under the stage. They sat on the page as
-          little flags with nothing around them to say what they were, and on an
-          audio lecture — where the stage is empty anyway — a row of markers
-          floating over blank space read as damage rather than as a feature. The
-          same bookmarks are listed, with their times and their text, in the
-          notes panel beside the player, which is where they can be understood. */}
     </Box>
   );
 });

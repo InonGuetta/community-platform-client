@@ -105,8 +105,21 @@ describe("giving a donation", () => {
     renderPage();
     const user = userEvent.setup();
     await user.type(screen.getByLabelText("סכום מותאם"), "5");
-    expect(screen.getByRole("button", { name: /המשך לתשלום/ })).toBeDisabled();
-    expect(screen.getByText("הסכום המינימלי הוא ₪10")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "הזינו סכום" })).toBeDisabled();
+    expect(screen.getByText("הערך חייב להיות בין 10 ל־100000")).toBeInTheDocument();
+  });
+
+  it("will not take a negative amount, typed or pasted, and puts a stray one back in range", async () => {
+    renderPage();
+    const user = userEvent.setup();
+    const field = screen.getByLabelText("סכום מותאם");
+    await user.type(field, "-50");
+    expect(field.value).toBe("50");
+    await user.clear(field);
+    await user.type(field, "3");
+    await user.tab();
+    expect(field.value).toBe("10");
+    expect(screen.getByRole("button", { name: /המשך לתשלום ₪10/ })).toBeEnabled();
   });
 });
 

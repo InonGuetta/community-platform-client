@@ -1,6 +1,16 @@
 {
   "title": "Archives des médias",
   "upload": "Téléverser un média",
+  "subtitle": "Cours, livres et vidéos. Tout ce qui a été réuni, au même endroit.",
+  "allItems": "Tous les éléments",
+  "hero": {
+    "label": "Dernière publication",
+    "kicker": "Nouveau dans les archives · {{type}}",
+    "listen": "Écouter",
+    "watch": "Regarder",
+    "read": "Lire",
+    "details": "Détails du cours"
+  },
   "tabs": {
     "archive": "Archives",
     "smartSearch": "Recherche approfondie intelligente"
@@ -14,7 +24,8 @@
     "oldest": "Les plus anciens",
     "title": "Titre du cours (A–Z)",
     "creator": "Nom de l'enseignant (A–Z)",
-    "liked": "Les plus aimés"
+    "liked": "Les plus aimés",
+    "button": "Trier : {{order}}"
   },
   "filter": {
     "toggle": "Filtrer",
@@ -34,9 +45,10 @@
     "removedLabel": "Sans :",
     "chosenSpoken": "Filtré par",
     "removedSpoken": "Retiré du filtre",
-    "tagCount": "{{count}} étiquettes",
     "remove": "Retirer {{name}} du filtre",
-    "clear": "Effacer les étiquettes"
+    "clear": "Effacer les étiquettes",
+    "tagCount_one": "1 étiquette",
+    "tagCount_other": "{{count}} étiquettes"
   },
   "tree": {
     "back": "Retour",
@@ -50,7 +62,6 @@
     "tooMany": "{{shown}} étiquettes affichées sur {{total}} — affinez la recherche",
     "wholeBranch": "Le nombre couvre toute la branche, y compris ce qui en a été retiré",
     "partial": "Partiellement choisi — certaines catégories de cette branche ont été retirées",
-    "partialSpoken": "Partiellement choisi, {{count}} étiquettes",
     "inside": "Dans {{path}}",
     "mark": {
       "included": "Choisi · cliquez à nouveau pour annuler",
@@ -66,7 +77,9 @@
       "inheritedExcluded": "Hors du filtre via une catégorie parente · cliquez pour rétablir",
       "contains": "Un élément à l'intérieur est choisi · cliquez pour tout choisir",
       "none": "Non choisi · cliquez pour choisir"
-    }
+    },
+    "partialSpoken_one": "Partiellement choisi, 1 étiquette",
+    "partialSpoken_other": "Partiellement choisi, {{count}} étiquettes"
   },
   "edit": {
     "detailsTitle": "Modifier les informations — {{title}}",
@@ -89,7 +102,14 @@
   "smartSearch": {
     "placeholder": "Recherche approfondie intelligente",
     "run": "Rechercher",
-    "none": "Aucun résultat correspondant."
+    "none": "Aucun résultat correspondant.",
+    "introTitle": "Rechercher par le sens, pas seulement par les mots",
+    "introText": "Décrivez avec vos mots ce que vous cherchez et obtenez les passages pertinents des cours et des livres, même si ces mots n'y figurent pas.",
+    "examples": [
+      "Que dit-on de l'intention dans la prière",
+      "Sources sur les lois du mouktsé",
+      "Le désaccord entre Beit Shammaï et Beit Hillel"
+    ]
   },
   "greeting": {
     "morning": "Bonjour",

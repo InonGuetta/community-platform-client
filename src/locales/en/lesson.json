@@ -1,11 +1,17 @@
 {
   "published": "Published on: ",
   "draftUploaded": "Draft · uploaded on: ",
+  "backToArchive": "The archive",
+  "kicker": {
+    "audio": "Audio lesson",
+    "video": "Video lesson",
+    "text": "Book"
+  },
   "tabs": {
     "summary": "Summary",
     "chapters": "Chapters",
     "transcript": "Transcript",
-    "notes": "Personal notes",
+    "notes": "Bookmarks",
     "sessionChat": "Session chat",
     "discuss": "Discussion with AI",
     "transcriptView": "Transcript view",
@@ -214,7 +220,7 @@
     "share": "Share"
   },
   "notebook": {
-    "title": "My notebook for this lesson",
+    "title": "My notebook",
     "all": "To the whole notebook",
     "newNote": "New note for the lesson",
     "empty": "There are no notes for this lesson yet. Click \"New note for the lesson\" to start writing.",

@@ -3,7 +3,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider } from "@mui/material/styles";
-import { buildTheme } from "../../../theme/theme";
+import { buildLegacyTheme } from "../../../theme/legacyTheme";
 import { useLanguage } from "../../../i18n/useLanguage";
 import LanguageSwitcher from "../../layout/LanguageSwitcher";
 
@@ -13,7 +13,7 @@ import LanguageSwitcher from "../../layout/LanguageSwitcher";
 // light glass card). One per direction, each built the first time it is
 // needed and kept, so moving between the auth pages builds nothing.
 const lightThemes = {};
-const lightThemeFor = (direction) => (lightThemes[direction] ??= buildTheme("light", direction));
+const lightThemeFor = (direction) => (lightThemes[direction] ??= buildLegacyTheme("light", direction));
 
 const AuthLayout = ({ title, children }) => {
   const { direction } = useLanguage();
@@ -29,6 +29,7 @@ const AuthLayout = ({ title, children }) => {
     position: "relative",
     overflow: "hidden",
     px: 2,
+    fontFamily: "system-ui, -apple-system, sans-serif",
     "&::before": {
       content: '""',
       position: "absolute",

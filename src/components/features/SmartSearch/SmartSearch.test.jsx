@@ -61,3 +61,13 @@ test("an empty box clears the results without asking the server", async () => {
   await waitFor(() => expect(store.getState().transcript.searchResults).toEqual([]));
   expect(screen.queryByText("לא נמצאו תוצאות תואמות.")).not.toBeInTheDocument();
 });
+
+// UI_UX_FIXES 4.2 / 4.3: one magnifier (the button, at the start), and before
+// the first search a few examples that run a search when pressed.
+test("one search button, and an example runs its own search", async () => {
+  renderSearch();
+  expect(screen.getAllByRole("button", { name: "חיפוש" })).toHaveLength(1);
+  fireEvent.click(screen.getByRole("button", { name: "מה נאמר על כוונה בתפילה" }));
+  await waitFor(() => expect(search).toHaveBeenCalledWith({ q: "מה נאמר על כוונה בתפילה", mode: "hybrid" }));
+  expect(box()).toHaveValue("מה נאמר על כוונה בתפילה");
+});

@@ -3,11 +3,9 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
+import StatusBadge from "../../../features/StatusBadge/StatusBadge";
 import NoteCard from "../../../features/Notes/NoteCard";
 import NoteToolbar from "../../../features/Notes/NoteToolbar";
 import SourcePreviewDialog from "./SourcePreviewDialog";
@@ -27,60 +25,56 @@ const LessonNotebook = ({ media, isText, currentTime, readerPage, bookmarks, onS
   const { notes, loading, preview } = notebook;
 
   return (
-    <Paper
-      data-testid="lesson-notebook"
-      elevation={0}
-      sx={{ mt: 3, p: { xs: 2, md: 3 }, borderRadius: 3, border: "1px solid", borderColor: "divider" }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", mb: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <MenuBookIcon color="primary" />
-          <Typography variant="h6" fontWeight={800} color="primary">{t("notebook.title")}</Typography>
-          {notes.length > 0 && <Chip size="small" label={notes.length} />}
+    // Redesign v4 (screens 20, 26): a section card under the lesson — the
+    // theme's Paper is the card (D-51) — with a display heading and the two
+    // actions at the end of its row, which drop under it on a phone.
+    <Paper data-testid="lesson-notebook" sx={{ mt: 4, p: { xs: 3, md: 4 } }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { xs: "flex-start", md: "center" },
+          justifyContent: "space-between",
+          gap: 2,
+          mb: 2.5,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Typography variant="display" component="h2" sx={{ fontSize: 26 }}>
+            {t("notebook.title")}
+          </Typography>
+          {notes.length > 0 && <StatusBadge tone="neutral">{notes.length}</StatusBadge>}
         </Box>
 
-        {/* Only when there is a card to format — a strip of disabled buttons
-            over an empty notebook is noise on a page that is about the lesson. */}
-        {notes.length > 0 && (
-          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", minWidth: 280 }}>
-            <NoteToolbar
-              onCommand={notebook.execCommand}
-              onFontSize={notebook.setFontSize}
-              formats={notebook.formats}
-              disabled={!notebook.activeNoteId}
-            />
-          </Box>
-        )}
-
-        <Box sx={{ display: "flex", gap: 1, marginInlineEnd: "auto" }}>
-          <Button
-            component={RouterLink}
-            to={NOTEBOOK_SHELF.path}
-            variant="outlined"
-            sx={{ borderRadius: 2, fontWeight: 700 }}
-          >
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+          <Button component={RouterLink} to={NOTEBOOK_SHELF.path} variant="soft">
             {t("notebook.all")}
           </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={notebook.handleCreate}
-            sx={{ borderRadius: 2, fontWeight: 700 }}
-          >
+          <Button variant="contained" startIcon={<AddIcon />} onClick={notebook.handleCreate}>
             {t("notebook.newNote")}
           </Button>
         </Box>
       </Box>
 
+      {/* Only when there is a card to format — a strip of disabled buttons
+          over an empty notebook is noise on a page that is about the lesson. */}
+      {notes.length > 0 && (
+        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 2 }}>
+          <NoteToolbar
+            onCommand={notebook.execCommand}
+            onFontSize={notebook.setFontSize}
+            formats={notebook.formats}
+            disabled={!notebook.targetNoteId}
+          />
+        </Box>
+      )}
+
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}><CircularProgress size={28} /></Box>
       ) : notes.length === 0 ? (
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, py: 4, color: "text.secondary" }}>
-          <NoteAltOutlinedIcon sx={{ fontSize: 48, opacity: 0.4 }} />
-          <Typography variant="body2">
-            {t("notebook.empty")}
-          </Typography>
-        </Box>
+        <Typography sx={{ fontSize: 15, color: "text.secondary" }}>
+          {t("notebook.empty")}
+        </Typography>
       ) : (
         <Box
           sx={{

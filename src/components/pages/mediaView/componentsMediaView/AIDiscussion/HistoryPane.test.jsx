@@ -59,7 +59,7 @@ describe("the list", () => {
   test("a list that failed to load says so and can be retried", async () => {
     const h = history({ status: "failed", error: { code: "DB_UNAVAILABLE" } });
     render(<HistoryPane history={h} />);
-    await userEvent.click(screen.getByRole("button", { name: "נסה שוב" }));
+    await userEvent.click(screen.getByRole("button", { name: "ניסיון חוזר" }));
     expect(h.retry).toHaveBeenCalled();
   });
 });
@@ -88,7 +88,7 @@ describe("one conversation", () => {
   test("an earlier conversation can be continued", async () => {
     const h = history({ viewing: opened(3), currentId: 9 });
     render(<HistoryPane history={h} />);
-    await userEvent.click(screen.getByRole("button", { name: "המשך את השיחה הזו" }));
+    await userEvent.click(screen.getByRole("button", { name: "המשך השיחה הזו" }));
     await waitFor(() => expect(h.continueConversation).toHaveBeenCalledWith(3));
   });
 
@@ -96,7 +96,7 @@ describe("one conversation", () => {
   test("the current conversation offers a way back to it instead", () => {
     render(<HistoryPane history={history({ viewing: opened(9), currentId: 9 })} />);
     expect(screen.getByRole("button", { name: "חזרה לשיחה" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "המשך את השיחה הזו" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "המשך השיחה הזו" })).not.toBeInTheDocument();
   });
 
   test("back to the list", async () => {
@@ -109,7 +109,7 @@ describe("one conversation", () => {
   test("one that could not be opened says so, and offers no way to continue it", () => {
     render(<HistoryPane history={history({ viewing: { ...opened(3), status: "failed", error: { code: "NOT_FOUND" }, messages: [] } })} />);
     expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "המשך את השיחה הזו" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "המשך השיחה הזו" })).not.toBeInTheDocument();
   });
 });
 
@@ -124,11 +124,11 @@ test("a resume that failed says so, and the conversation stays open", () => {
   render(<HistoryPane history={history({ viewing, currentId: 9 })} />);
   expect(screen.getByRole("alert")).toBeInTheDocument();
   expect(screen.getByTestId("message-user")).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "המשך את השיחה הזו" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "המשך השיחה הזו" })).toBeEnabled();
 });
 
 describe("deleting a conversation", () => {
-  const deleteButton = () => screen.getByRole("button", { name: 'מחק את השיחה "מה כתוב על תפילין?"' });
+  const deleteButton = () => screen.getByRole("button", { name: 'מחיקת השיחה "מה כתוב על תפילין?"' });
 
   test("asks first, and deletes only on yes", async () => {
     const h = history({ items: [older] });
@@ -141,7 +141,7 @@ describe("deleting a conversation", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
 
     await userEvent.click(deleteButton());
-    await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "מחק" }));
+    await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "מחיקה" }));
     expect(h.remove).toHaveBeenCalledWith(3);
   });
 
@@ -172,7 +172,7 @@ test("an answer in an earlier conversation can be saved to the notebook too", as
   ];
   const viewing = { conversationId: 3, conversation: { id: 3 }, status: "succeeded", error: null, messages };
   render(<HistoryPane history={history({ viewing })} notebook={notebook} />);
-  await userEvent.click(screen.getByRole("button", { name: "שמור למחברת" }));
+  await userEvent.click(screen.getByRole("button", { name: "שמירה למחברת" }));
   expect(notebook.save).toHaveBeenCalledWith(messages, 2);
 });
 
@@ -181,6 +181,6 @@ test("an earlier conversation can be copied whole", async () => {
   const messages = [{ id: 1, role: "user", content: "שאלה", citations: [] }];
   const viewing = { conversationId: 3, conversation: { id: 3 }, status: "succeeded", error: null, messages };
   render(<HistoryPane history={history({ viewing, copy })} />);
-  await userEvent.click(screen.getByRole("button", { name: "העתק שיחה" }));
+  await userEvent.click(screen.getByRole("button", { name: "העתקת השיחה" }));
   expect(copy).toHaveBeenCalledWith(messages);
 });

@@ -68,7 +68,7 @@ const renderAt = (search) => {
 const fields = () => ({
   password: screen.getByLabelText(/סיסמה חדשה/),
   confirm: screen.getByLabelText(/אימות סיסמה/),
-  submit: screen.getByRole("button", { name: "שמור והתחבר" }),
+  submit: screen.getByRole("button", { name: "שמירה והתחברות" }),
 });
 
 const typeInto = async (user, password, confirm = password) => {

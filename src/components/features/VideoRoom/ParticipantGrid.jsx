@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { ROOM, WHITE } from "../../../theme/tokens";
 
 const ParticipantGrid = ({ streams }) => (
   <Box sx={{
@@ -10,7 +11,7 @@ const ParticipantGrid = ({ streams }) => (
     height: "100%",
   }}>
     {streams.map(({ id, stream, label }) => (
-      <Box key={id} sx={{ position: "relative", bgcolor: "grey.900", borderRadius: 1, overflow: "hidden" }}>
+      <Box key={id} sx={{ position: "relative", bgcolor: ROOM.bar, borderRadius: 1, overflow: "hidden" }}>
         <video
           autoPlay
           playsInline
@@ -18,7 +19,7 @@ const ParticipantGrid = ({ streams }) => (
           ref={(el) => { if (el && stream) el.srcObject = stream; }}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
-        <Typography sx={{ position: "absolute", bottom: 8, insetInlineEnd: 8, color: "white", fontSize: 12, bgcolor: "rgba(0,0,0,0.5)", px: 1, borderRadius: 0.5 }}>
+        <Typography sx={{ position: "absolute", bottom: 8, insetInlineEnd: 8, color: WHITE, fontSize: 12, bgcolor: ROOM.label, px: 1, borderRadius: 0.5 }}>
           {label || id}
         </Typography>
       </Box>

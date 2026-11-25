@@ -4,6 +4,12 @@
   "verified": "Adresse vérifiée",
   "displayName": "Nom affiché",
   "save": "Enregistrer",
+  "verification": {
+    "resend": "Envoyer l’e-mail de vérification",
+    "sent": "E-mail de vérification envoyé. Son lien est valable 24 heures.",
+    "alreadyVerified": "Votre adresse est déjà vérifiée",
+    "failed": "Impossible d’envoyer l’e-mail pour le moment. Réessayez plus tard."
+  },
   "password": {
     "title": "Changer le mot de passe",
     "current": "Mot de passe actuel",
@@ -104,5 +110,12 @@
       "resendIn": "Nouveau code dans {{seconds}} s",
       "verifyFailed": "Impossible de vérifier le code pour le moment. Réessayez."
     }
+  },
+  "nav": {
+    "label": "Aller à une section",
+    "details": "Informations",
+    "phone": "Téléphone",
+    "notifications": "Notifications",
+    "password": "Mot de passe"
   }
 }

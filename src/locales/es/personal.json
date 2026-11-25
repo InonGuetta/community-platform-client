@@ -6,9 +6,6 @@
   "items_one": "Un elemento",
   "items_other": "{{count}} elementos",
   "fullList": "Ver la lista completa",
-  "more": "Más clases",
-  "noMore": "No hay más clases",
-  "showMore": "Mostrar más clases de {{title}}",
   "emptyList": "No tiene clases que mostrar.",
   "lists": {
     "title": "Listas guardadas",

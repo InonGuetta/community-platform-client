@@ -14,7 +14,7 @@ import { selectInboxItems, selectInboxUnread, selectPendingRoleRequests } from "
 export const INBOX_POLL_MS = 60_000;
 
 // The bell's logic, kept out of the component by the project's rule: it
-// dispatches and selects. Also read by Navbar for the admin's "משתמשים" badge.
+// dispatches and selects. Also read by useAppShell for the admin's "משתמשים" pill.
 const useNotificationBell = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();

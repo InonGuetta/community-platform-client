@@ -9,6 +9,7 @@ import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
+import { TABLE_SX } from "../../../features/DataTable/tableSx";
 import useAiUsage from "./useAiUsage";
 import { purposeLabel, formatUsd, formatUsage, capProgress } from "./aiUsageFormat";
 import { useTranslation } from "react-i18next";
@@ -34,11 +35,11 @@ const AiUsagePanel = () => {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 2, flexWrap: "wrap" }}>
         <Typography variant="h6" fontWeight={700}>{t("ai.title")}</Typography>
-        <Button size="small" onClick={reload} disabled={status === "loading"}>{t("ai.refresh")}</Button>
+        <Button size="small" variant="soft" onClick={reload} disabled={status === "loading"}>{t("ai.refresh")}</Button>
       </Box>
 
       <Box>
-        <Typography variant="h4" fontWeight={800} component="p">{formatUsd(report.spentUsd)}</Typography>
+        <Typography variant="display" component="p" sx={{ fontSize: 48, lineHeight: 1.1, color: "primary.main" }}>{formatUsd(report.spentUsd)}</Typography>
         <Typography variant="caption" color="text.secondary">
           {t("ai.estimate")}
         </Typography>
@@ -74,7 +75,7 @@ const AiUsagePanel = () => {
         <Box sx={{ overflowX: "auto" }}>
         {/* Its own horizontal scroll, like the pipeline's tables: on a phone the
             columns are wider than the screen, and longer in French and Spanish. */}
-        <Table size="small" aria-label={t("ai.tableLabel")}>
+        <Table size="small" sx={TABLE_SX} aria-label={t("ai.tableLabel")}>
           <TableHead>
             <TableRow>
               <TableCell>{t("ai.kind")}</TableCell>

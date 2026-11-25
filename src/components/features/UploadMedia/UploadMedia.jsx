@@ -17,7 +17,7 @@ const UploadMedia = ({ open }) => {
   const { t } = useTranslation(["upload", "common"]);
   const {
     progress, courses, knownCreators, knownTags, file, fields, uploading,
-    justUploaded, suggestions, savingTags,
+    justUploaded, suggestions, savingTags, typeAuto, dragging, dropProps,
     handleClose, handleDialogClose, handleFieldChange, handleFileChange, handleSubmit,
     handleSkipTags, handleSaveTags,
   } = useUploadMedia({ open });
@@ -30,13 +30,25 @@ const UploadMedia = ({ open }) => {
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Box
             sx={{
-              border: "2px dashed", borderColor: "grey.400", borderRadius: 2,
+              border: "2px dashed", borderColor: dragging ? "primary.main" : "surface.lineStrong", borderRadius: 2,
+              bgcolor: dragging ? "action.hover" : "transparent",
               p: 3, textAlign: "center", cursor: "pointer",
               "&:hover": { borderColor: "primary.main", bgcolor: "action.hover" },
             }}
+            // A drop area as well as a button: dragging a file onto it picks
+            // the file, as choosing it in the dialog does (UI_UX_FIXES 4.12).
+            {...dropProps}
+            role="button"
+            tabIndex={0}
             onClick={() => document.getElementById("media-file-input").click()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                document.getElementById("media-file-input").click();
+              }
+            }}
           >
-            <CloudUploadIcon sx={{ fontSize: 40, color: "grey.500", mb: 1 }} />
+            <CloudUploadIcon sx={{ fontSize: 40, color: "text.secondary", mb: 1 }} />
             <Typography color="text.secondary">
               {file ? file.name : t("chooseFile")}
             </Typography>
@@ -54,6 +66,7 @@ const UploadMedia = ({ open }) => {
             courses={courses}
             knownCreators={knownCreators}
             knownTags={knownTags}
+            typeAuto={typeAuto}
           />
 
           {uploading && (
@@ -74,7 +87,7 @@ const UploadMedia = ({ open }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} variant="outlined" disabled={uploading}>{t("common:actions.cancel")}</Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={uploading || !file}>
+        <Button onClick={handleSubmit} variant="contained" disabled={uploading || !file || !fields.title.trim() || !fields.mediaType}>
           {uploading ? t("uploadingShort") : t("upload")}
         </Button>
       </DialogActions>

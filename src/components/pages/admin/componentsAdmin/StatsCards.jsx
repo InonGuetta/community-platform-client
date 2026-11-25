@@ -1,43 +1,39 @@
 import { useNavigate } from "react-router-dom";
-import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-import CardActionArea from "@mui/material/CardActionArea";
-import CardContent from "@mui/material/CardContent";
+import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
 import PeopleIcon from "@mui/icons-material/People";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import Box from "@mui/material/Box";
+import { RADIUS, CARD_SHELL_SX } from "../../../../theme/tokens";
 import { useTranslation } from "react-i18next";
 
-const StatCard = ({ icon, label, value, color, to }) => {
+// A KPI card (component 17): the figure in display type, its label above it,
+// and a tile for the icon. The whole card is a link to where the figure lives.
+const StatCard = ({ icon, label, value, to }) => {
   const navigate = useNavigate();
   return (
-    <Card
+    <ButtonBase
+      onClick={() => navigate(to)}
       sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        gap: 2,
+        p: 3,
         height: "100%",
-        // Bottom color accent grows in on hover; card lifts slightly.
-        borderBottom: "3px solid transparent",
-        transition: "transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease",
-        "&:hover": {
-          transform: "translateY(-1px)",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
-          borderBottomColor: `${color}.main`,
-        },
+        textAlign: "start",
+        ...CARD_SHELL_SX,
+        transition: "box-shadow 0.25s ease",
+        "&:hover": { boxShadow: 2 },
       }}
     >
-      <CardActionArea onClick={() => navigate(to)} sx={{ height: "100%" }}>
-        <CardContent>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{ bgcolor: `${color}.light`, p: 1.5, borderRadius: 2, color: `${color}.dark` }}>{icon}</Box>
-            <Box>
-              <Typography variant="body2" color="text.secondary">{label}</Typography>
-              <Typography variant="h5" fontWeight={700}>{value}</Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </CardActionArea>
-    </Card>
+      <Box sx={{ display: "grid", placeItems: "center", width: 48, height: 48, flexShrink: 0, borderRadius: `${RADIUS.tile}px`, bgcolor: "surface.accentSoft", color: "primary.main" }}>{icon}</Box>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography variant="kicker" component="p" sx={{ color: "text.secondary" }}>{label}</Typography>
+        <Typography variant="display" component="p" sx={{ fontSize: 40, lineHeight: 1.1 }}>{value}</Typography>
+      </Box>
+    </ButtonBase>
   );
 };
 
@@ -50,17 +46,11 @@ const StatsCards = ({ stats }) => {
     : "₪0";
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={4}>
-        <StatCard icon={<PeopleIcon />} label={t("stats.activeUsers")} value={stats.users?.active ?? 0} color="primary" to="/users" />
-      </Grid>
-      <Grid item xs={12} sm={4}>
-        <StatCard icon={<VideoLibraryIcon />} label={t("stats.totalMedia")} value={stats.media?.total ?? 0} color="secondary" to="/archive" />
-      </Grid>
-      <Grid item xs={12} sm={4}>
-        <StatCard icon={<VolunteerActivismIcon />} label={t("stats.totalDonations")} value={donationILS} color="success" to="/donate" />
-      </Grid>
-    </Grid>
+    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(3, minmax(0, 1fr))" }, gap: 3 }}>
+      <StatCard icon={<PeopleIcon />} label={t("stats.activeUsers")} value={stats.users?.active ?? 0} to="/users" />
+      <StatCard icon={<VideoLibraryIcon />} label={t("stats.totalMedia")} value={stats.media?.total ?? 0} to="/archive" />
+      <StatCard icon={<VolunteerActivismIcon />} label={t("stats.totalDonations")} value={donationILS} to="/donate" />
+    </Box>
   );
 };
 

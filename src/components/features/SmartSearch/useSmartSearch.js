@@ -13,12 +13,14 @@ export const useSmartSearch = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
-  const runSearch = async () => {
+  // `override` is a query chosen from the examples; a click event (the button)
+  // is not a string, so the box's own text is used then.
+  const runSearch = async (override) => {
     // Guard against overlapping searches: a search runs an embedding + a GPT-4o
     // rerank (a few seconds). Without this, a second Enter mid-search could let
     // the older (slower) request resolve last and overwrite the newer results.
     if (loading) return;
-    const q = value.trim();
+    const q = (typeof override === "string" ? override : value).trim();
     if (!q) {
       dispatch(clearSearchResults());
       setSearched(false);
@@ -30,9 +32,14 @@ export const useSmartSearch = () => {
     setSearched(true);
   };
 
+  const searchFor = (q) => {
+    setValue(q);
+    runSearch(q);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter") runSearch();
   };
 
-  return { results, value, setValue, loading, searched, runSearch, handleKeyDown };
+  return { results, value, setValue, loading, searched, runSearch, searchFor, handleKeyDown };
 };

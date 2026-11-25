@@ -64,3 +64,340 @@
 - לא נבדק בדפדפן אמיתי (אין צילום בשלב הזה). הסיכון העיקרי: שדות עם label בתוך toolbars צפופים גבוהים יותר עכשיו (label מעל), ו-`<Paper>` רגילים בדפים קיבלו רדיוס 24 וגבול – מכוון (D-51), ויתוקן דף-דף בשלבים.
 - `FilterBar` דורס את עיצוב ה-SearchBar וה-Select ב-`sx` משלו – 3א.
 - דפי ה-auth: שדות `standard` עם label קטן קבוע מעל (D-53) עד 5א.
+
+---
+
+## שלב 2 – מעטפת (2026-11-19, opus)
+
+### מה השתנה
+- **`navConfig` אחד** (`layout/navConfig.js`, D-64): 5 קישורים ראשיים, 3 פריטי dock, מדפים + "החשבון שלי", פריטי ניהול לפי תפקיד, `isActive` (D-31). `navLinks.js` נמחק.
+- **`AppHeader`** (`layout/navbar/AppHeader.jsx`): sticky, 48px, זכוכית, 1180 פנימי; לוגו + שם + 5 קישורים (מ-md), פעמון (נקודה, D-71) ואווטאר עם chevron. מתחת ל-md: המבורגר. `variant="minimal"` (לוגו, שם, גלובוס) – מוצג מ-`AuthLayout` ולכל מי שלא מחובר (D-11, D-70). הלוגיקה ב-`useAppShell.js`.
+- **`AvatarMenu`** (272, מ-navConfig, בסדר של קומפוננטה 2): כותרת → החשבון שלי, מדפים, החשבון שלי, מתג "תצוגת מנהל" + קבוצת ניהול (עם ה-pill של בקשות התפקיד), שפת האתר (פותח את `LanguageMenu`, שיוצא עכשיו מ-`LanguageSwitcher.jsx` עם `onChosen`), התקנה, מתג "מצב כהה", התנתקות.
+- **`NavDrawer`** (מסך 19): modal מצד ההתחלה, 400px, backdrop + blur, אווטאר 80 עם gradient, badge תפקיד, אותן קבוצות + 5 הקישורים. נסגר בניווט ומעצמו מ-md (D-05, D-69).
+- **`Dock`**: זכוכית, 3 אייקונים עם gradient (SVG מהמוקאפ ב-`dockIcons.jsx`), הגדלה + tooltip בדסקטופ, תוויות במובייל, נקודה לפעיל; לא מסומן כלום ב-`/courses`. מוצג רק למחובר, לא ב-auth, באורח ובחדר מפגש (D-24, D-76).
+- **תצוגת מנהל** (D-66): `adminView.js` + `useAdminView.js` + `AdminOnly.jsx`, provider ב-`App.jsx`. הוחל על קבוצת הניהול ועל כפתור ההעלאה בארכיון.
+- **"מצב כהה"** עבר מה-header לתפריט ולמגירה כ-`role="switch"` (D-67).
+- **`PageContainer` + `pageWidth.js`**: App עוטף כל route במעטפת – 1180/1080/full, 16/24 בצדדים, 32/48 למעלה, 160 למטה (בלי dock: 32/48). `shellGeometry.js`: `HEADER_HEIGHT = 48`, `DOCK_CLEARANCE`, `DOCK_OFFSET`, `viewportBelowHeader`.
+- **64→48:** `SessionRoom`, `NotebookPage` מ-`HEADER_HEIGHT`; ב-8 דפים ה-`minHeight` הוסר (D-72). `GlobalSnackbar` מעל ה-dock (D-75).
+- **תמונות:** עמודת התמונה של הארכיון, תמונת הרקע והשטיפות של `AuthLayout` הוסרו; הכרטיס עבר ל-paper (D-73). כל 6 הקבצים ב-`public/images/` נמחקו (אף אחד לא בשימוש).
+- **שם המותג** (D-26, D-74): "קול תבונה" (he/yi), "Kol Tevuna" (en/fr/es); `check-locale-chunks.mjs` מזהה לפי `common:language.change` באותו commit; `index.html`, manifest.
+- **מחרוזות חדשות** (דרך `add-translation`, 5 שפות, yi טיוטה): `nav:mainNav`, `nav:adminView`, `nav:groups.admin`, `nav:links.upload`, `nav:accountMenu.open`/`openPending_*`, `nav:dock.{label,ask,myCourses}`. נמחקו: `nav:personal`, `nav:colorMode.toLight/toggle` (D-78).
+- טוקנים חדשים ב-`tokens.js`: `DOCK`, `SHELL`.
+- **נמחקו:** `Navbar.jsx`, `NavLinksBar.jsx`, `PersonalMenu.jsx`, `UserDrawer.jsx`, `navStyles.js`, `navLinks.js`, `Navbar.test.jsx`.
+
+### כל קישור מהניווט הישן – איפה הוא עכשיו
+ארכיון, שאל, הקורסים שלי, מפגשים, תרומה → header (md+), מגירה, ו-3 מהם ב-dock · 5 המדפים → תפריט ומגירה · `/profile` → כותרת התפריט + "החשבון שלי" + מגירה · ניהול קורסים / משתמשים / ניהול → קבוצת ניהול (תפריט + מגירה, מאחורי המתג; ב-URL תמיד) · שפה, התקנה, מצב כהה, התנתקות → תפריט ומגירה · פעמון → header בכל רוחב.
+
+### בדיקות
+- `npm run verify` ירוק (lint, כל הבדיקות, build, check:chunks).
+- חדשות: `AppHeader.test.jsx` (מחליף את `Navbar.test.jsx`: תפקידים, תפריט, מגירה = תפריט + 5, תצוגת מנהל, מצב כהה, העלאה מהתפריט, בקשות תפקיד), `Dock.test.jsx`, `navConfig.test.js`, `pageWidth.test.js`, `adminView.test.jsx`. עודכנו: `NotificationBell.test.jsx`, `accountState.test.jsx` (התנתקות מהתפריט ומהמגירה), `shellKeys.test.js`, `i18n.test.jsx`, `useMediaSession.test.js` (השם החדש).
+- **`npm run e2e` ירוק – 5/5** (journey he/en/yi, language, phone). `e2e/language.spec.js` עודכן: השפה נבחרת אחרי התחברות מתפריט האווטאר; המגירה נמדדת ב-viewport של 600px (ההמבורגר רק מתחת ל-md), נסגרת ב-Esc, והצד התהפך (עברית → right, אנגלית → left; D-05).
+- ה-e2e תפס באג שהבדיקות לא ראו: `user` שימש ב-`App.jsx` לפני שהוגדר (TDZ – כל הדפים נפלו ל-ErrorBoundary). תוקן. אין בדיקת unit שמרנדרת את `App` כולו.
+- צולם בדפדפן (1440 ו-390, עברית): header, תפריט, מגירה, dock, דף התחברות – תואם את 02/19.
+- ה-API ו-Vite כבר רצו כשהשלב התחיל (לא הופעלו על ידי השלב), ולכן לא נעצרו בסופו. Memurai רץ.
+- **אין סקריפט חדש ב-`package.json`** – אין סקיל לעדכן.
+
+### מה נשאר פתוח
+- `admin-only` על badges ו-⋯ – 3א (`MediaTile`); badge בעמוד הפריט – 4א. המנגנון: `useAdminView().showAdmin` או `<AdminOnly>`.
+- padding כפול בדפים שלא עוצבו (ה-`p: 3` הישן בתוך `PageContainer`) – כל שלב מוריד בדפים שלו (D-13). המחברת גוללת זמנית (D-72) – 5ב.
+- Breakpoint 900 ולא 768 (D-68) – לבדוק ב-8ב.
+- אייקוני האפליקציה עדיין navy; שם המותג בשרת (מיילים, דף שיתוף) – שאלה פתוחה משלב 0.
+
+---
+
+## שלב 3א – CoverArt, MediaTile, ⋯ ודף הארכיון (2026-11-19, opus)
+
+### מה השתנה
+- **`CoverArt`** (`features/MediaTile/CoverArt.jsx` + `src/utilities/coverArt.js`): 15 הפלטות והצורות של `art()` מהמוקאפ, פלטה לפי FNV-hash של `item.id` (D-19), `thumbnail_url` גובר, id ל-gradient מ-`useId`.
+- **`MediaTile`** (קומפוננטה 5) מחליף את `MediaCard` בכל מקום – דרך `MediaGrid`, ולכן גם בדף יוצר, אהבתי, שמורים, רשימה שמורה והמשך צפייה. עטיפה מרובעת, ▶ (ציור, D-02/D-80), ♥ עם pop (רק בלחיצה, מבוטל ב-reduced-motion; D-79), ⋯ (`MediaTileMenu` + `useMediaTileMenu` + `tileActions.js` טהור: הורדה לכולם; עריכה · תגיות · פרסום/הסתרה · מפריד · מחיקה רק עם הרשאה **ו**-`showAdmin` **ו**-handler – D-14/D-15; "הורדה" פותח את `DownloadMenu` – D-16), badge טיוטה/ציבורי admin-only, kicker "סוג · משך", כותרת h3 עד 2 שורות, מרצה (לחיץ לדף יוצר), תגית ראשונה. בלי מונה לייקים ובלי שורת אייקונים. תצוגה מקדימה של וידאו ב-hover נשמרה (`useVideoPreview`).
+- **לייק בגריד:** `useTileLikes` – `fetchLikedIds` פעם אחת לגריד, אותם `likeMedia`/`unlikeMedia` (D-18).
+- **`MediaGrid`:** 2/3/4 עמודות, רווחים 16/32 × 32/48 (`TILE.gap`), skeleton מרובע, "טעינת עוד" soft. מחושב בו `showAdmin` ו-likes פעם אחת לכל הגריד.
+- **דף הארכיון (02)** במבנה של החלטה 1: `PageHeader` (ברכה כ-kicker – D-88, H1 44/80, כותרת משנה, "העלאת מדיה" admin-only) → טאבים → `ArchiveHero` (D-01, D-87; `featuredItem.js` טהור) → `ArchiveToolbar` דביק ב-`top: HEADER_HEIGHT` (צ׳יפי סוג multi-select – D-03, חיפוש, מיון כצ׳יפ עם תפריט – D-84, צ׳יפ "סינון" כהה כשפתוח עם מונה – D-86) → פאנל 29 (`FilterBar` הפך לפאנל בלבד: מרצה, אורך, 2 תאריכים, ניקוי, מפריד, תגיות; בלי בורר סוג) → "כל הפריטים" + ספירה (D-34) → גריד. הכל ב-`ArchiveBrowser`, ולכן גם בדף היוצר.
+- **`FilterChip`** חדש ב-`features/` (D-85). `filterCount.js` – הספירה של הצ׳יפ "סינון", בלי הסוג.
+- **חיפוש עומק חכם (03):** שדה גדול ממורכז (D-90). `TagDrilldown`: צ׳יפים בגודל מלא, חיפוש תגית כ-pill בתחילת השורה.
+- **טוקנים:** `TILE`, `HERO` ב-`tokens.js`.
+- **מחרוזות** (דרך `add-translation`, 5 שפות, yi טיוטה): `archive:subtitle`, `allItems`, `hero.{label,kicker,listen,watch,read,details}`, `sort.button`; `media:card.{kicker,actionsFor,likeOf}`; ניסוח חדש ל-`card.publishedHint`/`draftHint` (D-83). נמחקו: `card.editDetailsOf`, `editTagsOf`, `length`, `likes_*` (D-82).
+- **נמחקו:** `features/MediaGrid/MediaCard.jsx`, `MediaCard.test.jsx`.
+- **סקיל חדש** בריפו השורש: `.claude/skills/redesign-screen/SKILL.md` – הצ׳קליסט להחלת v4 על מסך (רכיבים, טוקנים, admin-only, PageContainer, i18n, lint, בדיקות, DECISIONS/LOG). commit נפרד בריפו השורש (ענף `i18n`).
+
+### קבצים
+`src/utilities/coverArt.js` (+test), `src/components/features/MediaTile/{CoverArt,MediaTile,MediaTileMenu}.jsx`, `{useMediaTileMenu,useTileLikes,useVideoPreview,tileActions}.js`, `MediaTile.test.jsx`, `tileActions.test.js`, `features/FilterChip/FilterChip.jsx`, `features/MediaGrid/MediaGrid.jsx`, `features/SmartSearch/SmartSearch.jsx`, `pages/archive/{ArchivePage.jsx,featuredItem.js,featuredItem.test.js}`, `pages/archive/componentsArchive/{ArchiveBrowser,ArchiveGreeting,ArchiveHero,ArchiveToolbar,FilterBar,TagDrilldown}.jsx`, `filterCount.js`, `ArchiveToolbar.test.jsx`, `FilterBar.test.jsx`, `src/theme/tokens.js`, `src/locales/*/{archive,media}.json`, `src/components/a11yReview.test.jsx`, `pages/personal/PlaylistsSection.test.jsx`, `e2e/journey.spec.js`, `design/REDESIGN_V4_{DECISIONS,LOG}.md`.
+
+### בדיקות
+- `npm run verify` ירוק – 170 קובצי בדיקה, 1881 בדיקות, build, check:chunks (אזהרת lint ישנה אחת ב-`useAdminDashboardController.js`).
+- **חדשות:** `MediaTile.test.jsx` (16: kicker עם/בלי משך, כותרת ותגית אחת, בלי מונה ותיאור, תמונה מול CoverArt, פתיחה בלחיצה וב-Enter, יוצר לחיץ בלבד, לב עם `aria-pressed`, ⋯ לסטודנט/מנהל/תצוגת מנהל כבויה, טיוטה + פרסום, כל פעולה ל-handler, הורדה → `DownloadMenu`), `tileActions.test.js`, `coverArt.test.js`, `featuredItem.test.js`, `ArchiveToolbar.test.jsx`.
+- **נכתבו מחדש (מבנה, לא התנהגות):** `MediaCard.test.jsx` → `MediaTile.test.jsx` (אורך ב-kicker במקום chip עם `aria-label`); `FilterBar.test.jsx` – בדיקות הסוג והמיון עברו ל-`ArchiveToolbar.test.jsx` (המיון: `button` + `menuitemradio` במקום `combobox` + `option`), "ספירה על ה-badge" נבדקת על `activeFilterCount` ועל הצ׳יפ; הפאנל נבדק שאין בו בורר סוג. `a11yReview.test.jsx` – ה-mock עבר ל-`MediaTile` + mocks ל-`useTileLikes`/`useAdminView`. `PlaylistsSection.test.jsx` – ה-store של הבדיקה קיבל `likes` (האריח קורא אותו).
+- **e2e:** `journey.spec.js` – הפרסום נעשה דרך ⋯ של האריח (`media:card.actionsFor` עם שם השיעור) ואז `menuitem` `media:card.publish`. **`npm run e2e` ירוק – 5/5:** בריצה המלאה 4 עברו (journey en/yi עם הפרסום החדש, language, phone), וה-journey בעברית נפל בצעד הראשון (הרשמה) על "לא ניתן להגיע לשרת" – תקלת API רגעית לפני כל UI של השלב; בהרצה חוזרת (`-g "[he]"`) עבר במלואו, כולל הפרסום דרך ⋯.
+- ה-API, Vite ו-Memurai כבר רצו כשהשלב התחיל – לא הופעלו ולא נעצרו על ידו.
+- **אין סקריפט חדש ב-`package.json`** – אין סקיל קיים לעדכן.
+
+### מה נשאר פתוח
+- **לשלב 3ב:** `CollectionPage`, `PlaylistPage`, `PlaylistsSection`, `CreatorPage` כבר מציגים `MediaTile` (דרך `MediaGrid`), אבל עדיין עם הכותרות, ה-`p: 3` וה-`bgcolor` הישנים. `PlaylistsSection` עדיין סופר "3 בשורה" (`PER_ROW`) מול גריד של 4 ב-lg – יתוקן במבנה המתקפל (D-36). בדפים האישיים ⋯ = הורדה בלבד (D-14), כי לא מועברים handlers.
+- הלב באריח מול האגודל בעמוד הפריט (D-79) – להכריע ב-4א.
+- לא צולם בדפדפן בשלב הזה מעבר ל-e2e; השוואה ויזואלית מול `new-02`/`new-29` – 8ב.
+
+## שלב 3ב – 03, 04, 06, 07/28, 25
+
+- **מה השתנה:** `CollectionPage` (המשך צפייה, אהבתי, תוכן שמור) ו-`PlaylistPage` – `PageHeader` (kicker עם מונה, כותרת משנה) והסרת עטיפות `p: 3`/`bgcolor`; `PlaylistsSection` – שורות מתקפלות במקום "שלושה בשורה" והחץ "עוד" (D-36, D-92); `CreatorPage` – אווטאר גדול עם gradient, `h1` display, `BackLink` (D-93). מסך 03 כבר נעשה ב-3א (D-90) ולא נגעו בו. D-91..D-93.
+- **קבצים:** `pages/personal/{CollectionPage,PlaylistPage,PlaylistsSection,useCollectionPageController}.jsx/js`, `pages/creators/CreatorPage.jsx`, `layout/personalShelves.js` (`subtitleKey`), locales `nav.json` (+`shelfSubtitle`) ו-`personal.json` (−`more`/`noMore`/`showMore`) בחמש שפות.
+- **בדיקות:** `PlaylistsSection.test.jsx` נכתבה מחדש (מבנה: שורה מתקפלת במקום חץ ו"שלוש בשורה"; אותה התנהגות – שם, מונה, סדר, ריק, "לרשימה המלאה", שתי רשימות בלתי תלויות). `PlaylistsSectionLoading` ללא שינוי.
+- **סקריפטים:** אין שינוי ב-`package.json`.
+- **פתוח:** השוואה ויזואלית – 8ב.
+- **שער:** lint, build ו-`check:chunks` ירוקים; בריצת `verify` מלאה תחת עומס נפל מבחן אחד של `language` (timeout), שעבר בהרצה בודדת (4/4 קבצים). **`npm run e2e` ירוק – 5/5.**
+
+---
+
+## שלב 4א – עמוד שמע ווידאו: layout, נגן, מיכל הטאבים, שורת פעולות, מחברת (2026-11-19, opus)
+
+### מה השתנה
+- **`LessonHeader`** חדש (`pages/mediaView/componentsMediaView/`): `BackLink` "הארכיון" → kicker accent לפי סוג (`lesson:kicker.*`) + badge "טיוטה"/"ציבורי" admin-only (`showStatusBadge` מה-controller = `showsStatusBadge` של האריח + `useAdminView`) → H1 display (שמע 48/64, וידאו/ספר 40/56, בלי נקודה בסוף – `lessonTitle.js`) → "מרצה: X" עם הקישור לדף היוצר (D-96, D-97).
+- **`MediaViewPage`**: בלי `p: 3` ובלי MUI Grid; CSS grid של 12 – שמע 5/7 מ-md (CoverArt מרובע + כרטיס נגן | כרטיס טאבים), וידאו וספר 7/5 מ-lg (נגן + תאריך | טאבים). מתחת: מטא (תאריך בשמע), תיאור 17px, כרטיס המחברת. מדידת `panelHeight` (ResizeObserver + `stageHeightForWidth`) יצאה; לתוכן הטאבים `maxHeight: 70vh` מ-md (D-22, D-98).
+- **נגן (D-21, D-94):** `PlayerControls` עם `variant` – `"card"` לשמע (play 56 accent, פס 6px `ltr`, זמנים 13px `ltr`, שורת 36px: עוצמה, כתוביות, הגדרות = מהירות + הורדות) ו-`"overlay"` לווידאו (הבר הקיים). `MediaPlayer` לשמע = כרטיס עם ה-`<audio>` המוסתר והכתובית בתוכו; לווידאו stage 16:9 ברדיוס 28 עם `SHADOW.player`. המילוי = accent בשניהם (במקום `mediaTypeAccents`). `seekOnReady`, `onProgress` (שמירת מיקום), `seekTo` דרך ref, `useMediaSession`, `captionsOn` – לא זזו. `stageGeometry.js` + בדיקתו נמחקו.
+- **`MediaInsightsTabs`:** רק המיכל – בלי `fullWidth`, ה-theme מצייר וגולל; prop `contentMaxHeight` (D-101). תוכן הפאנלים לא נגע (4ג).
+- **`MediaActionsBar` (D-99):** pills `soft` מיושרים להתחלה, אייקון לפני התווית; "לייק" `tinted-success` כשלחוץ; שמירה + caret הרשימות ב-pill אחד. משותף לחלון המקור במחברת.
+- **לב (D-95):** `likeIcons` → לב (עמוד הפריט, מדף "התוכן שאהבתי" במגירה; האריח כבר היה לב). סוגר את D-79.
+- **`LessonNotebook`, `CourseTrackBar` (D-100):** כרטיסי `Paper` בסגנון החדש; כותרת display 26, כפתורים soft/primary, מונה כ-`StatusBadge`, מצב ריק טקסט 15px.
+- **מחרוזות** (דרך `add-translation`, 5 שפות, yi טיוטה): `lesson:backToArchive`, `lesson:kicker.{audio,video,text}`. לא נמחקו מפתחות (כל הקיימים עדיין בשימוש).
+- **סקיל:** `redesign-screen` קיבל שורות ל-`LessonHeader` ולשני ה-variants של הנגן (commit נפרד בריפו השורש, ענף `i18n`).
+
+### קבצים
+`src/components/pages/mediaView/{MediaViewPage.jsx,MediaViewPage.test.jsx,useMediaViewPageController.js}`, `componentsMediaView/{LessonHeader.jsx,lessonTitle.js,lessonTitle.test.js,MediaInsightsTabs.jsx,MediaActionsBar.jsx,LessonNotebook.jsx,CourseTrackBar.jsx}`, `src/components/features/MediaPlayer/{MediaPlayer.jsx,PlayerControls.jsx,MediaPlayer.test.jsx}` (−`stageGeometry.js`, −`stageGeometry.test.js`), `src/components/layout/personalShelves.js`, `src/locales/*/lesson.json`, `design/REDESIGN_V4_{DECISIONS,LOG}.md`.
+
+### בדיקות
+- **נכתבו מחדש (מבנה, לא התנהגות):** `MediaPlayer.test.jsx` – לשמע: "stage 16:9 עם בר ממורכז" → "כרטיס בלי stage", האלמנט 1×1 נמצא לפי `data-testid`, הבר "לא נעלם" → הפקדים לא נעלמים; צבע ההתקדמות → accent בשני הסוגים (במקום כתום/כחול). נוספו: הכרטיס מציע play/מיקום/זמנים/עוצמה/הגדרות, מהירות מתפריט הכרטיס, רדיוס 28 לווידאו. `MediaViewPage.test.jsx` – עטוף ב-`MemoryRouter` (ה-BackLink); נוספו: header (קישור לארכיון, kicker, H1 בלי נקודה, badge רק עם `showStatusBadge`, "ציבורי"), עטיפה רק לשמע. כל 25 הבדיקות הקיימות עברו בלי שינוי (תוויות לייק/שמירה, caret, טאבים, תאריך).
+- **חדשה:** `lessonTitle.test.js`. **נמחקה:** `stageGeometry.test.js` (הפונקציה יצאה).
+- `SourcePreviewDialogBookmarks`, `LessonNotebook*`, `SaveMenu*`, `ShareDialogActions` – עברו בלי שינוי.
+
+- **`npm run e2e` ירוק – 5/5** בריצה אחת (journey he/en/yi – כולל heading בשם השיעור, `lesson:actions.share` והקישור הציבורי בעמוד החדש; language; phone). ה-e2e לא מנגן מדיה; ניגון, הסתרת הבר בווידאו ו-seek נבדקו ביחידה ובדפדפן.
+- נבדק בדפדפן (1510px, עברית, מנהל): שמע (`/media/100`) – עטיפה, כרטיס נגן עם כתובית, טאבים עם גלילה פנימית, שורת פעולות, מטא, מחברת; וידאו (`/media/46`, טיוטה) – badge, נגן ברדיוס 28, ניגון והסתרת הבר, תאריך מתחת לנגן. מובייל לא צולם (חלון הדפדפן לא השתנה בגודל) – העמודות נערמות ב-xs דרך `gridTemplateColumns`.
+- ה-API, Vite ו-Memurai כבר רצו כשהשלב התחיל – לא הופעלו ולא נעצרו על ידו. **אין סקריפט חדש ב-`package.json`.**
+
+### מה נשאר פתוח
+- **4ג:** תוכן הטאבים (סיכום: נקודות מפתח כרשימה, תגיות מוצעות בקופסת `fill-2`; פרקים; תמלול; הערות; דיון; `ChatPane`). המיכל כבר נותן `maxHeight` וגלילה – לא להוסיף גלילה פנימית נוספת בפאנל.
+- **4ב:** ענף `isText` כבר ב-layout של 7/5 מ-lg עם `LessonHeader` (kicker "ספר", H1 40/56) ותאריך 13px מתחת למציג; `TextViewer` עצמו, הקישור "פתיחה בכרטיסייה חדשה" וכפתור "הפקת סיכום מחדש" – 4ב.
+- `mediaTypeAccents` עדיין בשימוש במחברת (`RichNoteEditor`, `BookmarksSidebar`) – 5ג.
+- השוואה מול `new-20`/`new-26` במובייל – 8ב.
+
+---
+
+## שלב 4ג – תוכן הטאבים: סיכום, פרקים, תמלול, הערות, דיון + ChatPane (2026-11-19, sonnet)
+
+### מה השתנה
+- **סיכום (20):** `AISummaryPanel` – H3 display 24, פסקה 16 / 1.9 ב-`ink2`, נקודות מפתח כרשימה עם נקודת accent של 6px (לא chips), כותרות h4 18/800, בלי Divider; `AiTagSuggestions` – קופסת `fill-2` (D-105).
+- **פרקים (21):** `ChaptersPanel` (D-106).
+- **תמלול (22):** `SegmentedControl` במקום `ToggleButtonGroup` ב-`MediaInsightsTabs`; `FollowAlongTranscript` עם `<mark>` ו-`surface.cue` (D-104); `TranscriptEditor` – כותרת display 24 ופסקאות 16 / 1.9. טוקן `cue` ב-`tokens.js`/`theme.js`.
+- **הערות (23):** `NotesPanel` – כותרת display 24, כפתור "שמור" primary בלי אייקון. הרשימה, העריכה, שלושת סוגי העוגנים – ללא שינוי.
+- **דיון (24):** `AIDiscussionPanel` עם `SegmentedControl` לשלושת המצבים; `ChatPane` (D-107). `SmartSearchPane` ו-`HistoryPane` לא שונו (כרטיסי Paper קיימים נראים נכון בסגנון החדש).
+- לא נוסף מיכל גלילה; לא נוספו או נמחקו מחרוזות.
+- החלטות: D-102 עד D-107.
+
+### בדיקות ושער
+- בדיקות קיימות עברו בלי שינוי (כפתורי `aria-pressed` נשמרו – D-103). נוספה בדיקה אחת: נקודות מפתח כ-`ul`/`li` (`AISummaryPanel.test.jsx`).
+- **`npm run verify` ירוק** – 170 קבצים + הבדיקה החדשה, build, check:chunks.
+- **`npm run e2e`:** ריצה ראשונה 4/5 – ה-journey בעברית נפל בהרשמה (נשאר ב-`/sign-up`, לפני מסך שעוצב מחדש); ריצה חוזרת של הספק לבדו – עברה. API ו-Vite כבר רצו, לא הופעלו ולא נעצרו.
+- **פתוח:** לא צולם בדפדפן; השוואה מול `new-20..24` ובדיקת dark/מובייל – 8ב. `ChatPane` ב-/ask לא נבדק חזותית (5ב).
+
+---
+
+## שלב 4ב – עמוד ספר (27) (2026-11-19, sonnet)
+
+### מה השתנה
+- `PdfViewer`: מיכל `divider` ברדיוס 20 ו-padding 12; `PdfToolbar`: בלי כרטיס, ltr, ממורכז; `PdfPage`: כרטיס לבן, צל `cover`, רדיוס 12 (D-108).
+- `TextViewer`: הקישור "פתיחה בכרטיסייה חדשה" 13px accent עם אייקון; iframe ברדיוס 12. `AISummaryPanel`: "הפק מחדש" `soft` (D-109). אין מחרוזות חדשות ואין מפתחות שנמחקו.
+- נבדק בקוד: בספר שלוש הלשוניות בלבד (סיכום, הערות, דיון); סימניות דף, הודעת איכות טקסט והרשאת ההפקה – ללא שינוי. החלטות: D-108, D-109.
+### קבצים
+`componentsMediaView/{PdfViewer,PdfToolbar,PdfPage,TextViewer,AISummaryPanel}.jsx`.
+### פתוח
+`npm run verify` ירוק; `npm run e2e` 5/5. לא צולם בדפדפן; השוואה מול `new-27`, dark ומובייל – 8ב.
+
+---
+
+## שלב 5א – התחברות, הרשמה, איפוס סיסמה (01, 30, 31) (2026-11-19, sonnet)
+
+### מה השתנה
+- `AuthLayout`: רקע שני גרדיאנטים (בהיר וכהה, `AUTH` ב-`tokens.js`), כרטיס 440 ברדיוס 32 עם blur וצל `auth`, לוגו כהה 48, H1 display 40, `intro` אופציונלי. כבר לא כופה theme בהיר (D-110). ה-header המינימלי משלב 2 בשימוש, ואין dock (`App.jsx` כבר לא מציג אותו ב-`AUTH_PATHS`).
+- שדות רגילים מה-theme, כפתור מלא, מפריד "או", כפתורי ספקים outline עם ריבוע לוגו (D-111, D-112); הרשמה עם `SegmentedControl` ו-`*` על השדות הנדרשים (D-113); איפוס/אימות/הסרה באותו כרטיס (D-114). אין מחרוזות חדשות ואין מפתחות שנמחקו.
+### קבצים
+`pages/auth/{AuthLayout,authShared,SocialSignIn,SignIn,SignUp,ForgotPassword,ResetPassword,VerifyEmail,Unsubscribe}.jsx`, `theme/tokens.js` (`AUTH`).
+### בדיקות
+- `authPagesFlow.test.jsx`: "sign-in/sign-up offers Google, then Apple, then LinkedIn" read each button's `textContent`, which now includes the logo square's "G" / "in". The helper takes the name without `aria-hidden` children; the assertion (three providers, same order, same words) is unchanged. `ResetPassword.test.jsx`, `Unsubscribe.test.jsx` passed untouched.
+- `npm run verify`: lint, whole suite (1891), build and `check:chunks` green after that one fix. `npm run e2e`: 5/5 (journey he/en/yi, language, phone).
+### על ה-flake
+בריצת e2e הראשונה נפלו כל 5, לא בגלל `/sign-up` אלא כי שרת ה-Vite שרץ כבר הגיש את `SocialSignIn.jsx` כמודול ריק (נקרא באמצע כתיבה) – "does not provide an export named 'default'", והדף לא עלה. `touch` על הקבצים תיקן, והריצה השנייה ירוקה. השינוי שלנו לא גרם ל"לא ניתן להגיע לשרת". אם זה חוזר אחרי כתיבת קבצים – קודם `curl` על המודול.
+### פתוח
+לא צולם בדפדפן; השוואה מול `new-01/30/31`, dark, LTR ומובייל – 8ב. אימות הטלפון (`PhoneCard`) נשאר ל-5ב. D-110 עד D-114 (המספור ממשיך אחרי D-109 שכבר נתפס בשלב 4ב).
+
+---
+
+## שלב 5ב – הורדות, שאל את הארכיון, תרומה, החשבון שלי (08, 09, 12, 18) (2026-11-19, sonnet)
+
+### מה השתנה
+- הורדות: `PageHeader` + `EmptyState`, שורות עם רדיוס 16 וכפתור השמעה accent (D-118).
+- `/ask`: בלי כרטיס עוטף, `PageHeader` עם "שיחה חדשה"/"העתק שיחה" כ-`soft`, והקלט דביק מעל ה-dock (`ChatPane` קיבל `hideActions` ו-`inputBottom`; D-115).
+- תרומה: `PageHeader` ממורכז עם kicker, `SectionCard` 560, `SegmentedControl`, גריד סכומים, מנעול (D-116). נוסף `donate:kicker` בחמש שפות.
+- החשבון שלי: כרטיסי `SectionCard`, אווטאר 112 עם גרדיאנט, תגיות `StatusBadge`, שורות התראות, `PhoneCard` ובקשת ההרשאה באותה שפה, סיסמה בשלוש עמודות (D-117). כל ההגדרות הקיימות נשארו. הקבצים: `pages/{downloads,askArchive,donate,profile}/*`, `features/ChatPane/ChatPane.jsx`, `features/Avatar/AvatarEditor.jsx`, `locales/*/donate.json`.
+- שלב 5ב בפועל לא כלל את 05 (המחברת) – זה 5ג.
+### בדיקות / e2e
+`npm run verify` ירוק (בלי שינוי בבדיקות הקיימות – תוויות, תפקידים ומתגים לא השתנו); `npm run e2e` 5/5, כולל `phone.spec.js`.
+### פתוח
+לא צולם בדפדפן; השוואה מול `new-08/09/12/18`, dark, LTR ומובייל – 8ב. ל-"סכום מותאם" אין משבצת בגריד (D-116).
+
+---
+
+## שלב 5ג – המחברת שלי (05) (2026-11-21, opus)
+
+### מה השתנה
+- **`NotebookPage`:** בלי עטיפה משלו (`p: 3`, `minHeight`, גובה קבוע ו-`overflow` יצאו). `PageHeader` ← CSS grid של 12 מ-md, הערות 7 / צד 5; בטלפון עמודה אחת והרשימה ראשונה כמו קודם. הדף גולל; מ-md הסרגל דביק בראש עמודת ההערות ועמודת הצד דביקה עם גלילה פנימית (D-119, מחליף את D-37).
+- **`NotebookHeader`:** `PageHeader` עם "הערה חדשה" (primary, בלי הגרדיאנט התכלת) ו"ייצוא" (`soft`) – אותו תפריט (PDF, Word, פיצול) ואותו tooltip. הסרגל יצא ממנו.
+- **`NoteToolbar`:** כרטיס עם כפתורים עגולים של 36, פעיל = accent על `accentSoft` (D-120).
+- **`NoteCard` + `RichNoteEditor`:** כרטיס סקשן, כותרת display 30, גוף 16 / 1.9 `ink2` בלי מסגרת משלו, כף כמו במוקאפ (D-121); הפניות למקור ירוקות דרך `features/Notes/noteStyles.js` (D-122). לוגיקת העורך – הדבקה, גרירה, שינוי שם, מחיקת אובייקט, פקודות, טיוטות – לא נגעה; השינוי בעורך הוא ה-`sx` בלבד (+ `common.white` במקום `#fff`).
+- **`NotesIndex`:** `SectionCard` עם `SearchBar` + צ׳יפ "בחירה מרובה" (= סמן הכל, שלושה מצבים) ומחיקת הנבחרות לידו; שורות 16 רדיוס, פעילה `accentSoft` + טבעת (D-123, D-124).
+- **`BookmarksSidebar`:** כרטיס "הסימניות שלי" נפרד: kicker סוג ← שם שיעור ← צ׳יפים עם `placeShortLabel` (וההערה, כשנכתבה); לחיצה וגרירה כמו קודם, שלושת העוגנים (D-125).
+- **`NotesColumn`:** בלי גלילה משלו, `gap` 24; מצב ריק במסגרת המקווקוות עם אריח האייקון.
+- **כרטיס המחברת בעמוד השיעור** (`LessonNotebook`) לא שונה – מקבל את כל זה דרך `NoteCard`/`NoteToolbar` (D-126).
+- `mediaTypeAccents` נמחק מ-`utilities/constant.js` (המשתמשים האחרונים היו העורך והסימניות); `iconForBookmark` נשאר ב-`mediaIcons.js` בלי משתמש (נבדק). **אין מחרוזות חדשות ואין מפתחות שנמחקו** – כל התוויות כבר היו קיימות (`notebook:title`, `newNote`, `export.*`, `index.*`, `bookmarks.*`).
+- החלטות: D-119 עד D-126.
+
+### קבצים
+`src/components/pages/notebook/NotebookPage.jsx`, `componentsNotebook/{NotebookHeader,NotesIndex,NotesColumn,BookmarksSidebar}.jsx`, `src/components/features/Notes/{NoteCard,NoteToolbar,RichNoteEditor}.jsx`, `features/Notes/noteStyles.js` (חדש), `features/Notes/NoteCard.test.jsx`, `src/utilities/{constant,mediaIcons}.js`, `design/REDESIGN_V4_{DECISIONS,LOG}.md`.
+
+### בדיקות
+- **נכתבה מחדש (מבנה):** `NoteCard.test.jsx` "an unticked one is not" חיפש `2px` בצל – צל הכרטיס החדש (`0 1px 2px …`) מכיל אותו. שתי הבדיקות של הטבעת מחפשות עכשיו `0 0 0 2px` (אותה התנהגות: מסומנת = טבעת, לא מסומנת = בלי).
+- **תוקן בקוד, לא בבדיקה:** `NotebookLightList` ("nothing is saved for a note whose body has not arrived") לוחץ על המופע הראשון של שם ההערה – "שנבחרה מהרשימה". בטיוטה הראשונה עמודת ההערות היתה ראשונה ב-DOM, והלחיצה נפלה על כותרת הכרטיס. עמודת הצד חזרה להיות ראשונה ב-DOM (כמו קודם) ומצוירת שנייה מ-md ב-`order` – גם סדר ה-Tab נשמר.
+- כל שאר בדיקות המחברת, `features/Notes/*`, `LessonNotebook*`, `SourcePreviewDialog*` עברו בלי שינוי (תוויות, תפקידים, `getByText` של הערת סימנייה).
+- **`npm run verify` ירוק** – lint, 170 קבצים / 1891 בדיקות, build, `check:chunks`.
+- **`npm run e2e` ירוק – 5/5** בריצה אחת (journey he/en/yi, language, phone). אף spec לא עובר במחברת; ה-journey עובר בעמוד השיעור, שכרטיס המחברת שבו משתמש ב-`NoteCard`. API ו-Vite כבר רצו – לא הופעלו ולא נעצרו. **אין סקריפט חדש ב-`package.json`.**
+
+### פתוח
+- לא צולם בדפדפן (הדפדפן לא היה מחובר לחשבון); השוואה מול `new-05`, dark, LTR ומובייל – 8ב. לבדוק שם במיוחד: הסרגל הדביק מעל כרטיסים שגוללים מתחתיו, ועמודת הצד הדביקה כשהיא ארוכה מהחלון.
+- D-123 (צ׳יפ = "סמן הכל", תיבות הסימון נשארות) ו-D-125 (ההערה בתוך צ׳יפ הסימנייה) סוטות מהמוקאפ כדי לא לאבד פונקציה – לסקירה.
+
+---
+
+## שלב 6 – 10, 11, 13/14, 15 (2026-11-21, sonnet)
+
+### מה השתנה
+- **הקורסים שלי (10):** `PageHeader` (ספירה כ-subtitle, "הצטרפות לקורס" ב-actions), `EmptyState`, כרטיסי קורס ברדיוס 24 עם אריח אייקון `accentSoft` ו-`StatusBadge`ים; ממתינים לאישור – כרטיס עם כפתור `soft`.
+- **ניהול קורסים (13/14):** כותרת "ניהול קורסים" בחמש שפות, `PageHeader`, `SegmentedControl`, `EmptyState`, כרטיס קורס עם ריבוע כתום ו-badges, באנר "דף הקורס", קופסת קוד כהה, "התלמידים שלי" ככרטיס (D-127..D-129). אין פריט ניווט מסומן (`isActive`).
+- **דף קורס (15):** `BackLink`, `PageHeader`, שורות שיעור וכרטיסי התקדמות/"מי שמע מה" ברדיוס חדש (D-130).
+- **מפגשים (11):** `PageHeader`, `EmptyState` (מיקרופון), `SessionCard` (D-131). החדר החי לא נגע – 8ב.
+- הוסרו כל עטיפות `p: 3`/`bgcolor`/`maxWidth` של הדפים.
+- **קבצים:** `pages/courses/{MyCoursesPage,CoursesPage,CourseTrackPage}.jsx`, `componentsCourses/{JoinCodePanel,MyStudents,CourseReport}.jsx`, `pages/sessions/SessionsPage.jsx`, `locales/*/courses.json` (`title`).
+
+### פתוח
+לא צולם בדפדפן; השוואה מול `new-10/11/13/14/15`, dark, LTR ומובייל – 8ב, יחד עם חדר המפגש.
+
+---
+
+## שלב 7 – 16, 17 (2026-11-21, sonnet)
+
+### מה השתנה
+- **רכיב חדש:** `features/DataTable/{tableSx.js,TableCard.jsx}` – הטבלה של רכיב 15 (D-132).
+- **משתמשים (16):** `PageHeader` עם חיפוש ו"הוספת משתמש" בצד, טבלה בכרטיס עם גלילה פנימית, `StatusBadge` לתפקיד/סטטוס, כפתורי פעולה עגולים 36px, שורה לא פעילה `opacity .5`; בקשות אישור על `fill2` (D-133).
+- **לוח בקרה (17):** `PageHeader`, 3 כרטיסי KPI עם display, תתי-כרטיסים `fill2`, סכום AI/SMS ב-display accent, טבלאות תקלות/עלות/תרומות בסגנון המשותף, `SegmentedControl` לתרומות, כפתורי רענון/הרצה מחדש `soft` (D-134). נמחקו עטיפות `p: 3`. אין מחרוזות חדשות.
+- **קבצים:** `pages/users/{UsersPage,componentsUsers/*}`, `pages/admin/{AdminDashboard,componentsAdmin/{StatsCards,QueueStatus,AiUsagePanel,SmsUsagePanel,PipelineTrouble,DonationsLedger,TagProposals}}`.
+
+### בדיקות / e2e / פתוח
+`npm run verify` ירוק (lint, 170 קבצים / 1891 בדיקות, build, `check:chunks`) – אף בדיקה לא נכתבה מחדש. `npm run e2e` ירוק 5/5 (אישור המרצה ב-`/users` עובד, האימייל פעם אחת). אין סקריפט חדש. לא צולם בדפדפן – השוואה מול `new-16/17`, dark, LTR ומובייל – 8ב. `SystemHealth` לא שונה.
+
+## שלב 8א – צילומים (2026-11-21)
+
+`npm run screens` (חדש; `playwright.screens.config.js` + `e2e/screens/screens.spec.js`, לא חלק מ-`npm run e2e`): מנהל חד-פעמי מאותם fixtures של ה-e2e, קורס, שיעור שמע מפורסם, וידאו כטיוטה (ffmpeg), ספר PDF, לייק, שמירה, רשימה והערה. 77 צילומים ב-`design/qa-shots/<lang>-<mode>-<width>/NN-name.png` (בתיקייה ב-`.gitignore`) ו-`INDEX.md`: עברית בהיר 1440 ו-390 (31 ו-30; המגירה 19 רק ב-390), אנגלית בהיר 1440 (7) + מגירה ב-390, עברית כהה 1440 (8). אפס מסכים שלא הושגו.
+- **מגבלות לתשומת לב 8ב:** שום דבר לא תומלל או סוכם, לכן לשוניות 20–24 מראות את מצב "טרם עובד" ולא תמלול/פרקים/סיכום אמיתיים; דף הארכיון, `/users` ולוח הבקרה מציגים גם נתוני dev אמיתיים. צילום fullPage מראה את ה-dock הקבוע באמצע הדף, ואת המגירה (19) כשהדף מאחוריה ארוך.
+- הסקיל `run-tests` עודכן (סקריפט `screens`, בריפו השורש). אין שינוי בקוד האפליקציה.
+
+## שלב 8ב – השוואה חזותית ותיקונים (2026-11-21, sonnet)
+
+### מה נעשה
+- השוואת `design/qa-shots/he-light-1440` ו-`he-light-390` מול `new-NN`, צילומי `en-light-1440` (הִשתקפות LTR) ו-`he-dark-1440` (קריאות וניגודיות). נמדד גם גלישה אופקית בכל צילום (`screens.spec.js` רושם "horizontal scroll" ב-INDEX): אפס גלישות ב-85 הצילומים. נוספו צילומי 800 ו-760 (משני צדי 768).
+- **D-135:** `md` = 768 (המפרט) במקום 900. D-136..D-139: ראו DECISIONS.
+- **תוקן:** לוח בקרה (כרטיס לבן + שורות `fill-2`, תקינות עם `StatusBadge`, כותרת משנה חדשה `admin.subtitle` ב-5 שפות, תיקון כיווניות (bidi) של סיבה ותאריך בטבלת התקלות, `minWidth` שמנע עמוד של 10,000px במובייל); תפקיד מנהל באינדיגו וגובה שורה בטבלת משתמשים; אייקון מחיקה נייטרלי בניהול קורסים.
+- **קבצים:** `theme/theme.js`, `pages/admin/{AdminDashboard,componentsAdmin/{QueueStatus,SystemHealth,PipelineTrouble}}`, `pages/users/componentsUsers/UsersTableContent.jsx`, `pages/courses/CoursesPage.jsx`, `locales/*/admin.json`, `e2e/screens/screens.spec.js`, סקיל `run-tests` (שורת `screens`: 800/760 ובדיקת הגלישה).
+- **בדיקות:** אף בדיקה לא נכתבה מחדש. `npm run verify` ירוק (1891 בדיקות; `PdfViewer.test` נכשל פעם אחת רק תחת עומס ועבר לבד, 16/16). e2e: ראו שורה אחרונה.
+
+### החלטות א׳–י (איפה סוטים מהמוקאפ)
+1 מבנה הארכיון – תואם (02, 29). 2 אין רשימת 5 הקישורים – תואם (19). 3 `navConfig` יחיד לאווטאר ולמגירה, אותם שמות – תואם. 4 "ניהול קורסים" ואין פריט מסומן – תואם (13/14). 5 header מינימלי ללא dock ב-01/30/31 – תואם. 6 אין נקודה בסוף כותרת (נבדקו כל מפתחות he) – תואם; כותרות משנה כן בנקודה, כמו במוקאפ. 7 רוחבים 1180/1080 – תואם (`pageWidth.js`; הצילומים אומתו). 8 תפריט ⋯ – תואם. 9 טאבים לפי סוג (ספר 3, שמע/וידאו 5) – תואם (27, 26). 10 Dark mode נשאר, המתג בתפריט ובמגירה – תואם, קריא בכל הצילומים.
+
+### טבלה לפי מסך (1440 / 390)
+| מסך | תוצאה |
+|---|---|
+| 01 התחברות, 30 הרשמה, 31 איפוס | תואם (header מינימלי, כרטיס 440) |
+| 02 ארכיון, 03 חיפוש חכם | תואם; hero מציג את הפריט האחרון (נתונים אמיתיים) |
+| 29 פאנל סינון | תואם; פער ידוע: אייקון לוח שנה native בשדות תאריך (D-139) |
+| 04 המשך, 06 אהבתי, 07/28 שמורים, 25 יוצר | תואם |
+| 05 מחברת | תואם; "הסימניות שלי" בעמודת הצד (החלטת שלב 5ג) |
+| 08 הורדות, 10 הקורסים שלי, 11 מפגשים, 12 תרומה | תואם |
+| 09 שאל את הארכיון | תואם (מצב ריק; הכפתורים והבועות רק עם שיחה) |
+| 13/14 ניהול קורסים | תוקן: מחיקה נייטרלית (D-138); פער ידוע: "דף הקורס" ככפתור (D-139) |
+| 15 דף קורס | תואם |
+| 16 משתמשים | תוקן: מנהל באינדיגו, שורה נמוכה (D-137) |
+| 17 לוח בקרה | תוקן (D-136); במובייל טבלאות גוללות בתוך הכרטיס |
+| 18 החשבון שלי | תואם (כרטיסי טלפון ו-SMS נוספו כפונקציה קיימת) |
+| 19 מגירה | תואם (בצילום fullPage העמוד מאחוריה ארוך) |
+| 20–24 שיעור שמע | תואם; 21–24 במצב "טרם עובד" (לא תומלל) |
+| 26 וידאו | תואם; בקרי וידאו נייטיביים (D-94) |
+| 27 ספר | תואם |
+| en-light (01, 02, 05, 09, 16, 18, 20) | הצילומים מתהפכים נכון (header, עמודות, חצים); כותרת תוכן בעברית נשארת בכיוון התוכן (D-139) |
+| he-dark | קריא, ללא בעיות ניגודיות |
+| 800 / 760 | נראה תקין בשני הצדדים של 768 (D-135) |
+
+### פתוח ל-8ג
+סקירת הקוד, חדר המפגש החי, תיעוד, וה-flake של e2e (ראו הנחיית השלב).
+
+**e2e:** 5/5 ירוק. מצאתי ותיקנתי פגם משלב 8א: `playwright.config.js` (`testDir: "e2e"`) אסף גם את `e2e/screens/screens.spec.js`, ולכן `npm run e2e` הריץ גם את הצילומים ונכשל בטיימאאוט (180 שניות); נוסף `testIgnore: "**/screens/**"`.
+
+## שלב 8ג – ניקוי, תיעוד וסיכום (2026-11-21, sonnet)
+
+### מה נעשה
+- **סריקה (D-140, D-141):** `WHITE`, `ROOM`, `CARD_SHELL_SX` ב-`tokens.js`; קליפת הכרטיס אחת ב-`SectionCard`, `NoteCard`, כרטיס הנגן ושני כרטיסי הניהול; אין `grey.*` בקוד; `ErrorBoundary` ו-`stripeJs` בצבעי v4; `OfflinePlayer` עם `SegmentedControl`; שלושה `Chip` של סטטוס ל-`StatusBadge`; כותרת האורח ב-`PageHeader`; `p: 3` של `SessionRoom` ו-`64px` של `AvatarMenu` הוסרו; פעמון תמיד קו.
+- **מסכים שלא הושוו (03, 04, 06, 07/28, 08, 10, 11, 15, 25, 30, 31):** נבדקו 03, 04, 11, 25 מול `new-NN` בפירוט; השאר נבדקו בסבב ה-screens האחרון. נמצא: הפעמון (תוקן). לא תוקן ביודעין: 04/06/07/25 במוקאפ ברוחב 1080 ואצלנו 1180 (החלטה 7 במפרט); בלשונית החיפוש החכם יש כותרת משנה שהמוקאפ אין (פונקציה קיימת, ללא נזק).
+- **חדר מפגש (D-142):** צבעים בלבד.
+- **e2e (D-143):** הסיבה נמצאה: `node --watch` הפעיל מחדש את ה-API באמצע בקשת ההרשמה. נוסף ניסיון חוזר בטוח ב-`journey.spec.js`.
+- **תיעוד (בריפו השורש):** `CONTRIBUTING.md` (טבלת רכיבים וטוקנים, `PageContainer`, תצוגת מנהל, `npm run screens`), `ARCHITECTURE.md` ("Design system (v4)"), `CLAUDE.md` (כלל הטוקנים).
+- **בדיקות:** `npm run verify` ירוק (170 קבצים, 1891 בדיקות; בהרצה מלאה במכונה עמוסה 10 קבצים נפלו על timeout של ה-worker, ובהרצה עם `--maxWorkers=3` הכל עבר), `npm run e2e` ירוק 5/5.
+
+## סיכום לאינון
+
+### מה נעשה, לפי שלב
+- **0** מיפוי, `_tokens.css`, החלטות על הסתירות. **1** theme, טוקנים, פונטים, רכיבי בסיס. **2** מעטפת: `navConfig`, header 48, אווטאר, מגירה, dock, תצוגת מנהל, מצב כהה, `PageContainer`.
+- **3א/3ב** `CoverArt`, `MediaTile`, תפריט ⋯, הארכיון ומסכי 03/04/06/07/25. **4א/4ג/4ב** עמוד שמע/וידאו/ספר, נגן בכרטיס, טאבים, `ChatPane`.
+- **5א/5ב/5ג** התחברות/הרשמה/איפוס, הורדות, שאל את הארכיון, תרומה, פרופיל, המחברת. **6** קורסים, מפגשים, דף קורס. **7** משתמשים ולוח בקרה.
+- **8א/8ב** צילומים (`npm run screens`) והשוואה ותיקונים. **8ג** ניקוי, תיעוד, סיכום.
+
+### איך לראות
+- ענף `redesign-v4` בריפו הקליינט. שלושה טרמינלים כרגיל (`npm run dev` ב-server, `npm run workers`, `npm run dev` ב-client), ואז http://localhost:5173.
+- `npm run screens` בקליינט מצלם את כל המסכים ל-`design/qa-shots/` (עם `INDEX.md`), והמוקאפים ב-`design/redesign-v4/new-NN-*.png`.
+- מתג "תצוגת מנהל" בתפריט האווטאר, והמצב הכהה לידו.
+
+### ההחלטות שכדאי לך לסקור (מתוך `REDESIGN_V4_DECISIONS.md`)
+1. **D-13** רוחב לפי route בטבלה אחת (`pageWidth.js`), וכל דף בלי עטיפה משלו.
+2. **D-135** `md` = 768 כמו במפרט במקום 900 של MUI.
+3. **D-50/D-51** `shape.borderRadius` נשאר 4, כל רדיוס דרך `RADIUS`; `Paper` ברמה 1 הוא הכרטיס.
+4. **D-07** תצוגת מנהל היא העדפת תצוגה, לא הרשאה, וכלי המרצה בדף שיעור לא מאחוריה.
+5. **D-94** נגן שמע בכרטיס ווידאו כבמה 16:9, שניהם דרך `PlayerControls`; בקרי הווידאו הנייטיביים נשארו.
+6. **D-45** גרידים ב-CSS grid ולא ב-`Grid` של MUI (מרג׳ין שלילי בצד הלא נכון).
+7. **D-136/D-137** לוח בקרה בכרטיס לבן עם שורות `fill2`; תפקיד מנהל באינדיגו.
+8. **D-140** `WHITE`/`ROOM`/`CARD_SHELL_SX`, ומה שנשאר קשיח במכוון (פלטת ההדגשה של המשתמש, קאברים).
+9. **D-141** תשעת מצבי הריק הקטנים נשארו שורת טקסט ולא `EmptyState`.
+10. **D-143** הסיבה ל-flake של ה-e2e והעצה להריץ את ה-API עם `npm start`.
+
+### פערים ידועים
+- שדות תאריך בפאנל הסינון עם אייקון לוח שנה native (D-139); "דף הקורס" ככפתור (D-139); בקרי וידאו נייטיביים.
+- 04/06/07/25 ברוחב 1180 ולא 1080 של המוקאפ (החלטה 7).
+- שלא נבדקו בעין בכל שלב: מסכי 05, 08, 10, 15 ו-06/07 מול המוקאפ בפירוט פיקסלים, ומובייל של חדר המפגש החי.
+- אזהרת lint אחת ישנה (`useAdminDashboardController`, `load` ב-deps), לוגיקה.
+- שום דבר לא תומלל בנתוני הצילום, ולכן לשוניות התמלול והפרקים צולמו במצב "טרם עובד".
+
+### שאלות פתוחות אליך
+- **שם האתר במיילים:** ההודעות מהשרת עדיין נוסחו בשם הישן של האתר; ה-UI עבר ל"קול תבונה" (D-26) והשרת לא שונה.
+- **יידיש:** כל המחרוזות בקבצי ה-`yi` הן טיוטה (`_draft`) עד שדובר יעבור עליהן.
+- **ה-flake של ה-e2e:** מה מפעיל מחדש את `node --watch` כשאיש לא ערך קובץ? (D-143). עד אז: `npm start` לפני `npm run e2e`.
+- Memurai נעצר כל 10 ימים (רישיון Developer), ועבודות שנתקעו בתור דורשות להפעיל אותו מחדש.
+
+### מסלול מיזוג מוצע
+- ברפו הקליינט `main` כבר מכיל את `i18n` (נמזג), וגם את PR #24 (`redesign-v4` כפי שהיה בשלב 1). ל-`redesign-v4` חסרים 3 קומיטים מ-`main`, ולכן **קודם למזג `origin/main` לתוך `redesign-v4`** (צפוי נקי או כמעט), להריץ `npm run verify` ו-`npm run e2e`, ואז PR ל-`main`.
+- בשרת: `i18n` כבר ב-`main`, ואין שם שינויים בעבודה הזו.
+- בריפו השורש: `i18n` מקדים את `main` ב-5 קומיטים (מסמכים וסקילים) ו-`main` מקדים אותו ב-2, ולכן למזג `main` לתוך `i18n` ואז PR. לא בוצע מיזוג.
+
+## אחרי הריצה – מסכי ההתחברות לעיצוב הקודם (2026-11-22)
+לבקשת אינון: דפי ה-auth שוחזרו למצב שלפני v4 (D-144). קבצים: `src/components/pages/auth/*` (מ-`4780608`), `public/images/entry_image.png`, `src/theme/legacyTheme.js` (חדש), `src/theme/tokens.js` (נמחק `AUTH`). השאר ללא שינוי.

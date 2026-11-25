@@ -30,12 +30,13 @@
   },
   "add": "Añadir usuario",
   "headers": {
-    "id": "ID",
+    "id": "N.º",
     "name": "Nombre",
     "email": "Correo electrónico",
     "role": "Rol",
     "status": "Estado",
     "actions": "Acciones"
   },
-  "phoneMasked": "Teléfono verificado: {{phone}}"
+  "phoneMasked": "Teléfono verificado: {{phone}}",
+  "more": "Más acciones para {{name}}"
 }

@@ -7,6 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import { RADIUS } from "../../../../theme/tokens";
 import { formatDate } from "../../../../utilities/formatDate";
 import { formatTime } from "../../../../utilities/formatTime";
 import { useCourseReport } from "./useCourseReport";
@@ -55,11 +56,11 @@ const CourseReport = ({ courseId, courseTitle }) => {
   const { status, report, exportCsv } = useCourseReport(courseId);
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, mt: 4, borderRadius: 3 }}>
+    <Paper sx={{ p: 3, mt: 4, borderRadius: `${RADIUS.card}px` }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5, flexWrap: "wrap" }}>
-        <Typography variant="h6" fontWeight={800} sx={{ flex: 1 }}>{t("report.title")}</Typography>
+        <Typography variant="h6" component="h2" fontWeight={800} fontSize={22} sx={{ flex: 1 }}>{t("report.title")}</Typography>
         {report?.students?.length > 0 && report.lessons.length > 0 && (
-          <Button size="small" variant="outlined" endIcon={<FileDownloadOutlinedIcon />} onClick={() => exportCsv(courseTitle)}>
+          <Button size="small" variant="soft" endIcon={<FileDownloadOutlinedIcon />} onClick={() => exportCsv(courseTitle)}>
             {t("report.export")}
           </Button>
         )}

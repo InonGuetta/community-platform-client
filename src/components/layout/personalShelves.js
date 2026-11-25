@@ -1,6 +1,6 @@
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
-import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import HistoryIcon from "@mui/icons-material/History";
@@ -26,10 +26,12 @@ import { fetchContinueWatching } from "../../store/slicesAndThunks/mediaSlice/me
 // Filled and outline of the same icon, kept as a pair.
 //
 // A shelf and the button that fills it have to look like the same thing: the
-// thumbs-up in the menu is what the thumbs-up on a lecture puts things into.
+// heart in the menu is what the heart on a lecture puts things into.
 // They were two independent imports that happened to match because they were
 // synchronised by hand, which lasts exactly until one of them is changed.
-export const likeIcons = { on: ThumbUpAltIcon, off: ThumbUpOffAltIcon };
+// A heart since Redesign v4 (D-95): the tile's ♥ (D-79), the lesson page's
+// "אהבתי" and this shelf are one action, drawn one way.
+export const likeIcons = { on: FavoriteRoundedIcon, off: FavoriteBorderRoundedIcon };
 export const saveIcons = { on: BookmarkIcon, off: BookmarkBorderIcon };
 
 // And their colours, for the same reason: a like is green and a save is purple
@@ -64,6 +66,7 @@ export const LIKES_SHELF = {
     fetch: fetchLikedMedia,
     selectSlice: (state) => state.likes,
     emptyKey: "shelfEmpty.likes",
+    subtitleKey: "shelfSubtitle.likes",
   },
 };
 
@@ -76,6 +79,7 @@ export const SAVED_SHELF = {
     fetch: fetchSavedMedia,
     selectSlice: (state) => state.saves,
     emptyKey: "shelfEmpty.saved",
+    subtitleKey: "shelfSubtitle.saved",
     // Saving is two things at once — filing a lecture in a list also saves it
     // generally (see the server's addToPlaylist) — so an unfiltered grid showed
     // every filed lecture loose at the top AND again inside its list. The top of
@@ -112,6 +116,7 @@ export const CONTINUE_SHELF = {
     fetch: fetchContinueWatching,
     selectSlice: (state) => state.media.continueWatching,
     emptyKey: "shelfEmpty.continue",
+    subtitleKey: "shelfSubtitle.continue",
   },
 };
 

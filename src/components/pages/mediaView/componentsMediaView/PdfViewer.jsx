@@ -5,6 +5,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import PdfToolbar from "./PdfToolbar";
 import BookmarkNotePanel from "./BookmarkNotePanel";
 import PdfPage from "./PdfPage";
+import { RADIUS } from "../../../../theme/tokens";
 import { BOX_PAD } from "./pdfLayout";
 import { usePdfDocument } from "./usePdfDocument";
 import { usePdfPageTracking } from "./usePdfPageTracking";
@@ -94,6 +95,10 @@ const PdfViewer = ({
 
   return (
     <Box>
+      {/* Redesign v4 (screen 27): the viewer's container, in the line colour,
+          radius 20, padding 12, with the toolbar on it and the pages as white
+          cards. */}
+      <Box sx={{ bgcolor: "divider", borderRadius: `${RADIUS.viewer}px`, p: "12px" }}>
       <PdfToolbar
         page={page}
         pages={pdf.numPages}
@@ -107,9 +112,9 @@ const PdfViewer = ({
         ref={containerRef}
         data-pdf-scroll=""
         sx={{
-          maxHeight: "70vh", overflowY: "auto", bgcolor: "action.hover",
+          maxHeight: "70vh", overflowY: "auto",
           // See PAGE_GAP / BOX_PAD: the zoom arithmetic reads these same numbers.
-          p: `${BOX_PAD}px`, borderRadius: 2,
+          p: `${BOX_PAD}px`,
         }}
       >
         {Array.from({ length: pdf.numPages }, (_, i) => (
@@ -125,6 +130,7 @@ const PdfViewer = ({
             flashed={flashed}
           />
         ))}
+      </Box>
       </Box>
 
       {pending && (

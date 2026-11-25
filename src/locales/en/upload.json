@@ -1,6 +1,6 @@
 {
   "title": "Upload media",
-  "chooseFile": "Click to choose a file",
+  "chooseFile": "Drag a file here or click to choose",
   "uploading": "Uploading... {{progress}}%",
   "processing": "Processing on the server...",
   "uploadingShort": "Uploading...",
@@ -13,8 +13,10 @@
     "tagsHelper": "Up to {{max}} tags. You can also skip this — we'll suggest tags after the upload.",
     "course": "Course",
     "courseHelper": "No course — the content is shown to every student",
-    "noCourse": "No course (general library)"
+    "noCourse": "No course (general library)",
+    "typeAuto": "Detected automatically from the file. You can change it."
   },
   "tagsSaved": "Tags saved",
-  "tagsFailed": "Saving the tags failed"
+  "tagsFailed": "Saving the tags failed",
+  "notAllowed": "Only video, audio, PDF, TXT or Word files can be uploaded"
 }

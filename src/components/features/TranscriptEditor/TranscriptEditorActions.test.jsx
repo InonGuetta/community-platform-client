@@ -33,7 +33,7 @@ beforeEach(() => {
 test("saving sends the edited text and says it was saved", async () => {
   renderEditor();
   fireEvent.change(screen.getByRole("textbox"), { target: { value: "שלום עולם" } });
-  fireEvent.click(screen.getByRole("button", { name: "שמור תמלול" }));
+  fireEvent.click(screen.getByRole("button", { name: "שמירת תמלול" }));
   expect(await screen.findByText("התמלול נשמר בהצלחה")).toBeInTheDocument();
   expect(transcriptsApi.update).toHaveBeenCalledWith(9, { editedText: "שלום עולם" });
 });
@@ -46,7 +46,7 @@ const refused = (code) => Object.assign(new Error("Request failed"), {
 });
 const save = () => {
   fireEvent.change(screen.getByRole("textbox"), { target: { value: "שלום עולם" } });
-  fireEvent.click(screen.getByRole("button", { name: "שמור תמלול" }));
+  fireEvent.click(screen.getByRole("button", { name: "שמירת תמלול" }));
 };
 
 test("a refused save says so in Hebrew", async () => {
@@ -65,7 +65,7 @@ test("a refused save with a code it knows says that instead", async () => {
 
 test("starting the pipeline refetches the transcript at once", async () => {
   renderEditor();
-  fireEvent.click(screen.getByRole("button", { name: "הפעל תמלול" }));
+  fireEvent.click(screen.getByRole("button", { name: "הפעלת תמלול" }));
   await waitFor(() => expect(transcriptsApi.trigger).toHaveBeenCalledWith(9));
   await waitFor(() => expect(transcriptsApi.get).toHaveBeenCalledWith(9, { content: true }));
 });
@@ -73,14 +73,14 @@ test("starting the pipeline refetches the transcript at once", async () => {
 test("a refused start does not refetch", async () => {
   transcriptsApi.trigger.mockRejectedValue(new Error("402"));
   renderEditor();
-  fireEvent.click(screen.getByRole("button", { name: "הפעל תמלול" }));
+  fireEvent.click(screen.getByRole("button", { name: "הפעלת תמלול" }));
   await waitFor(() => expect(transcriptsApi.trigger).toHaveBeenCalled());
-  await waitFor(() => expect(screen.getByRole("button", { name: "הפעל תמלול" })).toBeEnabled());
+  await waitFor(() => expect(screen.getByRole("button", { name: "הפעלת תמלול" })).toBeEnabled());
   expect(transcriptsApi.get).not.toHaveBeenCalled();
 });
 
 test("the Hebrew correction is queued for this lesson", async () => {
   renderEditor();
-  fireEvent.click(screen.getByRole("button", { name: "תקן עברית" }));
+  fireEvent.click(screen.getByRole("button", { name: "תיקון עברית" }));
   await waitFor(() => expect(transcriptsApi.fixHebrew).toHaveBeenCalledWith(9));
 });

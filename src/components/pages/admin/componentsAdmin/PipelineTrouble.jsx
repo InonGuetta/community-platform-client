@@ -2,7 +2,8 @@ import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
+import StatusBadge from "../../../features/StatusBadge/StatusBadge";
+import { TABLE_SX } from "../../../features/DataTable/tableSx";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Table from "@mui/material/Table";
@@ -64,7 +65,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
         <Typography variant="h6" fontWeight={700}>{t("pipeline.title")}</Typography>
         <Button
           size="small"
-          variant="outlined"
+          variant="soft"
           startIcon={running ? <CircularProgress size={16} /> : <ReplayIcon />}
           onClick={() => setConfirmOpen(true)}
           disabled={running}
@@ -95,7 +96,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>{t("pipeline.noFailedJobs")}</Typography>
       ) : (
         <Box sx={{ overflowX: "auto", mb: 3 }}>
-          <Table size="small">
+          <Table size="small" sx={[TABLE_SX, { minWidth: 640 }]}>
             <TableHead>
               <TableRow>
                 <TableCell>{t("pipeline.queue")}</TableCell>
@@ -107,10 +108,10 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
             <TableBody>
               {failed.map((job) => (
                 <TableRow key={`${job.queue}-${job.id}`}>
-                  <TableCell><Chip size="small" label={job.queue} /></TableCell>
+                  <TableCell><StatusBadge tone="neutral" size="small">{job.queue}</StatusBadge></TableCell>
                   <TableCell>{job.mediaId ?? "—"}</TableCell>
-                  <TableCell sx={{ maxWidth: 380, wordBreak: "break-word" }}>{job.reason || "—"}</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>{formatDateTime(job.failedAt, "—")}</TableCell>
+                  <TableCell dir="auto" sx={{ maxWidth: 380, wordBreak: "break-word" }}>{job.reason || "—"}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}><bdi dir="ltr">{formatDateTime(job.failedAt, "—")}</bdi></TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -125,7 +126,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
         <Typography variant="body2" color="text.secondary">{t("pipeline.noStranded")}</Typography>
       ) : (
         <Box sx={{ overflowX: "auto" }}>
-          <Table size="small">
+          <Table size="small" sx={[TABLE_SX, { minWidth: 640 }]}>
             <TableHead>
               <TableRow>
                 <TableCell>#</TableCell>
@@ -140,7 +141,7 @@ const PipelineTrouble = ({ trouble, onReconciled }) => {
                   <TableCell>{item.id}</TableCell>
                   <TableCell sx={{ maxWidth: 220, wordBreak: "break-word" }}>{item.title}</TableCell>
                   <TableCell>
-                    <Chip size="small" color={item.status === "error" ? "error" : "default"} label={item.status ?? t("pipeline.neverRun")} />
+                    <StatusBadge tone={item.status === "error" ? "error" : "neutral"} size="small">{item.status ?? t("pipeline.neverRun")}</StatusBadge>
                   </TableCell>
                   <TableCell sx={{ maxWidth: 320, wordBreak: "break-word" }}>{processingReasonText(item.error_message, item.error_message ? t("pipeline.reasonUnknown") : "—")}</TableCell>
                 </TableRow>

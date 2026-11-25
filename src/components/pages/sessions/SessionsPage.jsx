@@ -178,7 +178,7 @@ const SessionsPage = () => {
         <DialogTitle onClose={() => setCreateDialogOpen(false)}>{t("create.title")}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <TextField label={t("create.name")} value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} fullWidth />
+            <TextField label={t("create.name")} placeholder={t("create.namePlaceholder", { name: t("untitled") })} value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} fullWidth />
             <TextField label={t("create.type")} value={form.sessionType} onChange={(e) => setForm((p) => ({ ...p, sessionType: e.target.value, maxParticipants: e.target.value === sessionTypes.oneOnOne ? MIN_PARTICIPANTS : p.sessionType === sessionTypes.oneOnOne ? DEFAULT_PARTICIPANTS : p.maxParticipants }))} select fullWidth>
               {Object.values(sessionTypes).map((t) => <MenuItem key={t} value={t}>{sessionTypeLabels[t] || t}</MenuItem>)}
             </TextField>

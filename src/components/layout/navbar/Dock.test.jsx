@@ -44,9 +44,10 @@ test("course management marks nothing", () => {
   expect(current()).toHaveLength(0);
 });
 
-test("a lesson marks nothing", () => {
+// UI_UX_FIXES 3.1: a lesson is opened from the archive, which stays lit.
+test("a lesson lights the archive", () => {
   renderAt("/media/5");
-  expect(current()).toHaveLength(0);
+  expect(current().map((a) => a.getAttribute("href"))).toEqual(["/archive"]);
 });
 
 test("the notebook is lit on /notebook", () => {

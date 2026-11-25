@@ -23,7 +23,8 @@
     "schedule": "Programmer pour plus tard",
     "scheduleSubmit": "Programmer la séance",
     "createStart": "Créer et commencer",
-    "pastTime": "Cette date est déjà passée"
+    "pastTime": "Cette date est déjà passée",
+    "namePlaceholder": "Facultatif. Sans titre, la séance s’affiche comme « {{name}} »"
   },
   "notices": {
     "cannotJoin": "Impossible de rejoindre la séance",

@@ -27,7 +27,7 @@ const TITLE_SIZE = {
 
 const KICKER_KEYS = { audio: "kicker.audio", video: "kicker.video", text: "kicker.text" };
 
-const LessonHeader = ({ media, showStatusBadge = false }) => {
+const LessonHeader = ({ media, showStatusBadge = false, dateText = null }) => {
   const { t } = useTranslation(["lesson", "media"]);
   const type = media.media_type;
   const isDraft = media.is_published === false;
@@ -38,6 +38,8 @@ const LessonHeader = ({ media, showStatusBadge = false }) => {
       : media.is_public
         ? { tone: "indigo", label: t("media:card.public") }
         : null;
+
+  const showCreator = Boolean(media.creator_name) && !isLeakedCreator(media.creator_name);
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -66,27 +68,46 @@ const LessonHeader = ({ media, showStatusBadge = false }) => {
         {lessonTitleForHeading(media.title)}
       </Typography>
 
-      {/* "מרצה" or "מחבר" by media type — one column, worded for what it is.
-          Always present: creator_name is NOT NULL and reads "כללי" when nobody
-          said, so this never collapses into a title that looks unattributed by
-          accident rather than on purpose. */}
-      {media.creator_name && !isLeakedCreator(media.creator_name) && (
-        <Typography sx={{ fontSize: 17, fontWeight: 500, color: "text.secondary" }}>
-          {creatorPrefixes[type] || creatorPrefixes.video}:{" "}
-          {/* Their other lessons are one click away (PRD ATTR-10). */}
-          {hasCreatorPage(media.creator_name) ? (
-            <Link
-              component={RouterLink}
-              to={creatorPath(media.creator_name)}
-              color="inherit"
-              underline="hover"
-              fontWeight={600}
-            >
-              {media.creator_name}
-            </Link>
-          ) : (
-            creatorDisplayName(media.creator_name)
+      {/* The lecturer and the upload date, on one line, then what the lesson
+          says about itself (UI_UX_FIXES 3.7): they used to float under the
+          player in the empty space. "מרצה" or "מחבר" by media type — one column,
+          worded for what it is. */}
+      {(showCreator || dateText) && (
+        <Typography
+          component="div"
+          sx={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", columnGap: 1.5, fontSize: 17, fontWeight: 500, color: "text.secondary" }}
+        >
+          {showCreator && (
+            <span>
+              {creatorPrefixes[type] || creatorPrefixes.video}:{" "}
+              {/* Their other lessons are one click away (PRD ATTR-10). */}
+              {hasCreatorPage(media.creator_name) ? (
+                <Link
+                  component={RouterLink}
+                  to={creatorPath(media.creator_name)}
+                  color="inherit"
+                  underline="hover"
+                  fontWeight={600}
+                >
+                  {media.creator_name}
+                </Link>
+              ) : (
+                creatorDisplayName(media.creator_name)
+              )}
+            </span>
           )}
+          {showCreator && dateText && <span aria-hidden>·</span>}
+          {dateText && (
+            <Typography component="span" data-testid="media-date" sx={{ fontSize: 15, color: "text.secondary" }}>
+              {dateText}
+            </Typography>
+          )}
+        </Typography>
+      )}
+
+      {media.description && (
+        <Typography dir="auto" sx={{ fontSize: 17, mt: 1.5, maxWidth: "70ch" }}>
+          {media.description}
         </Typography>
       )}
     </Box>

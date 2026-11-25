@@ -105,6 +105,7 @@ it("puts the waiting role requests on the admin's users item", async () => {
   const user = userEvent.setup();
   renderHeader("admin");
   await user.click(await screen.findByRole("button", { name: "תפריט החשבון, 2 בקשות ממתינות" }));
+  await user.click(within(screen.getByRole("menu")).getByRole("menuitem", { name: "ניהול" }));
   expect(within(screen.getByRole("menu")).getByLabelText("משתמשים, 2 בקשות ממתינות")).toBeTruthy();
 });
 

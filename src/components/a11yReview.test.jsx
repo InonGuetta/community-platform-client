@@ -39,9 +39,9 @@ describe("names a screen reader can read", () => {
         />
       </table>
     );
-    for (const name of ["עריכת דנה", "השבתת דנה", "מחיקת דנה"]) {
-      expect(screen.getByRole("button", { name })).toBeInTheDocument();
-    }
+    expect(screen.getByRole("button", { name: "עריכת דנה" })).toBeInTheDocument();
+    expect(screen.getByRole("switch", { name: "השבתת דנה" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "פעולות נוספות עבור דנה" })).toBeInTheDocument();
   });
 });
 

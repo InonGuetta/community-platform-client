@@ -30,12 +30,13 @@
   },
   "add": "הוספת משתמש",
   "headers": {
-    "id": "ID / מזהה",
+    "id": "מס׳",
     "name": "שם",
     "email": "אימייל",
     "role": "תפקיד",
     "status": "סטטוס",
     "actions": "פעולות"
   },
-  "phoneMasked": "טלפון מאומת: {{phone}}"
+  "phoneMasked": "טלפון מאומת: {{phone}}",
+  "more": "פעולות נוספות עבור {{name}}"
 }

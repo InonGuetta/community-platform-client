@@ -5,11 +5,20 @@ import Box from "@mui/material/Box";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import Typography from "@mui/material/Typography";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
+import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import { useDirection, menuOrigins } from "../../../i18n/useDirection";
 import { useLanguage } from "../../../i18n/useLanguage";
 import { LanguageMenu } from "../LanguageSwitcher";
 import { HEADER_HEIGHT } from "../shellGeometry";
+import { ACCOUNT_ITEM } from "../navConfig";
 import NavLinkLabel from "./NavLinkLabel";
 import SwitchMark from "./SwitchMark";
 
@@ -18,20 +27,29 @@ import SwitchMark from "./SwitchMark";
 // shelves and the account page, "תצוגת מנהל" and the management group behind
 // it, the site's language, installing, "מצב כהה", and signing out.
 // Everything here is also in the drawer, from the same lists (decision 3).
+//
+// UI_UX_FIXES 3.5: the account page is reached once — through the header at the
+// top (name and e-mail), not also as a row; every item carries the icon the
+// drawer gives it; and the management items sit in one group that folds, so the
+// menu stays short. The group opens by itself when the page you are on is in it.
 
 const rowSx = { justifyContent: "space-between", gap: 2 };
 const rule = <Divider sx={{ my: 0.5 }} />;
+const iconSx = { minWidth: 32, color: "text.secondary" };
+const MenuIcon = ({ Icon }) => (Icon ? <ListItemIcon sx={iconSx}><Icon fontSize="small" /></ListItemIcon> : null);
 
 const AvatarMenu = ({ shell }) => {
   const { t } = useTranslation(["nav", "common"]);
   const { end } = useDirection();
   const { language, languages } = useLanguage();
   const [languageAnchor, setLanguageAnchor] = useState(null);
+  const [adminFolded, setAdminFolded] = useState(true);
   const {
     user, pathname, config, adminView, darkMode, toggleColorMode, installer, install,
     menuAnchor, closeMenu, handleLogout, runAction, pendingRoleRequests,
   } = shell;
   const currentLanguage = languages.find((l) => l.code === language);
+  const adminOpen = !adminFolded || config.admin.some((item) => item.to === pathname);
 
   return (
     <>
@@ -59,32 +77,48 @@ const AvatarMenu = ({ shell }) => {
           )}
         </MenuItem>
 
-        {config.personal.map((item) => (
-          <MenuItem key={item.id} component={Link} to={item.to} onClick={closeMenu} selected={pathname === item.to}>
-            {t(item.labelKey)}
-          </MenuItem>
-        ))}
+        {config.personal
+          .filter((item) => item.id !== ACCOUNT_ITEM.id)
+          .map((item) => (
+            <MenuItem key={item.id} component={Link} to={item.to} onClick={closeMenu} selected={pathname === item.to}>
+              <MenuIcon Icon={item.Icon} />
+              {t(item.labelKey)}
+            </MenuItem>
+          ))}
 
         {adminView.eligible && rule}
         {adminView.eligible && (
           <MenuItem role="switch" aria-checked={adminView.enabled} onClick={adminView.toggle} sx={rowSx}>
-            <Box component="span" sx={{ fontWeight: 600 }}>{t("adminView")}</Box>
+            <Box component="span" sx={{ display: "flex", alignItems: "center", fontWeight: 600 }}>
+              <MenuIcon Icon={AdminPanelSettingsOutlinedIcon} />
+              {t("adminView")}
+            </Box>
             <SwitchMark checked={adminView.enabled} />
           </MenuItem>
         )}
         {adminView.showAdmin && config.admin.length > 0 && (
-          <Typography variant="kicker" component="li" role="presentation" sx={{ display: "block", px: 1.5, pt: 0.5, pb: 0.5, color: "text.secondary" }}>
-            {t("groups.admin")}
-          </Typography>
+          <MenuItem
+            onClick={() => setAdminFolded((folded) => !folded)}
+            aria-expanded={adminOpen}
+            sx={{ ...rowSx, pt: 0.75 }}
+          >
+            <Typography variant="kicker" component="span" sx={{ color: "text.secondary" }}>
+              {t("groups.admin")}
+            </Typography>
+            {adminOpen ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+          </MenuItem>
         )}
         {adminView.showAdmin &&
+          adminOpen &&
           config.admin.map((item) =>
             item.to ? (
               <MenuItem key={item.id} component={Link} to={item.to} onClick={closeMenu} selected={pathname === item.to}>
+                <MenuIcon Icon={item.Icon} />
                 {item.countsRequests ? <NavLinkLabel item={item} pendingRoleRequests={pendingRoleRequests} /> : t(item.labelKey)}
               </MenuItem>
             ) : (
               <MenuItem key={item.id} onClick={() => runAction(item.action)}>
+                <MenuIcon Icon={item.Icon} />
                 {t(item.labelKey)}
               </MenuItem>
             )
@@ -92,19 +126,31 @@ const AvatarMenu = ({ shell }) => {
 
         {rule}
         <MenuItem onClick={(e) => setLanguageAnchor(e.currentTarget)} aria-haspopup="menu" sx={rowSx}>
-          <span>{t("common:language.label")}</span>
+          <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
+            <MenuIcon Icon={LanguageOutlinedIcon} />
+            {t("common:language.label")}
+          </Box>
           <Box component="span" lang={currentLanguage?.code} dir={currentLanguage?.dir} sx={{ color: "text.secondary", fontSize: 13 }}>
             {currentLanguage?.name}
           </Box>
         </MenuItem>
-        {installer.offer && <MenuItem onClick={install}>{t("drawer.install")}</MenuItem>}
+        {installer.offer && (
+          <MenuItem onClick={install}>
+            <MenuIcon Icon={GetAppOutlinedIcon} />
+            {t("drawer.install")}
+          </MenuItem>
+        )}
         <MenuItem role="switch" aria-checked={darkMode} onClick={toggleColorMode} sx={rowSx}>
-          <span>{t("colorMode.toDark")}</span>
+          <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
+            <MenuIcon Icon={DarkModeOutlinedIcon} />
+            {t("colorMode.toDark")}
+          </Box>
           <SwitchMark checked={darkMode} />
         </MenuItem>
 
         {rule}
         <MenuItem onClick={handleLogout} sx={{ color: "surface.danger", fontWeight: 600 }}>
+          <MenuIcon Icon={LogoutOutlinedIcon} />
           {t("drawer.signOut")}
         </MenuItem>
       </Menu>

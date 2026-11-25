@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { ColorModeContext } from "../../../theme/colorMode";
 import { openUpload } from "../../../store/slicesAndThunks/uiSlice";
 import { navConfigFor } from "../navConfig";
@@ -17,13 +18,16 @@ const useAppShell = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { user, role, signOut } = useAccount();
+  const { user, role, initialized, signOut } = useAccount();
   const adminView = useAdminView();
   const { mode, toggle: toggleColorMode } = useContext(ColorModeContext);
   const bell = useNotificationBell();
   const installer = useInstallPrompt();
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Below md the avatar opens the side drawer, not a second menu (UI_UX_FIXES 3.6).
+  const narrow = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
   const config = navConfigFor(role);
   const closeAll = () => {
@@ -57,6 +61,7 @@ const useAppShell = () => {
   return {
     user,
     role,
+    initialized,
     pathname,
     config,
     adminView,
@@ -69,7 +74,7 @@ const useAppShell = () => {
     // on screen (D-08); the bell does not list role requests.
     pendingRoleRequests: adminView.showAdmin ? bell.pendingRoleRequests || 0 : 0,
     menuAnchor,
-    openMenu: (event) => setMenuAnchor(event.currentTarget),
+    openMenu: (event) => (narrow ? setDrawerOpen(true) : setMenuAnchor(event.currentTarget)),
     closeMenu: () => setMenuAnchor(null),
     drawerOpen,
     openDrawer: () => setDrawerOpen(true),

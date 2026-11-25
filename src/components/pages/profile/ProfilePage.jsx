@@ -63,7 +63,13 @@ const ProfilePage = () => {
             size={112}
             details={
               <Box sx={{ minWidth: 0 }}>
-                <Typography sx={{ fontSize: 18, fontWeight: 700, wordBreak: "break-all" }}>{user.email}</Typography>
+                {/* The name above the address (UI_UX_FIXES 3.12). */}
+                {user.display_name && (
+                  <Typography dir="auto" sx={{ fontSize: 22, fontWeight: 800, overflowWrap: "anywhere" }}>
+                    {user.display_name}
+                  </Typography>
+                )}
+                <Typography sx={{ fontSize: user.display_name ? 15 : 18, fontWeight: user.display_name ? 500 : 700, color: user.display_name ? "text.secondary" : "text.primary", wordBreak: "break-all" }}>{user.email}</Typography>
                 <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
                   <StatusBadge tone="indigo">{roleLabels[user.role] ?? user.role}</StatusBadge>
                   {user.email_verified ? (

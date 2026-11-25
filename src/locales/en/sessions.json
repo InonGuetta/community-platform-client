@@ -23,7 +23,8 @@
     "schedule": "Schedule for a future time",
     "scheduleSubmit": "Schedule session",
     "createStart": "Create and start",
-    "pastTime": "The time has already passed"
+    "pastTime": "The time has already passed",
+    "namePlaceholder": "Optional. Without one the session shows as “{{name}}”"
   },
   "notices": {
     "cannotJoin": "The session cannot be joined",

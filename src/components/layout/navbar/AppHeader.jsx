@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
+import Skeleton from "@mui/material/Skeleton";
 import MenuIcon from "@mui/icons-material/Menu";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { RADIUS, SHELL } from "../../../theme/tokens";
@@ -111,6 +112,21 @@ const MinimalHeader = () => (
   </Frame>
 );
 
+// While the first "who am I" is in flight (UI_UX_FIXES 3.2). The session is an
+// httpOnly cookie the page cannot read, so nothing client-side says whether one
+// exists; showing the guest header first and swapping it was the flicker. Every
+// page with this header needs a sign-in, so the neutral choice is the signed-in
+// shape: the brand, and grey placeholders where the bell and the avatar go.
+const PendingHeader = () => (
+  <Frame>
+    <Brand />
+    <Box aria-hidden sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+      <Skeleton variant="circular" width={28} height={28} />
+      <Skeleton variant="circular" width={28} height={28} />
+    </Box>
+  </Frame>
+);
+
 const PrimaryLinks = ({ links, pathname }) => {
   const { t } = useTranslation("nav");
   return (
@@ -201,10 +217,12 @@ const AvatarButton = ({ shell }) => {
 const SignedInHeader = () => {
   const { t } = useTranslation("nav");
   const shell = useAppShell();
-  const { user, pathname, config, bell, installer, drawerOpen, openDrawer } = shell;
+  const { user, initialized, pathname, config, bell, installer, drawerOpen, openDrawer } = shell;
 
-  // Before fetchMe has answered, and for anyone signed out, only the brand and
-  // the language (component 1: "משתמש לא מחובר").
+  // Before fetchMe has answered: a neutral skeleton, not the guest header.
+  if (!user && !initialized) return <PendingHeader />;
+  // For anyone signed out, only the brand and the language (component 1:
+  // "משתמש לא מחובר").
   if (!user) return <MinimalHeader />;
 
   return (

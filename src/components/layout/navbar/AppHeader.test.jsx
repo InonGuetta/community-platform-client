@@ -7,7 +7,7 @@ import { Provider } from "react-redux";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import { ThemeProvider } from "@mui/material/styles";
-import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
+import authReducer, { authInitialized } from "../../../store/slicesAndThunks/authSlice/authSlice";
 import uiReducer from "../../../store/slicesAndThunks/uiSlice";
 import inboxReducer from "../../../store/slicesAndThunks/inboxSlice/inboxSlice";
 import { buildTheme } from "../../../theme/theme";
@@ -47,13 +47,15 @@ const Providers = ({ children }) => {
   );
 };
 
-const renderHeader = (role, { path = "/archive", signedIn = true } = {}) => {
+const renderHeader = (role, { path = "/archive", signedIn = true, answered = true } = {}) => {
   const store = configureStore({ reducer: { auth: authReducer, ui: uiReducer, inbox: inboxReducer } });
   if (signedIn) {
     store.dispatch({
       type: "auth/login/fulfilled",
       payload: { user: { id: 1, display_name: "דוד", email: "david@example.test", role } },
     });
+  } else if (answered) {
+    store.dispatch(authInitialized());
   }
   render(
     <Provider store={store}>
@@ -74,6 +76,11 @@ const headerLinks = () => within(screen.getByRole("banner")).getAllByRole("link"
 
 const openAvatarMenu = async (user = userEvent.setup()) => {
   await user.click(screen.getByRole("button", { name: /תפריט החשבון/ }));
+  return screen.getByRole("menu");
+};
+// The management items sit in a group that starts folded (UI_UX_FIXES 3.5).
+const openManagement = async (user = userEvent.setup()) => {
+  await user.click(within(screen.getByRole("menu")).getByRole("menuitem", { name: "ניהול" }));
   return screen.getByRole("menu");
 };
 const menuHrefs = (menu) => within(menu).getAllByRole("menuitem").map((i) => i.getAttribute("href")).filter(Boolean);
@@ -110,6 +117,14 @@ describe("the header", () => {
     expect(screen.queryByRole("button", { name: "התראות" })).toBeNull();
   });
 
+  // UI_UX_FIXES 3.2: until fetchMe answers, neither the guest header nor the
+  // signed-in one — a skeleton, so nothing swaps in the first second.
+  test("while the first answer is awaited it is a skeleton, not the guest header", () => {
+    renderHeader(null, { signedIn: false, answered: false });
+    expect(screen.queryByRole("button", { name: "שינוי שפה" })).toBeNull();
+    expect(headerLinks()).toEqual(["/archive"]);
+  });
+
   test("the language and the colour mode are no longer in the header itself", () => {
     renderHeader("student");
     const header = screen.getByRole("banner");
@@ -122,14 +137,15 @@ describe("what each role is offered in the avatar menu", () => {
   test("a student: the shelves and the account, and nothing to manage", async () => {
     renderHeader("student");
     const menu = await openAvatarMenu();
-    expect(menuHrefs(menu)).toEqual(["/profile", ...PERSONAL_SHELVES.map((s) => s.path), "/profile"]);
+    expect(menuHrefs(menu)).toEqual(["/profile", ...PERSONAL_SHELVES.map((s) => s.path)]);
     expect(within(menu).queryByRole("switch", { name: "תצוגת מנהל" })).toBeNull();
     expect(within(menu).queryByText("העלאת מדיה")).toBeNull();
   });
 
   test("a lecturer: course management and upload, and no admin pages", async () => {
     renderHeader("lecturer");
-    const menu = await openAvatarMenu();
+    await openAvatarMenu();
+    const menu = await openManagement();
     const hrefs = menuHrefs(menu);
     expect(hrefs).toContain("/courses");
     expect(hrefs).not.toContain("/users");
@@ -139,8 +155,20 @@ describe("what each role is offered in the avatar menu", () => {
 
   test("an admin: everything, in the spec's order", async () => {
     renderHeader("admin");
-    const hrefs = menuHrefs(await openAvatarMenu());
+    await openAvatarMenu();
+    const hrefs = menuHrefs(await openManagement());
     expect(hrefs.slice(-3)).toEqual(["/admin", "/users", "/courses"]);
+  });
+
+  test("the account page is reached once, by the header; the management group folds", async () => {
+    renderHeader("admin");
+    const menu = await openAvatarMenu();
+    expect(menuHrefs(menu).filter((h) => h === "/profile")).toHaveLength(1);
+    const group = within(menu).getByRole("menuitem", { name: "ניהול" });
+    expect(group).toHaveAttribute("aria-expanded", "false");
+    expect(menuHrefs(menu)).not.toContain("/admin");
+    await openManagement();
+    expect(within(screen.getByRole("menu")).getByRole("menuitem", { name: "לוח בקרה" })).toHaveAttribute("href", "/admin");
   });
 
   test("an unrecognised role is treated as a student, not as an admin", async () => {
@@ -164,6 +192,8 @@ describe("תצוגת מנהל", () => {
     const user = userEvent.setup();
     renderHeader("admin");
     let menu = await openAvatarMenu(user);
+    menu = await openManagement(user);
+    expect(menuHrefs(menu)).toContain("/admin");
     const toggle = within(menu).getByRole("switch", { name: "תצוגת מנהל" });
     expect(toggle).toHaveAttribute("aria-checked", "true");
 
@@ -180,7 +210,8 @@ describe("תצוגת מנהל", () => {
   test("the menu's upload opens the dialog on the archive", async () => {
     const user = userEvent.setup();
     const store = renderHeader("lecturer", { path: "/ask" });
-    const menu = await openAvatarMenu(user);
+    await openAvatarMenu(user);
+    const menu = await openManagement(user);
     await user.click(within(menu).getByRole("menuitem", { name: "העלאת מדיה" }));
     expect(store.getState().ui.isUploadOpen).toBe(true);
     expect(screen.getByTestId("where").textContent).toBe("/archive");
@@ -252,7 +283,9 @@ describe("waiting role requests (D-08)", () => {
     notificationsApi.list.mockResolvedValueOnce({ items: [], unread: 0, pendingRoleRequests: 3 });
     renderHeader("admin");
     const button = await screen.findByRole("button", { name: "תפריט החשבון, 3 בקשות ממתינות" });
-    await userEvent.click(button);
+    const user = userEvent.setup();
+    await user.click(button);
+    await openManagement(user);
     expect(within(screen.getByRole("menu")).getByLabelText("משתמשים, 3 בקשות ממתינות")).toBeInTheDocument();
   });
 });

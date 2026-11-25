@@ -74,7 +74,7 @@ const UploadMedia = ({ open }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} variant="outlined" disabled={uploading}>{t("common:actions.cancel")}</Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={uploading || !file}>
+        <Button onClick={handleSubmit} variant="contained" disabled={uploading || !file || !fields.title.trim() || !fields.mediaType}>
           {uploading ? t("uploadingShort") : t("upload")}
         </Button>
       </DialogActions>

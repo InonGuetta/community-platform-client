@@ -7,7 +7,7 @@
     "donate": "Donar",
     "manageCourses": "Gestionar cursos",
     "users": "Usuarios",
-    "admin": "Administración",
+    "admin": "Panel de control",
     "upload": "Subir contenido"
   },
   "pendingRequests_one": "{{label}}, una solicitud pendiente",

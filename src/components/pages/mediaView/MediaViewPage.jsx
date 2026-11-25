@@ -1,6 +1,5 @@
 import { useRef, useCallback } from "react";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
 import MediaPlayer from "../../features/MediaPlayer/MediaPlayer";
@@ -49,10 +48,6 @@ import { useTranslation } from "react-i18next";
 // A CSS grid, not MUI's Grid (D-45): its negative margins land on the wrong
 // side without a stylis flip.
 const columns = (bp) => ({ xs: "minmax(0, 1fr)", [bp]: "repeat(12, minmax(0, 1fr))" });
-
-// Where the date line sits, in each layout: under the player of a video or a
-// book (13px), or in the meta line under the grid for audio (14px), as drawn.
-const dateSx = { color: "text.secondary", textAlign: "start" };
 
 // The player or the reader, when a jump scrolls it to the top: clear of the
 // sticky header.
@@ -124,15 +119,10 @@ const MediaViewPage = () => {
 
   // The upload's date — media_items keeps no separate publication date. A draft
   // says so rather than claiming to be published, since the people who can see
-  // one are exactly the people who know it is not.
+  // one are exactly the people who know it is not. It sits in the lesson's
+  // header, on the line of the lecturer (UI_UX_FIXES 3.7).
   const date = formatDate(media.created_at);
-  const dateLine = (sx) => date && (
-    <Typography data-testid="media-date" sx={{ ...dateSx, ...sx }}>
-      {media.is_published === false ? t("draftUploaded") : t("published")}
-      {date}
-    </Typography>
-  );
-
+  const dateText = date ? `${media.is_published === false ? t("draftUploaded") : t("published")}${date}` : null;
 
   const player = (
     <MediaPlayer
@@ -153,7 +143,7 @@ const MediaViewPage = () => {
 
   return (
     <>
-      <LessonHeader media={media} showStatusBadge={showStatusBadge} />
+      <LessonHeader media={media} showStatusBadge={showStatusBadge} dateText={dateText} />
 
       <Box
         sx={{
@@ -172,6 +162,10 @@ const MediaViewPage = () => {
                 sx={{
                   position: "relative",
                   aspectRatio: "1 / 1",
+                  // A small cover on a phone, so the player follows at once
+                  // instead of below a full screen of art (UI_UX_FIXES 3.9).
+                  width: { xs: 160, md: "100%" },
+                  marginInline: { xs: "auto", md: 0 },
                   borderRadius: `${RADIUS.cover}px`,
                   overflow: "hidden",
                   boxShadow: SHADOW.cover,
@@ -202,8 +196,6 @@ const MediaViewPage = () => {
               )}
             </Box>
           )}
-
-          {!isAudio && dateLine({ fontSize: 13, mt: 1.5 })}
 
           {/* Its place in its course, and the way on (PRD CRS-1, CRS-3), in a
               card under the player (D-23). A book has no "next" to run on to. */}
@@ -286,17 +278,6 @@ const MediaViewPage = () => {
           />
         </Paper>
       </Box>
-
-      {isAudio && dateLine({ fontSize: 14, mt: 4 })}
-
-      {media.description && (
-        <Typography
-          dir="auto"
-          sx={{ fontSize: 17, mt: isAudio && date ? 1 : 4 }}
-        >
-          {media.description}
-        </Typography>
-      )}
 
       <LessonNotebook
         media={media}

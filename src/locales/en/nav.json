@@ -7,7 +7,7 @@
     "donate": "Donate",
     "manageCourses": "Manage courses",
     "users": "Users",
-    "admin": "Admin",
+    "admin": "Dashboard",
     "upload": "Upload media"
   },
   "pendingRequests_one": "{{label}}, one request waiting",

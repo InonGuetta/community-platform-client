@@ -8,6 +8,8 @@ import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import CloseIcon from "@mui/icons-material/Close";
@@ -31,6 +33,9 @@ import SwitchMark from "./SwitchMark";
 // Its groups come from the same navConfig as the avatar menu (decision 3):
 // the personal shelves and the account, the five places to browse, "תצוגת
 // מנהל" and what it shows, the language, installing, "מצב כהה", signing out.
+// UI_UX_FIXES 3.6: the avatar opens this same drawer on a phone, so there are
+// two surfaces there (this and the dock), not three. Each destination shows its
+// icon at the start, next to the word.
 // Choosing anything closes it — it is a modal panel now, not the floating one
 // that stayed open beside the archive's picture.
 //
@@ -48,6 +53,8 @@ const itemSx = {
   fontWeight: 600,
   "&:hover": { bgcolor: "surface.fill2" },
 };
+// A destination: its icon at the start, hard against the word (UI_UX_FIXES 3.6).
+const linkSx = { justifyContent: "flex-start" };
 const Rule = ({ my = 1.5 }) => <Divider sx={{ my }} />;
 
 const NavDrawer = ({ shell }) => {
@@ -75,10 +82,14 @@ const NavDrawer = ({ shell }) => {
         to={item.to}
         onClick={closeDrawer}
         aria-current={active ? "page" : undefined}
-        sx={[itemSx, active && { color: "primary.main" }]}
+        sx={[itemSx, linkSx, active && { color: "primary.main" }]}
       >
-        <span>{label}</span>
-        {Icon && <Icon sx={{ fontSize: 20, color: "text.secondary" }} />}
+        {Icon && (
+          <ListItemIcon sx={{ minWidth: 0, color: active ? "primary.main" : "text.secondary" }}>
+            <Icon sx={{ fontSize: 22 }} />
+          </ListItemIcon>
+        )}
+        <ListItemText primary={label} slotProps={{ primary: { sx: { fontSize: "inherit", fontWeight: "inherit" } } }} />
       </ListItemButton>
     );
   };
@@ -146,7 +157,7 @@ const NavDrawer = ({ shell }) => {
 
       <Rule />
       <List disablePadding component="nav" aria-label={t("mainNav")}>
-        {config.primary.map((item) => linkItem(item, undefined, null))}
+        {config.primary.map((item) => linkItem(item))}
       </List>
 
       {adminView.eligible && (
@@ -165,10 +176,15 @@ const NavDrawer = ({ shell }) => {
             {adminView.showAdmin &&
               config.admin.map((item) =>
                 item.to ? (
-                  linkItem(item, item.countsRequests ? <NavLinkLabel item={item} pendingRoleRequests={pendingRoleRequests} /> : undefined, null)
+                  linkItem(item, item.countsRequests ? <NavLinkLabel item={item} pendingRoleRequests={pendingRoleRequests} /> : undefined)
                 ) : (
-                  <ListItemButton key={item.id} onClick={() => runAction(item.action)} sx={itemSx}>
-                    <span>{t(item.labelKey)}</span>
+                  <ListItemButton key={item.id} onClick={() => runAction(item.action)} sx={[itemSx, linkSx]}>
+                    {item.Icon && (
+                      <ListItemIcon sx={{ minWidth: 0, color: "text.secondary" }}>
+                        <item.Icon sx={{ fontSize: 22 }} />
+                      </ListItemIcon>
+                    )}
+                    <ListItemText primary={t(item.labelKey)} slotProps={{ primary: { sx: { fontSize: "inherit", fontWeight: "inherit" } } }} />
                   </ListItemButton>
                 )
               )}

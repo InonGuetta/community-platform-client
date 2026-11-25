@@ -23,7 +23,8 @@
     "schedule": "לקבוע למועד עתידי",
     "scheduleSubmit": "קביעת מפגש",
     "createStart": "יצירה והתחלה",
-    "pastTime": "אי אפשר לקבוע מועד שכבר עבר"
+    "pastTime": "אי אפשר לקבוע מועד שכבר עבר",
+    "namePlaceholder": "לא חובה. בלי כותרת המפגש יופיע כ״{{name}}״"
   },
   "notices": {
     "cannotJoin": "לא ניתן להצטרף למפגש",

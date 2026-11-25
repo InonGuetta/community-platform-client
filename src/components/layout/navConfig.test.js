@@ -52,3 +52,9 @@ test("every place navConfig links to is a route in App.jsx", () => {
   const fixed = [...PRIMARY_LINKS, ...ADMIN_ITEMS, PERSONAL_ITEMS.at(-1)].filter((i) => i.to);
   for (const item of fixed) expect(routes, item.to).toContain(item.to);
 });
+
+// UI_UX_FIXES 3.1: a lesson is opened from the archive, which stays lit.
+test("a lesson lights the archive and nothing else", () => {
+  const lit = PRIMARY_LINKS.filter((link) => isActive(link, "/media/5")).map((l) => l.id);
+  expect(lit).toEqual(["archive"]);
+});

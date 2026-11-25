@@ -13,6 +13,7 @@ import { ALL_TYPES, isAllTypes, isTypePressed } from "./typeSelection";
 import { SORT_OPTIONS, DEFAULT_SORT } from "./sortOptions";
 import { HEADER_HEIGHT } from "../../../layout/shellGeometry";
 import { useDirection, menuOrigins } from "../../../../i18n/useDirection";
+import { useStuckBand } from "./useStuckBand";
 
 // The archive's toolbar (decision 1, step 4): sticky under the header, on the
 // page's own colour, blurred.
@@ -46,6 +47,7 @@ const ArchiveToolbar = ({
   const { t } = useTranslation("archive");
   const { end } = useDirection();
   const [sortAnchor, setSortAnchor] = useState(null);
+  const { sentinelRef, stuck } = useStuckBand();
   const current = SORT_OPTIONS.find((o) => o.value === sortOrder) || SORT_OPTIONS[0];
 
   const chooseSort = (value) => {
@@ -54,6 +56,8 @@ const ArchiveToolbar = ({
   };
 
   return (
+    <>
+    <Box ref={sentinelRef} aria-hidden sx={{ height: "1px", mb: "-1px", pointerEvents: "none" }} />
     <ClickAwayListener onClickAway={() => filtersOpen && onDismissFilters?.()}>
       <Box
         onKeyDown={(e) => {
@@ -68,7 +72,11 @@ const ArchiveToolbar = ({
           mx: { xs: -2, md: -3 },
           px: { xs: 2, md: 3 },
           pt: { xs: 1.5, md: 2 },
-          bgcolor: alpha(theme.palette.background.default, 0.85),
+          // Nearly opaque, so the cards' titles do not read through it (3.4);
+          // the page's own colour in both modes. An edge shows only while stuck.
+          bgcolor: alpha(theme.palette.background.default, 0.96),
+          boxShadow: stuck ? `0 1px 0 ${theme.palette.divider}, 0 6px 16px -10px rgba(0,0,0,.35)` : "none",
+          transition: "box-shadow .15s",
           // Room under the open panel.
           pb: filtersOpen ? 2 : 0,
           backdropFilter: "saturate(180%) blur(20px)",
@@ -134,6 +142,7 @@ const ArchiveToolbar = ({
         </Menu>
       </Box>
     </ClickAwayListener>
+    </>
   );
 };
 

@@ -164,10 +164,19 @@ export const CONTENT_WIDTH = { wide: 1180, narrow: 1080 };
 
 // The dock (component 4): its glass, and the gradient of each of its icons.
 export const DOCK = {
-  glass: { light: "rgba(255,255,255,.55)", dark: "rgba(17,24,39,.6)" },
-  edge: { light: "rgba(255,255,255,.7)", dark: "rgba(255,255,255,.08)" },
+  // A soft silver glass (polish run): a gentle top-to-bottom gradient that still
+  // melts into a white page. Dark keeps a dark glass with a faint cool sheen.
+  glass: {
+    light: "linear-gradient(180deg, rgba(250,251,253,.74) 0%, rgba(229,232,238,.66) 100%)",
+    dark: "linear-gradient(180deg, rgba(34,42,60,.66) 0%, rgba(17,24,39,.62) 100%)",
+  },
+  edge: { light: "rgba(255,255,255,.75)", dark: "rgba(255,255,255,.1)" },
+  // The inner top highlight, laid over the drop shadow.
+  highlight: { light: "inset 0 1px 0 rgba(255,255,255,.85)", dark: "inset 0 1px 0 rgba(255,255,255,.12)" },
+  // The bar's side padding: about double the old 14px / 12px; top and bottom unchanged.
+  paddingInline: { xs: 24, md: 30 },
   dot: { light: "rgba(0,0,0,.55)", dark: "rgba(255,255,255,.6)" },
-  shadow: "0 0 0 .5px rgba(0,0,0,.12), 0 18px 40px -8px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.8)",
+  shadow: "0 0 0 .5px rgba(0,0,0,.12), 0 18px 40px -8px rgba(0,0,0,.28)",
   iconShadow: "0 4px 10px -2px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35)",
   tip: "rgba(30,30,32,.82)",
   gradient: {

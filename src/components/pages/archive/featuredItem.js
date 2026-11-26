@@ -11,3 +11,16 @@ export const featuredItem = (items, { hasActiveFilter = false, sortOrder = DEFAU
   if (hasActiveFilter || sortOrder !== DEFAULT_SORT) return null;
   return (items || []).find((item) => item.is_published) || null;
 };
+
+// What the banner shows (owner's change, polish run): the item the reader
+// consumed most recently — the first of "המשך צפייה" — and only when there is
+// none, today's newest published lesson. `gate` is featuredItem's own answer:
+// when it says there is no banner (a search, a filter, another order), neither
+// does this. `settled` is false while the shelf is still loading, so the banner
+// does not flash the newest lesson and then swap it.
+export const heroItem = (continueItems, featured, { settled = true } = {}) => {
+  if (!featured) return null;
+  if (!settled) return null;
+  const resume = (continueItems || [])[0];
+  return resume ? { item: resume, resuming: true } : { item: featured, resuming: false };
+};

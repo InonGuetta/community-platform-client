@@ -12,14 +12,14 @@ import UploadMedia from "../../features/UploadMedia/UploadMedia";
 import SmartSearch from "../../features/SmartSearch/SmartSearch";
 import useArchivePageController from "./useArchivePageController";
 import { useArchiveUpload } from "./useArchiveUpload";
-import { featuredItem } from "./featuredItem";
+import { useArchiveHero } from "./useArchiveHero";
 import { useTranslation } from "react-i18next";
 
 // The archive (mockup 02), in the order decision 1 fixes:
 //   1. the page header — the greeting as its kicker, the title, the subtitle,
 //      and "העלאת מדיה" (admin-only; useArchiveUpload);
 //   2. the tabs ארכיון / חיפוש עומק חכם (03);
-//   3. on the archive tab, the banner of the newest published lesson — only
+//   3. on the archive tab, the banner — where the reader left off, else the newest published lesson — only
 //      while nothing narrows or reorders the list (featuredItem.js);
 //   4–7. the toolbar, the filter panel (29), "כל הפריטים" with its count, and
 //      the grid — ArchiveBrowser, shared with a lecturer's page (PRD ATTR-10).
@@ -30,8 +30,12 @@ const ArchivePage = () => {
   const archive = useArchivePageController();
   const { user, isUploadOpen, canUpload } = useArchiveUpload();
   const [tab, setTab] = useState(0);
-  const featured =
-    tab === 0 ? featuredItem(archive.filteredMedia, { hasActiveFilter: archive.hasActiveFilter, sortOrder: archive.sortOrder }) : null;
+  const hero = useArchiveHero({
+    active: tab === 0,
+    items: archive.filteredMedia,
+    hasActiveFilter: archive.hasActiveFilter,
+    sortOrder: archive.sortOrder,
+  });
 
   return (
     <Box>
@@ -54,7 +58,7 @@ const ArchivePage = () => {
         <Tab label={t("tabs.smartSearch")} />
       </Tabs>
 
-      {featured && <ArchiveHero item={featured} onOpen={archive.handleOpenMedia} />}
+      {hero && <ArchiveHero item={hero.item} resuming={hero.resuming} onOpen={archive.handleOpenMedia} />}
 
       {tab === 0 && (
         <ArchiveBrowser archive={archive} user={user} canUpload={canUpload} onOpenUpload={archive.handleOpenUpload} />

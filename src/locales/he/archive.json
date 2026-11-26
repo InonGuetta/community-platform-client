@@ -9,7 +9,12 @@
     "listen": "האזנה",
     "watch": "צפייה",
     "read": "קריאה",
-    "details": "פרטי השיעור"
+    "details": "פרטי השיעור",
+    "kickerResume": "המשך מהמקום שעצרת · {{type}}",
+    "labelResume": "המשך מהמקום שעצרת",
+    "resumeListen": "המשך האזנה",
+    "resumeWatch": "המשך צפייה",
+    "resumeRead": "המשך קריאה"
   },
   "tabs": {
     "archive": "ארכיון",

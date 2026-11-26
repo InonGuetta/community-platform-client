@@ -14,7 +14,7 @@ import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
-import { useDirection, menuOrigins } from "../../../i18n/useDirection";
+import { useDirection } from "../../../i18n/useDirection";
 import { useLanguage } from "../../../i18n/useLanguage";
 import { LanguageMenu } from "../LanguageSwitcher";
 import { HEADER_HEIGHT } from "../shellGeometry";
@@ -54,11 +54,28 @@ const AvatarMenu = ({ shell }) => {
   return (
     <>
       <Menu
-        anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={closeMenu}
-        {...menuOrigins(end)}
-        slotProps={{ paper: { sx: { width: 272, maxWidth: "calc(100vw - 24px)", maxHeight: `calc(100vh - ${HEADER_HEIGHT + 16}px)`, overflowY: "auto", mt: 0.5 } } }}
+        // Flush to the screen's end edge, directly under the header: anchored to
+        // that point of the viewport, not to the avatar, which sits inside the
+        // header's padding. marginThreshold 0 stops MUI keeping 16px from it.
+        anchorReference="anchorPosition"
+        anchorPosition={{ top: HEADER_HEIGHT, left: end === "left" ? 0 : document.documentElement.clientWidth }}
+        marginThreshold={0}
+        transformOrigin={{ vertical: "top", horizontal: end }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 272,
+              maxWidth: "100vw",
+              maxHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
+              overflowY: "auto",
+              // The edge side meets the screen, so those corners are square.
+              borderStartEndRadius: 0,
+              borderEndEndRadius: 0,
+            },
+          },
+        }}
       >
         {/* Who is signed in — and the way to their account page. */}
         <MenuItem

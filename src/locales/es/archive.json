@@ -9,7 +9,12 @@
     "listen": "Escuchar",
     "watch": "Ver",
     "read": "Leer",
-    "details": "Detalles de la clase"
+    "details": "Detalles de la clase",
+    "kickerResume": "Sigue donde lo dejaste · {{type}}",
+    "labelResume": "Donde lo dejaste",
+    "resumeListen": "Seguir escuchando",
+    "resumeWatch": "Seguir viendo",
+    "resumeRead": "Seguir leyendo"
   },
   "tabs": {
     "archive": "Archivo",

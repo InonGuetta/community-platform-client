@@ -39,13 +39,14 @@ const Dock = () => {
           display: "flex",
           alignItems: "flex-end",
           gap: { xs: 1, md: 1.5 },
-          padding: { xs: "8px 12px", md: "10px 14px" },
+          paddingBlock: { xs: "8px", md: "10px" },
+          paddingInline: { xs: `${DOCK.paddingInline.xs}px`, md: `${DOCK.paddingInline.md}px` },
           borderRadius: { xs: "24px", md: "26px" },
-          bgcolor: DOCK.glass[mode],
+          background: DOCK.glass[mode],
           backdropFilter: "blur(28px) saturate(180%)",
           WebkitBackdropFilter: "blur(28px) saturate(180%)",
           border: `1px solid ${DOCK.edge[mode]}`,
-          boxShadow: DOCK.shadow,
+          boxShadow: `${DOCK.shadow}, ${DOCK.highlight[mode]}`,
           // UI_UX_FIXES 2.2: slides down out of the way while scrolling down.
           // It stays up while focus is inside it, so a keyboard user's Tab
           // never lands on something that is off the screen.

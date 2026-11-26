@@ -11,6 +11,7 @@ export const selectMediaHasMore = createSelector(selectMediaState, (media) => Bo
 export const selectMediaLoadingMore = createSelector(selectMediaState, (media) => media.loadingMore);
 export const selectMediaTotal = createSelector(selectMediaState, (media) => media.total);
 export const selectMediaError = createSelector(selectMediaState, (media) => media.error);
+export const selectContinueWatching = createSelector(selectMediaState, (media) => media.continueWatching);
 
 export const selectMediaByType = (type) =>
   createSelector(selectAllMedia, (items) => items.filter((item) => item.media_type === type));

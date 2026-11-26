@@ -6,18 +6,21 @@ import { useTranslation } from "react-i18next";
 import { mediaTypeLabels } from "../../../../utilities/constant";
 import { lengthLabel } from "../../../../utilities/durationOptions";
 import { creatorDisplayName } from "../../../../utilities/creatorPage";
-import { RADIUS, HERO, WHITE } from "../../../../theme/tokens";
+import { RADIUS, HERO, WHITE, TILE } from "../../../../theme/tokens";
 
 // The archive's banner (decision 1, step 3): the newest published lesson
-// (featuredItem.js; D-01), on an indigo gradient with rings, radius 28.
+// (featuredItem.js; D-01) or, when the reader has history, the one they left
+// last (`resuming`), on an indigo gradient with rings, radius 28.
 //
 // Both buttons open the lesson (D-02): there is no playing from the archive,
 // so "האזנה" is the way into the lesson page, worded by type — האזנה, צפייה,
 // קריאה. The whole banner opens it too, for a pointer; the buttons are the way
 // in for a keyboard.
 const ACTION_KEY = { audio: "hero.listen", video: "hero.watch", text: "hero.read" };
+// Resuming says so: the media page restores the saved position by itself.
+const RESUME_KEY = { audio: "hero.resumeListen", video: "hero.resumeWatch", text: "hero.resumeRead" };
 
-const ArchiveHero = ({ item, onOpen }) => {
+const ArchiveHero = ({ item, onOpen, resuming = false }) => {
   const { t } = useTranslation("archive");
   const open = () => onOpen(item.id);
   const press = (e) => {
@@ -31,7 +34,7 @@ const ArchiveHero = ({ item, onOpen }) => {
   return (
     <Box
       component="section"
-      aria-label={t("hero.label")}
+      aria-label={resuming ? t("hero.labelResume") : t("hero.label")}
       onClick={open}
       sx={{
         position: "relative",
@@ -71,7 +74,7 @@ const ArchiveHero = ({ item, onOpen }) => {
 
       <Box sx={{ position: "relative", height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", p: { xs: 3, md: 5 }, maxWidth: 672, textAlign: "start" }}>
         <Typography variant="kicker" component="p" sx={{ color: HERO.kicker, mb: 1.5 }}>
-          {t("hero.kicker", { type: typeLabel })}
+          {resuming ? t("hero.kickerResume", { type: typeLabel }) : t("hero.kicker", { type: typeLabel })}
         </Typography>
         <Typography
           variant="display"
@@ -90,9 +93,9 @@ const ArchiveHero = ({ item, onOpen }) => {
           <Button
             onClick={press}
             startIcon={<PlayArrowRoundedIcon />}
-            sx={{ bgcolor: WHITE, color: "text.primary", "&:hover": { bgcolor: WHITE, transform: "scale(1.03)" } }}
+            sx={{ bgcolor: WHITE, color: TILE.fabInk, "&:hover": { bgcolor: WHITE, transform: "scale(1.03)" } }}
           >
-            {t(ACTION_KEY[item.media_type] || "hero.read")}
+            {t((resuming ? RESUME_KEY : ACTION_KEY)[item.media_type] || (resuming ? "hero.resumeRead" : "hero.read"))}
           </Button>
           <Button
             onClick={press}

@@ -45,6 +45,9 @@ import { RADIUS, SHADOW, MOTION, TILE, WHITE } from "../../../theme/tokens";
 const fabSx = {
   position: "absolute",
   zIndex: 1,
+  // The cover lets clicks through to the stretched link (see below); its
+  // buttons take them back.
+  pointerEvents: "auto",
   width: 34,
   height: 34,
   borderRadius: "50%",
@@ -123,6 +126,12 @@ const MediaTile = ({
           className="MediaTile-cover"
           sx={{
             position: "relative",
+            // The hover lift (transform) makes the cover a stacking context, which
+            // traps its buttons' z-index under the title link's ::after — the ⋯
+            // menu could not be clicked. So the cover sits ABOVE that layer and
+            // passes clicks through to it; only its buttons catch them.
+            zIndex: 2,
+            pointerEvents: "none",
             aspectRatio: "1 / 1",
             borderRadius: `${RADIUS.cover}px`,
             overflow: "hidden",
@@ -226,7 +235,7 @@ const MediaTile = ({
               underline="none"
               sx={{
                 // The stretched link: this ::after covers the whole tile.
-                "&::after": { content: '""', position: "absolute", inset: 0, borderRadius: `${RADIUS.tile}px` },
+                "&::after": { content: '""', position: "absolute", inset: 0, zIndex: 1, borderRadius: `${RADIUS.tile}px` },
                 "&:focus-visible": { outline: "none" },
                 "&:focus-visible::after": { outline: "2px solid", outlineColor: "primary.main", outlineOffset: "2px" },
               }}
@@ -241,7 +250,7 @@ const MediaTile = ({
                 aria-label={t("card.allByCreator", { name: item.creator_name })}
                 dir="auto"
                 sx={{
-                  position: "relative", zIndex: 1,
+                  position: "relative", zIndex: 2,
                   mt: 0.25, fontSize: { xs: 13, md: 14 }, color: "text.secondary", textAlign: "start",
                   borderRadius: 1, "&:hover": { color: "text.primary", textDecoration: "underline" },
                 }}

@@ -17,18 +17,21 @@
     "likes": "Content I liked",
     "saved": "Saved content",
     "continue": "Continue watching",
-    "downloads": "Offline listening"
+    "downloads": "Offline listening",
+    "history": "History"
   },
   "shelfEmpty": {
     "likes": "You haven't liked anything yet",
     "saved": "You haven't saved anything yet",
     "savedAllInLists": "Everything you saved is organised in the lists below",
-    "continue": "You haven't started watching a lesson yet"
+    "continue": "You haven't started watching a lesson yet",
+    "history": "You have not opened a lesson yet"
   },
   "shelfSubtitle": {
     "continue": "Pick up where you left off",
     "likes": "Everything you liked",
-    "saved": "Everything you saved, in one place"
+    "saved": "Everything you saved, in one place",
+    "history": "Everything you were in, most recent first"
   },
   "colorMode": {
     "toDark": "Dark mode"
@@ -73,5 +76,9 @@
     "ask": "Ask",
     "myCourses": "Courses",
     "notebook": "Notebook"
+  },
+  "fullscreen": {
+    "enter": "Full screen",
+    "exit": "Exit full screen"
   }
 }

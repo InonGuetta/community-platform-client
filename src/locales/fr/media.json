@@ -52,7 +52,9 @@
     "settings": "Paramètres",
     "settingsLabel": "Paramètres du lecteur",
     "speed": "Vitesse de lecture",
-    "lessonFallback": "Cours"
+    "lessonFallback": "Cours",
+    "fullscreen": "Plein écran",
+    "exitFullscreen": "Quitter le plein écran"
   },
   "bar": {
     "label": "En cours de lecture",
@@ -62,6 +64,7 @@
     "close": "Fermer le lecteur",
     "more": "Plus d’options",
     "speedValue": "Vitesse : {{rate}}X",
-    "video": "Vidéo du cours"
+    "video": "Vidéo du cours",
+    "download": "Télécharger"
   }
 }

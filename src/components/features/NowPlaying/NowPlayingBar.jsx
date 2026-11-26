@@ -23,6 +23,8 @@ import OpenInFullRoundedIcon from "@mui/icons-material/OpenInFullRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import CheckIcon from "@mui/icons-material/Check";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import DownloadMenu from "../DownloadMenu/DownloadMenu";
 import { useTranslation } from "react-i18next";
 import CoverArt from "../MediaTile/CoverArt";
 import TypeAccent from "../TypeAccent/TypeAccent";
@@ -43,7 +45,8 @@ import { DOCK, NOW_PLAYING, RADIUS, SHADOW } from "../../../theme/tokens";
 //
 //   audio  the bar alone: the cover, the title and the lecturer at the start;
 //          back, play, forward and the line with its times in the middle;
-//          speed, volume, "open the lesson page" and close at the end.
+//          download, speed, volume, "open the lesson page" and close at the
+//          end. Download opens the same menu as the lesson page's pill.
 //   video  the same bar, with the picture in a window standing on it at the
 //          start corner, attached to it — the bar's buttons drive it. Below md
 //          the picture plays inside the row, in the cover's place, so the dock
@@ -104,6 +107,7 @@ const BarBody = ({
   const { end } = useDirection();
   const [speedAnchor, setSpeedAnchor] = useState(null);
   const [moreAnchor, setMoreAnchor] = useState(null);
+  const [downloadAnchor, setDownloadAnchor] = useState(null);
   const isVideo = item.media_type === mediaTypes.video;
   const silent = muted || volume === 0;
   const lecturer = item.creator_name && item.creator_name !== defaultCreatorName ? creatorDisplayName(item.creator_name) : "";
@@ -323,8 +327,16 @@ const BarBody = ({
             <Box component="span" dir="ltr" sx={timeSx}>{formatTime(duration)}</Box>
           </Box>
 
-          {/* End: speed, volume, open the page. */}
+          {/* End: download, speed, volume, open the page. */}
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.5, flex: "1 1 0", minWidth: 0 }}>
+            <IconButton
+              onClick={(e) => setDownloadAnchor(e.currentTarget)}
+              aria-label={t("bar.download")}
+              aria-haspopup="menu"
+              sx={iconSx}
+            >
+              <DownloadRoundedIcon />
+            </IconButton>
             <Button
               size="small"
               onClick={(e) => setSpeedAnchor(e.currentTarget)}
@@ -400,11 +412,27 @@ const BarBody = ({
         </MenuItem>
         {speedItems}
         <Divider />
+        <MenuItem onClick={() => { setDownloadAnchor(moreAnchor); setMoreAnchor(null); }} sx={{ textAlign: "start" }}>
+          <ListItemIcon><DownloadRoundedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText primary={t("bar.download")} />
+        </MenuItem>
         <MenuItem onClick={() => { setMoreAnchor(null); expand(); }} sx={{ textAlign: "start" }}>
           <ListItemIcon><OpenInFullRoundedIcon fontSize="small" /></ListItemIcon>
           <ListItemText primary={t("bar.expand")} />
         </MenuItem>
       </Menu>
+      {/* Mounted only while open: its hook reads the lesson's saved-offline
+          state, and a closed menu has no reason to. */}
+      {downloadAnchor && (
+        <DownloadMenu
+          anchorEl={downloadAnchor}
+          open
+          onClose={() => setDownloadAnchor(null)}
+          media={item}
+          hasTranscript={item.has_transcript}
+          direction="up"
+        />
+      )}
     </Box>
   );
 };

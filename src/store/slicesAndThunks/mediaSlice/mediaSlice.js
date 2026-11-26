@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchAllMedia, fetchMoreMedia, fetchOneMedia, fetchContinueWatching } from "./mediaGet";
+import { fetchAllMedia, fetchMoreMedia, fetchOneMedia, fetchContinueWatching, fetchHistory } from "./mediaGet";
 import { uploadMedia } from "./mediaPost";
 import { updateMedia } from "./mediaPut";
 import { deleteMedia } from "./mediaDelete";
@@ -29,6 +29,9 @@ const mediaSlice = createSlice({
     status: statuses.idle,
     error: null,
     continueWatching: { items: [], status: statuses.idle, stale: false },
+    // The same shape, for the history shelf and the archive's hero (every kind
+    // of lesson the user was in, not only what played).
+    history: { items: [], status: statuses.idle, stale: false },
   },
   reducers: {
     clearSelectedItem(state) { state.selectedItem = null; },
@@ -41,6 +44,11 @@ const mediaSlice = createSlice({
     // and resetting would make it vanish and come back while it reloads.
     markContinueWatchingStale(state) {
       state.continueWatching.stale = true;
+      state.history.stale = true;
+    },
+    // A lesson page was just opened: the history has a new first entry.
+    markHistoryStale(state) {
+      state.history.stale = true;
     },
   },
   extraReducers: (builder) => {
@@ -95,6 +103,21 @@ const mediaSlice = createSlice({
         state.error = action.payload?.message;
       })
 
+      // As continueWatching: a stale list reloads in place, without a spinner.
+      .addCase(fetchHistory.pending, (state) => {
+        const refresh = state.history.stale && state.history.status !== statuses.idle;
+        state.history.stale = false;
+        if (!refresh) state.history.status = statuses.loading;
+      })
+      .addCase(fetchHistory.fulfilled, (state, action) => {
+        state.history.status = statuses.succeeded;
+        state.history.items = action.payload;
+      })
+      .addCase(fetchHistory.rejected, (state, action) => {
+        state.history.status = statuses.failed;
+        state.error = action.payload?.message;
+      })
+
       .addCase(fetchOneMedia.pending, (state) => { state.status = statuses.loading; })
       .addCase(fetchOneMedia.fulfilled, (state, action) => { state.status = statuses.succeeded; state.selectedItem = action.payload; })
       .addCase(fetchOneMedia.rejected, (state, action) => { state.status = statuses.failed; state.error = action.payload?.message; })
@@ -127,5 +150,5 @@ const mediaSlice = createSlice({
   },
 });
 
-export const { clearSelectedItem, clearError, markContinueWatchingStale } = mediaSlice.actions;
+export const { clearSelectedItem, clearError, markContinueWatchingStale, markHistoryStale } = mediaSlice.actions;
 export default mediaSlice.reducer;

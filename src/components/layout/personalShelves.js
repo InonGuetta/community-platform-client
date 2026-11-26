@@ -4,10 +4,11 @@ import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import HistoryIcon from "@mui/icons-material/History";
+import RestoreRoundedIcon from "@mui/icons-material/RestoreRounded";
 import DownloadForOfflineIcon from "@mui/icons-material/DownloadForOffline";
 import { fetchLikedMedia } from "../../store/slicesAndThunks/likesSlice/likesGet";
 import { fetchSavedMedia } from "../../store/slicesAndThunks/savesSlice/savesGet";
-import { fetchContinueWatching } from "../../store/slicesAndThunks/mediaSlice/mediaGet";
+import { fetchContinueWatching, fetchHistory } from "../../store/slicesAndThunks/mediaSlice/mediaGet";
 
 // The one description of each personal shelf — the collections a user builds for
 // themselves, as opposed to the places everyone browses.
@@ -120,6 +121,23 @@ export const CONTINUE_SHELF = {
   },
 };
 
+// Everything the user was in, newest first — every kind of lesson, a book as
+// much as a recording (server migration 055), where "המשך צפייה" holds only
+// what played and has a position to carry on from. The archive's hero is the
+// first of it. Opening a lesson's page is a visit; so is playing one in the
+// bottom player.
+export const HISTORY_SHELF = {
+  path: "/history",
+  labelKey: "shelves.history",
+  Icon: RestoreRoundedIcon,
+  collection: {
+    fetch: fetchHistory,
+    selectSlice: (state) => state.media.history,
+    emptyKey: "shelfEmpty.history",
+    subtitleKey: "shelfSubtitle.history",
+  },
+};
+
 // Lessons kept on this device for listening with no network (PRD MOB-2). Like
 // the notebook it has no `collection`: its list comes from the device, not
 // from a thunk that asks the server — which is the whole point of it.
@@ -132,7 +150,7 @@ export const DOWNLOADS_SHELF = {
 // Order matters: it is the order of the dropdown and of the drawer's section.
 // Continue watching leads, because it is the one a returning user wants first —
 // the others are things they have to have decided to keep.
-export const PERSONAL_SHELVES = [CONTINUE_SHELF, NOTEBOOK_SHELF, LIKES_SHELF, SAVED_SHELF, DOWNLOADS_SHELF];
+export const PERSONAL_SHELVES = [CONTINUE_SHELF, HISTORY_SHELF, NOTEBOOK_SHELF, LIKES_SHELF, SAVED_SHELF, DOWNLOADS_SHELF];
 
 // The shelves that CollectionPage can render, which is also what App.jsx builds
 // routes from — so a shelf added above arrives with its page already wired.

@@ -52,7 +52,9 @@
     "settings": "Settings",
     "settingsLabel": "Player settings",
     "speed": "Playback speed",
-    "lessonFallback": "Lesson"
+    "lessonFallback": "Lesson",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen"
   },
   "bar": {
     "label": "Now playing",
@@ -62,6 +64,7 @@
     "close": "Close the player",
     "more": "More options",
     "speedValue": "Speed: {{rate}}X",
-    "video": "Lesson video"
+    "video": "Lesson video",
+    "download": "Download"
   }
 }

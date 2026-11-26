@@ -11,7 +11,7 @@ import { updateBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bo
 import { notify } from "../../../store/slicesAndThunks/snackbarSlice";
 import { isSaveShortcut } from "../../../utilities/keyboard";
 import { bookmarkNames } from "../../../utilities/noteSource";
-import { inReadingOrder } from "../../../utilities/bookmarks";
+import { inReadingOrder, bookmarkSectionsByType } from "../../../utilities/bookmarks";
 import { useNoteEditing } from "../../features/Notes/useNoteEditing";
 import { useSourceTrail } from "./useSourceTrail";
 import { useNoteBodies } from "./useNoteBodies";
@@ -140,6 +140,9 @@ export const useNotebookPageController = () => {
     }
     return groups;
   }, [bookmarks, search, t]);
+
+  // The same groups, one section per kind of content, the fullest first.
+  const bookmarkSections = useMemo(() => bookmarkSectionsByType(bookmarkGroups), [bookmarkGroups]);
 
 
   // A note created or picked from the list is scrolled to the top of the view
@@ -297,6 +300,7 @@ export const useNotebookPageController = () => {
     allVisibleSelected,
     askSources,
     bookmarkGroups,
+    bookmarkSections,
     bookmarks,
     bookmarksStatus,
     cardNodes,

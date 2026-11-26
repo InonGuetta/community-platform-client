@@ -26,7 +26,7 @@ const NotebookPage = () => {
     activeNoteId,
     allVisibleSelected,
     askSources,
-    bookmarkGroups,
+    bookmarkSections,
     bookmarks,
     bookmarksStatus,
     cardNodes,
@@ -166,7 +166,7 @@ const NotebookPage = () => {
           />
 
           <BookmarksSidebar
-            bookmarkGroups={bookmarkGroups}
+            bookmarkSections={bookmarkSections}
             bookmarks={bookmarks}
             bookmarksStatus={bookmarksStatus}
             openSource={openSource}

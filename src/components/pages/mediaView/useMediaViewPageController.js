@@ -5,7 +5,8 @@ import { openingPageFrom, TIME_PARAM } from "../../../utilities/deepLink";
 import { fetchOneMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
 import { fetchBookmarks } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksGet";
 import { createBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bookmarksPost";
-import { clearSelectedItem } from "../../../store/slicesAndThunks/mediaSlice/mediaSlice";
+import { clearSelectedItem, markHistoryStale } from "../../../store/slicesAndThunks/mediaSlice/mediaSlice";
+import { mediaApi } from "../../../api/mediaApi";
 import { selectSelectedMedia } from "../../../store/selectors/mediaSelectors";
 import { selectBookmarksByMediaId } from "../../../store/selectors/bookmarksSelectors";
 import useTakeOver from "../../features/NowPlaying/useTakeOver";
@@ -70,6 +71,16 @@ const useMediaViewPageController = () => {
       dispatch(fetchBookmarks(id));
     }
   }, [dispatch, id]);
+
+  // A visit, for the history and the archive's hero (server migration 055):
+  // once the lesson has loaded — never for one that answered 404 — and once per
+  // lesson opened. Not worth a word to the reader if it fails: the page works
+  // the same, and the history simply misses this one opening.
+  const loadedId = media && String(media.id) === String(id) ? media.id : null;
+  useEffect(() => {
+    if (!loadedId) return;
+    mediaApi.recordView(loadedId).then(() => dispatch(markHistoryStale())).catch(() => {});
+  }, [loadedId, dispatch]);
 
   const handleCreateBookmark = (timestampSeconds, note) =>
     dispatch(createBookmark({ mediaId: Number(id), timestampSeconds, note }));

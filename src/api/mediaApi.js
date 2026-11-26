@@ -88,6 +88,15 @@ export const mediaApi = {
   continueWatching: async () =>
     (await axiosInstance.get("/media/continue-watching")).data,
 
+  // Everything this user was in, every kind of lesson, newest first — a book
+  // opened counts as much as a recording played (server migration 055).
+  history: async () => (await axiosInstance.get("/media/history")).data,
+
+  // The lesson page was opened: the history's visit (204, no body).
+  recordView: async (id) => {
+    await axiosInstance.post(`/media/${id}/view`);
+  },
+
   // Playback position, per user per item. Both sides of the resume feature.
   getProgress: async (id) => (await axiosInstance.get(`/media/${id}/progress`)).data,
 

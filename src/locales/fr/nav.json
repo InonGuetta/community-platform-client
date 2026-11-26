@@ -17,18 +17,21 @@
     "likes": "Contenu que j'ai aimé",
     "saved": "Contenu enregistré",
     "continue": "Reprendre",
-    "downloads": "Écoute hors ligne"
+    "downloads": "Écoute hors ligne",
+    "history": "Historique"
   },
   "shelfEmpty": {
     "likes": "Vous n'avez encore rien aimé",
     "saved": "Vous n'avez encore rien enregistré",
     "savedAllInLists": "Tout ce que vous avez enregistré est rangé dans les listes ci-dessous",
-    "continue": "Vous n'avez encore commencé aucun cours"
+    "continue": "Vous n'avez encore commencé aucun cours",
+    "history": "Vous n'avez encore ouvert aucun cours"
   },
   "shelfSubtitle": {
     "continue": "Reprenez là où vous vous êtes arrêté",
     "likes": "Tout ce que vous avez aimé",
-    "saved": "Tout ce que vous avez enregistré, au même endroit"
+    "saved": "Tout ce que vous avez enregistré, au même endroit",
+    "history": "Tout ce que vous avez consulté, du plus récent au plus ancien"
   },
   "colorMode": {
     "toDark": "Mode sombre"
@@ -73,5 +76,9 @@
     "ask": "Interroger",
     "myCourses": "Cours",
     "notebook": "Carnet"
+  },
+  "fullscreen": {
+    "enter": "Plein écran",
+    "exit": "Quitter le plein écran"
   }
 }

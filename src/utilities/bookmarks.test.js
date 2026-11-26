@@ -8,6 +8,7 @@ import {
   placeShortLabel,
   bookmarkLines,
   isPageBookmark,
+  bookmarkSectionsByType,
   pageMarksFor,
 } from "./bookmarks";
 
@@ -290,5 +291,31 @@ describe("the marks to draw on a page", () => {
   test("a page with nothing on it draws nothing", () => {
     expect(pageMarksFor(41, [pageMark])).toEqual([]);
     expect(pageMarksFor(9, [])).toEqual([]);
+  });
+});
+
+describe("bookmarkSectionsByType", () => {
+  const group = (mediaType, n) => ({ mediaType, items: Array.from({ length: n }, (_, i) => ({ id: `${mediaType}${i}` })) });
+
+  test("the type with the most marks comes first", () => {
+    const sections = bookmarkSectionsByType([group("audio", 3), group("text", 5), group("video", 10)]);
+    expect(sections.map((s) => [s.type, s.count])).toEqual([["video", 10], ["text", 5], ["audio", 3]]);
+  });
+
+  test("counts marks, not lessons", () => {
+    const sections = bookmarkSectionsByType([group("audio", 1), group("audio", 1), group("audio", 1), group("text", 4)]);
+    expect(sections.map((s) => [s.type, s.groups.length, s.count])).toEqual([["text", 1, 4], ["audio", 3, 3]]);
+  });
+
+  test("a tie keeps audio, video, text", () => {
+    expect(bookmarkSectionsByType([group("text", 2), group("video", 2), group("audio", 2)]).map((s) => s.type))
+      .toEqual(["audio", "video", "text"]);
+  });
+
+  test("a type with no marks has no section, and an unknown type is a recording", () => {
+    const sections = bookmarkSectionsByType([group(undefined, 2)]);
+    expect(sections).toHaveLength(1);
+    expect(sections[0].type).toBe("audio");
+    expect(bookmarkSectionsByType([])).toEqual([]);
   });
 });

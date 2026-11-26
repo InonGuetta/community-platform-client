@@ -22,6 +22,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import SpeedIcon from "@mui/icons-material/Speed";
 import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
 import ClosedCaptionOffOutlinedIcon from "@mui/icons-material/ClosedCaptionOffOutlined";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { alpha } from "@mui/material/styles";
 import { useDownloadItems } from "../DownloadMenu/downloadOptions";
 import { formatTime } from "../../../utilities/formatTime";
@@ -108,6 +110,8 @@ const PlayerControls = ({
   onBusyChange,
   // PRD MOB-5. The button is there only when the lesson has captions to show.
   captionsAvailable = false, captionsOn = false, onToggleCaptions,
+  // A video's full screen — the overlay's last button; absent on the card.
+  fullscreenAvailable = false, fullscreenOn = false, onToggleFullscreen,
 }) => {
   const { t } = useTranslation("media");
   const theme = useTheme();
@@ -325,6 +329,15 @@ const PlayerControls = ({
     </Tooltip>
   );
 
+  const fullscreenLabel = fullscreenOn ? t("player.exitFullscreen") : t("player.fullscreen");
+  const fullscreenButton = fullscreenAvailable && (
+    <Tooltip title={fullscreenLabel}>
+      <IconButton onClick={onToggleFullscreen} size="small" aria-label={fullscreenLabel} aria-pressed={fullscreenOn} sx={iconSx}>
+        {fullscreenOn ? <FullscreenExitIcon /> : <FullscreenIcon />}
+      </IconButton>
+    </Tooltip>
+  );
+
   const settingsMenu = (
     <Menu
       anchorEl={menuAnchor}
@@ -446,6 +459,7 @@ const PlayerControls = ({
 
       {captionsButton}
       {settingsButton}
+      {fullscreenButton}
       {settingsMenu}
     </Box>
   );

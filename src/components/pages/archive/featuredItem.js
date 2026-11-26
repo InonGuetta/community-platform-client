@@ -12,9 +12,9 @@ export const featuredItem = (items, { hasActiveFilter = false, sortOrder = DEFAU
   return (items || []).find((item) => item.is_published) || null;
 };
 
-// What the banner shows (owner's change, polish run): the item the reader
-// consumed most recently — the first of "המשך צפייה" — and only when there is
-// none, today's newest published lesson. `gate` is featuredItem's own answer:
+// What the banner shows (owner's change, polish run; history since round 3):
+// the lesson the reader was in most recently, of any kind — the first of the
+// history — and only when there is none, today's newest published lesson. `gate` is featuredItem's own answer:
 // when it says there is no banner (a search, a filter, another order), neither
 // does this. `settled` is false while the shelf is still loading, so the banner
 // does not flash the newest lesson and then swap it.

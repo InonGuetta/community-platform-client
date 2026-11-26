@@ -80,7 +80,8 @@ const Dock = ({ bottom = DOCK_GAP }) => {
               outline: "none",
               borderRadius: "14px",
               [theme.breakpoints.up("md")]: {
-                "&:hover, &:focus-visible": { transform: "scale(1.28) translateY(-6px)" },
+                // Half the lift it had (1.28 and 6px): it rose too far.
+                "&:hover, &:focus-visible": { transform: "scale(1.14) translateY(-3px)" },
                 "&:hover .dock-tip, &:focus-visible .dock-tip": { opacity: 1 },
               },
               "&:active": { transform: "scale(1.1)" },

@@ -52,7 +52,9 @@
     "settings": "הגדרות",
     "settingsLabel": "הגדרות נגן",
     "speed": "מהירות הפעלה",
-    "lessonFallback": "שיעור"
+    "lessonFallback": "שיעור",
+    "fullscreen": "מסך מלא",
+    "exitFullscreen": "יציאה ממסך מלא"
   },
   "bar": {
     "label": "מתנגן עכשיו",
@@ -62,6 +64,7 @@
     "close": "סגירת הנגן",
     "more": "אפשרויות נוספות",
     "speedValue": "מהירות: {{rate}}X",
-    "video": "הווידאו של השיעור"
+    "video": "הווידאו של השיעור",
+    "download": "הורדה"
   }
 }

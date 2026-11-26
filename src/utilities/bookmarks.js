@@ -162,3 +162,25 @@ export const bookmarkLines = (bookmark) => {
   // this", and an apology is not.
   return { title: note || place, detail: note ? place : "" };
 };
+
+// The notebook's bookmarks, one section per kind of content: every lesson's
+// group of marks under the section of its type — recordings, videos, books —
+// and the sections in order of how many marks each holds, the fullest first.
+// A tie keeps the fixed order audio, video, text. An unknown type counts as a
+// recording, as accentKeyFor in features/TypeAccent does. `groups` is
+// [{ mediaType, items }] as the notebook builds them; each section is
+// { type, count, groups }, and a type with no marks has no section.
+const SECTION_ORDER = ["audio", "video", "text"];
+const sectionTypeOf = (mediaType) => (mediaType === "video" || mediaType === "text" ? mediaType : "audio");
+
+export const bookmarkSectionsByType = (groups = []) => {
+  const sections = SECTION_ORDER.map((type) => ({ type, count: 0, groups: [] }));
+  for (const group of groups) {
+    const section = sections[SECTION_ORDER.indexOf(sectionTypeOf(group.mediaType))];
+    section.groups.push(group);
+    section.count += group.items.length;
+  }
+  return sections
+    .filter((section) => section.groups.length > 0)
+    .sort((a, b) => b.count - a.count || SECTION_ORDER.indexOf(a.type) - SECTION_ORDER.indexOf(b.type));
+};

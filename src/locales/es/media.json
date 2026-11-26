@@ -52,7 +52,9 @@
     "settings": "Ajustes",
     "settingsLabel": "Ajustes del reproductor",
     "speed": "Velocidad de reproducción",
-    "lessonFallback": "Clase"
+    "lessonFallback": "Clase",
+    "fullscreen": "Pantalla completa",
+    "exitFullscreen": "Salir de pantalla completa"
   },
   "bar": {
     "label": "Reproduciendo ahora",
@@ -62,6 +64,7 @@
     "close": "Cerrar el reproductor",
     "more": "Más opciones",
     "speedValue": "Velocidad: {{rate}}X",
-    "video": "Vídeo de la clase"
+    "video": "Vídeo de la clase",
+    "download": "Descargar"
   }
 }

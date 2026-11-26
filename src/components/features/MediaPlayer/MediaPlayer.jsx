@@ -6,6 +6,7 @@ import PlayerControls from "./PlayerControls";
 import { mediaTypes } from "../../../utilities/constant";
 import { RADIUS, SHADOW, CARD_SHELL_SX, WHITE } from "../../../theme/tokens";
 import { captionAt } from "../../../utilities/transcriptTiming";
+import { useFullscreen } from "../../../utilities/useFullscreen";
 
 // A video's stage: the picture's own shape. Audio has no stage any more — it
 // is a card under the lesson's cover (D-21).
@@ -85,6 +86,15 @@ const MediaPlayer = forwardRef((
 
   const controlsVisible = !isVideo || !playing || controlsBusy || pointerAwake;
 
+  // ── Full screen (a video only) ──────────────────────────────────────────────
+  //
+  // The whole stage goes full screen — picture, captions and our own bar — not
+  // the <video> alone, which would bring back the browser's controls and drop
+  // ours (the settings menu with speed and downloads). A double click on the
+  // picture does the same, as in every player people already use.
+  const stageRef = useRef(null);
+  const fullscreen = useFullscreen(stageRef);
+
   // ── Captions (PRD MOB-5) ────────────────────────────────────────────────────
   //
   // Drawn by the page rather than as a <track> on the media element: an audio
@@ -146,6 +156,9 @@ const MediaPlayer = forwardRef((
       captionsAvailable={hasCaptions}
       captionsOn={captionsOn}
       onToggleCaptions={toggleCaptions}
+      fullscreenAvailable={isVideo && fullscreen.supported}
+      fullscreenOn={fullscreen.active}
+      onToggleFullscreen={fullscreen.toggle}
     />
   );
 
@@ -216,6 +229,8 @@ const MediaPlayer = forwardRef((
   // ── Video: the picture, with the bar floating over its foot ────────────────
   return (
     <Box
+      ref={stageRef}
+      data-testid="player-stage"
       sx={{
         position: "relative",
         width: "100%",
@@ -224,9 +239,14 @@ const MediaPlayer = forwardRef((
         borderRadius: `${RADIUS.hero}px`,
         boxShadow: SHADOW.player,
         overflow: "hidden",
+        // Full screen: the stage is the screen, square-cornered, and the
+        // picture fills it at its own shape (objectFit: contain, below).
+        "&:fullscreen": { borderRadius: 0, display: "flex", alignItems: "stretch" },
+        "&:fullscreen > .player-frame": { aspectRatio: "auto", height: "100%" },
       }}
     >
       <Box
+        className="player-frame"
         onPointerMove={wakeControls}
         // Leaving the picture is as clear a "done with the controls" as running
         // out of time, and waiting the full delay afterwards only leaves the bar
@@ -249,6 +269,7 @@ const MediaPlayer = forwardRef((
             playback behind it. */}
         <Box
           onClick={togglePlay}
+          onDoubleClick={fullscreen.supported ? fullscreen.toggle : undefined}
           sx={{
             position: "absolute",
             inset: 0,

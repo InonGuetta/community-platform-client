@@ -36,6 +36,11 @@ export const fetchContinueWatching = createApiThunk("media/continueWatching", "F
   return await mediaApi.continueWatching();
 });
 
+// The history shelf and the archive's hero: every lesson the user was in.
+export const fetchHistory = createApiThunk("media/history", "Failed to fetch history", async () => {
+  return await mediaApi.history();
+});
+
 export const fetchOneMedia = createApiThunk("media/fetchOne", "Failed to fetch media item", async (id) => {
   return await mediaApi.getOne(id);
 });

@@ -7,6 +7,10 @@ import IconButton from "@mui/material/IconButton";
 import Skeleton from "@mui/material/Skeleton";
 import MenuIcon from "@mui/icons-material/Menu";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import FullscreenRoundedIcon from "@mui/icons-material/FullscreenRounded";
+import FullscreenExitRoundedIcon from "@mui/icons-material/FullscreenExitRounded";
+import Tooltip from "@mui/material/Tooltip";
+import { useFullscreen } from "../../../utilities/useFullscreen";
 import { RADIUS, SHELL } from "../../../theme/tokens";
 import { HEADER_HEIGHT } from "../shellGeometry";
 import { isActive } from "../navConfig";
@@ -19,9 +23,11 @@ import useAppShell from "./useAppShell";
 import { avatarInitial } from "./useAccount";
 import { BrandWaveIcon } from "./dockIcons";
 
-// The top header (design/REDESIGN_V4.md, component 1): sticky, 48px, glass.
-// At the start the brand and the five places everyone browses; at the end the
-// bell and the avatar, which opens the avatar menu. Below md the five links
+// The top header (design/REDESIGN_V4.md, component 1): sticky, glass, 60px
+// (it was 48 — widened at the owner's request). At the start the brand; in the
+// middle of the bar the places everyone browses, "ארכיון" to "תרומה", centred
+// on the bar itself rather than pushed against the brand; at the end the full
+// screen button, the bell and the avatar, which opens the avatar menu. Below md the five links
 // give way to a hamburger that opens the side drawer — the only menu on a phone
 // (decision 2). Everything else the old bar held (the personal shelves, the
 // management links, the language, the colour mode, installing, signing out) is
@@ -30,7 +36,7 @@ import { BrandWaveIcon } from "./dockIcons";
 // variant="minimal": the brand and the language only — the sign-in pages
 // (decision 5, rendered by AuthLayout) and anyone not signed in.
 
-const Frame = ({ children }) => (
+const Frame = ({ children, centred = false }) => (
   <Box
     component="header"
     sx={(theme) => ({
@@ -56,6 +62,13 @@ const Frame = ({ children }) => (
         alignItems: "center",
         justifyContent: "space-between",
         gap: 2,
+        // Three columns from md up when the bar has a middle: the two sides take
+        // equal shares, so the middle sits at the bar's true centre whatever the
+        // brand's and the buttons' widths.
+        ...(centred && {
+          display: { xs: "flex", md: "grid" },
+          gridTemplateColumns: { md: "1fr auto 1fr" },
+        }),
       }}
     >
       {children}
@@ -130,7 +143,7 @@ const PendingHeader = () => (
 const PrimaryLinks = ({ links, pathname }) => {
   const { t } = useTranslation("nav");
   return (
-    <Box component="nav" aria-label={t("mainNav")} sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 3 }}>
+    <Box component="nav" aria-label={t("mainNav")} sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", justifyContent: "center", gap: { md: 3, lg: 4 } }}>
       {links.map((link) => {
         const active = isActive(link, pathname);
         return (
@@ -140,7 +153,7 @@ const PrimaryLinks = ({ links, pathname }) => {
             to={link.to}
             aria-current={active ? "page" : undefined}
             sx={{
-              fontSize: 13,
+              fontSize: 15,
               whiteSpace: "nowrap",
               textDecoration: "none",
               color: active ? "text.primary" : "surface.ink2",
@@ -214,6 +227,27 @@ const AvatarButton = ({ shell }) => {
   );
 };
 
+// What F11 does, as a button beside the bell. Not drawn where the browser
+// offers no full screen (an iPhone), rather than as a button that does nothing.
+const FullscreenButton = () => {
+  const { t } = useTranslation("nav");
+  const { supported, active, toggle } = useFullscreen();
+  if (!supported) return null;
+  const label = active ? t("fullscreen.exit") : t("fullscreen.enter");
+  return (
+    <Tooltip title={label}>
+      <IconButton
+        onClick={toggle}
+        aria-label={label}
+        aria-pressed={active}
+        sx={{ display: { xs: "none", md: "inline-flex" }, color: "surface.ink2", "&:hover": { color: "text.primary" } }}
+      >
+        {active ? <FullscreenExitRoundedIcon sx={{ fontSize: 22 }} /> : <FullscreenRoundedIcon sx={{ fontSize: 22 }} />}
+      </IconButton>
+    </Tooltip>
+  );
+};
+
 const SignedInHeader = () => {
   const { t } = useTranslation("nav");
   const shell = useAppShell();
@@ -227,8 +261,8 @@ const SignedInHeader = () => {
 
   return (
     <>
-      <Frame>
-        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 4 }, minWidth: 0 }}>
+      <Frame centred>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
           <IconButton
             onClick={openDrawer}
             aria-label={drawerOpen ? t("drawer.close") : t("drawer.open")}
@@ -238,9 +272,10 @@ const SignedInHeader = () => {
             <MenuIcon sx={{ fontSize: 20 }} />
           </IconButton>
           <Brand />
-          <PrimaryLinks links={config.primary} pathname={pathname} />
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexShrink: 0 }}>
+        <PrimaryLinks links={config.primary} pathname={pathname} />
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 1.5, flexShrink: 0 }}>
+          <FullscreenButton />
           <NotificationBell
             items={bell.items}
             unread={bell.unread}

@@ -65,6 +65,7 @@ const SessionCard = ({ title, badges, actions }) => (
 const cardsGrid = { display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" } };
 
 const SessionsPage = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation(["sessions", "common"]);
   const {
     rooms, upcoming, createDialogOpen, setCreateDialogOpen,

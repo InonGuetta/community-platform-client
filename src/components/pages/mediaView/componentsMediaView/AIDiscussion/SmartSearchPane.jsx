@@ -37,6 +37,7 @@ const MAX_QUERY_CHARS = 300;
 const STRONG = 0.7;
 
 const ResultCard = ({ hit, isText, onSeek, onOpenPage }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("lesson");
   const place = placeOf(hit);
   const openable = canOpenPlace(place, { onSeek, onOpenPage });

@@ -21,6 +21,7 @@ import { roleLabels, roles } from "../../../utilities/constant";
 // one-line answer here rather than only in an email they may not read.
 
 const PendingRoleBanner = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { user } = useAccount();
   const { t } = useTranslation("nav");
 

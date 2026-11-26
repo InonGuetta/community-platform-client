@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 // How a donation ended (PRD PAY-1): thanks, still being checked, or did not go
 // through — said by the row the server just brought in line with Stripe.
 const DonationResult = ({ donation, onAgain }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("donate");
   const text = resultText(donation?.status);
   return (

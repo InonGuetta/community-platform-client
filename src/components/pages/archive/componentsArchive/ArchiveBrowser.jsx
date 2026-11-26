@@ -20,6 +20,7 @@ import { formatNumber } from "../../../../utilities/formatDate";
 // on the lecturer's page: the lecturer is the page's, so the field choosing one
 // is not offered and does not count as a filter.
 const ArchiveBrowser = ({ archive: a, user, canUpload, onOpenUpload, chooseCreator = true }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("archive");
   const deleteTarget = a.filteredMedia.find((i) => i.id === a.deleteTargetId);
   const [filtersOpen, setFiltersOpen] = useState(false);

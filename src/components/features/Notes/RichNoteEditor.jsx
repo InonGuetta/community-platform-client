@@ -148,6 +148,7 @@ const droppedOnText = (editor, range, point) => {
 const RichNoteEditor = forwardRef(({
   html, onChange, onFormatsChange, onFocus, onError, onOpenSource, onRenameSource, placeholder, minHeight = 280,
 }, ref) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation(["notes", "common"]);
   const editorRef = useRef(null);
   // The editor and the image controls that float over it. Their positions are

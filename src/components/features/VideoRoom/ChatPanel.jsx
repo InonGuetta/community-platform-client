@@ -23,6 +23,7 @@ const timeOf = (at) =>
   new Date(at).toLocaleTimeString(intlLocale(), { hour: "2-digit", minute: "2-digit" });
 
 const ChatPanel = ({ messages, onSend, myUserId }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("sessions");
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);

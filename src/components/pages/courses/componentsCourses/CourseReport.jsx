@@ -52,6 +52,7 @@ const StatusCell = ({ cell, lessonTitle }) => {
 };
 
 const CourseReport = ({ courseId, courseTitle }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("courses");
   const { status, report, exportCsv } = useCourseReport(courseId);
 

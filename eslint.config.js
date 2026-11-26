@@ -84,16 +84,12 @@ export default [
       "react/react-in-jsx-scope": "off",
 
       // eslint-plugin-react-hooks 7 folds the React Compiler's rule family into
-      // "recommended". Most of them stay on — they are silent here and would
-      // catch real mistakes — but two fire on correct code and are turned off
-      // deliberately rather than worked around.
-      //
-      // preserve-manual-memoization reports that the compiler cannot preserve
-      // `useCallback(..., [dispatch, media?.id])` because it infers `media`
-      // instead. Depending on the id rather than the whole object is the more
-      // precise choice and is what we want; the complaint only matters to a
-      // compiler this project does not use.
-      "react-hooks/preserve-manual-memoization": "off",
+      // "recommended", and the compiler runs on this code (vite.config.js), so
+      // all of them stay on — a component that breaks one is a component the
+      // compiler silently leaves unoptimised. That includes
+      // preserve-manual-memoization: `useCallback(..., [dispatch, media?.id])`
+      // reading `media.id` inside makes the compiler skip the whole hook; read
+      // the id into a const first and depend on that. One rule stays off:
 
       // set-state-in-effect flags six places that reset derived state when the
       // thing they describe changes — a new media id, a newly selected note.
@@ -101,8 +97,8 @@ export default [
       // key rather than to synchronise in an effect. But that restructures four
       // working files, and the UI layer is the one part of this codebase with
       // no test coverage, so it is recorded as debt instead of refactored
-      // blind. Revisit alongside component tests, or when adopting the
-      // compiler.
+      // blind. Revisit alongside component tests. (The compiler compiles these
+      // components regardless: this check is the linter's, not a bail-out.)
       "react-hooks/set-state-in-effect": "off",
 
       // A hook called conditionally is always a bug, and there should be none.

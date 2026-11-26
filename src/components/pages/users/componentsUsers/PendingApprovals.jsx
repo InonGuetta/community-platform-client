@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 // Oldest first — it is a queue. The server orders it; this only renders.
 
 const PendingApprovals = ({ pending = [], currentUserId, onApprove, onReject }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation(["users", "common"]);
   // Which row has its "why" box open. One at a time: two reasons half-typed in
   // two boxes is a way to send the wrong one.

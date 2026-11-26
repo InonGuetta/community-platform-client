@@ -58,6 +58,7 @@ const FilterBar = ({
   onDateFilter,
   onClearAll,
 }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("archive");
   const activeCount = activeFilterCount({
     creatorFilter, tagIds, excludedTagIds, uploadedAfter, uploadedBefore, lengthOffered, durationRange,

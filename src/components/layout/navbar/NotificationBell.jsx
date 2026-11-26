@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 // "משתמשים" pill.
 
 const NotificationBell = ({ items, unread, anchor, open, onOpen, onClose, onSelect, onMarkAllRead }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   // The panel hangs from the bell toward the end of the line — into the page,
   // not off its edge.
   const { end } = useDirection();

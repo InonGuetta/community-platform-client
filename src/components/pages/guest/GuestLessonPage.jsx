@@ -53,6 +53,7 @@ const Player = ({ lesson, src }) => {
 };
 
 const GuestLessonPage = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("guest");
   const c = useGuestLessonPageController();
   const lesson = c.lesson;

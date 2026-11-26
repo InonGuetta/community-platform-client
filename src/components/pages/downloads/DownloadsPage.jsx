@@ -46,6 +46,7 @@ const OfflineNotice = ({ onRetry }) => {
 };
 
 const DownloadingRow = ({ entry, onCancel }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("downloads");
   const percent = percentOf(entry.received, entry.total);
   return (
@@ -71,6 +72,7 @@ const DownloadingRow = ({ entry, onCancel }) => {
 };
 
 const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("downloads");
   const byline = lessonByline(item);
   return (
@@ -119,6 +121,7 @@ const LessonRow = ({ item, isPlaying, offline, onPlay, onOpen, onRemove }) => {
 };
 
 const DownloadsPage = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation(["downloads", "nav"]);
   const c = useDownloadsPageController();
   const { Icon, labelKey } = DOWNLOADS_SHELF;

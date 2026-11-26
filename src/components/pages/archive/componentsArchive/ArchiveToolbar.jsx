@@ -44,6 +44,7 @@ const ArchiveToolbar = ({
   panel = null,
   onDismissFilters,
 }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("archive");
   const { end } = useDirection();
   const [sortAnchor, setSortAnchor] = useState(null);

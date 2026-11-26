@@ -21,6 +21,7 @@ import { useAuthSubmit } from "./useAuthSubmit";
 import { useTranslation } from "react-i18next";
 
 const SignUp = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("auth");
   const { error, isSubmitting, submit } = useAuthSubmit(register);
   // requestedRole, not role — this is an APPLICATION. The server creates every

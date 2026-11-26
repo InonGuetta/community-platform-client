@@ -8,6 +8,7 @@ import { noteHtmlToPlainText } from "../../../utilities/noteHtml";
  * @param {{ items: any[], drafts: Record<string, { title: string, body: string }> }} args
  */
 export const useNotesSearch = ({ items, drafts }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const [search, setSearch] = useState("");
 
   // Searched on the WORDS, not on the stored body: a body is markup, and

@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 // "התרומות שלי" (PRD PAY-2): every donation the reader made, with its real
 // status — pending ones were just checked against Stripe by the controller.
 const MyDonations = ({ history }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("donate");
   if (history.status !== "ready" || history.items.length === 0) return null;
   return (

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
 import {
@@ -92,9 +92,12 @@ const useMediaInsights = (mediaId, media) => {
   const hebrewFixStatus = transcript?.[AI_ACTION_FIELDS.hebrewFix.status];
   const headingsStatus = transcript?.[AI_ACTION_FIELDS.headings.status];
   const aiBusy = isAiActionBusy(hebrewFixStatus) || isAiActionBusy(headingsStatus);
+  // The status alone, not the row: see the dependencies below. (No row means no
+  // status, which is not in flight — the same early return as before.)
+  const transcriptStatus = transcript?.status;
 
   useEffect(() => {
-    if (!mediaId || !transcript || !(IN_FLIGHT_STATUSES.has(transcript.status) || aiBusy)) return;
+    if (!mediaId || !(IN_FLIGHT_STATUSES.has(transcriptStatus) || aiBusy)) return;
 
     let timer = null;
     let attempt = 0;
@@ -110,7 +113,9 @@ const useMediaInsights = (mediaId, media) => {
       // Nothing is watching a hidden tab, and browsers throttle these anyway.
       // Leaving `timer` null lets the visibility listener pick it back up.
       if (document.hidden) return;
-      timer = setTimeout(tick, nextPollDelay(attempt++));
+      const delay = nextPollDelay(attempt);
+      attempt += 1;
+      timer = setTimeout(tick, delay);
     };
 
     const tick = async () => {
@@ -134,23 +139,22 @@ const useMediaInsights = (mediaId, media) => {
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-    // Depends on transcript?.status, deliberately NOT on transcript. Every poll
+    // Depends on the status, deliberately NOT on transcript. Every poll
     // returns a new object, so depending on the whole thing would tear this
     // effect down and rebuild it on every response — resetting the backoff and
     // the ceiling clock each time, and defeating the point of both. Only a
     // change of status should restart it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, mediaId, transcript?.status, aiBusy, pollAttemptEpoch, transcriptRequest]);
+  }, [dispatch, mediaId, transcriptStatus, aiBusy, pollAttemptEpoch, transcriptRequest]);
 
   // An action finishing or failing is said out loud: it ran on the server for
   // minutes, and the reader may be looking at another tab of the page. Only a
   // CHANGE from busy is announced — a row first seen already finished (a visit
   // long after the run) is not news.
   const previousAi = useRef({ mediaId, hebrewFix: hebrewFixStatus, headings: headingsStatus });
-  useEffect(() => {
-    const before = previousAi.current;
-    previousAi.current = { mediaId, hebrewFix: hebrewFixStatus, headings: headingsStatus };
-    if (before.mediaId !== mediaId) return;
+  // The transcript is read for the error code only, at the moment a status
+  // changes — an effect event, so the row is not a dependency: depending on it
+  // would re-run the effect below on every poll.
+  const announce = useEffectEvent((before) => {
     const say = (outcome, done, failed, errorField) => {
       if (outcome === "done") dispatch(notify({ message: done, severity: "success" }));
       if (outcome === "error") {
@@ -159,10 +163,13 @@ const useMediaInsights = (mediaId, media) => {
     };
     say(aiActionOutcome(before.hebrewFix, hebrewFixStatus), i18n.t("lesson:aiActions.hebrewFixed"), i18n.t("lesson:aiActions.hebrewFixFailed"), AI_ACTION_FIELDS.hebrewFix.error);
     say(aiActionOutcome(before.headings, headingsStatus), i18n.t("lesson:aiActions.headingsMade"), i18n.t("lesson:aiActions.headingsFailed"), AI_ACTION_FIELDS.headings.error);
-    // The transcript is read for the error code only, at the moment a status
-    // changes; depending on it would re-run this on every poll.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, mediaId, hebrewFixStatus, headingsStatus]);
+  });
+  useEffect(() => {
+    const before = previousAi.current;
+    previousAi.current = { mediaId, hebrewFix: hebrewFixStatus, headings: headingsStatus };
+    if (before.mediaId !== mediaId) return;
+    announce(before);
+  }, [mediaId, hebrewFixStatus, headingsStatus]);
 
   // ── The two on-demand AI actions ───────────────────────────────────────────
 
@@ -174,26 +181,27 @@ const useMediaInsights = (mediaId, media) => {
   const generatingHeadings = requestingHeadings || isAiActionBusy(headingsStatus);
   const [generatingSummary, setGeneratingSummary] = useState(false);
 
+  const loadedId = media?.id;
   const generateHeadings = useCallback(async () => {
-    if (!media?.id) return;
+    if (!loadedId) return;
     setRequestingHeadings(true);
-    await dispatch(generateKeyPointHeadings(media.id));
+    await dispatch(generateKeyPointHeadings(loadedId));
     setRequestingHeadings(false);
-  }, [dispatch, media?.id]);
+  }, [dispatch, loadedId]);
 
   // Books have no transcription step to piggyback on, so the summary needs its
   // own entry point. The refetch right after is what flips the polling loop on:
   // the trigger sets status='pending', and the page then watches until the
   // worker reaches 'done' or 'error'.
   const generateSummary = useCallback(async () => {
-    if (!media?.id) return;
+    if (!loadedId) return;
     setGeneratingSummary(true);
-    const result = await dispatch(triggerTranscriptPipeline(media.id));
+    const result = await dispatch(triggerTranscriptPipeline(loadedId));
     if (result.meta.requestStatus === "fulfilled") {
-      await dispatch(fetchTranscript(transcriptRequest(media.id)));
+      await dispatch(fetchTranscript(transcriptRequest(loadedId)));
     }
     setGeneratingSummary(false);
-  }, [dispatch, media?.id, transcriptRequest]);
+  }, [dispatch, loadedId, transcriptRequest]);
 
   // ── Derived ────────────────────────────────────────────────────────────────
 

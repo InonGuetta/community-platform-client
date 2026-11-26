@@ -34,6 +34,7 @@ import { useTranslation } from "react-i18next";
 // written in it is erased on the server and cannot be brought back.
 
 const ConversationRow = ({ item, current, onOpen, onDelete, deleting }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("lesson");
   const title = item.first_question || t("history.untitled");
   return (

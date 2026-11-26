@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateTranscript, triggerTranscriptPipeline, fixHebrewTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptPut";
 import { fetchTranscript } from "../../../store/slicesAndThunks/transcriptSlice/transcriptGet";
@@ -32,10 +32,14 @@ export const useTranscriptEditor = ({ transcript, mediaId, canEdit = false }) =>
 
   // When polling brings fresh chunks/text from the server, sync them into
   // the textarea — but only if the user hasn't started typing locally,
-  // so we don't blow away in-progress edits.
+  // so we don't blow away in-progress edits. Only new text from the server
+  // runs it; the textarea and canEdit are read at that moment, not watched.
+  const syncFromServer = useEffectEvent((text) => {
+    if (!canEdit || editedText === "") setEditedText(text);
+  });
   useEffect(() => {
-    if (!canEdit || editedText === "") setEditedText(initialText);
-  }, [initialText]); // eslint-disable-line react-hooks/exhaustive-deps
+    syncFromServer(initialText);
+  }, [initialText]);
 
   const status = transcript?.status;
   const fixStatus = transcript?.hebrew_fix_status;
@@ -45,14 +49,16 @@ export const useTranscriptEditor = ({ transcript, mediaId, canEdit = false }) =>
   // sync above deliberately leaves alone a textarea the user has typed in, and
   // this is the one time replacing it is what they asked for. (It is read-only
   // while the correction runs, so there is no typing to lose.)
+  // The row is read when the status changes, not watched: it is a new object
+  // on every poll.
   const previousFixStatus = useRef(fixStatus);
+  const takeCorrectedText = useEffectEvent(() => {
+    if (transcript?.edited_text != null) setEditedText(transcript.edited_text);
+  });
   useEffect(() => {
     const before = previousFixStatus.current;
     previousFixStatus.current = fixStatus;
-    if (aiActionOutcome(before, fixStatus) === "done" && transcript?.edited_text != null) {
-      setEditedText(transcript.edited_text);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (aiActionOutcome(before, fixStatus) === "done") takeCorrectedText();
   }, [fixStatus]);
   const isProcessing = IN_FLIGHT.has(status);
   const hasContent = (transcript?.chunks?.length ?? 0) > 0 || !!transcript?.edited_text;

@@ -69,9 +69,14 @@ They concentrate on the things that fail quietly:
   fix was the opposite, removing it from the array and holding it in a ref. The
   rule cannot tell those apart. Every deliberate omission carries a comment
   saying why.
-- `eslint-plugin-react-hooks` 7 bundles the React Compiler's rule family.
-  `preserve-manual-memoization` and `set-state-in-effect` fire on correct code
-  here and are off; the rest stay on.
+- `eslint-plugin-react-hooks` 7 bundles the React Compiler's rule family, and
+  the compiler runs on this code (React 19, `babel-plugin-react-compiler` in
+  `vite.config.js`), so they all stay on except `set-state-in-effect`, which
+  fires on correct code here and does not stop the compiler. A component that
+  misbehaves when compiled opts out with a `"use no memo"` directive and a
+  comment saying why — chiefly the components that render i18next text outside
+  `t` (`translatedLabels`, `i18n.t`, helpers such as `formatDate`), which the
+  compiler would freeze in the old language (`../CLAUDE.md` → Conventions).
 
 ## Configuration
 

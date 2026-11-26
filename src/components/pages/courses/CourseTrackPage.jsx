@@ -79,6 +79,7 @@ const LessonRow = ({ lesson, index, canArrange, drag, onOpen }) => {
 };
 
 const CourseTrackPage = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("courses");
   const c = useCourseTrackPageController();
   const drag = useDragReorder({

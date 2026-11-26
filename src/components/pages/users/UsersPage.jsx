@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 const ROLE_OPTIONS = Object.values(roles);
 
 const UserFormDialog = ({ open, onClose, onSubmit, initial = {} }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation(["users", "common"]);
   const [form, setForm] = useState({ email: initial.email || "", password: "", displayName: initial.display_name || "", role: initial.role || "student" });
   const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));

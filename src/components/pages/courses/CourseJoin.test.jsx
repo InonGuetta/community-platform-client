@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import authReducer from "../../../store/slicesAndThunks/authSlice/authSlice";
@@ -116,15 +116,16 @@ describe("the lecturer's side", () => {
     const store = makeStore([course]);
     const Panel = () => {
       // The panel reads the course as the store holds it, so a new code shows.
-      const live = store.getState().courses.items[0];
+      // Through useSelector: a read of store.getState() during render is
+      // invisible to the React Compiler, which would keep the first answer.
+      const live = useSelector((state) => state.courses.items[0]);
       return <JoinCodePanel course={live} />;
     };
-    const view = render(
+    render(
       <Provider store={store}>
         <Panel />
       </Provider>
     );
-    store.subscribe(() => view.rerender(<Provider store={store}><Panel /></Provider>));
     return store;
   };
 

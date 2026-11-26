@@ -69,6 +69,7 @@ export const RecordButton = ({ recorderStatus, pendingParts, onStart, onStop, di
 // The chip in the top bar, and — for a participant — the way to change their
 // answer. Nothing at all when the room is not being recorded.
 export const RecordingIndicator = ({ recording, mySocketId, onAnswer }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("sessions");
   const status = myRecordingStatus(recording, mySocketId);
   if (!status) return null;

@@ -16,6 +16,7 @@ import useAskArchivePageController, { archiveSuggestions } from "./useAskArchive
 // "שיחה חדשה" and "העתק שיחה" sit in the header (only once there is a
 // conversation), so ChatPane is told not to draw its own pair.
 const AskArchivePage = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("chat");
   const c = useAskArchivePageController();
   const started = c.chat.messages.length > 0;

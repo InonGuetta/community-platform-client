@@ -94,6 +94,7 @@ const PdfViewer = lazy(() => import("./PdfViewer"));
 // one format wide.
 const SANDBOXED_FORMATS = { pdf: false };
 const TextViewer = ({ media, onAddBookmark, bookmarks, jumpTo, onPageChange }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("lesson");
   const [loaded, setLoaded] = useState(false);
   // Reported by the viewer below. Starts as "loading" rather than unknown,

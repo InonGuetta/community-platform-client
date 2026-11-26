@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 // "הצטרפות בקוד" in a course's panel (PRD ROST-9). See useJoinCodePanel.
 
 const RequestRow = ({ request, busy, onApprove, onReject }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("courses");
   return (
   <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 1, borderTop: 1, borderColor: "divider", flexWrap: "wrap" }}>

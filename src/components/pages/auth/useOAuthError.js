@@ -21,6 +21,7 @@ export const oauthErrorText = (code) => {
 };
 
 export const useOAuthError = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const [searchParams] = useSearchParams();
   return oauthErrorText(searchParams.get("error"));
 };

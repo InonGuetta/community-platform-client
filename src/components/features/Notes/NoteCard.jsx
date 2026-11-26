@@ -109,6 +109,7 @@ const NoteCard = ({
   // Asked when the body is needed — see NotePlaceholder.
   onNeedBody,
 }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("notes");
   const [sourceHovering, setSourceHovering] = useState(false);
 

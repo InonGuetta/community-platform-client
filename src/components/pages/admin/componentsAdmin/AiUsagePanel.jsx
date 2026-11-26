@@ -19,6 +19,7 @@ import { formatNumber } from "../../../../utilities/formatDate";
 // the cap, and what it was spent on. An estimate — the usage OpenAI reported,
 // at list price — and said so, because the invoice is the real number.
 const AiUsagePanel = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("admin");
   const { report, status, reload } = useAiUsage();
 

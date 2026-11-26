@@ -55,6 +55,7 @@ const columns = (bp) => ({ xs: "minmax(0, 1fr)", [bp]: "repeat(12, minmax(0, 1fr
 const scrollTargetSx = { scrollMarginTop: `${HEADER_HEIGHT + 16}px` };
 
 const MediaViewPage = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("lesson");
   const controller = useMediaViewPageController();
   const {

@@ -44,6 +44,7 @@ const BORDER_COLOR = { strong: "success.main", medium: "warning.main", normal: "
 // text via OpenAI on the server. Clicking a result jumps to the player at the
 // matching segment's start_time (onOpenResult is wired by the page).
 const SmartSearch = ({ onOpenResult }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("archive");
   const { results, value, setValue, loading, searched, runSearch, searchFor, handleKeyDown } = useSmartSearch();
 

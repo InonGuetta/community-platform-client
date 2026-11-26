@@ -58,6 +58,7 @@ const linkSx = { justifyContent: "flex-start" };
 const Rule = ({ my = 1.5 }) => <Divider sx={{ my }} />;
 
 const NavDrawer = ({ shell }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation(["nav", "common"]);
   const { start } = useDirection();
   const { language, languages } = useLanguage();

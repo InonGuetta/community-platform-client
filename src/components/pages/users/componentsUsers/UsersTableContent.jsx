@@ -56,6 +56,7 @@ const RowMenu = ({ user, onDelete }) => {
 };
 
 const UsersTableContent = ({ users, onEdit, onDelete, onToggleActive, canToggleActive = false, currentUserId, loading = false }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("users");
   return (
   <TableBody>

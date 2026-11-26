@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 const REQUESTABLE = [roles.lecturer, roles.admin];
 
 const RoleRequestCard = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("profile");
   const { user, choice, setChoice, submitting, submit } = useRoleRequest();
 

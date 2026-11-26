@@ -132,16 +132,17 @@ const useAIDiscussionController = ({ mediaId, transcript, media }) => {
   // in the history — as plain text with its sources (conversationText).
   // navigator.clipboard is missing on an insecure origin and can be refused by
   // the browser; either way the reader is told rather than left guessing.
+  const mediaTitle = media?.title;
   const copyConversation = useCallback(async (messages) => {
     try {
-      await navigator.clipboard.writeText(conversationText(messages, { mediaTitle: media?.title }));
+      await navigator.clipboard.writeText(conversationText(messages, { mediaTitle }));
       dispatch(notify({ message: i18n.t("chat:copied"), severity: "success" }));
       return true;
     } catch {
       dispatch(notify({ message: i18n.t("chat:copyFailed"), severity: "warning" }));
       return false;
     }
-  }, [dispatch, media?.title]);
+  }, [dispatch, mediaTitle]);
 
   const runSearch = useCallback((text) => {
     const query = String(text ?? "").trim();

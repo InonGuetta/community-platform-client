@@ -51,6 +51,7 @@ const NotesIndex = ({
   toggleAllVisible,
   toggleSelected,
 }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation(["notebook", "notes"]);
   return (
   <SectionCard>

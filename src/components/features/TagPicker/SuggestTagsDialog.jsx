@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -76,14 +76,16 @@ const SuggestTagsDialog = ({
   // Keyed on the CONTENT of the suggestions rather than the array holding them:
   // a parent that rebuilds the list on each render is ordinary React, and this
   // effect sets state, so identity in the dependencies is the same loop by
-  // another route.
+  // another route. The array itself is read by an effect event, not watched.
   const suggestedKey = suggestions.map((s) => s.id).join(",");
-  useEffect(() => {
-    if (!open) return;
+  const seed = useEffectEvent(() => {
     const byId = new Map(nodes.map((node) => [node.id, node]));
     setChosen(suggestions.map((s) => byId.get(s.id)).filter(Boolean));
     setCreated([]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
+  useEffect(() => {
+    if (!open) return;
+    seed();
   }, [open, item?.id, suggestedKey, nodes]);
 
   if (!item) return null;

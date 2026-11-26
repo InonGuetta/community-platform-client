@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 // configured price — and said so. Without a provider every message went to the
 // server's log, and the panel says that first.
 const SmsUsagePanel = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("admin");
   const { report, status, reload } = useSmsUsage();
 

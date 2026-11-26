@@ -51,6 +51,7 @@ const NotesPanel = ({
   onSeekText,
   isText = false,
 }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("lesson");
   const {
     note, setNote, editingId, draft, setDraft, startEditing, stopEditing, commit, handleCreate, removeBookmark,

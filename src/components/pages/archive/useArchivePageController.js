@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchAllMedia, fetchMoreMedia } from "../../../store/slicesAndThunks/mediaSlice/mediaGet";
@@ -62,7 +62,7 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
   // Everything arriving here has come from outside the application — see
   // archiveFilterParams.js, where an unusable value becomes "no filter" rather
   // than an error.
-  const initial = useMemo(() => readFilters(searchParams), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [initial] = useState(() => readFilters(searchParams));
 
   // Which media types are shown; empty is all of them — see typeSelection.js.
   const [selectedTypes, setSelectedTypes] = useState(initial.selectedTypes);
@@ -144,7 +144,11 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
   // was reorganised. Normalising is what turns it into the same lists a sequence
   // of clicks would have produced; see tagStates.js for the three combinations
   // the server cannot answer the way the screen would suggest.
-  useEffect(() => {
+  //
+  // tagSelection is read, not watched: this reacts to the vocabulary changing,
+  // and re-running it on every click would be asking the same question again
+  // with the same answer — so the work is an effect event.
+  const settleSelection = useEffectEvent(() => {
     const pruned = pruneUnknownTags(tagRelations, tagSelection);
     const settled = normalizeSelection(tagRelations, pruned);
     if (sameSelection(settled, tagSelection)) return;
@@ -162,10 +166,9 @@ const useArchivePageController = ({ fixedCreator = "" } = {}) => {
         })
       );
     }
-    // tagSelection is deliberately not a dependency: this reacts to the
-    // vocabulary changing, and re-running it on every click would be asking the
-    // same question again with the same answer.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
+  useEffect(() => {
+    settleSelection();
   }, [tagRelations, dispatch]);
 
   // The address, kept in step with the filter.

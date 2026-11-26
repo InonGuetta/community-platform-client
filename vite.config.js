@@ -25,7 +25,15 @@ const answerUnavailable = (proxy) => {
 };
 
 export default defineConfig({
-  plugins: [react()],
+  // The React Compiler (React 19) memoises components and hooks at build time,
+  // so a re-render skips what did not change without a hand-written useMemo /
+  // useCallback / memo. It runs in dev, build and Vitest alike, so the tests
+  // exercise the compiled code. A component that breaks the Rules of React is
+  // left uncompiled by the compiler itself; one that misbehaves when compiled
+  // opts out with a "use no memo" directive and a comment saying why — chiefly
+  // one that renders i18next text outside useTranslation's t, which compiled
+  // would stay in the old language (../CLAUDE.md, Conventions).
+  plugins: [react({ babel: { plugins: ["babel-plugin-react-compiler"] } })],
   // Vitest resolves the app's extensionless imports the same way the dev server
   // does, which plain node cannot.
   //

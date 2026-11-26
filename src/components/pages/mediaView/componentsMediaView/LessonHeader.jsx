@@ -28,6 +28,7 @@ const TITLE_SIZE = {
 const KICKER_KEYS = { audio: "kicker.audio", video: "kicker.video", text: "kicker.text" };
 
 const LessonHeader = ({ media, showStatusBadge = false, dateText = null }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation(["lesson", "media"]);
   const type = media.media_type;
   const isDraft = media.is_published === false;

@@ -73,6 +73,7 @@ const MediaTile = ({
   item, user, showAdmin = false, liked = false, onToggleLike,
   onDelete, onTogglePublish, onEditTags, onEditDetails, onOpenCreator,
 }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("media");
   const menu = useMediaTileMenu({ item, user, showAdmin, onEditDetails, onEditTags, onTogglePublish, onDelete });
   const isVideo = item.media_type === "video";

@@ -27,6 +27,7 @@ const STATUS_TONES = { completed: "success", pending: "warning", failed: "error"
 const STATUSES = Object.keys(STATUS_TONES);
 
 const DonationsLedger = ({ donations, totals }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("admin");
   const [filter, setFilter] = useState("");
 

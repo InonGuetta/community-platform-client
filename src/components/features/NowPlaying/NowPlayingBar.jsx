@@ -94,6 +94,7 @@ const BarBody = ({
   playbackRate, setPlaybackRate,
   skipSeconds, skipBack, skipForward, expand, close,
 }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("media");
   const theme = useTheme();
   const mode = theme.palette.mode;

@@ -50,6 +50,10 @@ export const fixedSuggestions = () => i18n.t("chat:suggestions", { returnObjects
 // marker with no citation behind it stays the plain text it is — the server
 // removes invented ones, so this is belt and braces, not a path that matters.
 const AnswerText = ({ content, citations, onOpen }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
+  // Subscribed for the re-render only: a compiled parent hands back the same
+  // element on a language change, and this would keep the old words.
+  useTranslation();
   const byN = new Map((citations ?? []).map((c) => [Number(c.n), c]));
   const parts = String(content).split(/(\[\d+\])/g);
   return parts.map((part, i) => {
@@ -98,7 +102,12 @@ const waitingLabel = (t, stage, subject) => {
   return t(stage === "searching" ? "waiting.searching" : "waiting.reading", { context: subject });
 };
 
-const Sources = ({ citations, onOpen }) => (
+const Sources = ({ citations, onOpen }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
+  // Subscribed for the re-render only: a compiled parent hands back the same
+  // element on a language change, and this would keep the old words.
+  useTranslation();
+  return (
   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mt: 1.5 }} data-testid="answer-sources">
     {citations.map((c) => {
       const place = placeOf(c);
@@ -117,7 +126,8 @@ const Sources = ({ citations, onOpen }) => (
       );
     })}
   </Box>
-);
+  );
+};
 
 // "Save to notebook" under an answer. Saved once, it says so and stays pressed
 // for this visit; a failure says so and can be pressed again.
@@ -154,12 +164,14 @@ export const answerSaver = (notebook, messages) => (message) =>
 // not one under every answer, which would double the buttons in a thread
 // that already has a save button and sources under each. Shared with the
 // history mode, where it copies the conversation open there.
-export const CopyConversationButton = ({ onCopy, disabled = false }) =>
-  onCopy ? (
+export const CopyConversationButton = ({ onCopy, disabled = false }) => {
+  const { t } = useTranslation("chat");
+  return onCopy ? (
     <Button size="small" startIcon={<ContentCopyIcon />} onClick={onCopy} disabled={disabled}>
-      {i18n.t("chat:copy")}
+      {t("copy")}
     </Button>
   ) : null;
+};
 
 // Exported for the history mode, which shows an earlier conversation exactly
 // as the chat does — the same bubbles, the same clickable sources.
@@ -226,6 +238,7 @@ const ChatPane = ({
   // floats the question box `inputBottom` above the screen's edge.
   hideActions = false, inputBottom = 0,
 }) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("chat");
   const { rtl } = useDirection();
   const subject = givenSubject ?? (isText ? "book" : "lesson");

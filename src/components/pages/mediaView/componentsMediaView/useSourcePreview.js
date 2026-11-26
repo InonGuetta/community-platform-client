@@ -33,10 +33,11 @@ export const useSourcePreview = ({ open, mediaId }) => {
   // page — this window is where the user is listening. The new bookmark goes
   // into the shared slice, which is the same list the notebook renders behind
   // this window, so it appears there immediately and under the right lecture.
+  const loadedId = media?.id;
   const handleCreateBookmark = useCallback((timestampSeconds, note) => {
-    if (!media?.id) return;
-    dispatch(createBookmark({ mediaId: Number(media.id), timestampSeconds, note }));
-  }, [dispatch, media?.id]);
+    if (!loadedId) return;
+    dispatch(createBookmark({ mediaId: Number(loadedId), timestampSeconds, note }));
+  }, [dispatch, loadedId]);
 
   // The same act for a book, in the other coordinate space. A separate function
   // rather than one taking either, for the reason the lecture page gives: an
@@ -45,9 +46,9 @@ export const useSourcePreview = ({ open, mediaId }) => {
   const handleCreateTextBookmark = useCallback(({
     chunkId: chunk, charPosition, charEnd, quotedText, note, pageNumber, rect,
   }) => {
-    if (!media?.id) return;
+    if (!loadedId) return;
     return dispatch(createBookmark({
-      mediaId: Number(media.id),
+      mediaId: Number(loadedId),
       chunkId: chunk,
       charPosition,
       charEnd,
@@ -56,7 +57,7 @@ export const useSourcePreview = ({ open, mediaId }) => {
       pageNumber,
       rect,
     }));
-  }, [dispatch, media?.id]);
+  }, [dispatch, loadedId]);
 
   return { media, error, handleCreateBookmark, handleCreateTextBookmark };
 };

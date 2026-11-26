@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -60,8 +60,11 @@ const EditTagsDialog = ({ open, item, tagTree = EMPTY, onClose, onSave }) => {
   // Re-seeded whenever a different item is opened. Without the id in the
   // dependencies the dialog would keep the first item's tags for the second,
   // which is the kind of bug that ends with somebody's tags on the wrong shiur.
-  useEffect(() => {
-    if (!open || !item) return;
+  // Watched by id and by the CONTENT of its tags; the item itself is read by an
+  // effect event.
+  const tagKey = item?.tag_ids?.join(",");
+  const seed = useEffectEvent(() => {
+    if (!item) return;
     const byId = new Map(tagTree.map((node) => [node.id, node]));
     const known = (item.tag_ids || []).map((id) => byId.get(id)).filter(Boolean);
     // Tags typed rather than picked live at the root and have ids like any
@@ -69,8 +72,11 @@ const EditTagsDialog = ({ open, item, tagTree = EMPTY, onClose, onSave }) => {
     // here rather than re-saved by accident.
     setChosen(known);
     setCreated([]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, item?.id, item?.tag_ids?.join(","), tagTree]);
+  });
+  useEffect(() => {
+    if (!open) return;
+    seed();
+  }, [open, item?.id, tagKey, tagTree]);
 
   if (!item) return null;
 

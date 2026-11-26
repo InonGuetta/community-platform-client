@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 // it is, and — for whoever manages it — the switch. A guest sees it only while
 // it is also published, so the switch says so rather than pretending.
 const usePublicLink = (media) => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("lesson");
   const dispatch = useDispatch();
   const user = useSelector(selectUser);

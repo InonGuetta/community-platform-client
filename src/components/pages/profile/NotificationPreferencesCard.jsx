@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 const SWITCH_COLUMN = 64;
 
 const NotificationPreferencesCard = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation(["profile", "notifications"]);
   const { categories, allOff, status, phoneVerified, smsOffered, anySms, handleToggle, handleRestoreAll, handleSmsAllOff } =
     useNotificationPreferences();

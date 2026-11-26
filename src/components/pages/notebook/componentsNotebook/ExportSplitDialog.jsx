@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -71,15 +71,18 @@ const ExportSplitDialog = ({ open, notes, exporting, onClose, onExport }) => {
   // event they never caused and cannot see. What actually invalidates a plan is
   // a different set of notes being exported, which is what this watches.
   const selectionKey = notes.map((note) => note.id).join(",");
-  useEffect(() => {
-    if (!open) return;
+  // `t` is read by an effect event, not watched: a language switch is not a new
+  // set of notes, and must not wipe a plan the user is arranging (the books
+  // keep the names they got).
+  const resetBooks = useEffectEvent((key) => {
     setBooks([
-      { name: t("export.splitDialog.bookName", { n: 1 }), noteIds: selectionKey ? selectionKey.split(",").map(Number) : [] },
+      { name: t("export.splitDialog.bookName", { n: 1 }), noteIds: key ? key.split(",").map(Number) : [] },
       { name: t("export.splitDialog.bookName", { n: 2 }), noteIds: [] },
     ]);
-    // `t` stays out: a language switch is not a new set of notes, and must not
-    // wipe a plan the user is arranging (the books keep the names they got).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
+  useEffect(() => {
+    if (!open) return;
+    resetBooks(selectionKey);
   }, [open, selectionKey]);
 
   const byId = useMemo(() => new Map(notes.map((note) => [note.id, note])), [notes]);

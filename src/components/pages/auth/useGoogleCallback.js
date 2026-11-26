@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { fetchMe } from "../../../store/slicesAndThunks/authSlice/authGet";
@@ -18,7 +18,11 @@ export const useGoogleCallback = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  useEffect(() => {
+  // Runs exactly once, on arrival back from the provider: the work is an effect
+  // event, so what it reads is not a dependency. Re-running it would let a
+  // second fetchMe fire — and this component navigates away as its whole
+  // purpose, so re-running it is never wanted.
+  const arrive = useEffectEvent(() => {
     const error = searchParams.get("error");
     if (error) {
       navigate("/sign-in?error=oauth_failed");
@@ -29,9 +33,8 @@ export const useGoogleCallback = () => {
       if (result.meta.requestStatus === "fulfilled") navigate(takeReturnTo());
       else navigate("/sign-in?error=oauth_failed");
     });
-    // Runs exactly once, on arrival back from the provider. Adding the dependencies
-    // the rule asks for would let a second fetchMe fire — and this component
-    // navigates away as its whole purpose, so re-running it is never wanted.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
+  useEffect(() => {
+    arrive();
   }, []);
 };

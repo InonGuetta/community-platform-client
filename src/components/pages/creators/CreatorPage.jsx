@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 // By NAME, as the archive attributes: a guest speaker has lessons and no
 // account, and the name on the lesson is what a reader followed here.
 const CreatorPage = () => {
+  "use no memo"; // reads i18next outside useTranslation's t while rendering: compiled, it would keep the old language
   const { t } = useTranslation("creators");
   const c = useCreatorPageController();
   const p = c.profile;

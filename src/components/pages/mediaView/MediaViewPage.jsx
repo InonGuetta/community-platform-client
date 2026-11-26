@@ -4,6 +4,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
 import MediaPlayer from "../../features/MediaPlayer/MediaPlayer";
 import CoverArt from "../../features/MediaTile/CoverArt";
+import TypeAccent from "../../features/TypeAccent/TypeAccent";
 import TextViewer from "./componentsMediaView/TextViewer";
 import { mediaApi } from "../../../api/mediaApi";
 import LessonHeader from "./componentsMediaView/LessonHeader";
@@ -124,21 +125,26 @@ const MediaViewPage = () => {
   const date = formatDate(media.created_at);
   const dateText = date ? `${media.is_published === false ? t("draftUploaded") : t("published")}${date}` : null;
 
+  // The player and the tabs card are drawn in the lesson's own accent — a
+  // video orange, a recording the site's blue, a book purple (D-146). The
+  // header, the back link and the shell keep the site's.
   const player = (
-    <MediaPlayer
-      ref={playerRef}
-      url={mediaApi.streamUrl(media.id)}
-      media={media}
-      // Only so the player's settings menu can offer the transcript
-      // PDF without fetching one it already has.
-      transcript={transcript}
-      // Captions (PRD MOB-5): the same cues the transcript tab follows the
-      // lesson with.
-      captions={captions}
-      onProgress={handlePlayerProgress}
-      onEnded={handlePlayerEnded}
-      seekOnReady={seekOnReady}
-    />
+    <TypeAccent type={media.media_type}>
+      <MediaPlayer
+        ref={playerRef}
+        url={mediaApi.streamUrl(media.id)}
+        media={media}
+        // Only so the player's settings menu can offer the transcript
+        // PDF without fetching one it already has.
+        transcript={transcript}
+        // Captions (PRD MOB-5): the same cues the transcript tab follows the
+        // lesson with.
+        captions={captions}
+        onProgress={handlePlayerProgress}
+        onEnded={handlePlayerEnded}
+        seekOnReady={seekOnReady}
+      />
+    </TypeAccent>
   );
 
   return (
@@ -202,81 +208,83 @@ const MediaViewPage = () => {
           {!isText && <CourseTrackBar track={courseTrack} />}
         </Box>
 
-        <Paper
-          sx={{
-            gridColumn: { [bp]: isAudio ? "span 7" : "span 5" },
-            minWidth: 0,
-            p: { xs: 3, md: 4 },
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <MediaInsightsTabs
-            mediaId={media.id}
-            tags={media.tags}
-            insights={controller}
-            onSeek={seekPlayer}
-            // The transcript tab follows the lesson as it plays (PRD MOB-6).
-            captions={captions}
-            currentTime={currentTime}
-            // Recorded in a live session (PRD REC-3): its chat, in a tab of
-            // its own; a message's time plays the moment it was written.
-            sessionChatPanel={media.session_id ? <SessionChatPanel mediaId={media.id} onSeek={seekPlayer} /> : null}
-            // Proposed tags (PRD ARCH-4): for whoever may tag this lesson,
-            // once it has a summary to propose them from.
-            tagSuggestionsPanel={
-              canEditTranscript && transcript?.ai_summary ? (
-                <AiTagSuggestions mediaId={media.id} onTagged={refreshMedia} />
-              ) : null
-            }
-            notesPanel={
-              <NotesPanel
-                bookmarks={bookmarks}
-                currentTime={currentTime}
-                // Not passed for a book: there is no playhead to read a
-                // position off, so the panel hides its form entirely and
-                // points at the reader instead. Withheld rather than merely
-                // unused, so the panel cannot grow a path back to it.
-                onCreateBookmark={isText ? undefined : handleCreateBookmark}
-                // A bookmark in a book scrolls the reader; one on a recording
-                // seeks the player. Same click, two coordinate spaces, and the
-                // panel picks by which field the bookmark carries.
-                onSeek={isText ? undefined : seekPlayer}
-                onSeekText={isText ? jumpToBookmark : undefined}
-                isText={isText}
-              />
-            }
-            discussionPanel={
-              <AIDiscussionPanel
-                mediaId={media.id}
-                // Its title and type name the source chips of an answer
-                // saved to the notebook.
-                media={media}
-                transcript={transcript}
-                isText={isText}
-                // A hit in a recording seeks the player; one in a book turns
-                // the reader to its page. Each kind gets only the one that
-                // fits, so a hit cannot try to seek a player that is absent.
-                onSeek={isText ? undefined : seekFromNotebook}
-                onOpenPage={isText ? openPageFromDiscussion : undefined}
-              />
-            }
-          />
+        <TypeAccent type={media.media_type}>
+          <Paper
+            sx={{
+              gridColumn: { [bp]: isAudio ? "span 7" : "span 5" },
+              minWidth: 0,
+              p: { xs: 3, md: 4 },
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <MediaInsightsTabs
+              mediaId={media.id}
+              tags={media.tags}
+              insights={controller}
+              onSeek={seekPlayer}
+              // The transcript tab follows the lesson as it plays (PRD MOB-6).
+              captions={captions}
+              currentTime={currentTime}
+              // Recorded in a live session (PRD REC-3): its chat, in a tab of
+              // its own; a message's time plays the moment it was written.
+              sessionChatPanel={media.session_id ? <SessionChatPanel mediaId={media.id} onSeek={seekPlayer} /> : null}
+              // Proposed tags (PRD ARCH-4): for whoever may tag this lesson,
+              // once it has a summary to propose them from.
+              tagSuggestionsPanel={
+                canEditTranscript && transcript?.ai_summary ? (
+                  <AiTagSuggestions mediaId={media.id} onTagged={refreshMedia} />
+                ) : null
+              }
+              notesPanel={
+                <NotesPanel
+                  bookmarks={bookmarks}
+                  currentTime={currentTime}
+                  // Not passed for a book: there is no playhead to read a
+                  // position off, so the panel hides its form entirely and
+                  // points at the reader instead. Withheld rather than merely
+                  // unused, so the panel cannot grow a path back to it.
+                  onCreateBookmark={isText ? undefined : handleCreateBookmark}
+                  // A bookmark in a book scrolls the reader; one on a recording
+                  // seeks the player. Same click, two coordinate spaces, and the
+                  // panel picks by which field the bookmark carries.
+                  onSeek={isText ? undefined : seekPlayer}
+                  onSeekText={isText ? jumpToBookmark : undefined}
+                  isText={isText}
+                />
+              }
+              discussionPanel={
+                <AIDiscussionPanel
+                  mediaId={media.id}
+                  // Its title and type name the source chips of an answer
+                  // saved to the notebook.
+                  media={media}
+                  transcript={transcript}
+                  isText={isText}
+                  // A hit in a recording seeks the player; one in a book turns
+                  // the reader to its page. Each kind gets only the one that
+                  // fits, so a hit cannot try to seek a player that is absent.
+                  onSeek={isText ? undefined : seekFromNotebook}
+                  onOpenPage={isText ? openPageFromDiscussion : undefined}
+                />
+              }
+            />
 
-          {/* The same bar the notebook's source preview renders — it owns the
-              divider above it, and the share dialog, the lists menu and the
-              download menu behind it. */}
-          <MediaActionsBar
-            media={media}
-            transcript={transcript}
-            currentTime={currentTime}
-            isText={isText}
-            isLiked={isLiked}
-            onToggleLike={toggleLike}
-            isSaved={isSaved}
-            onToggleSave={toggleSave}
-          />
-        </Paper>
+            {/* The same bar the notebook's source preview renders — it owns the
+                divider above it, and the share dialog, the lists menu and the
+                download menu behind it. */}
+            <MediaActionsBar
+              media={media}
+              transcript={transcript}
+              currentTime={currentTime}
+              isText={isText}
+              isLiked={isLiked}
+              onToggleLike={toggleLike}
+              isSaved={isSaved}
+              onToggleSave={toggleSave}
+            />
+          </Paper>
+        </TypeAccent>
       </Box>
 
       <LessonNotebook

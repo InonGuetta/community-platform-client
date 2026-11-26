@@ -189,7 +189,9 @@ const PlayerControls = ({
             flexShrink: 0,
             bgcolor: "primary.main",
             color: "primary.contrastText",
-            boxShadow: SHADOW.play,
+            // In the accent's own colour (D-146): the indigo glow under an
+            // orange button read as a mistake.
+            boxShadow: theme.palette.surface?.playGlow || SHADOW.play,
             "&:hover": { bgcolor: "primary.dark" },
             "& svg": { fontSize: 28 },
           }

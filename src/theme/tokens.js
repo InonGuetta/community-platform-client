@@ -95,9 +95,40 @@ export const ROOM = {
   label: "rgba(0,0,0,.5)",
 };
 
-// The tones a StatusBadge is drawn in (component 9).
-export const badgeTones = (c) => ({
-  indigo: { bg: c.accentSoft, fg: c === dark ? "#a5b4fc" : c.accent },
+// The accent of each kind of content (polish run, D-146): the player's control
+// bar and the lesson's tabs card are drawn in it, and so is the bottom player
+// (D-145). Audio is the site's own accent, value for value, so nothing changes
+// for a recording; a video is orange, a book purple.
+//
+// `main` carries white text in the light mode — #c2410c is orange-700, because
+// the asked-for orange-600 (#ea580c) gives white only 3.6:1 and 4.5 is the
+// floor; violet-600 gives 5.7:1 as it is. The dark mode's shades are light ones
+// that read on a dark card, and white on them would be 2.3–2.7:1, so their
+// text is the dark page's ink (8.4:1 and 7:1). `glow` is the play button's
+// shadow, in the same colour.
+const accentOf = (c, contrastText, glow) => ({
+  main: c.accent, hover: c.accentHover, soft: c.accentSoft, alt: c.accentAlt, contrastText, glow,
+});
+export const TYPE_ACCENT = {
+  audio: {
+    light: accentOf(light, WHITE, "0 6px 16px rgba(79,70,229,.4)"),
+    dark: accentOf(dark, WHITE, "0 6px 16px rgba(79,70,229,.4)"),
+  },
+  video: {
+    light: { main: "#c2410c", hover: "#9a3412", soft: "#fff7ed", alt: "#ea580c", contrastText: WHITE, glow: "0 6px 16px rgba(194,65,12,.38)", badgeFg: "#c2410c" },
+    dark: { main: "#fb923c", hover: "#fdba74", soft: "rgba(251,146,60,.15)", alt: "#fdba74", contrastText: dark.bg, glow: "0 6px 16px rgba(251,146,60,.3)", badgeFg: "#fdba74" },
+  },
+  text: {
+    light: { main: "#7c3aed", hover: "#6d28d9", soft: "#f5f3ff", alt: "#8b5cf6", contrastText: WHITE, glow: "0 6px 16px rgba(124,58,237,.38)", badgeFg: "#7c3aed" },
+    dark: { main: "#a78bfa", hover: "#c4b5fd", soft: "rgba(167,139,250,.15)", alt: "#c4b5fd", contrastText: dark.bg, glow: "0 6px 16px rgba(167,139,250,.3)", badgeFg: "#c4b5fd" },
+  },
+};
+
+// The tones a StatusBadge is drawn in (component 9). `isDark` is passed rather
+// than read off `c`, because a type's accent (TYPE_ACCENT) builds its own copy
+// of the palette.
+export const badgeTones = (c, isDark = c === dark) => ({
+  indigo: { bg: c.accentSoft, fg: c.badgeFg || (isDark ? "#a5b4fc" : c.accent) },
   neutral: { bg: c.fill, fg: c.ink2 },
   success: { bg: c.success.bg, fg: c.success.fg },
   warning: { bg: c.warning.bg, fg: c.warning.fg },
@@ -219,3 +250,10 @@ export const HERO = {
   ghostHover: "rgba(255,255,255,.25)",
 };
 
+
+// The bottom player (D-145): the dock's glass, stretched along the screen's
+// foot, with its shadow cast upwards; the docked video window over it.
+export const NOW_PLAYING = {
+  shadow: "0 -10px 30px -14px rgba(0,0,0,.28)",
+  videoShadow: "0 -8px 24px -10px rgba(0,0,0,.35)",
+};

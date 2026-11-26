@@ -1,17 +1,34 @@
 import { createTheme } from "@mui/material/styles";
 import { COLORS, badgeTones, RADIUS, SHADOW, MOTION, FONT_TEXT, FONT_DISPLAY } from "./tokens";
 
+// The mode's colours, with a content type's accent (TYPE_ACCENT) laid over the
+// site's own when one is given — D-146. Everything the theme draws in the
+// accent (a contained button, the tabs' indicator, a chosen menu row, the focus
+// ring, an indigo badge) then follows it, with no component knowing.
+const colorsFor = (mode, accent) => {
+  const base = COLORS[mode] || COLORS.light;
+  if (!accent) return base;
+  return {
+    ...base,
+    accent: accent.main,
+    accentHover: accent.hover,
+    accentSoft: accent.soft,
+    accentAlt: accent.alt || accent.main,
+    badgeFg: accent.badgeFg,
+  };
+};
+
 // Redesign v4 (design/REDESIGN_V4.md, parts B and C). The values live in
 // tokens.js; this file turns them into a MUI theme, so that every screen gets
 // the new colours, type, buttons, fields, tabs, switches and cards from the
 // theme alone, before any page is restyled.
 
-const paletteFor = (mode) => {
-  const c = COLORS[mode] || COLORS.light;
-  const isDark = c === COLORS.dark;
+const paletteFor = (mode, accent) => {
+  const c = colorsFor(mode, accent);
+  const isDark = mode === "dark";
   return {
     mode: isDark ? "dark" : "light",
-    primary: { main: c.accent, dark: c.accentHover, contrastText: "#fff" },
+    primary: { main: c.accent, dark: c.accentHover, contrastText: accent?.contrastText || "#fff" },
     // The old teal's place (a highlighted transcript line, an outline around
     // what is chosen) taken by the brand's second tone. `light` is left to MUI
     // to derive, because callers pair it with contrastText.
@@ -37,13 +54,15 @@ const paletteFor = (mode) => {
       placeholder: c.placeholder,
       raised: c.raised,
       accentSoft: c.accentSoft,
+      // The play button's shadow, in the accent's own colour.
+      playGlow: accent?.glow || SHADOW.play,
       danger: c.danger,
       draft: c.draft,
       cue: c.cue,
       wash: c.wash,
       glass: c.glass,
     },
-    badge: badgeTones(c),
+    badge: badgeTones(c, isDark),
   };
 };
 
@@ -123,9 +142,12 @@ const displayType = { fontFamily: FONT_DISPLAY, fontWeight: 800, letterSpacing: 
 // The direction follows the interface's language (src/i18n), paired with
 // <html dir>, which i18n.js keeps in step. Hebrew-first, so rtl unless told
 // otherwise. Built per mode and direction so the ThemeProvider can swap themes.
-export const buildTheme = (mode, direction = "rtl") => {
-  const palette = paletteFor(mode);
-  const c = COLORS[palette.mode];
+//
+// `accent` is one of TYPE_ACCENT's shades (`TYPE_ACCENT.video.dark`, …) — only
+// the TypeAccent wrapper passes it; the app's own theme has none.
+export const buildTheme = (mode, direction = "rtl", accent = null) => {
+  const palette = paletteFor(mode, accent);
+  const c = colorsFor(palette.mode, accent);
   const isDark = palette.mode === "dark";
   const rtl = direction === "rtl";
 
@@ -318,7 +340,9 @@ export const buildTheme = (mode, direction = "rtl") => {
             fontWeight: 700,
             textTransform: "none",
             color: c.mute,
-            "&.Mui-selected": { color: c.ink },
+            // Ink on the site's own accent; under a content type's accent
+            // (D-146) the open tab takes its colour, with the indicator.
+            "&.Mui-selected": { color: accent ? c.accent : c.ink },
             // Inside the scroller, which clips: the ring goes inward.
             "&.Mui-focusVisible": focusRing(c, -3),
           },

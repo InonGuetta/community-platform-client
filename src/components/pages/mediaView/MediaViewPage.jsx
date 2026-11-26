@@ -61,7 +61,7 @@ const MediaViewPage = () => {
     media, bookmarks, transcript, showStatusBadge,
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
     readerPage, handleReaderPageChange,
-    seekOnReady, currentTime, handlePlayerProgress,
+    seekOnReady, playOnReady, initialRate, currentTime, handlePlayerProgress,
     handleCreateBookmark,
     isLiked, toggleLike,
     isSaved, toggleSave,
@@ -143,6 +143,9 @@ const MediaViewPage = () => {
         onProgress={handlePlayerProgress}
         onEnded={handlePlayerEnded}
         seekOnReady={seekOnReady}
+        // Taking over from the bottom player (D-145): it goes on playing here.
+        playOnReady={playOnReady}
+        initialRate={initialRate}
       />
     </TypeAccent>
   );

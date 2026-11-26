@@ -401,3 +401,13 @@
 
 ## אחרי הריצה – מסכי ההתחברות לעיצוב הקודם (2026-11-22)
 לבקשת אינון: דפי ה-auth שוחזרו למצב שלפני v4 (D-144). קבצים: `src/components/pages/auth/*` (מ-`4780608`), `public/images/entry_image.png`, `src/theme/legacyTheme.js` (חדש), `src/theme/tokens.js` (נמחק `AUTH`). השאר ללא שינוי.
+
+## ליטוש – נגן תחתון וצבע לפי סוג תוכן (2026-11-26, ענף `polish-dock-hero-menu`)
+**מה:** (1) הנגינה בהירו של הארכיון פותחת שמע או וידאו בנגן תחתון שנשאר פתוח בין דפים. "פרטי השיעור" והספרים ממשיכים לדף השיעור (D-145, D-147, D-148). (2) הנגן וכרטיס הלשוניות בדף השיעור נצבעים לפי סוג התוכן: וידאו כתום, שמע כמו היום, ספר סגול (D-146).
+
+**קבצים חדשים:** `features/MediaPlayer/usePlayback.js` (יצא מ-`MediaPlayer`), `features/MediaPlayer/usePlaybackProgress.js` (יצא מ-`useMediaViewPageController`), `features/NowPlaying/{NowPlayingBar.jsx,useNowPlayingBar.js,useTakeOver.js}`, `features/TypeAccent/{TypeAccent.jsx,accentForType.js}`, `store/slicesAndThunks/nowPlayingSlice/nowPlayingSlice.js`, `store/selectors/nowPlayingSelectors.js`, `layout/useBottomChrome.js`.
+**קבצים ששונו:** `App.jsx`, `store/store.js`, `mediaSlice.js` (`markContinueWatchingStale`), `theme/{tokens.js,theme.js}` (`TYPE_ACCENT`, `NOW_PLAYING`, `buildTheme(mode, dir, accent)`), `MediaPlayer.jsx`, `PlayerControls.jsx`, `layout/{shellGeometry.js,PageContainer.jsx}`, `navbar/Dock.jsx`, `GlobalSnackbar.jsx`, `pages/archive/{ArchivePage.jsx,useArchiveHero.js,componentsArchive/ArchiveHero.jsx}`, `pages/mediaView/{MediaViewPage.jsx,useMediaViewPageController.js}`, `pages/askArchive/*`, `pages/notebook/*`, `locales/*/media.json` (`bar.*`, חמש שפות, היידיש טיוטה).
+
+**בדיקות חדשות:** `nowPlayingSlice.test.js` (פתיחה, החלפה, סגירה, ספר נדחה, מסירה, `bottomChromeFor`), `NowPlayingBar.test.jsx` (חזרה למיקום ואז ניגון, חלון וידאו, ממשיך לנגן אחרי ניווט, רווח ו-Esc, סגירה ששומרת, החלפה, מסירה לדף שלוקח אותה פעם אחת), `ArchiveHero.test.jsx` (שמע ווידאו פותחים את הפס, ספר מנווט, "פרטי השיעור" מנווט), `TypeAccent.test.jsx` (צבע לכל סוג, שמע לא נוגע ב-theme, מצב כהה, ניגודיות ≥ 4.5).
+
+**פתוח:** הבדיקה בעין של מסך 390 עם וידאו בתוך השורה. אין "הבא בקורס" בפס (בכוונה, זה נשאר לדף).

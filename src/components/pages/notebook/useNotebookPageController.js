@@ -20,6 +20,7 @@ import { useNotesExport } from "./useNotesExport";
 import { selectNotesState } from "../../../store/selectors/notesSelectors";
 import { selectBookmarksState } from "../../../store/selectors/bookmarksSelectors";
 import { useTranslation } from "react-i18next";
+import { useBottomChrome } from "../../layout/useBottomChrome";
 
 // Everything the notebook page DOES — what it reads from the store, what it
 // dispatches, and the state of the editors, the selection, the source window and
@@ -286,8 +287,13 @@ export const useNotebookPageController = () => {
   const reportEditorWarning = (message) => dispatch(notify({ message, severity: "warning" }));
   const renameSource = (bookmarkId, name) => dispatch(updateBookmark({ id: bookmarkId, note: name }));
 
+  // The sticky index stops above the dock, and above the bottom player under
+  // it when that is open (D-145).
+  const { dockOffset } = useBottomChrome();
+
   return {
     activeNoteId,
+    dockOffset,
     allVisibleSelected,
     askSources,
     bookmarkGroups,

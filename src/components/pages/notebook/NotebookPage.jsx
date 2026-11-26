@@ -11,7 +11,7 @@ import BookmarksSidebar from "./componentsNotebook/BookmarksSidebar";
 import NotesColumn from "./componentsNotebook/NotesColumn";
 import { useTranslation } from "react-i18next";
 import NoteToolbar from "../../features/Notes/NoteToolbar";
-import { HEADER_HEIGHT, DOCK_OFFSET } from "../../layout/shellGeometry";
+import { HEADER_HEIGHT } from "../../layout/shellGeometry";
 
 // The side column's distance below the site header while it sticks.
 const SIDE_GAP = 12;
@@ -82,6 +82,7 @@ const NotebookPage = () => {
     titlePrompt,
     toggleAllVisible,
     toggleSelected,
+    dockOffset,
   } = useNotebookPageController();
 
   // The strip is live whenever there is a note to format (UI_UX_FIXES 4.4):
@@ -137,7 +138,7 @@ const NotebookPage = () => {
             display: "flex", flexDirection: "column", gap: 3,
             position: { md: "sticky" },
             top: { md: HEADER_HEIGHT + SIDE_GAP },
-            maxHeight: { md: `calc(100vh - ${HEADER_HEIGHT + SIDE_GAP}px - ${DOCK_OFFSET.md}px)` },
+            maxHeight: { md: `calc(100vh - ${HEADER_HEIGHT + SIDE_GAP}px - ${dockOffset.md}px)` },
             overflowY: { md: "auto" },
           }}
         >

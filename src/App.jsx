@@ -9,6 +9,8 @@ import { ColorModeContext } from "./theme/colorMode";
 import AppHeader from "./components/layout/navbar/AppHeader";
 import Dock from "./components/layout/navbar/Dock";
 import PageContainer from "./components/layout/PageContainer";
+import NowPlayingBar from "./components/features/NowPlaying/NowPlayingBar";
+import { useBottomChrome } from "./components/layout/useBottomChrome";
 import { pageWidthFor } from "./components/layout/pageWidth";
 import { AdminViewContext, readAdminView, saveAdminView } from "./components/layout/adminView";
 import PendingRoleBanner from "./components/layout/navbar/PendingRoleBanner";
@@ -169,6 +171,10 @@ const App = () => {
   // every page but the sign-in ones and a guest's lesson, which have their own.
   const withShell = !AUTH_PATHS.includes(pathname) && !isGuestPath(pathname);
   const withDock = withShell && Boolean(user) && !isSessionRoom(pathname);
+  // The bottom player (D-145) lives where the dock does — mounted once, here,
+  // so it plays on across every route inside the shell. While it is open the
+  // dock stands on it and every page's foot grows by its height.
+  const chrome = useBottomChrome();
 
   useEffect(() => {
     // The httpOnly cookie isn't readable from JS, so we always ask the server who we are
@@ -198,7 +204,7 @@ const App = () => {
           </>
         )}
         <PageTransition pathname={pathname}>
-          <ShellColumn on={withShell} width={pageWidthFor(pathname)} dockClearance={withDock}>
+          <ShellColumn on={withShell} width={pageWidthFor(pathname)} dockClearance={withDock} clearance={chrome.clearance}>
           <Routes location={location}>
             <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
@@ -269,7 +275,9 @@ const App = () => {
         </Routes>
           </ShellColumn>
         </PageTransition>
-        {withDock && <Dock />}
+        {withDock && <Dock bottom={chrome.dockBottom} />}
+        {/* In a live session's room it closes: a lecture playing over a call. */}
+        {withShell && Boolean(user) && <NowPlayingBar closeHere={!withDock} />}
         {/* A profile picture, offered once right after signing up. */}
         <WelcomeAvatarDialog />
         <GlobalSnackbar />

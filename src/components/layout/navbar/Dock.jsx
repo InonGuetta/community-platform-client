@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import { DOCK, MOTION } from "../../../theme/tokens";
 import { DOCK_ITEMS, isActive } from "../navConfig";
 import { useDockVisibility } from "./useDockVisibility";
+import { DOCK_GAP } from "../shellGeometry";
 
 // The dock (design/REDESIGN_V4.md, component 4): a floating glass bar at the
 // bottom centre with the three places a reader goes most — the archive,
@@ -15,9 +16,10 @@ import { useDockVisibility } from "./useDockVisibility";
 //
 // App decides WHERE it is shown (signed in; not the sign-in pages, a guest's
 // lesson or a live session — D-24). PageContainer's bottom padding is the room
-// it needs.
+// it needs. `bottom` is App's too: while the bottom player is open the dock
+// stands on it (D-145), and slides there.
 
-const Dock = () => {
+const Dock = ({ bottom = DOCK_GAP }) => {
   const { t } = useTranslation("nav");
   const { pathname } = useLocation();
   const visible = useDockVisibility(pathname);
@@ -29,7 +31,7 @@ const Dock = () => {
         const mode = theme.palette.mode;
         return {
           position: "fixed",
-          bottom: { xs: 12, md: 18 },
+          bottom: { xs: `${bottom.xs}px`, md: `${bottom.md}px` },
           // Centred with logical insets: the dock is as wide as its icons and
           // sits between equal margins on both sides.
           insetInline: 0,
@@ -51,7 +53,7 @@ const Dock = () => {
           // It stays up while focus is inside it, so a keyboard user's Tab
           // never lands on something that is off the screen.
           transform: visible ? "none" : "translateY(calc(100% + 32px))",
-          transition: "transform .25s ease",
+          transition: "transform .25s ease, bottom .25s ease",
           "&:focus-within": { transform: "none" },
           "@media (prefers-reduced-motion: reduce)": { transition: "none" },
         };

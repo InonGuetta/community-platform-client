@@ -53,5 +53,15 @@
     "settingsLabel": "Paramètres du lecteur",
     "speed": "Vitesse de lecture",
     "lessonFallback": "Cours"
+  },
+  "bar": {
+    "label": "En cours de lecture",
+    "back": "Reculer de {{seconds}} secondes",
+    "forward": "Avancer de {{seconds}} secondes",
+    "expand": "Ouvrir la page du cours",
+    "close": "Fermer le lecteur",
+    "more": "Plus d’options",
+    "speedValue": "Vitesse : {{rate}}X",
+    "video": "Vidéo du cours"
   }
 }

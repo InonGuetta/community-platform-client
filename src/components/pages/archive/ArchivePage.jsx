@@ -58,7 +58,7 @@ const ArchivePage = () => {
         <Tab label={t("tabs.smartSearch")} />
       </Tabs>
 
-      {hero && <ArchiveHero item={hero.item} resuming={hero.resuming} onOpen={archive.handleOpenMedia} />}
+      {hero && <ArchiveHero item={hero.item} resuming={hero.resuming} onOpen={archive.handleOpenMedia} onPlay={hero.play} />}
 
       {tab === 0 && (
         <ArchiveBrowser archive={archive} user={user} canUpload={canUpload} onOpenUpload={archive.handleOpenUpload} />

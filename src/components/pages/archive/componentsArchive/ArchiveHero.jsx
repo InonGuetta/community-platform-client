@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import { useTranslation } from "react-i18next";
 import { mediaTypeLabels } from "../../../../utilities/constant";
+import { isPlayableInBar } from "../../../../store/slicesAndThunks/nowPlayingSlice/nowPlayingSlice";
 import { lengthLabel } from "../../../../utilities/durationOptions";
 import { creatorDisplayName } from "../../../../utilities/creatorPage";
 import { RADIUS, HERO, WHITE, TILE } from "../../../../theme/tokens";
@@ -12,20 +13,26 @@ import { RADIUS, HERO, WHITE, TILE } from "../../../../theme/tokens";
 // (featuredItem.js; D-01) or, when the reader has history, the one they left
 // last (`resuming`), on an indigo gradient with rings, radius 28.
 //
-// Both buttons open the lesson (D-02): there is no playing from the archive,
-// so "האזנה" is the way into the lesson page, worded by type — האזנה, צפייה,
-// קריאה. The whole banner opens it too, for a pointer; the buttons are the way
-// in for a keyboard.
+// The play button, worded by type — האזנה, צפייה, קריאה — plays a recording
+// or a video in the bottom player and stays on the archive (D-145; it used to
+// open the lesson page, D-02). A book is read, not played, so for one it still
+// opens the page. "פרטי השיעור" opens the lesson page, and so does the whole
+// banner, for a pointer; the buttons are the way in for a keyboard.
 const ACTION_KEY = { audio: "hero.listen", video: "hero.watch", text: "hero.read" };
 // Resuming says so: the media page restores the saved position by itself.
 const RESUME_KEY = { audio: "hero.resumeListen", video: "hero.resumeWatch", text: "hero.resumeRead" };
 
-const ArchiveHero = ({ item, onOpen, resuming = false }) => {
+const ArchiveHero = ({ item, onOpen, onPlay, resuming = false }) => {
   const { t } = useTranslation("archive");
   const open = () => onOpen(item.id);
   const press = (e) => {
     e.stopPropagation();
     open();
+  };
+  const pressPlay = (e) => {
+    e.stopPropagation();
+    if (onPlay && isPlayableInBar(item)) onPlay(item);
+    else open();
   };
   const typeLabel = mediaTypeLabels[item.media_type] || item.media_type;
   const length = item.media_type === "text" ? null : lengthLabel(item.duration_seconds);
@@ -91,7 +98,7 @@ const ArchiveHero = ({ item, onOpen, resuming = false }) => {
         )}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
           <Button
-            onClick={press}
+            onClick={pressPlay}
             startIcon={<PlayArrowRoundedIcon />}
             sx={{ bgcolor: WHITE, color: TILE.fabInk, "&:hover": { bgcolor: WHITE, transform: "scale(1.03)" } }}
           >

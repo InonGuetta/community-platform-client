@@ -4,7 +4,7 @@ import AddCommentIcon from "@mui/icons-material/AddComment";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ChatPane from "../../features/ChatPane/ChatPane";
 import PageHeader from "../../features/PageHeader/PageHeader";
-import { DOCK_OFFSET, HEADER_HEIGHT } from "../../layout/shellGeometry";
+import { HEADER_HEIGHT } from "../../layout/shellGeometry";
 import { useTranslation } from "react-i18next";
 import useAskArchivePageController, { archiveSuggestions } from "./useAskArchivePageController";
 
@@ -55,8 +55,8 @@ const AskArchivePage = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: {
-            xs: `calc(100vh - ${HEADER_HEIGHT}px - ${DOCK_OFFSET.xs}px - 240px)`,
-            md: `calc(100vh - ${HEADER_HEIGHT}px - ${DOCK_OFFSET.md}px - 280px)`,
+            xs: `calc(100vh - ${HEADER_HEIGHT}px - ${c.dockOffset.xs}px - 240px)`,
+            md: `calc(100vh - ${HEADER_HEIGHT}px - ${c.dockOffset.md}px - 280px)`,
           },
         }}
       >
@@ -66,7 +66,7 @@ const AskArchivePage = () => {
           subject="archive"
           suggestedQuestions={archiveSuggestions()}
           hideActions
-          inputBottom={DOCK_OFFSET}
+          inputBottom={c.dockOffset}
         />
       </Box>
     </Box>

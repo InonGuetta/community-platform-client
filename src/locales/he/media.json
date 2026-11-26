@@ -53,5 +53,15 @@
     "settingsLabel": "הגדרות נגן",
     "speed": "מהירות הפעלה",
     "lessonFallback": "שיעור"
+  },
+  "bar": {
+    "label": "מתנגן עכשיו",
+    "back": "{{seconds}} שניות אחורה",
+    "forward": "{{seconds}} שניות קדימה",
+    "expand": "פתיחת דף השיעור",
+    "close": "סגירת הנגן",
+    "more": "אפשרויות נוספות",
+    "speedValue": "מהירות: {{rate}}X",
+    "video": "הווידאו של השיעור"
   }
 }

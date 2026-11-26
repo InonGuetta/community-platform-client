@@ -14,6 +14,7 @@ import uiReducer from "./slicesAndThunks/uiSlice";
 import notificationReducer from "./slicesAndThunks/snackbarSlice";
 import inboxReducer from "./slicesAndThunks/inboxSlice/inboxSlice";
 import offlineReducer from "./slicesAndThunks/offlineSlice/offlineSlice";
+import nowPlayingReducer from "./slicesAndThunks/nowPlayingSlice/nowPlayingSlice";
 import { notificationMiddleware } from "./middleware/notificationMiddleware";
 import { loggerMiddleware } from "./middleware/loggerMiddleware";
 import { setUnauthorizedHandler } from "../utilities/axiosInstance";
@@ -35,6 +36,7 @@ const appReducer = combineReducers({
   notification: notificationReducer,
   inbox: inboxReducer,
   offline: offlineReducer,
+  nowPlaying: nowPlayingReducer,
 });
 
 // Signing out has to empty every slice, not just auth. Only the auth state was

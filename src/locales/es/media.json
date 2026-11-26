@@ -53,5 +53,15 @@
     "settingsLabel": "Ajustes del reproductor",
     "speed": "Velocidad de reproducción",
     "lessonFallback": "Clase"
+  },
+  "bar": {
+    "label": "Reproduciendo ahora",
+    "back": "Retroceder {{seconds}} segundos",
+    "forward": "Avanzar {{seconds}} segundos",
+    "expand": "Abrir la página de la clase",
+    "close": "Cerrar el reproductor",
+    "more": "Más opciones",
+    "speedValue": "Velocidad: {{rate}}X",
+    "video": "Vídeo de la clase"
   }
 }

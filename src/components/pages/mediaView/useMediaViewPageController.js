@@ -8,7 +8,8 @@ import { createBookmark } from "../../../store/slicesAndThunks/bookmarksSlice/bo
 import { clearSelectedItem } from "../../../store/slicesAndThunks/mediaSlice/mediaSlice";
 import { selectSelectedMedia } from "../../../store/selectors/mediaSelectors";
 import { selectBookmarksByMediaId } from "../../../store/selectors/bookmarksSelectors";
-import { mediaApi } from "../../../api/mediaApi";
+import useTakeOver from "../../features/NowPlaying/useTakeOver";
+import usePlaybackProgress from "../../features/MediaPlayer/usePlaybackProgress";
 import useMediaInsights from "./useMediaInsights";
 import useMediaLike from "./useMediaLike";
 import useMediaSave from "./useMediaSave";
@@ -32,11 +33,6 @@ import { showsStatusBadge } from "../../features/MediaTile/tileActions";
 // file. `playerRef` deliberately fails that test and stays in the component,
 // because a ref has to be created where the element it points at is rendered.
 
-// How often a playing position is persisted. The player reports progress every
-// ~1s; writing that straight through would be a request per second per viewer,
-// for a value nobody reads until the next visit.
-const SAVE_PROGRESS_EVERY_MS = 10000;
-
 const useMediaViewPageController = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -58,36 +54,22 @@ const useMediaViewPageController = () => {
   const selectBookmarks = useMemo(() => selectBookmarksByMediaId(id), [id]);
   const bookmarks = useSelector(selectBookmarks);
 
-  // Resume Playback: the saved position (seconds) from a previous viewing.
-  // The player seeks here once it's ready. 0 = start from the beginning.
-  const [resumePosition, setResumePosition] = useState(0);
+  // Resume Playback: the saved position (seconds) from a previous viewing,
+  // fetched and saved through usePlaybackProgress — the hook the bottom player
+  // saves with too (D-145). The player seeks there once it's ready.
+  const { resumePosition, reportProgress, saveNow } = usePlaybackProgress(id);
+
+  // Taking over from the bottom player (D-145): where the bar was, whether it
+  // was playing and at what speed, when it was playing this lesson.
+  const takenOver = useTakeOver(id);
 
   useEffect(() => {
     dispatch(clearSelectedItem());
-    setResumePosition(0);
     if (id) {
       dispatch(fetchOneMedia(id));
       dispatch(fetchBookmarks(id));
     }
   }, [dispatch, id]);
-
-  // Fetch where this user left off so the player can resume there. Failures
-  // (no progress yet, network) are silent — we just start from the beginning.
-  useEffect(() => {
-    if (!id) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const data = await mediaApi.getProgress(id);
-        if (!cancelled && data?.last_position_seconds > 0) {
-          setResumePosition(data.last_position_seconds);
-        }
-      } catch {}
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
 
   const handleCreateBookmark = (timestampSeconds, note) =>
     dispatch(createBookmark({ mediaId: Number(id), timestampSeconds, note }));
@@ -152,23 +134,23 @@ const useMediaViewPageController = () => {
   // ── Playback position ──────────────────────────────────────────────────────
 
   const [currentTime, setCurrentTime] = useState(0);
-  const lastSavedAtRef = useRef(0);
 
   // Smart-search deep link: /media/:id?t=SECONDS starts the player there. An
-  // explicit link wins over Resume Playback; otherwise fall back to the saved
-  // position so the player picks up where the viewer left off.
-  const seekOnReady = Number(searchParams.get(TIME_PARAM)) || resumePosition;
+  // explicit link wins over Resume Playback; a handover from the bottom player
+  // is fresher than the saved position, which may be ten seconds behind it;
+  // otherwise the saved position, so the player picks up where the viewer left off.
+  const seekOnReady = Number(searchParams.get(TIME_PARAM)) || takenOver?.position || resumePosition;
+  // A lesson that was playing in the bar goes on playing here, at its speed.
+  const playOnReady = Boolean(takenOver?.playing);
+  const initialRate = takenOver?.rate || null;
 
   // currentTime updates on every tick because the notes panel and the share
   // dialog both show it; the DB write is throttled, because they are not the
   // same need. Failures are silent — losing a position is not worth a toast.
   const handlePlayerProgress = useCallback((seconds) => {
     setCurrentTime(seconds);
-    const now = Date.now();
-    if (now - lastSavedAtRef.current < SAVE_PROGRESS_EVERY_MS) return;
-    lastSavedAtRef.current = now;
-    mediaApi.saveProgress(id, seconds).catch(() => {});
-  }, [id]);
+    reportProgress(seconds);
+  }, [reportProgress]);
 
   // ── The course's track (PRD CRS-1, CRS-3) ──────────────────────────────────
   //
@@ -185,9 +167,9 @@ const useMediaViewPageController = () => {
 
   const handlePlayerEnded = useCallback(() => {
     const end = Math.max(currentTimeRef.current, Number(media?.duration_seconds) || 0);
-    if (end > 0) mediaApi.saveProgress(id, Math.round(end)).catch(() => {});
+    saveNow(end);
     courseTrack.handleEnded();
-  }, [id, media?.duration_seconds, courseTrack]);
+  }, [saveNow, media?.duration_seconds, courseTrack]);
 
   // ── Likes ──────────────────────────────────────────────────────────────────
 
@@ -221,7 +203,7 @@ const useMediaViewPageController = () => {
     media, bookmarks, showStatusBadge,
     handleCreateTextBookmark, readerTarget, jumpToBookmark,
     readerPage, handleReaderPageChange: setReaderPage,
-    seekOnReady, currentTime, handlePlayerProgress,
+    seekOnReady, playOnReady, initialRate, currentTime, handlePlayerProgress,
     handlePlayerEnded, courseTrack, refreshMedia,
     handleCreateBookmark,
     isLiked, toggleLike,

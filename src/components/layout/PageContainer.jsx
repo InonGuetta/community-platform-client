@@ -10,8 +10,9 @@ import { DOCK_CLEARANCE } from "./shellGeometry";
 //
 // App wraps every signed-in route in one, sized by pageWidthFor(pathname), so a
 // page never wraps itself. `dockClearance={false}` drops the bottom room where
-// no dock is shown.
-const PageContainer = ({ width = "wide", dockClearance = true, children }) => {
+// no dock is shown; `clearance` is that room when the bottom player makes it
+// taller (App passes bottomChromeFor's, D-145).
+const PageContainer = ({ width = "wide", dockClearance = true, clearance = null, children }) => {
   const maxWidth = maxWidthOf(width);
   if (maxWidth === null) return <Box sx={{ width: "100%" }}>{children}</Box>;
   return (
@@ -22,7 +23,11 @@ const PageContainer = ({ width = "wide", dockClearance = true, children }) => {
         marginInline: "auto",
         paddingInline: { xs: 2, md: 3 },
         paddingTop: { xs: 4, md: 6 },
-        paddingBottom: dockClearance ? `${DOCK_CLEARANCE}px` : { xs: 4, md: 6 },
+        paddingBottom: !dockClearance
+          ? { xs: 4, md: 6 }
+          : clearance
+            ? { xs: `${clearance.xs}px`, md: `${clearance.md}px` }
+            : `${DOCK_CLEARANCE}px`,
         boxSizing: "border-box",
       }}
     >

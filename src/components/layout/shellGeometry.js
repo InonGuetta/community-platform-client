@@ -16,3 +16,30 @@ export const DOCK_CLEARANCE = 160;
 export const DOCK_OFFSET = { xs: 96, md: 112 };
 
 export const viewportBelowHeader = `calc(100vh - ${HEADER_HEIGHT}px)`;
+
+// The dock's gap from the screen's edge (Dock's own `bottom`).
+export const DOCK_GAP = { xs: 12, md: 18 };
+
+// The bottom player (D-145): one row along the foot of the screen, and the
+// docked video window that stands on it from md up (below md the picture plays
+// inside the row, in the cover's place).
+export const NOW_PLAYING_HEIGHT = { xs: 64, md: 72 };
+export const NOW_PLAYING_VIDEO = { xs: { width: 80, height: 45 }, md: { width: 320, height: 180 } };
+
+const ZERO = { xs: 0, md: 0 };
+
+// What the foot of the screen holds, and so where everything that floats there
+// goes: the dock stands on the bar, a toast and a floating input clear both,
+// and a page's bottom padding grows by the bar — and, beside a docked video,
+// by as much of the window as the dock's room does not already cover.
+// `type` is the media type in the bar, or null when it is closed.
+export const bottomChromeFor = (type) => {
+  const bar = type ? NOW_PLAYING_HEIGHT : ZERO;
+  const videoRoom = type === "video" ? Math.max(0, NOW_PLAYING_VIDEO.md.height + 24 - DOCK_CLEARANCE) : 0;
+  return {
+    barOpen: Boolean(type),
+    dockBottom: { xs: DOCK_GAP.xs + bar.xs, md: DOCK_GAP.md + bar.md },
+    dockOffset: { xs: DOCK_OFFSET.xs + bar.xs, md: DOCK_OFFSET.md + bar.md },
+    clearance: { xs: DOCK_CLEARANCE + bar.xs, md: DOCK_CLEARANCE + bar.md + videoRoom },
+  };
+};

@@ -11,6 +11,7 @@ import { statuses } from "../../../utilities/constant";
 import { placeHref } from "../../../utilities/discussionPlace";
 import { conversationText } from "../../../utilities/discussionNote";
 import i18n from "../../../i18n/i18n";
+import { useBottomChrome } from "../../layout/useBottomChrome";
 
 // "שאל את הארכיון" (PRD ASK-2): the lesson chat's slice, thunks and pane,
 // keyed by ARCHIVE_DISCUSSION instead of a lesson id — the server answers the
@@ -61,8 +62,13 @@ const useAskArchivePageController = () => {
     go: (place) => navigate(placeHref(place)),
   }), [navigate]);
 
+  // The question box floats above the dock — higher while the bottom player
+  // holds the foot of the screen (D-145).
+  const { dockOffset } = useBottomChrome();
+
   return {
     opener,
+    dockOffset,
     chat: {
       conversation: archive.conversation,
       messages: archive.messages,

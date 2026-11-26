@@ -53,5 +53,15 @@
     "settingsLabel": "Player settings",
     "speed": "Playback speed",
     "lessonFallback": "Lesson"
+  },
+  "bar": {
+    "label": "Now playing",
+    "back": "Back {{seconds}} seconds",
+    "forward": "Forward {{seconds}} seconds",
+    "expand": "Open the lesson page",
+    "close": "Close the player",
+    "more": "More options",
+    "speedValue": "Speed: {{rate}}X",
+    "video": "Lesson video"
   }
 }

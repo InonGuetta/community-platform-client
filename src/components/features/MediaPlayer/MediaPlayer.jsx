@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState, useCallback, useEffect } from "react";
-import useMediaSession from "./useMediaSession";
+import usePlayback from "./usePlayback";
 import ReactPlayer from "react-player";
 import Box from "@mui/material/Box";
 import PlayerControls from "./PlayerControls";
@@ -36,111 +36,23 @@ const saveCaptionsOn = (on) => {
 // `captions` is { cues, precise } from utilities/transcriptTiming (PRD MOB-5),
 // or null when the lesson has nothing to caption.
 const MediaPlayer = forwardRef((
-  { url, media, transcript, captions = null, onProgress, onEnded, seekOnReady = 0 },
+  { url, media, transcript, captions = null, onProgress, onEnded, seekOnReady = 0, playOnReady = false, initialRate = null },
   ref
 ) => {
   const mediaType = media?.media_type;
-  const duration = media?.duration_seconds;
-  const playerRef = useRef(null);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const [isReady, setIsReady] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const [played, setPlayed] = useState(0);
-
-  // Volume and mute are kept apart on purpose. Muting does not touch `volume`,
-  // so unmuting restores exactly the level that was set before — which is what
-  // "click again and the sound comes back as it was" means. A user who instead
-  // drags the slider to zero has genuinely chosen silence, so the speaker
-  // button lifts them back to the last audible level rather than to 0.
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
-  const lastAudibleVolumeRef = useRef(1);
-
-  const handleVolumeChange = useCallback((next) => {
-    setVolume(next);
-    if (next > 0) {
-      lastAudibleVolumeRef.current = next;
-      // Dragging the slider up is itself a request to hear something.
-      setMuted(false);
-    }
-  }, []);
-
-  const handleToggleMute = useCallback(() => {
-    if (muted || volume === 0) {
-      setMuted(false);
-      if (volume === 0) setVolume(lastAudibleVolumeRef.current || 1);
-      return;
-    }
-    lastAudibleVolumeRef.current = volume;
-    setMuted(true);
-  }, [muted, volume]);
-
-  // The file's real length, once the player knows it. The `duration` prop comes
-  // from the database and can be missing or slightly off; this is the value the
-  // scrub bar has to agree with or the thumb lands in the wrong place.
-  const [loadedDuration, setLoadedDuration] = useState(0);
-  const effectiveDuration = loadedDuration || duration || 0;
-
-  // While the user is dragging the scrub bar, the thumb follows the pointer and
-  // NOT the playing position — otherwise every progress tick yanks it back and
-  // the bar becomes impossible to drag.
-  const [scrubbing, setScrubbing] = useState(false);
-  const [scrubValue, setScrubValue] = useState(0);
-
-  // Auto-seek (deep link ?t= or Resume Playback) must happen exactly once, and
-  // only after the media is ready — seekTo before load is a no-op. seekOnReady
-  // can also arrive late (the resume position is fetched async), so we react to
-  // both "became ready" and "value arrived" via an effect. The ref guards
-  // against re-seeking on later renders, which would fight a user who manually
-  // rewinds. It resets per source so a new media item resumes again.
-  const hasAutoSeekedRef = useRef(false);
-  useEffect(() => {
-    hasAutoSeekedRef.current = false;
-    setIsReady(false);
-    setPlaying(false);
-    setPlayed(0);
-    setLoadedDuration(0);
-  }, [url]);
-
-  useEffect(() => {
-    if (isReady && seekOnReady > 0 && !hasAutoSeekedRef.current) {
-      hasAutoSeekedRef.current = true;
-      playerRef.current?.seekTo(seekOnReady, "seconds");
-      setPlayed(seekOnReady);
-    }
-  }, [isReady, seekOnReady]);
-
-  const handleReady = useCallback(() => setIsReady(true), []);
-
-  // Fires on every ReactPlayer tick (~1s). Throttling for any DB persistence is
-  // the caller's responsibility — here we only want the UI to feel real-time.
-  const handleProgress = useCallback(({ playedSeconds }) => {
-    const seconds = Math.floor(playedSeconds);
-    setPlayed(seconds);
-    onProgress?.(seconds);
-  }, [onProgress]);
-
-  const seekTo = useCallback((seconds) => {
-    playerRef.current?.seekTo(seconds, "seconds");
-    setPlayed(seconds);
-  }, []);
-
-  useImperativeHandle(ref, () => ({ seekTo }), [seekTo]);
-
   const isVideo = mediaType === mediaTypes.video;
 
-  // The lock screen, the notification shade and the media keys (PRD MOB-3) —
-  // driving the same state as the bar below. See useMediaSession.
-  useMediaSession({
-    media,
-    active: isReady,
-    playing,
-    position: played,
-    duration: effectiveDuration,
-    playbackRate,
-    onPlayingChange: setPlaying,
-    onSeek: seekTo,
-  });
+  // Playing, position, volume, speed, resuming and the lock screen — shared
+  // with the bottom player (usePlayback; D-145), so the two cannot drift.
+  // `playOnReady` and `initialRate` arrive when this page takes over a lesson
+  // the bottom player was playing.
+  const {
+    playerRef, playing, togglePlay, position: played, shownPosition, duration: effectiveDuration,
+    volume, muted, handleVolumeChange, handleToggleMute, playbackRate, setPlaybackRate,
+    seekTo, scrub, commitScrub, playerEvents,
+  } = usePlayback({ url, media, seekOnReady, playOnReady, initialRate, onProgress, onEnded });
+
+  useImperativeHandle(ref, () => ({ seekTo }), [seekTo]);
 
   // ── The bar getting out of the way ─────────────────────────────────────────
   //
@@ -200,13 +112,9 @@ const MediaPlayer = forwardRef((
       volume={volume}
       muted={muted}
       playbackRate={playbackRate}
-      onProgress={handleProgress}
-      onDuration={setLoadedDuration}
-      onReady={handleReady}
-      onPlay={() => setPlaying(true)}
-      onPause={() => setPlaying(false)}
-      // The page moves on to the course's next lesson (PRD CRS-3).
-      onEnded={() => { setPlaying(false); onEnded?.(); }}
+      // Progress, duration, ready, play/pause and the end — the last moves the
+      // page on to the course's next lesson (PRD CRS-3).
+      {...playerEvents}
       // An audio lesson as an <audio> element (PRD MOB-3). The stream URL
       // has no extension, so ReactPlayer would otherwise build a <video>
       // for it too — and a phone pauses a VIDEO when the screen locks or
@@ -219,15 +127,15 @@ const MediaPlayer = forwardRef((
   const controls = (
     <PlayerControls
       playing={playing}
-      onTogglePlay={() => setPlaying((p) => !p)}
+      onTogglePlay={togglePlay}
       volume={volume}
       muted={muted}
       onVolumeChange={handleVolumeChange}
       onToggleMute={handleToggleMute}
-      played={scrubbing ? scrubValue : played}
+      played={shownPosition}
       duration={effectiveDuration}
-      onSeek={(v) => { setScrubbing(true); setScrubValue(v); }}
-      onSeekCommit={(v) => { setScrubbing(false); seekTo(v); }}
+      onSeek={scrub}
+      onSeekCommit={commitScrub}
       playbackRate={playbackRate}
       onRateChange={setPlaybackRate}
       media={media}
@@ -340,7 +248,7 @@ const MediaPlayer = forwardRef((
             and stops there, so pressing a button in it cannot also toggle
             playback behind it. */}
         <Box
-          onClick={() => setPlaying((p) => !p)}
+          onClick={togglePlay}
           sx={{
             position: "absolute",
             inset: 0,

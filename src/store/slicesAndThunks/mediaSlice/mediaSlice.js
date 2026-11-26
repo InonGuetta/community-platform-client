@@ -28,11 +28,20 @@ const mediaSlice = createSlice({
     selectedItem: null,
     status: statuses.idle,
     error: null,
-    continueWatching: { items: [], status: statuses.idle },
+    continueWatching: { items: [], status: statuses.idle, stale: false },
   },
   reducers: {
     clearSelectedItem(state) { state.selectedItem = null; },
     clearError(state) { state.error = null; },
+    // A position was just saved somewhere this list does not watch (the bottom
+    // player, D-145): read it again the next time a screen asks for it — the
+    // archive's hero at once, if it is showing.
+    //
+    // A flag rather than a reset to idle: the hero waits for a settled list,
+    // and resetting would make it vanish and come back while it reloads.
+    markContinueWatchingStale(state) {
+      state.continueWatching.stale = true;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -70,7 +79,13 @@ const mediaSlice = createSlice({
         state.error = action.payload?.message;
       })
 
-      .addCase(fetchContinueWatching.pending, (state) => { state.continueWatching.status = statuses.loading; })
+      // A refresh of a list already shown keeps showing it until the new one
+      // arrives (see markContinueWatchingStale).
+      .addCase(fetchContinueWatching.pending, (state) => {
+        const refresh = state.continueWatching.stale && state.continueWatching.status !== statuses.idle;
+        state.continueWatching.stale = false;
+        if (!refresh) state.continueWatching.status = statuses.loading;
+      })
       .addCase(fetchContinueWatching.fulfilled, (state, action) => {
         state.continueWatching.status = statuses.succeeded;
         state.continueWatching.items = action.payload;
@@ -112,5 +127,5 @@ const mediaSlice = createSlice({
   },
 });
 
-export const { clearSelectedItem, clearError } = mediaSlice.actions;
+export const { clearSelectedItem, clearError, markContinueWatchingStale } = mediaSlice.actions;
 export default mediaSlice.reducer;

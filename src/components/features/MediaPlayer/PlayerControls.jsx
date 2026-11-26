@@ -28,8 +28,7 @@ import { formatTime } from "../../../utilities/formatTime";
 import { useDirection, menuOrigins } from "../../../i18n/useDirection";
 import { SHADOW } from "../../../theme/tokens";
 import { useTranslation } from "react-i18next";
-
-const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
+import { SPEED_OPTIONS } from "./usePlayback";
 
 // The player's controls, in one of two shapes (D-21, D-94):
 //

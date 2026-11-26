@@ -3,7 +3,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { selectNotification } from "../../../store/selectors/notificationSelectors";
 import { closeNotification } from "../../../store/slicesAndThunks/snackbarSlice";
-import { DOCK_OFFSET } from "../../layout/shellGeometry";
+import { useBottomChrome } from "../../layout/useBottomChrome";
 
 // The single app-wide toast host. Rendered once in App (outside <Routes>) so a
 // message survives navigation and any page can trigger it via the notify()
@@ -12,6 +12,8 @@ import { DOCK_OFFSET } from "../../layout/shellGeometry";
 const GlobalSnackbar = () => {
   const dispatch = useDispatch();
   const { open, message, severity, key } = useSelector(selectNotification);
+  // Above the dock — and the bottom player under it, when it is open (D-145).
+  const { dockOffset } = useBottomChrome();
 
   const handleClose = (_event, reason) => {
     // Don't dismiss on an incidental click elsewhere — only on timeout or the X.
@@ -27,7 +29,7 @@ const GlobalSnackbar = () => {
       onClose={handleClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       // Above the dock, which floats at the bottom centre too (D-47).
-      sx={{ bottom: DOCK_OFFSET }}
+      sx={{ bottom: dockOffset }}
     >
       <Alert onClose={handleClose} severity={severity} variant="filled" sx={{ width: "100%" }}>
         {message}
